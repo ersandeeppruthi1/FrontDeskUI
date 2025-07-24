@@ -1,0 +1,929 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        let classMap = [];
+        var apiURL = "https://sittest.mahantsatishdassjicharitable.com";
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Information Form</title>
+    <link href="https://sittest2.mahantsatishdassjicharitable.com/css/Default/bootstrap.min.css" rel="stylesheet">
+    <link href="https://sittest2.mahantsatishdassjicharitable.com/css/Default/select2.min.css" rel="stylesheet">
+    <link href="https://sittest2.mahantsatishdassjicharitable.com/css/Default/font-awesome-all.min.css" rel="stylesheet">
+    <link href="https://sittest2.mahantsatishdassjicharitable.com/css/Default/simple-line-icons.min.css" rel="stylesheet">
+    <link href="https://sittest2.mahantsatishdassjicharitable.com/css/app.css" rel="stylesheet">
+
+    <!-- JS Libraries -->
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/css/Default/jquery.min.js"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/css/Default/moment.min.js"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/css/Default/select2.min.js"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/css/Default/bootstrap-select.min.js"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/css/Default/popper.min.js"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/css/Default/dayjs.js"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/css/Default/JSpdf.umd.min.js"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/css/Default/JSpdf.plugin.autotable.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/JS/entityPage.js?id=3" type="module"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/JS/controls.js?id=3" type="module"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/JS/listcontrols.js?id=3" type="module"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/JS/formHandler.js?id=3" type="module"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/JS/pageLoader.js?id=3" type="module"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/JS/Master/DBHandler.js?id=3" type="module"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/JS/VastuBill/VastuBillPDFExporter.js?id=3"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://sittest2.mahantsatishdassjicharitable.com/JS/utility.js?id=5"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="patient-id" class="mr-2">Patient's ID:</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="patient-id" onfocus="clearPreviousValue();" onchange="clearBelowFields()" required onkeyup="handleKeyPress(event)" onblur="goButtonClick()" min="1" max="9999999999">
+                        <!-- Replace the "Go" button with an icon (Font Awesome 6 example) -->
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-primary" id="go-button" onclick="goButtonClick()">
+                                <i class="fas fa-arrow-right"></i> <!-- Go icon -->
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="doctor-name">Department / Doctor's Name:</label>
+                    <select class="form-control" id="doctor-name" required onchange="calculateAmount()">
+                        <!-- Default option, you can add more options dynamically -->
+                        <option value="" disabled selected>Select a doctor</option>
+                    </select>
+
+                </div>
+            </div>
+
+            <div class="col-md-12" id="testDiv">
+                <div class="form-group">
+                    <label for="doctor-name">Test / X-ray</label>
+                    <select class="form-control" id="test-name" required onchange="calculateAmountTest()" multiple>
+                        <!-- Default option, you can add more options dynamically -->
+                        <option value="" disabled selected>Select a test</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="patient-name">Patient's Name:</label>
+                    <input type="text" class="form-control" id="patient-name" required>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="age">Age:</label>
+                    <input type="number" class="form-control" id="age" required min="1" max="125">
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="gender">Gender:</label>
+                    <select class="form-control" id="gender" required>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="phone">Phone Number:</label>
+                    <input type="tel" class="form-control" id="phone" required>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" class="form-control" id="date" required value="" disabled>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="amount">Amount:</label>
+                    <input type="number" class="form-control" id="amount" required value="50" disabled>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="payment">Select Payment Method:</label>
+                    <select id="payment" name="payment" class="form-control">
+                        <option value="cash">Cash</option>
+                        <option value="online">Online</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-12">
+
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <textarea class="form-control" id="address" rows="1" required></textarea>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <button type="button" class="btn btn-primary" id="submit-button" onclick="submitButtonClicked()">Submit</button>
+                <!--<button type="button" class="btn btn-primary" id="print-button" onclick="printButtonClicked()">Print</button>-->
+            </div>
+
+            <div class="col-md-12 mt-3 text-center text-primary" id="message"></div>
+            <div class="col-md-12 mt-4">
+                <label for="search">Search Old Records:</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="search" placeholder="Enter patient name" onkeydown="handleSearchKeyPress(event)">
+                    <!-- Replace the "Search" button with an icon (Font Awesome 6 example) -->
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-primary" id="search-button" onclick="searchRecords()">
+                            <i class="fas fa-search"></i> <!-- Search icon -->
+                        </button>
+                    </div>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-secondary" id="refresh-button" onclick="refreshSearch()">
+                            <i class="fas fa-redo"></i> <!-- Refresh icon -->
+                        </button>
+                    </div>
+                    <!-- Export button -->
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-success" id="export-button" onclick="exportDataToExcel()">
+                            <i class="fas fa-file-export"></i> <!-- Export icon -->
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 mt-4" id="old-records"></div>
+        </div>
+    </div>
+    <div id="loader-overlay" class="loader-overlay" style="display:none;">
+        <div id="loader" class="loader"></div>
+    </div>
+    <div id="contentToPrint" style="display:none;">
+        <!-- The content you want to print goes here -->
+        <h1>Patient Information</h1>
+        <p><strong>Name:</strong> John Doe</p>
+        <p><strong>Age:</strong> 30</p>
+        <canvas id="barcode"></canvas>
+    </div>
+
+    <style>
+        label {
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        var formValuesArray = [];
+        var dropdownValue = [];
+        var patientCache = []; // 🔸 Local cache for patient records
+        var socket;
+        var connection = 0;
+        var nextPatientId = 0;
+
+
+        async function goButtonClick() {
+            const patientId = document.getElementById("patient-id").value;
+
+            if (patientId === "") {
+                clearPreviousValue();
+                return;
+            }
+
+            document.getElementById("loader-overlay").style.display = "flex";
+            var filter = "patientId='" + patientId + "'";
+            let data = await StaticDBHandler.fetchEntityRecord(
+                "frontdeskpatientrecord",
+                "*",
+                filter
+            );
+            if (data && data.length > 0) {
+                data = data[0];
+                document.getElementById("patient-name").value = data.patientname || "";
+                document.getElementById("address").value = data.address || "";
+                document.getElementById("age").value = data.age || "";
+                document.getElementById("gender").value = (data.gender || "").toLowerCase() === "female" ? "Female" : "Male";
+                document.getElementById("phone").value = data.phone || "";
+                document.getElementById("payment").value = (data.paymentmethod || "").toLowerCase() === "online" ? "Online" : "cash";
+                document.getElementById("doctor-name").value = data.doctorname || "";
+                document.getElementById("submit-button").focus();
+                calculateAmount();
+            } else {
+                clearPreviousValue();
+
+                alert("No patient found with the provided ID.");
+            }
+
+            document.getElementById("loader-overlay").style.display = "none";
+        }
+
+
+        function clearPreviousValue() {
+            document.getElementById("patient-id").value = "";
+            document.getElementById("patient-name").value = "";
+            document.getElementById("age").value = "";
+            document.getElementById("gender").value = "Male";
+            document.getElementById("payment").value = "cash";
+            document.getElementById("phone").value = "";
+            document.getElementById("address").value = "";
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                // Simulate a click on the "Go" button
+                document.getElementById("go-button").click();
+            }
+            if (document.getElementById("patient-id").value == "") {
+                clearPreviousValue();
+            }
+        }
+
+        async function submitButtonClicked() {
+            const patientNameInput = document.getElementById("patient-name");
+
+            if (!validatePatientName(patientNameInput))
+                return;
+
+            showLoader(true);
+
+            setTimeout(async () => {
+                try {
+                    const formData = prepareFormData(patientNameInput);
+
+                    formData.serialNumber = getSerialNumber(formData.optionGroup);
+                    formData.totalTest = getSelectedTests();
+
+                    clearFormFields();
+
+                    if (formData.patientId || formData.patientId == 0) {
+                        formData.patientId = nextPatientId;
+                        nextPatientId = nextPatientId + 1;
+                    }
+
+                    const patientId = await savePatientRecord(formData);
+
+                    handlePostSave(formData.patientId, formData, patientNameInput);
+                } catch (error) {
+                    console.error("Error saving patient record:", error);
+                } finally {
+                    showLoader(false);
+                    $('#submit-button').prop('disabled', false);
+                }
+            }, 10);
+        }
+
+
+        function validatePatientName(patientNameInput) {
+            if (!patientNameInput.value || patientNameInput.value === "undefined") {
+                alert("Please enter patient Name.");
+                return false;
+            }
+            return true;
+        }
+
+
+
+        function prepareFormData(patientNameInput) {
+            const selectedDoctorOption = document.getElementById("doctor-name").selectedOptions[0];
+            const optionGroup = selectedDoctorOption.getAttribute("optionGroup");
+
+            return {
+                patientId: document.getElementById("patient-id").value,
+                patientName: patientNameInput.value,
+                age: document.getElementById("age").value,
+                phone: document.getElementById("phone").value,
+                gender: document.getElementById("gender").value,
+                doctorName: document.getElementById("doctor-name").value,
+                amount: document.getElementById("amount").value,
+                paymentMethod: document.getElementById("payment").value,
+                address: document.getElementById("address").value,
+                date: document.getElementById("date").value,
+                optionGroup
+            };
+        }
+
+
+        function clearFormFields() {
+            document.getElementById("patient-id").value = "";
+            $('#test-name').val(null).trigger('change');
+            ["patient-name", "age", "phone", "address"].forEach(id => document.getElementById(id).value = "");
+            document.getElementById("payment").value = "cash";
+            document.getElementById("gender").value = "Male";
+        }
+
+
+
+
+        function getSelectedTests() {
+            const testName = document.getElementById("test-name");
+            const selectedTests = Array.from(testName.selectedOptions);
+            return selectedTests.map(opt => `${opt.value}--${parseFloat(opt.getAttribute("amount"))}`).join("\n");
+        }
+
+        function getSerialNumber(optionGroup) {
+            const serialList = patientCache.filter(x => x.optionGroup === optionGroup);
+            return serialList.length > 0 ? serialList.Last + 1 : 1;
+        }
+
+
+        function printSlip(entry, intValue) {
+            if (entry.totalTest?.length > 1) {
+                const newSlipDate = formattedDate + "-----" + entry.intValue;
+                const data = `department=${entry.doctorName}&age=${entry.phone}&patientName=${entry.patientName} / ${entry.age}-${entry.gender[0].toUpperCase()}&slipDate=${newSlipDate}&totalTest=${entry.totalTest}&ta=${entry.amount}`;
+
+                if (socket.readyState === WebSocket.OPEN) {
+                    socket.send('tprint' + data);
+                } else if (connection < 2) {
+                    connection++;
+                    socket = new WebSocket('ws://localhost:1234/');
+                    printPatient(index);
+                }
+            } else {
+                window.open(`/Patient/PrintPatient?department=${entry.doctorName}&age=${entry.phone}&patientName=${entry.patientName} / ${entry.age}&gender=${entry.gender}&patientId=${entry.patientId}&slipDate=${formattedDate}&srNo=${intValue}`);
+            }
+        }
+
+        function handlePostSave(patientId, formData, patientNameInput) {
+            const intValue = parseInt(formData.serialNumber);
+            formValuesArray.unshift({
+                ...formData,
+                patientId: parseInt(patientId),
+                intValue
+            });
+
+            displayFormValues();
+
+            const confirmText = `Serial Number for this Slip is - ${intValue}.\nDo you want to print slip?`;
+            if (confirm(confirmText)) {
+                printSlip(formData, intValue);
+            } else {
+                patientNameInput.focus();
+                calculateAmount();
+            }
+        }
+
+        async function savePatientRecord(formData) {
+            return await DBHandler.submitRecordData("frontdeskpatientrecord", formData, "", true);
+        }
+
+
+        function showLoader(isVisible) {
+            document.getElementById("loader-overlay").style.display = isVisible ? "flex" : "none";
+            $('#submit-button').prop('disabled', isVisible);
+        }
+
+
+
+        function handleSearchKeyPress(event) {
+            if (event.key === "Enter") {
+                // Simulate a click on the "Search" button
+                document.getElementById("search-button").click();
+            }
+        }
+        function calculateAmountTest() {
+            // Get the select element
+            var selectElement = document.getElementById("test-name");
+
+            // Get the selected options
+            var selectedOptions = Array.from(selectElement.selectedOptions);
+
+            // Initialize a variable to hold the total amount
+            var totalAmount = 0;
+
+            // Iterate through the selected options and sum their amounts
+            selectedOptions.forEach(function (option) {
+                var amount = parseFloat(option.getAttribute("amount"));
+                if (!isNaN(amount)) {
+                    totalAmount += amount;
+                }
+            });
+
+            // Update the total amount display
+            document.getElementById("amount").value = totalAmount;
+        }
+
+        function calculateAmount() {
+            const doctorNameSelect = document.getElementById("doctor-name");
+            const selectedDoctorOption = doctorNameSelect.options[doctorNameSelect.selectedIndex];
+            const amount = selectedDoctorOption.getAttribute("amount") || 0;
+            const isDropdown = selectedDoctorOption.getAttribute("IsDropdown");
+            const groupName = selectedDoctorOption.getAttribute("optionGroup");
+
+            const selectElement = document.getElementById("test-name");
+            const amountInput = document.getElementById("amount");
+
+            selectElement.innerHTML = "";
+            $(selectElement).hide();
+            $(testDiv).hide();
+
+            if (isDropdown?.toLowerCase() === "true" && groupName) {
+                $(selectElement).show();
+                $(testDiv).show();
+
+                const filterArray = dropdownValue.filter(p => (p.category || "").toLowerCase() === groupName.toLowerCase());
+
+                const blankOption = document.createElement("option");
+                blankOption.value = "";
+                blankOption.textContent = "";
+                selectElement.appendChild(blankOption);
+
+                filterArray.forEach((item) => {
+                    const option = document.createElement("option");
+                    option.value = item.name;
+                    option.textContent = `${item.name}--${item.price}`;
+                    option.setAttribute("optionGroup", item.groupname || "");
+                    option.setAttribute("amount", item.price || 0);
+                    selectElement.appendChild(option);
+                });
+
+                $('#test-name').select2();
+            }
+
+            amountInput.value = amount;
+        }
+
+
+        async function getPatientIdOnLoad() {
+            formValuesArray = [];
+
+            const selectedDate = document.getElementById("date").value;
+            const filterCondition = ``;
+
+            const data = await DbHandlerFetchEntityRecords(
+                'frontdeskpatientrecord',
+                'patientid',
+                'patientid',
+                'desc',
+                filterCondition,
+                false, 1
+            );
+
+            if (Array.isArray(data)) {
+                nextPatientId = data[0].patientid + 1;
+            }
+        }
+
+        async function getPatientRecordsOnLoad(showloader) {
+            formValuesArray = [];
+
+            const selectedDate = document.getElementById("date").value;
+            const filterCondition = `date='${selectedDate}'`;
+
+            const data = await DBHandler.fetchEntityRecords(
+                'frontdeskpatientrecord',
+                'id,patientid,serialnumber,amount,patientname,age,gender,phone,doctorname,totaltest,paymentmethod,date',
+                'createdon',
+                'desc',
+                filterCondition,
+                showloader
+            );
+
+            if (Array.isArray(data)) {
+                formValuesArray = data.map(record => ({
+                    intValue: record.serialnumber,
+                    amount: record.amount,
+                    patientName: record.patientname,
+                    age: record.age,
+                    gender: record.gender,
+                    phone: record.phone,
+                    doctorName: record.doctorname,
+                    patientId: record.patientid,
+                    totalTest: record.totaltest,
+                    paymentMethod: record.paymentmethod
+                }));
+                patientCache = formValuesArray;
+                displayFormValues();
+            }
+        }
+
+        function displayFormValues() {
+            // Get references to DOM elements
+            const oldRecordsDiv = document.getElementById("old-records");
+            const searchInput = document.getElementById("search").value.toLowerCase();
+
+            // Filter and populate the table
+            const filteredArray = formValuesArray.filter(entry => (
+                searchInput === "" || entry.patientName.toLowerCase().includes(searchInput)
+                || entry.intValue.toString().toLowerCase().includes(searchInput)
+                || entry.patientId.toString().toLowerCase().includes(searchInput)
+                || entry.doctorName.toLowerCase().includes(searchInput)
+                || entry.patientName.toLowerCase().includes(searchInput)
+                || entry.gender.toLowerCase().includes(searchInput)
+                || entry.phone.toLowerCase().includes(searchInput)
+                || entry.amount.toString().toLowerCase().includes(searchInput)
+
+            ));
+
+            const tableHTML = `
+                                                                                                                                                                <table class="table table-bordered">
+                                                                                                                                                                    <thead>
+                                                                                                                                                                        <tr>
+                                                                                                                                                                            <th>Sr.No.</th>
+                                                                                                                                                                            <th>Patient Id</th>
+                                                                                                                                                                            <th>Department Name</th>
+                                                                                                                                                                            <th>Name</th>
+                                                                                                                                                                            <th>Gender</th>
+                                                                                                                                                                            <th>Age</th>
+                                                                                                                                                                            <th>Mobile Number</th>
+                                                                                                                                                                            <th>Amount</th>
+                                                                                                                                                                            <th>Payment Method</th>
+                                                                                                                                                                            <th></th>
+                                                                                                                                                                        </tr>
+                                                                                                                                                                    </thead>
+                                                                                                                                                                    <tbody>
+                                                                                                                                                                        ${filteredArray.map((entry, index) => `
+                                                                                                                                                                            <tr>
+                                                                                                                                                                                <td>${entry.intValue}</td>
+                                                                                                                                                                                <td>${entry.patientId}</td>
+                                                                                                                                                                                <td>${entry.doctorName + (entry.totalTest ? "<br>" + entry.totalTest.replaceAll("\n", "<br>") : "")}</td>
+                                                                                                                                                                                <td>${entry.patientName}</td>
+                                                                                                                                                                                <td>${entry.gender}</td>
+                                                                                                                                                                                <td>${entry.age}</td>
+                                                                                                                                                                                <td>${entry.phone}</td>
+                                                                                                                                                                                <td>${entry.amount}</td>
+                                                                                                                                                                                <td>${entry.paymentMethod}</td>
+                                                                                                                                                                                <td>
+                                                                                                                                                                                    <i class="fas fa-print" style="cursor: pointer;" onclick="printPatient(${index})"></i>
+                                                                                                                                                                                </td>
+                                                                                                                                                                            </tr>
+                                                                                                                                                                        `).join('')}
+                                                                                                                                                                    </tbody>
+                                                                                                                                                                </table>
+                                                                                                                                                            `;
+
+            // Set the table HTML inside the old-records div
+            oldRecordsDiv.innerHTML = tableHTML;
+        }
+
+        var connection = 0;
+        function printPatient(index) {
+            const entry = formValuesArray[index];
+            if (entry.totalTest && entry.totalTest.length > 1) {
+                var newSlipDate = formattedDate + "-----" + entry.intValue;
+                var data = `department=${entry.doctorName}&age=${entry.phone}&patientName=${entry.patientName + ' / ' + entry.age + '-' + entry.gender.substring(0, 1).toUpperCase()}&slipDate=${newSlipDate}&totalTest=${entry.totalTest}&ta=${entry.amount}`;
+                if (socket.readyState === WebSocket.OPEN) {
+                    // The WebSocket connection is open, so you can send data
+                    socket.send('tprint' + data);
+                } else if (connection < 2) {
+                    connection = connection + 1
+                    socket = new WebSocket('ws://localhost:1234/'); // Replace with your server URL
+                    printPatient(index);
+                    // The WebSocket connection is not open, handle the error or take appropriate action
+                    console.log("WebSocket connection is not open.");
+                }
+
+            }
+            else {
+                // Open a new window with the PrintPatient URL and query parameters
+                var data = `department=${entry.doctorName}&age=${entry.phone}&patientName=${entry.patientName + ' / ' + entry.age}&gender=${entry.gender}&patientId=${entry.patientId}&slipDate=${formattedDate}&srNo=${entry.intValue}`;
+                window.open('/Patient/PrintPatient?' + data, '_blank');
+            }
+        }
+
+
+        function clearPreviousValue() {
+            document.getElementById("patient-id").value = ""; // Set the value to an empty string
+            // Clear all values in the table below
+            document.getElementById("patient-name").value = "";
+            document.getElementById("age").value = "";
+            document.getElementById("gender").value = "Male"; // Reset gender to "Male"
+            document.getElementById("payment").value = "cash";
+            document.getElementById("phone").value = "";
+            document.getElementById("address").value = "";
+        }
+        function clearBelowFields() {
+            // Check if the selected value is empty
+            if (document.getElementById("patient-id").value == "") {
+                // Clear all values in the table below
+                document.getElementById("patient-name").value = "";
+                document.getElementById("age").value = "";
+                document.getElementById("gender").value = "Male"; // Reset gender to "Male"
+                document.getElementById("payment").value = "cash";
+                document.getElementById("phone").value = "";
+                document.getElementById("address").value = "";
+            }
+        }
+        function refreshSearch() {
+            getPatientRecordsOnLoad();
+        }
+        function searchRecords() {
+            displayFormValues();
+        }
+        async function exportDataToExcel() {
+            // Show the loader overlay
+            const loaderOverlay = document.getElementById("loader-overlay");
+            loaderOverlay.style.display = "flex";
+
+            const selectedDate = document.getElementById("date").value;
+            const filterCondition = `date='${selectedDate}'`;
+
+
+            let data = await DBHandler.fetchEntityRecords(
+                'frontdeskpatientrecord',
+                'id,patientid,serialnumber,amount,patientname,age,gender,phone,doctorname,totaltest,paymentmethod,date',
+                'createdon',
+                'desc',
+                filterCondition,
+                true
+            );
+            if (Array.isArray(data)) {
+                // Group patient records by doctorName
+                const doctorGroups = {};
+                data.forEach(record => {
+                    const doctorName = record.DoctorName;
+                    if (!doctorGroups[doctorName]) {
+                        doctorGroups[doctorName] = [];
+                    }
+                    doctorGroups[doctorName].push(record);
+                });
+
+                // Create a new workbook
+                const wb = XLSX.utils.book_new();
+
+                // Create an index sheet
+                const indexData = [];
+                let totalRows = 0; // Initialize total rows counter
+                for (const doctorName in doctorGroups) {
+                    const records = doctorGroups[doctorName];
+                    const rowCount = records.length;
+                    const totalAmount = records.reduce((total, entry) => total + entry.Amount, 0);
+                    totalRows += totalAmount; // Update total rows counter
+                    indexData.push({
+                        'Department Name': doctorName,
+                        'Number of Patient': rowCount,
+                        'Total Amount': totalAmount,
+                    });
+                }
+
+                // Add a row for total rows in the index
+                indexData.push({
+                    'Department Name': '',
+                    'Number of Patient': 'Total:',
+                    'Total Amount': totalRows,
+                });
+                // Add a row with the total Cash amount at the end of the data
+                const totalCash = data.reduce((total, entry) => entry.PaymentMethod === 'cash' ? total + entry.Amount : total, 0);
+                // Add a row for total rows in the index
+                indexData.push({
+                    'Department Name': '',
+                    'Number of Patient': 'cash:',
+                    'Total Amount': totalCash,
+                });
+
+                // Add a row with the total Cash amount at the end of the data
+                const totalOnline = data.reduce((total, entry) => entry.PaymentMethod === 'online' ? total + entry.Amount : total, 0);
+                // Add a row for total rows in the index
+                indexData.push({
+                    'Department Name': '',
+                    'Number of Patient': 'online:',
+                    'Total Amount': totalOnline,
+                });
+
+
+                const indexWs = XLSX.utils.json_to_sheet(indexData);
+                XLSX.utils.book_append_sheet(wb, indexWs, 'Index');
+
+                // Create a sheet for each doctorName group
+                for (const doctorName in doctorGroups) {
+                    const records = doctorGroups[doctorName];
+
+                    const data2 = records.map(entry => ({
+                        'Serial Number': entry.SerialNumber,
+                        'Patient Name': entry.PatientName,
+                        'Age': entry.Age,
+                        'Gender': entry.Gender,
+                        'Phone Number': entry.Phone,
+                        'Amount': entry.Amount,
+                        'Payment Method': entry.PaymentMethod,
+                    }));
+
+                    // Add a row with the total Amount at the end of the data
+                    const totalAmount = records.reduce((total, entry) => total + entry.Amount, 0);
+                    data2.push({ 'Serial Number': '', 'Patient Name': '', 'Age': '', 'Gender': '', 'Phone Number': 'Total:', 'Amount': totalAmount, 'Payment Method': '' });
+
+                    const ws = XLSX.utils.json_to_sheet(data2);
+
+                    // Make first row bold
+                    for (let i = 0; i < 2; i++) {
+                        const cell = ws[XLSX.utils.encode_cell({ r: 0, c: i })];
+                        // Create new style if cell doesnt have a style yet
+                        if (!cell.s) { cell.s = {}; }
+                        if (!cell.s.font) { cell.s.font = {}; }
+                        // Set bold
+                        cell.s.font.bold = true;
+                    }
+
+                    // Use doctorName as the sheet name
+                    XLSX.utils.book_append_sheet(wb, ws, doctorName);
+
+                }
+                // Save the workbook as a single Excel file
+                XLSX.writeFile(wb, 'patient_data_with_index.xlsx');
+            } else {
+                console.error('Invalid response format.');
+            }
+        }
+
+        // Function to apply black font color and bold style to the first and last rows of a sheet
+        function applyBlackFontAndBoldToFirstAndLastRows(sheet) {
+            // Create a style object for black font color and bold
+            const style = { font: { bold: true, color: { rgb: '000000' } } };
+
+            // Apply the style to the first row
+            sheet['A1'].s = style; // Assuming you want to style cell A1 as an example
+
+            // Calculate the last row number based on the number of rows in the sheet
+            const lastRowNumber = XLSX.utils.decode_range(sheet['!ref']).e.r;
+
+            // Apply the style to the last row (adjust the column as needed)
+            sheet['A' + (lastRowNumber + 1)].s = style; // Assuming you want to style the last row in column A as an example
+        }
+
+        async function populateDropdown() {
+            const selectElement = document.getElementById("doctor-name");
+            selectElement.innerHTML = '';
+
+            try {
+                // Add placeholder option
+                const placeholder = document.createElement("option");
+                placeholder.disabled = true;
+                placeholder.selected = true;
+                placeholder.textContent = "-- Select Department --";
+                selectElement.appendChild(placeholder);
+
+                // Fetch records
+                const data = await StaticDBHandler.fetchEntityRecords(
+                    'frontdeskdepartment',
+                    'id,name,isdropdown,category,groupname,price',
+                    'createdon',
+                    'desc',
+                    ''
+                );
+
+                dropdownValue = data;
+
+                // Filter only "Department" category
+                const departmentData = data
+                    .filter(p => (p.category || "").toLowerCase() === "department")
+                    .sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+                // Add department options directly
+                departmentData.forEach(doctor => {
+                    const option = document.createElement("option");
+                    option.value = doctor.name;
+                    option.textContent = doctor.name;
+                    option.setAttribute("optionGroup", doctor.groupname || "");
+                    option.setAttribute("amount", doctor.price || 0);
+                    option.setAttribute("IsDropdown", doctor.isdropdown || "");
+                    selectElement.appendChild(option);
+                });
+
+                // Trigger any post-load behavior
+                calculateAmount();
+                getPatientRecordsOnLoad();
+
+            } catch (error) {
+                console.error("Error fetching data from DBHandler:", error);
+            }
+        }
+
+
+
+        // Function to focus on the first input when Ctrl+A is pressed
+        function focusFirstInput(event) {
+            if (event.ctrlKey && event.key === 'f') {
+                document.getElementById('patient-id').focus();
+                event.preventDefault(); // Prevent default browser behavior for Ctrl+A
+            }
+            else if (event.ctrlKey && event.key === 'a') {
+                submitButtonClicked();
+                event.preventDefault(); // Prevent default browser behavior for Ctrl+A
+            }
+            else if (event.ctrlKey && event.key === 'q') {
+                document.getElementById('patient-name').focus();
+                event.preventDefault(); // Prevent default browser behavior for Ctrl+A
+            }
+
+        }
+
+        function toPascalCase(input) {
+            return input.toLowerCase().replace(/[-_]/g, ' ').split(' ').map(function (word) {
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }).join(' ');
+        }
+
+
+
+
+        function onDomLoaded() {
+            const today = new Date();
+            $("#date").val(today.toISOString().split('T')[0]);
+
+            populateDropdown();
+            // Get the input element by its ID
+            var inputElement = document.getElementById("patient-name");
+
+            // Function to convert text to Pascal case
+
+            // Add an input event listener to the input field
+            inputElement.addEventListener("blur", function () {
+                // Get the input value
+                var inputValue = inputElement.value;
+                // Convert the input value to camel case
+                var camelCaseValue = toPascalCase(inputValue);
+
+                // Set the input value to the camel case version
+                inputElement.value = camelCaseValue;
+            });
+
+            // Attach an event listener to the entire document to capture Ctrl+A keypress
+            document.addEventListener('keydown', focusFirstInput);
+
+            getPatientIdOnLoad();
+            socket = new WebSocket('ws://localhost:1234/'); // Replace with your server URL
+        }
+
+        //onDomLoaded();
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            document.cookie = "AuthToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "userid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            await getAuthToken();
+
+            onDomLoaded();
+        });
+
+    </script>
+
+
+
+    <style>
+        body {
+            background-image: url('https://frontdesk.mahantsatishdassjicharitable.com/images/backgroundimage.png');
+            background-size: cover; /* This will cover the entire viewport */
+            background-repeat: no-repeat;
+            background-attachment: fixed; /* This will make the background fixed while scrolling */
+        }
+
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+            display: none; /* Initially hidden */
+        }
+
+        @@keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        /* Loader overlay styles */
+        .loader-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+            z-index: 1000; /* Ensure it's above other elements */
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+
+        /* Loader styles (same as before) */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+    </style>
+
+
+</body>
+</html>
