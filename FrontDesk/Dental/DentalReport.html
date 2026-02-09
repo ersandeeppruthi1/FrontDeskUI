@@ -1,0 +1,352 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://apisit.vsservices.in";
+        //var apiURL = "";
+    </script>
+
+
+    <title></title>
+    <!-- Bootstrap CSS -->
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://apisit.vsservices.in/css/Default/select2.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/select2.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <!--<script src="css/Default/bootstrap-select.min.js"></script>-->
+    <!--<script src="JS/webpack-demo/dist/bundle.js?id=2024251342"></script>-->
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/jspdf.umd.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/jspdf.plugin.autotable.min.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <script src="https://apisit.vsservices.in/css/Default/jspdf.plugin.autotable.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://apisit.vsservices.in/JS/system/html2canvas.min.js"></script>
+    <script src="https://apisit.vsservices.in/JS/system/JsBarcode.all.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="container2">
+        <div class="toolbar">
+            <div class="row g-3 align-items-end">
+                <div class="col-sm-6 col-md-3">
+                    <label for="startDate" class="form-label">From date</label>
+                    <input type="date" id="startDate" class="form-control" onchange="loadAppointments2()">
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label for="endDate" class="form-label">To date</label>
+                    <input type="date" id="endDate" class="form-control" onchange="loadAppointments2()">
+                </div>
+            </div>
+        </div>
+        <div id="patientAppointmentGrid"></div>
+    </div>
+
+    <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Appointment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="appointmentForm">
+                            <div class="mb-3">
+                                <label>Date<span style="color: red;">*</span>:</label>
+                                <div class="date-container" style="position: relative; display: flex; align-items: center;">
+                                    <input id="appointmentDate" type="textDate" dbcolumnname="appointmentDate" class="form-control datepicker hasDatepicker">
+                                    <i class="date-icon fa fa-calendar" aria-hidden="true" style="position: absolute; right: 10px; cursor: pointer;" onclick="this.previousElementSibling.focus();"></i>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Treatment<span style="color: red;">*</span>:</label>
+                                <textarea id="appointmentTreatment" name="w3review" rows="4" cols="55"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label>Next Appointment:</label>
+                                <div class="date-container" style="position: relative; display: flex; align-items: center;">
+                                    <input id="nextAppointment" type="textDate" dbcolumnname="nextAppointment" class="form-control datepicker hasDatepicker">
+                                    <i class="date-icon fa fa-calendar" aria-hidden="true" style="position: absolute; right: 10px; cursor: pointer;" onclick="this.previousElementSibling.focus();"></i>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label>Practitioner<span style="color: red;">*</span>:</label>
+                                <select class="form-select" id="appointmentPractitioner">
+                                    <option value="">Select Practitioner</option>
+                                    <option value="Dr. Saket">Dr. Saket</option>
+                                    <option value="Dr. Kuldeep">Dr. Kuldeep</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" onclick="addAppointment()">Save Appointment</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        let grid;
+        let appointmentsMain = [];
+        var columns = [
+            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+            { field: 'treatmentdate', headerText: 'Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 130, allowPdfExport: false },
+            { field: 'PatientName', headerText: 'Patient Name', width: 220 },
+            { field: 'treatment', headerText: 'Treatment', width: 220 },
+            { field: 'nextappointment', headerText: 'Next Appointment', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 160, visible: false },
+            { field: 'practitioner', headerText: 'Practitioner', width: 160, visible: false },
+            { field: 'createdon', headerText: 'Created On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
+            { field: 'modifiedon', headerText: 'Modified On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, visible: false, allowPdfExport: false },
+            { headerText: 'Actions', width: 160, textAlign: 'Center', template: actionTemplate, allowPdfExport: false, visible: false }
+        ];
+
+        function initGrid(columns, patientGrid) {
+            ej.grids.Grid.Inject(
+                ej.grids.Filter,
+                ej.grids.Group,
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            grid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                pageSettings: { pageSize: 10 },
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                showColumnChooser: true,
+                //enablePersistence: true,
+                toolbar: ['ColumnChooser',
+                    'Search',
+                    'ExcelExport',
+                    'PdfExport',
+                    {
+                        text: 'New Appointment',
+                        tooltipText: 'New Appointment',
+                        prefixIcon: 'e-icons e-plus',
+                        id: 'newAppointment'
+                    }],
+                //height: 480,
+                columns: columns,
+                allowExcelExport: true,
+                allowPdfExport: true,
+
+
+                // ✅ Handle toolbar clicks
+                toolbarClick: function (args) {
+                    if (args.item.id === patientGrid + '_excelexport') {
+                        grid.excelExport({
+                            fileName: `Appointments_${formatDate(new Date())}.xlsx`,
+                            // Export current view records (respects filtering/sorting/paging)
+                            exportType: 'AllPages', // or 'AllPages'
+                        });
+                    }
+                    if (args.item.id === patientGrid + '_pdfexport') {
+                        grid.pdfExport({
+                            fileName: `Appointments_${formatDate(new Date())}.pdf`,
+                            exportType: 'CurrentPage', // or 'AllPages'
+                            theme: { header: { fontColor: '#000000' } },
+                            // Optional: page setup
+                            pageOrientation: 'Landscape', // 'Portrait' | 'Landscape'
+                            pageSize: 'LETTER',          // e.g., 'A4', 'LETTER'
+                            header: {
+                                fromTop: 0,
+                                height: 120,
+                                contents: [
+                                    {
+                                        type: 'Text',
+                                        value: 'Dental Treatment',
+                                        position: { x: 280, y: 0 },
+                                        style: {
+                                            textBrushColor: '#C25050',
+                                            fontSize: 25
+                                        },
+                                    }
+                                ]
+                            },
+                            footer: {
+                                fromBottom: 160,
+                                height: 150,
+                                contents: [
+                                    {
+                                        type: 'PageNumber',
+                                        pageNumberType: 'Arabic',
+                                        format: 'Page {$current} of {$total}',
+                                        position: { x: 520, y: 10 },
+                                        style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' }
+                                    }
+                                ]
+                            }
+                        });
+                    }
+
+                    if (args.item.id === 'newAppointment') {
+                        openNewAppointment(); // your function
+                    }
+                }
+            });
+            grid.appendTo('#' + patientGrid);
+        }
+
+        function openNewAppointment() {
+            const modal = new bootstrap.Modal(
+                document.getElementById('appointmentModal'),
+                { backdrop: 'static', keyboard: false }
+            );
+            modal.show();
+        }
+
+        function saveAppointment() {
+            const form = document.getElementById('appointmentForm');
+
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            alert('Appointment saved (demo)');
+
+            bootstrap.Modal.getInstance(
+                document.getElementById('appointmentModal')
+            ).hide();
+
+            loadAppointments2(); // refresh grid
+        }
+
+
+        function actionTemplate() {
+            return (
+                '<div class="d-grid gap-2 d-md-flex justify-content-md-center">' +
+                '<button class="btn btn-sm btn-warning" onclick="onEditAppointment(this)">Edit</button>' +
+                '<button class="btn btn-sm btn-danger ms-2" onclick="onDeleteAppointment(this)">Delete</button>' +
+                '</div>'
+            );
+        }
+
+        async function loadAppointments2() {
+            var startDate = $('#startDate').val();
+            var endDate = $('#endDate').val();
+
+            const filter = "dentalappointment.treatmentdate >= '" + startDate + "' AND dentalappointment.treatmentdate<= '" + endDate + "'";
+            var joinCondition = "LEFT JOIN dentaldetails ON dentaldetails.id = dentalappointment.patientid";
+            try {
+                const appointments = await DBHandler.fetchEntityRecords(
+                    'dentalappointment',
+                    'dentalappointment.*,dentaldetails.name as PatientName',
+                    'dentalappointment.treatmentdate',
+                    'desc',
+                    filter, true,
+                    0,
+                    joinCondition
+                );
+                appointmentsMain = appointments || [];
+                // Map to grid data and add serial numbers descending
+                let serialNumber = 1;
+                const rows = appointmentsMain.map((a) => ({
+                    id: a.id,
+                    srno: serialNumber++,
+                    treatmentdate: normalizeDate(a.treatmentdate),
+                    nextappointment: normalizeDate(a.nextappointment),
+                    treatment: a.treatment || '',
+                    practitioner: a.practitioner || '',
+                    createdon: normalizeDate(a.createdon),
+                    modifiedon: normalizeDate(a.modifiedon),
+                    PatientName: a.PatientName,
+                }));
+
+                grid.dataSource = rows;
+                grid.refresh();
+            } catch (err) {
+                console.error('Failed to load appointments:', err);
+            }
+        }
+
+        function normalizeDate(val) {
+            if (!val) return null;
+            const d = val instanceof Date ? val : new Date(val);
+            return isNaN(d) ? null : d;
+        }
+
+        $(document).ready(async () => {
+            $('#startDate').val(getDefaultValue('currentDate'));
+            $('#endDate').val(getDefaultValue('currentDate'));
+            initGrid(columns, 'patientAppointmentGrid');
+            loadAppointments2();
+        });
+
+
+    </script>
+
+    <style>
+        #patientAppointmentGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
+
+</body>
+</html>

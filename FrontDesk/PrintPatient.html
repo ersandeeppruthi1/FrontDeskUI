@@ -1,0 +1,186 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        let classMap = [];
+        //var apiURL = "https://sittest.mahantsatishdassjicharitable.com";
+        var apiURL = "";
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Information Form</title>
+    <script src="https://localhost:44309/css/Default/jquery.min.js"></script>
+    <script src="https://localhost:44309/JS/utility.js?id=081220258"></script>
+
+</head>
+<body>
+    <style>
+        body {
+            font-size: 22px;
+        }
+        /* Define the page size including the 1-inch margin */
+        .page {
+            width: 7.5in; /* Width of A4 sheet with 1-inch margin */
+            height: 5.0in; /* Height of A4 sheet with 1-inch margin */
+            margin: 0 auto; /* Center-align the page horizontally */
+            margin-top: 220px;
+            width: 95%;
+        }
+
+        table {
+            width: 100%; /* Set the table width to 100% of the page width */
+            border-collapse: collapse;
+            border: 1px solid #000; /* You can change the border color and thickness here */
+            margin: 0 auto; /* Center-align the table horizontally */
+        }
+
+        th, td {
+            text-align: left;
+            padding: 4px;
+            border: 1px solid #000; /* You can change the border color and thickness here */
+        }
+
+        .circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #000;
+            color: #000;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin: 3px;
+        }
+    </style>
+
+    <div class="page">
+        <style>
+            @media print {
+                table.print-header {
+                    width: 100%;
+                    table-layout: fixed; /* forces fixed column widths */
+                    border-collapse: collapse; /* consistent rendering */
+                    font-size: 12pt; /* keep readable size */
+                }
+
+                    table.print-header td {
+                        border: 1px solid #000; /* optional: adds structure */
+                        padding: 4px;
+                        word-wrap: break-word; /* prevents overflow */
+                        vertical-align: top;
+                    }
+
+                    /* Force fixed height for rows */
+                    table.print-header tr {
+                        height: 30px; /* adjust as needed */
+                    }
+
+                /* Prevent scaling on A4 */
+                @page {
+                    size: A4;
+                    margin: 15mm;
+                }
+            }
+        </style>
+
+
+        <table class="hospital-header" cellpadding="0" cellspacing="0">
+            <tr>
+                <td style="border:3px solid black; width:71px;text-align:center; font-weight:bold;" id="srNo"></td>
+                <td>
+                    <strong>
+                        <span id="doctorHeading">Department / Doctor:</span>
+                    </strong>
+                    <span id="department"></span>
+                </td>
+                <td style="width:250px;" colspan="2">
+                    <strong>Date:</strong> <span id="slipDate"></span>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3">
+                    <strong>Patient Name:</strong>
+                    <span id="patientName"></span>
+                </td>
+                <td style="width:160px;"><strong>Gender:</strong> <span id="gender"></span></td>
+            </tr>
+            <tr>
+                <td>
+                    <strong>Age:</strong>
+                    <span id="age"></span>
+                </td>
+                <td colspan="2">
+                    <strong>Mobile Number:</strong>
+                    <span id="phone"></span>
+                </td>
+                <td><strong>UHID:</strong> <span id="patientId"></span></td>
+
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        // Get query parameters from the URL
+        var urlParams = new URLSearchParams(window.location.search);
+
+        // Retrieve values from query parameters
+        var department = urlParams.get('department');
+        var age = urlParams.get('age');
+        var patientName = urlParams.get('patientName');
+        var gender = urlParams.get('gender');
+        var patientId = urlParams.get('patientId');
+        var slipDate = urlParams.get('slipDate');
+        var srNo = urlParams.get('srNo');
+        var phone = urlParams.get('phone');
+
+        // Populate the HTML elements with the retrieved values
+        document.getElementById('department').textContent = department || '';
+        if (department == 'Physiotherapy')
+            document.getElementById('doctorHeading').textContent = 'Department:';
+        else {
+            document.getElementById('doctorHeading').textContent = "Doctor's Name: ";
+            document.getElementById('department').textContent = department || '';
+        }
+        document.getElementById('age').textContent = age || '';
+        document.getElementById('patientName').textContent = patientName || '';
+        document.getElementById('gender').textContent = gender || '';
+        document.getElementById('slipDate').textContent = slipDate || '';
+        document.getElementById('srNo').textContent = "12" + srNo || '';
+        document.getElementById('patientId').textContent = patientId || '';
+        document.getElementById('phone').textContent = phone || '';
+
+        function onDomLoaded() {
+
+            setTimeout(function () {
+                //window.print();
+                //window.close();
+                return;
+            }, 500);
+
+        }
+
+        $(document).ready(async () => {
+            onDomLoaded();
+        });
+
+
+    </script>
+
+
+    <style>
+        #hamburger-menu {
+            display: none;
+        }
+
+        .logout-button {
+            display: none;
+        }
+
+        body {
+            height: 350px;
+        }
+    </style>
+
+
+</body>
+</html>

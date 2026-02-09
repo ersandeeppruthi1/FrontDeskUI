@@ -3,11 +3,12 @@
 <head>
     <script>
         let classMap = [];
+        //var apiURL = "https://sittest.mahantsatishdassjicharitable.com";
         var apiURL = "";
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Information Form</title>
+    <title>Belt Stock Return</title>
     <link href="https://localhost:44309/css/Default/bootstrap.min.css" rel="stylesheet">
     <link href="https://localhost:44309/css/Default/select2.min.css" rel="stylesheet">
     <link href="https://localhost:44309/css/Default/font-awesome-all.min.css" rel="stylesheet">
@@ -40,60 +41,48 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <script src="https://localhost:44309/css/Default/pdfmake.min.js"></script>
-    <script src="https://localhost:44309/css/Default/vfs_fonts.js"></script>
-
-    <script src="https://localhost:44309/css/Default/xlsx.full.min.js"></script>
-    <script src="https://localhost:44309/css/Default/moment.min.js"></script>
-
-    <script src="../../JS/system/html2canvas.min.js"></script>
-    <script src="../../JS/system/JsBarcode.all.min.js"></script>
-
-
-
 </head>
-
 <body>
+
     <div class="container body-content">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
         <div class="container mt-4">
             <form>
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label for="startDate" class="form-label">Start Date</label>
-                        <input type="date" class="form-control" id="startDate" onchange="refreshHistoryGrid()">
+                        <input type="date" class="form-control" id="startDate" onchange="refreshGrid()">
                     </div>
                     <div class="col-md-4">
                         <label for="endDate" class="form-label">End Date</label>
-                        <input type="date" class="form-control" id="endDate" onchange="refreshHistoryGrid()">
+                        <input type="date" class="form-control" id="endDate" onchange="refreshGrid()">
                     </div>
                 </div>
             </form>
         </div>
 
-        <div id="historyDetailInfoFull">
+        <div id="patienDetailInfoFull">
             <div id="searchAndActionsContainer"></div>
-            <table class="table table-bordered" id="historyTableBody">
-                <thead id="historyHeadingRow"></thead>
+            <table class="table table-bordered" id="tableBody">
+                <thead id="headingrow"></thead>
                 <tbody></tbody>
             </table>
+
         </div>
     </div>
 
     <script>
-        let historyCache = [];
+        let beltCache = [];
 
-        async function refreshHistoryGrid() {
+        async function refreshGrid() {
             const startDate = document.getElementById("startDate").value;
             const endDate = document.getElementById("endDate").value;
 
-            let filterCondition = `saledate >= '${startDate}' AND saledate <= '${endDate}'`;
+            let filterCondition = `purchasedate >= '${startDate}' AND purchasedate <= '${endDate}'`;
 
             const data = await DBHandler.fetchEntityRecords(
-                'frontdeskstockitemhistory',
+                'frontdeskstockitemin',
                 '*',
                 'createdon',
                 'desc',
@@ -101,59 +90,63 @@
                 true
             );
 
-            historyCache = data;
-            renderHistoryTable();
+            beltCache = data;
+            renderBeltTable();
         }
 
-        function renderHistoryTable() {
-            const thead = document.querySelector("#historyTableBody thead");
+        function renderBeltTable() {
+            const thead = document.querySelector("#tableBody thead");
             thead.innerHTML = `
-                    <tr>
-                        <th>Belt</th>
-                        <th>Amount</th>
-                        <th>Sale Date</th>
-                        <th>Patient Name</th>
-                    </tr>
-                `;
+                        <thead>
+                            <th>Belt</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Expiry Date</th>
+                            <th>Bill Date</th>
+                            <th>Payment Type</th>
+                        </thead>
+                    `;
 
-            const tbody = document.querySelector("#historyTableBody tbody");
+            const tbody = document.querySelector("#tableBody tbody");
             tbody.innerHTML = "";
 
             let totalAmount = 0;
 
-            historyCache.forEach(item => {
-                let amount = parseFloat(item.amount) || 0;
+            beltCache.forEach(item => {
+                let amount = parseFloat(item.amount) ||
+                    (parseFloat(item.itemstock) * parseFloat(item.price));
                 totalAmount += amount;
 
                 const row = `
-                        <tr>
-                            <td>${item.stockitemid || ""}</td>
-                            <td>${amount.toFixed(2)}</td>
-                            <td>${item.saledate ? formatDateInGrid(item.saledate) : ""}</td>
-                            <td>${item.patientname || ""}</td>
-                        </tr>
-                    `;
+                            <tr>
+                                <td>${item.stockitemname || ""}</td>
+                                <td>${item.itemstock || 0}</td>
+                                <td>${(parseFloat(item.price) || 0).toFixed(2)}</td>
+                                <td>${item.expiry ? formatDateInGrid(item.expiry) : ""}</td>
+                                <td>${item.purchasedate ? formatDateInGrid(item.purchasedate) : ""}</td>
+                                <td>${item.paymenttype || "Unknown"}</td>
+                            </tr>
+                        `;
                 tbody.innerHTML += row;
             });
 
             if (!tbody.innerHTML) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center">No records found</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center">No records found</td></tr>`;
             }
         }
 
-        function initializeHistoryPage() {
+        function initializePage() {
             $("#startDate").val(getDefaultValue('currentMonthStartDate'));
             $("#endDate").val(getDefaultValue('currentMonthEndDate'));
 
             createSearchAndActions('searchAndActionsContainer');
-            refreshHistoryGrid();
+            refreshGrid();
         }
 
         $(document).ready(() => {
-            initializeHistoryPage();
+            initializePage();
         });
     </script>
-
 
 </body>
 </html>

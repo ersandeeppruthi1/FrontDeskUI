@@ -1,0 +1,196 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        let classMap = [];
+        var apiURL = "";
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Information Form</title>
+    <link href="https://localhost:44309/css/Default/bootstrap.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/select2.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/font-awesome-all.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/simple-line-icons.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/app.css" rel="stylesheet">
+
+    <!-- JS Libraries -->
+    <script src="https://localhost:44309/css/Default/jquery.min.js"></script>
+    <script src="https://localhost:44309/css/Default/moment.min.js"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://localhost:44309/css/Default/select2.min.js"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap-select.min.js"></script>
+    <script src="https://localhost:44309/css/Default/popper.min.js"></script>
+    <script src="https://localhost:44309/css/Default/dayjs.js"></script>
+    <script src="https://localhost:44309/css/Default/JSpdf.umd.min.js"></script>
+    <script src="https://localhost:44309/css/Default/JSpdf.plugin.autotable.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="https://localhost:44309/JS/entityPage.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/controls.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/listcontrols.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/formHandler.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/pageLoader.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/Master/DBHandler.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/VastuBill/VastuBillPDFExporter.js?id=3"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://localhost:44309/JS/utility.js?id=5"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div class="container">
+        <div class="row" style="display:none">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" class="form-control" id="startDate" onchange="refreshSearch();">
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 mt-4" id="old-records"></div>
+    </div>
+
+
+    <script>
+        async function fetchData() {
+            const startDate = document.getElementById("startDate").value;
+            const endDate = document.getElementById("startDate").value;
+
+            let filterCondition = ` date >= '${startDate}'`;
+            filterCondition += ` AND date <= '${endDate}'`;
+
+            const data = await DBHandler.fetchEntityRecords(
+                'frontdeskpatientrecord',
+                'id,patientid,serialnumber,amount,patientname,age,gender,phone,doctorname,totaltest,paymentmethod,date,optiongroup',
+                'createdon',
+                'desc',
+                filterCondition,
+                true
+            );
+
+            patientCache = data;
+            createTable();
+        }
+
+
+
+        async function createTable() {
+            const container = document.getElementById("old-records");
+            container.innerHTML = ""; // Clear previous content
+
+            if (!patientCache || patientCache.length === 0) {
+                container.innerHTML = `<div class="alert alert-warning text-center">No records found</div>`;
+                return;
+            }
+
+            // --- 0. Build Payment Method Summary (Cash / Online) ---
+            let totalCash = 0, totalOnline = 0;
+            patientCache.forEach(record => {
+                const amount = parseFloat(record.amount) || 0;
+                const payment = (record.paymentmethod || "").toLowerCase();
+                if (payment.includes("cash")) {
+                    totalCash += amount;
+                } else if (payment.includes("online")) {
+                    totalOnline += amount;
+                }
+            });
+
+            let paymentTable = `
+                <h5 class="text-success">Payment Summary</h5>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered table-sm table-striped">
+                        <tbody>
+                            <tr>
+                                <td>Total Cash</td>
+                                <td>${formatIndianCurrency(totalCash)}</td>
+                            </tr>
+                              <tr>
+                                <td>Total Online</td>
+                                <td>${formatIndianCurrency(totalOnline)}</td>
+              </tr>
+                              <tr>
+                              <td style="font-weight:bold" >Total</td>
+                              <td  style="font-weight:bold">${formatIndianCurrency(totalCash + totalOnline)}</td>
+</tr>
+                        </tbody>
+                    </table>
+                </div>
+                `;
+
+            // --- 1. Build Summary (group by doctor/department) ---
+            const doctorGroups = {};
+            patientCache.forEach(record => {
+                const doctorName = (record.doctorname || "Unknown").trim();
+                if (!doctorGroups[doctorName]) {
+                    doctorGroups[doctorName] = { count: 0, amount: 0 };
+                }
+                doctorGroups[doctorName].count++;
+                doctorGroups[doctorName].amount += parseFloat(record.amount) || 0;
+            });
+
+            let summaryTable = `
+                <h5 class="text-primary">Summary</h5>
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered table-sm table-striped">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th>Department Name</th>
+                                <th>Total Patient</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+            let totalPatient = 0, totalAmount = 0;
+            for (const doctor in doctorGroups) {
+                const group = doctorGroups[doctor];
+                totalPatient += group.count;
+                totalAmount += group.amount;
+
+                summaryTable += `
+                    <tr>
+                        <td>${doctor}</td>
+                        <td>${group.count}</td>
+                        <td>${formatIndianCurrency(group.amount)}</td>
+                    </tr>
+                    `;
+            }
+
+            summaryTable += `
+                    <tr class="font-weight-bolder table-light">
+                        <td>Total</td>
+                        <td>${totalPatient}</td>
+                        <td>${formatIndianCurrency(totalAmount)}</td>
+                    </tr>
+                `;
+
+            summaryTable += `</tbody></table></div>`;
+
+            container.innerHTML = paymentTable + summaryTable ;
+        }
+
+
+        function refreshSearch() {
+            fetchData();
+        }
+
+        function onDomLoaded() {
+            $("#startDate").val(getDefaultValue('currentDate'));
+            fetchData();
+        }
+
+
+        onDomLoaded();
+
+        //document.addEventListener('DOMContentLoaded', onDomLoaded);
+    </script>
+
+
+</body>
+</html>

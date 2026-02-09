@@ -1,0 +1,247 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        let classMap = [];
+        //var apiURL = "https://sittest.mahantsatishdassjicharitable.com";
+        var apiURL = "";
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belt Stock Return</title>
+    <link href="https://localhost:44309/css/Default/bootstrap.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/select2.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/font-awesome-all.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/simple-line-icons.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/app.css" rel="stylesheet">
+
+    <!-- JS Libraries -->
+    <script src="https://localhost:44309/css/Default/jquery.min.js"></script>
+    <script src="https://localhost:44309/css/Default/moment.min.js"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://localhost:44309/css/Default/select2.min.js"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap-select.min.js"></script>
+    <script src="https://localhost:44309/css/Default/popper.min.js"></script>
+    <script src="https://localhost:44309/css/Default/dayjs.js"></script>
+    <script src="https://localhost:44309/css/Default/JSpdf.umd.min.js"></script>
+    <script src="https://localhost:44309/css/Default/JSpdf.plugin.autotable.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="https://localhost:44309/JS/entityPage.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/controls.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/listcontrols.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/formHandler.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/pageLoader.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/Master/DBHandler.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/VastuBill/VastuBillPDFExporter.js?id=3"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://localhost:44309/JS/utility.js?id=5"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Belt <span class="text-danger">*</span></label>
+                <select class="form-control" id="phystiothreapyStock" onchange="loadVastuBillItems()">
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Current Stock <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" value="" id="txtCurrentStock" readonly disabled>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Quantity<span class="text-danger">*</span></label>
+                <input type="text" class="form-control" value="" id="txtQuantity">
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Return Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" value="" id="txtBillDate">
+            </div>
+        </div>
+
+        <div class="row mb-12">
+            <div class="col-12 d-flex justify-content-end">
+                <button class="btn btn-primary mx-2" onclick="submitBeltStockIn()">Add Belt Stock In</button>
+                <button class="btn btn-secondary mx-2" onclick="viewReport()">View Report</button>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <div id="searchAndActionsContainer"></div>
+
+            <table class="table table-bordered" id="tableBody">
+                <thead>
+                    <tr id="headingrow">
+                        <th>Belt</th>
+                        <th>Quantity</th>
+                        <th>Bill Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be dynamically added here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+
+        var vastubills = [];
+
+        async function loadDataonLoad() {
+            $('#txtBillDate').val(getDefaultValue('currentDate'));
+            $('#txtExpiryDate').val(getDefaultValue('currentDate'));
+
+            createSearchAndActions('searchAndActionsContainer');
+
+            vastubills = await DBHandler.fetchEntityRecords(
+                'frontdeskdepartment',
+                '*',
+                'createdon',
+                'desc',
+                ''
+            );
+
+            vastubills = vastubills.filter(p => (p.category || "").toLowerCase() === "physiotherapy belt");
+
+            vastubills.forEach(x => { x.DisplayName = `${x.name} -- ${x.itemstock}`; });
+
+            loadEntityInControl($('#phystiothreapyStock'), vastubills, "name", "id");
+
+            const vastubillid = getQueryStringParam('stockid');
+            if (vastubillid) {
+                $('#phystiothreapyStock').val(vastubillid).trigger('change');
+            }
+        }
+
+
+        async function submitBeltStockIn() {
+            let stockId = $("#phystiothreapyStock").val();
+            let quantity = $("#txtQuantity").val();
+            let billDate = $("#txtBillDate").val();
+            let stockitemname = $("#phystiothreapyStock option:selected").text();
+
+            if (!stockId || !quantity || !billDate) {
+                alert("Please fill all fields!");
+                return;
+            }
+
+            if (quantity <= 0) {
+                alert("Please enter valid quantity!");
+            }
+
+
+            quantity = parseFloat(quantity);
+
+            let stockData = {
+                stockitemid: stockId,
+                stockitemname: stockitemname,
+                itemstock: -1 * quantity,
+                purchasedate: billDate,
+            };
+
+            try {
+                await DBHandler.submitRecordData("frontdeskstockitemin", stockData);
+                let stockItem = vastubills.filter(p => p.id == stockId);
+                let existingStock = stockItem.length > 0 ? (parseFloat(stockItem[0].itemstock) || 0) : 0;
+                let updatedStock = existingStock - quantity;
+
+                $("#txtQuantity").val("");
+                $('#txtCurrentStock').val("");
+                $("#phystiothreapyStock").val("").trigger('change');
+
+                if (stockItem.length > 0) {
+
+                    const updateData = { itemstock: updatedStock };
+
+                    await DBHandler.submitRecordData("frontdeskdepartment", updateData, stockItem[0].id, false)
+                    DBHandler.fetchEntityRecords("frontdeskdepartment", "*", "createdon", "desc", "").then(response => {
+                        vastubills = response;
+                    });;
+                }
+
+                showSuccessMessage("Belt stock-in saved successfully!");
+            } catch (error) {
+                console.error("Error saving stock-in:", error);
+                alert("Something went wrong while saving stock-in.");
+            }
+        }
+
+
+
+
+        async function refreshGrid() {
+            loadVastuBillItems();
+        }
+
+
+        async function loadVastuBillItems() {
+            let stockId = $("#phystiothreapyStock").val();
+            let tableBody = $("#tableBody tbody");
+            tableBody.empty();
+
+            if (!stockId) {
+                return;
+            }
+            let selectedStock = vastubills.find(p => p.id === stockId);
+            if (selectedStock) {
+                $('#txtCurrentStock').val(selectedStock.itemstock);
+            }
+
+            tableBody.append('<tr><td colspan="8" class="text-center">Loading...</td></tr>');
+
+            const filterCondition = `stockitemid = '${stockId}'`;
+            const stockItems = await DBHandler.fetchEntityRecords(
+                "frontdeskstockitemin",
+                "*",
+                "createdon",
+                "desc",
+                filterCondition
+            );
+
+            tableBody.empty();
+            let total = 0;
+
+            stockItems.forEach(item => {
+                let amount = parseFloat(item.amount) || (parseFloat(item.itemstock) * parseFloat(item.price));
+                total += amount;
+
+                tableBody.append(`
+                                          <tr>
+                                              <td>${item.stockitemname || ""}</td>
+                                              <td>${item.itemstock || 0}</td>
+                                              <td>${item.purchasedate ? formatDateInGrid(item.purchasedate) : ""}</td>
+                                          </tr>
+                                      `);
+            });
+
+            $("#divTotalAmount").text(`Total Amount: ${total.toFixed(2)}`);
+        }
+
+        function viewReport() {
+            window.location.href = "/main.html?type=html&webresourceid=ec417c63-7f75-4a71-9265-ed249bb150bd";
+        }
+
+
+        async function deleteVastuBillDepositAmount(id) {
+            deleteRecord("vastubilldepositamount", id, loadVastuBillItems);
+        }
+
+        $(document).ready(async () => {
+            loadDataonLoad();
+        });
+
+    </script>
+
+
+
+
+</body>
+</html>

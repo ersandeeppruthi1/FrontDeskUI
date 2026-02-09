@@ -1,0 +1,246 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        let classMap = [];
+        //var apiURL = "https://sittest.mahantsatishdassjicharitable.com";
+        var apiURL = "";
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Information Form</title>
+    <link href="https://localhost:44309/css/Default/bootstrap.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/select2.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/font-awesome-all.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/simple-line-icons.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/app.css" rel="stylesheet">
+
+    <!-- JS Libraries -->
+    <script src="https://localhost:44309/css/Default/jquery.min.js"></script>
+    <script src="https://localhost:44309/css/Default/moment.min.js"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://localhost:44309/css/Default/select2.min.js"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap-select.min.js"></script>
+    <script src="https://localhost:44309/css/Default/popper.min.js"></script>
+    <script src="https://localhost:44309/css/Default/dayjs.js"></script>
+    <script src="https://localhost:44309/css/Default/JSpdf.umd.min.js"></script>
+    <script src="https://localhost:44309/css/Default/JSpdf.plugin.autotable.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="https://localhost:44309/JS/entityPage.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/controls.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/listcontrols.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/formHandler.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/pageLoader.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/Master/DBHandler.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/VastuBill/VastuBillPDFExporter.js?id=3"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://localhost:44309/JS/utility.js?id=5"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+
+    <div class="container mt-5">
+
+        <div class="d-flex justify-content-between mb-3">
+            <input id="searchBox" type="text" class="form-control w-50" placeholder="Search Item">
+            <div>
+                <button id="exportPdf" class="btn btn-danger" onclick="exportPdf()">Export PDF</button>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="text-primary my-3"></div>
+
+        <!-- Table Container -->
+        <div id="tableContainer" class="table-responsive">
+        </div>
+    </div>
+
+    <script>
+        let departments = [];              // all department records
+        let filteredDepartments = [];      // filtered list for display
+        let currentSortColumn = null;
+        let currentSortDirection = "asc";  // default sorting direction
+
+        async function loadDepartmentDetails() {
+            try {
+                createSearchAndActions("tableContainer");
+                showLoader();
+                departments = await DBHandler.fetchEntityRecord(
+                    "frontdeskdepartment",
+                    "*",
+                    "category = 'department'",
+                    false
+                );
+
+                filteredDepartments = [...departments]; // initialize filtered list
+                renderDepartmentTable();
+                hideLoader();
+            } catch (error) {
+                console.error("Error loading department details:", error);
+                document.getElementById("loader").textContent = "Error loading data.";
+            }
+        }
+
+        function renderDepartmentTable() {
+            const tableDiv = document.querySelector("#tableContainer");
+
+            tableDiv.innerHTML = `
+                <table id="departmentTable" class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th class="sortable" data-column="name">Doctor Name</th>
+                            <th class="text-end sortable" data-column="price">Slip Price</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            `;
+
+            const tbody = tableDiv.querySelector("tbody");
+
+            filteredDepartments.forEach((dept, index) => {
+                const row = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${dept.name}</td>
+                        <td class="text-end">${formatIndianCurrency(dept.price)}</td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML("beforeend", row);
+            });
+        }
+
+        function sortDepartmentData(column) {
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === "asc" ? "desc" : "asc";
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = "asc";
+            }
+
+            filteredDepartments.sort((a, b) => {
+                const valueA = a[column];
+                const valueB = b[column];
+
+                if (typeof valueA === "string") {
+                    return currentSortDirection === "asc"
+                        ? valueA.localeCompare(valueB)
+                        : valueB.localeCompare(valueA);
+                }
+
+                return currentSortDirection === "asc"
+                    ? valueA - valueB
+                    : valueB - valueA;
+            });
+
+            renderDepartmentTable();
+            setupSorting(); // rebind events
+        }
+
+        function setupSorting() {
+            const headers = document.querySelectorAll("#departmentTable .sortable");
+            headers.forEach(header => {
+                header.addEventListener("click", () => {
+                    const column = header.getAttribute("data-column");
+                    sortDepartmentData(column);
+                });
+            });
+        }
+
+        function filterDepartmentTable() {
+            const query = document.getElementById("searchBox").value.toLowerCase();
+            filteredDepartments = departments.filter(dept =>
+                dept.name.toLowerCase().includes(query)
+            );
+            renderDepartmentTable();
+            setupSorting();
+            updateTotalAmountSummary();
+        }
+
+        function exportDepartmentsCsv() {
+            const rows = [["#", "Doctor Name", "Slip Price"]];
+            filteredDepartments.forEach((dept, index) => {
+                rows.push([
+                    index + 1,
+                    dept.name,
+                    formatIndianCurrency(dept.price),
+                ]);
+            });
+
+            const csvContent = rows.map(row => row.join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "DepartmentsReport.csv";
+            link.click();
+        }
+
+        function exportDepartmentsPdf() {
+            const rows = filteredDepartments.map((dept, index) => [
+                { text: index + 1, alignment: "center" },
+                { text: dept.name, alignment: "left" },
+                { text: formatIndianCurrency(dept.price), alignment: "right" },
+            ]);
+
+            const totalPrice = filteredDepartments.reduce(
+                (sum, dept) => sum + dept.price,
+                0
+            );
+
+            const docDefinition = {
+                content: [
+                    { text: "Department Slip Report", style: "header" },
+                    {
+                        table: {
+                            headerRows: 1,
+                            widths: ["auto", "*", "auto"],
+                            body: [
+                                [
+                                    { text: "#", alignment: "center" },
+                                    { text: "Doctor Name", alignment: "left" },
+                                    { text: "Slip Price", alignment: "right" },
+                                ],
+                                ...rows,
+                                [
+                                    { text: "Total", colSpan: 2, alignment: "center" },
+                                    {},
+                                    { text: formatIndianCurrency(totalPrice), alignment: "right" },
+                                ],
+                            ],
+                        },
+                    },
+                ],
+            };
+
+            pdfMake.createPdf(docDefinition).download("DepartmentsReport.pdf");
+        }
+
+        function setupEventListeners() {
+            // document.getElementById("searchBox").addEventListener("input", filterDepartmentTable);
+            // document.getElementById("exportCsv").addEventListener("click", exportDepartmentsCsv);
+            // document.getElementById("exportPdf").addEventListener("click", exportDepartmentsPdf);
+        }
+
+        function onLoadRender() {
+            loadDepartmentDetails();
+            setupSorting();
+            setupEventListeners();
+        }
+
+        //onLoadRender();
+
+        $(document).ready(() => {
+            onLoadRender();
+        });
+    </script>
+
+</body>
+</html>

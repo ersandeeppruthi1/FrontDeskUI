@@ -1,0 +1,711 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        let classMap = [];
+        //var apiURL = "https://sittest.mahantsatishdassjicharitable.com";
+        var apiURL = "";
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Information Form</title>
+    <link href="https://localhost:44309/css/Default/bootstrap.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/select2.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/font-awesome-all.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/simple-line-icons.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/app.css" rel="stylesheet">
+
+    <!-- JS Libraries -->
+    <script src="https://localhost:44309/css/Default/jquery.min.js"></script>
+    <script src="https://localhost:44309/css/Default/moment.min.js"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://localhost:44309/css/Default/select2.min.js"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap-select.min.js"></script>
+    <script src="https://localhost:44309/css/Default/popper.min.js"></script>
+    <script src="https://localhost:44309/css/Default/dayjs.js"></script>
+    <script src="https://localhost:44309/css/Default/JSpdf.umd.min.js"></script>
+    <script src="https://localhost:44309/css/Default/JSpdf.plugin.autotable.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="https://localhost:44309/JS/entityPage.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/controls.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/listcontrols.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/formHandler.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/pageLoader.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/Master/DBHandler.js?id=3" type="module"></script>
+    <script src="https://localhost:44309/JS/VastuBill/VastuBillPDFExporter.js?id=3"></script>
+    <script src="https://localhost:44309/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://localhost:44309/JS/utility.js?id=5"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <script src="../../css/Default/xlsx.full.min.js"></script>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="patient-id" class="mr-2 font-weight-bold">Patient's ID:</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="patient-id" onfocus="clearPreviousValue();" onchange="clearBelowFields()" required onkeyup="handleKeyPress(event)" onblur="goButtonClick()" min="1" max="9999999999">
+                        <!-- Replace the "Go" button with an icon (Font Awesome 6 example) -->
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-primary" id="go-button" onclick="goButtonClick()">
+                                <i class="fas fa-arrow-right"></i> <!-- Go icon -->
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4" style="display:none;">
+                <div class="form-group">
+                    <label for="doctor-name" class="font-weight-bold">Patient Id GUID:</label>
+                    <input type="text" class="form-control" id="patientguid">
+                </div>
+            </div>
+
+
+            <div class="col-md-4" style="display:none;">
+                <div class="form-group">
+                    <label for="doctor-name" class="font-weight-bold">Department / Doctor's Name:</label>
+                    <select class="form-control" id="doctor-name" required onchange="calculateAmount()" disabled>
+                        <!-- Default option, you can add more options dynamically -->
+                        <option value="" disabled selected>Select a doctor</option>
+                    </select>
+
+                </div>
+            </div>
+
+            <div class="col-md-4" style="display:none">
+                <div class="form-group">
+                    <label for="date" class="font-weight-bold">Date:</label>
+                    <input type="date" class="form-control" id="date" required value="" disabled>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="patient-name" class="font-weight-bold">Patient's Name:</label>
+                    <input type="text" class="form-control" id="patient-name" required disabled>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="age" class="font-weight-bold">Age:</label>
+                    <input type="number" class="form-control" id="age" required min="1" max="125" disabled>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="gender" class="font-weight-bold">Gender:</label>
+                    <select class="form-control" id="gender" required disabled>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="phone" class="font-weight-bold">Phone Number:</label>
+                    <input type="tel" class="form-control" id="phone" required disabled>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="phone" class="font-weight-bold">Medication:</label>
+                    <select id="nameSelect" class="form-control" disabled></select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="quantityInput" class="font-weight-bold">Count:</label>
+                    <div class="input-group">
+                        <input type="text" id="quantityInput" class="form-control" disabled />
+                        <button onclick="addData()" id="addRowButton" class="btn btn-success" style="margin-left:11px;" disabled>
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12 pt-3">
+                <div class="table-responsive">
+                    <table id="addedTable" class="table table-bordered table-striped align-middle">
+                        <thead class="table-light text-center">
+                            <tr>
+                                <th>Name</th>
+                                <th>Quantity</th>
+                                <th style="width: 60px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="newTableBodyAdded">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="col-md-12" style="padding-top:20px;">
+                <button type="button" class="btn btn-primary" id="submit-button" onclick="submitButtonClicked()">Add Treatment</button>
+            </div>
+
+
+            <div class="col-md-12" style="padding-top:20px;">
+            </div>
+
+            <div class="col-md-12 mt-3 text-center text-primary" id="message"></div>
+
+            <div class="col-md-12 mt-4">
+                <label for="search">Search Old Records:</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="search" placeholder="Enter patient name" onkeydown="handleSearchKeyPress(event)">
+                    <!-- Replace the "Search" button with an icon (Font Awesome 6 example) -->
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-primary" id="search-button" onclick="searchRecords()">
+                            <i class="fas fa-search"></i> <!-- Search icon -->
+                        </button>
+                    </div>
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-secondary" id="refresh-button" onclick="refreshSearch()">
+                            <i class="fas fa-redo"></i> <!-- Refresh icon -->
+                        </button>
+                    </div>
+                    <!-- Export button -->
+                    <div class="input-group-append">
+                        <button type="button" class="btn btn-success" id="export-button" onclick="exportDataToExcel()">
+                            <i class="fas fa-file-export"></i> <!-- Export icon -->
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-12 mt-4" id="old-records"></div>
+        </div>
+    </div>
+
+    <script>
+        function addRow() {
+
+        }
+        var formValuesArray = [];
+        var dropdownValue = [];
+
+        async function goButtonClick() {
+            $("#newTableBodyAdded").html("");
+            addRow();
+
+            const patientId = document.getElementById("patient-id")?.value || "";
+            if (!patientId) {
+                document.getElementById("patient-name").value = "";
+                document.getElementById("age").value = "";
+                document.getElementById("gender").value = "Male";
+                document.getElementById("phone").value = "";
+                return;
+            }
+
+            try {
+                let data = formValuesArray.find(p => p.patientId == patientId && p.totalTest == "");
+                debugger;
+                if (!data) {
+                    let records = "";
+                    records = await DBHandler.fetchEntityRecords(
+                        "frontdeskpatientrecord",
+                        "*",
+                        "createdon",
+                        "desc",
+                        `patientid='${patientId}'`
+                    );
+
+                    data = Array.isArray(records) && records.length > 0 ? records[0] : null;
+                }
+                else {
+                    data.patientname = data.patientName;
+                    data.doctorname = data.doctorName;
+                    data.patientrecordid = data.id;
+                    data.medicinedetail = data.medicineDetailRecord;
+                }
+                if (data) {
+                    const table = document.getElementById("newTableBodyAdded");
+
+                    document.getElementById("patientguid").value = data.id || "";
+
+                    document.getElementById("patient-name").value = data.patientname || "";
+                    document.getElementById("age").value = data.age || "";
+                    document.getElementById("gender").value = (data.gender || "Male").toLowerCase() === "female" ? "Female" : "Male";
+                    document.getElementById("phone").value = data.phone || "";
+                    document.getElementById("doctor-name").value = data.doctorname || "";
+
+                    //patientIdInTable = data.patientrecordid;
+                    $("#nameSelect, #quantityInput, #addRowButton").removeAttr("disabled");
+                    document.getElementById("nameSelect").focus();
+
+                    table.innerHTML = "";
+                    const medicineDetail = data.medicinedetail || "";
+                    const splitData = medicineDetail.split(/\r?\n/);
+
+                    splitData.forEach(line => {
+                        if (!line) return;
+
+                        try {
+                            const splitIndex = line.indexOf("-");
+                            if (splitIndex === -1) return;
+
+                            const quantity = line.substring(0, splitIndex).trim();
+                            const name = line.substring(splitIndex + 1).trim();
+
+                            const medicine = medcine.find(x => x.name === name || x.Name === name);
+                            if (!medicine) throw new Error(`No medicine found with name '${name}'`);
+
+                            const row = table.insertRow(-1);
+                            const cell1 = row.insertCell(0);
+                            const cell2 = row.insertCell(1);
+                            const cell3 = row.insertCell(2);
+
+                            cell1.innerHTML = medicine.name || medicine.Name;
+                            cell1.setAttribute("medicineValue", medicine.id || medicine.Id);
+
+                            cell2.innerHTML = quantity;
+                            cell2.classList.add("editable");
+                            cell2.onclick = function () {
+                                convertTOTextBox(this);
+                            };
+
+                            cell3.innerHTML = '<button onclick="deleteThisRow(this)"><i class="fas fa-trash"></i></button>';
+
+                            document.getElementById("nameSelect").selectedIndex = 0;
+                            document.getElementById("nameSelect").focus();
+                            document.getElementById("quantityInput").value = "";
+                        } catch (err) {
+                            console.error(err);
+                        }
+                    });
+                } else {
+                    alert("No patient found with the provided ID.");
+                }
+            } catch (err) {
+                console.error("Error fetching patient data:", err);
+                document.getElementById("patient-name").value = "";
+                document.getElementById("age").value = "";
+                document.getElementById("gender").value = "Male";
+                document.getElementById("phone").value = "";
+                document.getElementById("patient-id").value = "";
+                alert("No patient found with the provided ID.");
+            }
+        }
+
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+                // Simulate a click on the "Go" button
+                document.getElementById("go-button").click();
+            }
+            if (document.getElementById("patient-id").value == "") {
+                // Clear all values in the table below
+                document.getElementById("patient-name").value = "";
+                document.getElementById("age").value = "";
+                document.getElementById("gender").value = "Male"; // Reset gender to "Male"
+                document.getElementById("phone").value = "";
+            }
+        }
+
+        async function submitButtonClicked() {
+            const rows = [];
+            const patientId = document.getElementById("patient-id").value;
+            let medicineDetail = "";
+
+            // Collect medicine rows
+            $('#newTableBodyAdded tr').each(function () {
+                const $tds = $(this).find('td');
+                const medicineName = $tds.eq(0).text();
+                const medicineId = $tds.eq(0).attr('medicineValue');
+                const quantity = $tds.eq(1).text();
+
+                rows.push({
+                    TableName: "frontdeskpatientmedicine",
+                    ColumnValues: {
+                        PatientId: patientId,
+                        MedicineId: medicineId,
+                        MedicineName: medicineName,
+                        Quantity: quantity
+                        //patientrecordid: patientIdInTable
+                    }
+                });
+
+                medicineDetail += `${quantity}-${medicineName}\n`;
+            });
+
+            if (rows.length === 0) {
+                alert("Please add medicine");
+                return;
+            }
+
+            const patietGuid = $('#patientguid').val();
+            const formData = {
+                patientid: patientId,
+                medicinedetail: medicineDetail,
+            };
+
+            $('#newTableBodyAdded').empty();
+
+
+            try {
+                await DBHandler.submitRecordData("frontdeskpatientrecord", formData, patietGuid, false);
+                await DBHandler.submitBulkRecordData("frontdeskpatientmedicine", rows);
+
+
+                $("#nameSelect, #quantityInput, #addRowButton").prop("disabled", true);
+                document.getElementById("patient-id").focus();
+
+                // Update stock
+                const stockUpdatePromises = rows.map(async (p) => {
+                    const medicineId = p.ColumnValues.MedicineId;
+
+                    // Fetch stock record
+                    const stockRecord = await DBHandler.fetchEntityRecord(
+                        "frontdeskstockitem",
+                        "itemstock",
+                        `id='${medicineId}'`
+                    );
+
+                    if (stockRecord && stockRecord.length > 0 && stockRecord[0].itemstock !== undefined) {
+                        const newStock = stockRecord[0].itemstock - 1;
+                        const updateData = { itemstock: newStock };
+
+                        return DBHandler.submitRecordData("frontdeskstockitem", updateData, medicineId, true);
+                    }
+                });
+
+                await Promise.all(stockUpdatePromises);
+                await getPatientRecordsOnLoad();
+                showSuccessMessage("Medicine added successfully.");
+
+            } catch (error) {
+                console.error("Error submitting medicine:", error);
+                alert("Failed to add medicine. Please try again." + error);
+            } finally {
+            }
+        }
+
+
+        function handleSearchKeyPress(event) {
+            if (event.key === "Enter") {
+                // Simulate a click on the "Search" button
+                document.getElementById("search-button").click();
+            }
+        }
+
+        async function getPatientRecordsOnLoad() {
+            formValuesArray = [];
+
+            const dateValue = document.getElementById("date")?.value || "";
+
+            const records = await DBHandler.fetchEntityRecords(
+                "frontdeskpatientrecord",
+                "*",
+                "createdon",
+                "desc",
+                `date='${dateValue}'`
+            );
+
+            if (Array.isArray(records) && records.length > 0) {
+                formValuesArray = records.map(item => ({
+                    id: item.id,
+                    intValue: item.serialnumber,
+                    amount: item.amount,
+                    patientName: item.patientname,
+                    age: item.age,
+                    gender: item.gender,
+                    phone: item.phone,
+                    doctorName: item.doctorname,
+                    patientId: item.patientid,
+                    totalTest: item.totaltest,
+                    modifiedon:item.modifiedon,
+                    medicineDetailRecord: (item.medicinedetail || ""),
+                    medicineDetail: (item.medicinedetail || "").replaceAll("\n", "<br />"),
+                }));
+                displayFormValues();
+            }
+        }
+
+
+        function displayFormValues() {
+            // Get references to DOM elements
+            const oldRecordsDiv = document.getElementById("old-records");
+            const searchInput = document.getElementById("search").value.toLowerCase();
+
+            // Filter and populate the table
+            let filteredArray = formValuesArray.filter(entry => (
+                searchInput === "" || entry.patientName.toLowerCase().includes(searchInput)
+                || entry.intValue.toString().toLowerCase().includes(searchInput)
+                || entry.patientId.toString().toLowerCase().includes(searchInput)
+                || entry.doctorName.toLowerCase().includes(searchInput)
+                || entry.patientName.toLowerCase().includes(searchInput)
+                || entry.gender.toLowerCase().includes(searchInput)
+                || entry.phone.toLowerCase().includes(searchInput)
+                || entry.medicineDetail.toString().toLowerCase().includes(searchInput)
+            ));
+            filteredArray = filteredArray.filter(p => p.medicineDetail != null && p.medicineDetail != "");
+
+            filteredArray = filteredArray.sort((a, b) => new Date(b.modifiedon) - new Date(a.modifiedon));
+
+
+            const tableHTML = `
+                                                                                                                                    <table class="table table-bordered">
+                                                                                                                                        <thead>
+                                                                                                                                            <tr id="headingrow">
+                                                                                                                                                <th>Sr.No.</th>
+                                                                                                                                                <th>Patient Id</th>
+                                                                                                                                                <th>Department Name</th>
+                                                                                                                                                <th>Name</th>
+                                                                                                                                                <th>Gender</th>
+                                                                                                                                                <th>Age</th>
+                                                                                                                                                <th>Mobile Number</th>
+                                                                                                                                                <th>Medicine</th>
+                                                                                                                                            </tr>
+                                                                                                                                        </thead>
+                                                                                                                                        <tbody id="tableBody">
+                                                                                                                                            ${filteredArray.map((entry, index) => `
+                                                                                                                                                <tr>
+                                                                                                                                                    <td>${entry.intValue}</td>
+                                                                                                                                                    <td>${entry.patientId}</td>
+                                                                                                                                                    <td>${entry.doctorName + (entry.totalTest ? "<br>" + entry.totalTest.replaceAll("\n", "<br>") : "")}</td>
+                                                                                                                                                    <td>${entry.patientName}</td>
+                                                                                                                                                    <td>${entry.gender}</td>
+                                                                                                                                                    <td>${entry.age}</td>
+                                                                                                                                                    <td>${entry.phone}</td>
+                                                                                                                                                    <td>${entry.medicineDetail.replaceAll('\r\n', '<br />')}</td>
+                                                                                                                                                </tr>
+                                                                                                                                            `).join('')}
+                                                                                                                                        </tbody>
+                                                                                                                                    </table>
+                                                                                                                                `;
+
+            // Set the table HTML inside the old-records div
+            oldRecordsDiv.innerHTML = tableHTML;
+        }
+
+        function clearPreviousValue() {
+            document.getElementById("patient-id").value = ""; // Set the value to an empty string
+            // Clear all values in the table below
+            document.getElementById("patient-name").value = "";
+            document.getElementById("age").value = "";
+            document.getElementById("gender").value = "Male"; // Reset gender to "Male"
+            document.getElementById("phone").value = "";
+        }
+
+        function clearBelowFields() {
+            // Check if the selected value is empty
+            if (document.getElementById("patient-id").value == "") {
+                // Clear all values in the table below
+                document.getElementById("patient-name").value = "";
+                document.getElementById("age").value = "";
+                document.getElementById("gender").value = "Male"; // Reset gender to "Male"
+                document.getElementById("phone").value = "";
+            }
+        }
+        function refreshSearch() {
+            getPatientRecordsOnLoad();
+        }
+        function searchRecords() {
+            displayFormValues();
+        }
+        function exportDataToExcel() {
+            exportToExcel();
+        }
+
+        // Function to apply black font color and bold style to the first and last rows of a sheet
+        function applyBlackFontAndBoldToFirstAndLastRows(sheet) {
+            // Create a style object for black font color and bold
+            const style = { font: { bold: true, color: { rgb: '000000' } } };
+
+            // Apply the style to the first row
+            sheet['A1'].s = style; // Assuming you want to style cell A1 as an example
+
+            // Calculate the last row number based on the number of rows in the sheet
+            const lastRowNumber = XLSX.utils.decode_range(sheet['!ref']).e.r;
+
+            // Apply the style to the last row (adjust the column as needed)
+            sheet['A' + (lastRowNumber + 1)].s = style; // Assuming you want to style the last row in column A as an example
+        }
+
+        async function populateDropdown() {
+            const doctorSelect = document.getElementById("doctor-name");
+
+            const data = await StaticDBHandler.fetchEntityRecords(
+                "frontdeskdepartment",
+                "id,name,isdropdown,category,groupname,price,stockitem",
+                "createdon",
+                "desc",
+                ""
+            );
+
+            const dataStockItem2 = await StaticDBHandler.fetchEntityRecords(
+                "frontdeskstockitem",
+                "*",
+                "name",
+                "asc",
+                ""
+            );
+
+            dropdownValue = data;
+
+
+            const departments = data.filter(p => (p.category || "").toLowerCase() === "department");
+            medcine = dataStockItem2.filter(p => (p.category || "").toLowerCase() === "medicine");
+
+            doctorSelect.innerHTML = "";
+            for (const doctor of departments) {
+                const option = document.createElement("option");
+                option.value = doctor.name;
+                option.textContent = doctor.name;
+                option.dataset.optionGroup = doctor.groupname || "";
+                option.dataset.amount = doctor.price || 0;
+                doctorSelect.appendChild(option);
+            }
+
+            populateMedicine(medcine);
+
+        }
+
+        function populateMedicine(medicines) {
+            const medicineSelect = document.getElementById("nameSelect");
+            if (!medicineSelect) return;
+
+            medicineSelect.innerHTML = "";
+
+            for (const med of medicines) {
+                const option = document.createElement("option");
+                option.value = med.id;
+                option.textContent = med.name;
+                option.dataset.optionGroup = med.groupname || "";
+                option.dataset.amount = med.price || 0;
+                medicineSelect.appendChild(option);
+            }
+        }
+
+        function toPascalCase(input) {
+            return input.toLowerCase().replace(/[-_]/g, ' ').split(' ').map(function (word) {
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            }).join(' ');
+        }
+
+
+        function addData() {
+            // Get the selected medicine text and value
+            var medicineSelect = document.getElementById("nameSelect");
+            var name = medicineSelect.options[medicineSelect.selectedIndex].text;
+
+            var medicineValue = medicineSelect.value;
+            var quantity = document.getElementById("quantityInput").value;
+            if (quantity == undefined || quantity == 0) {
+                alert("Please enter quantity.");
+                document.getElementById("quantityInput").focus();
+                return;
+            }
+            var table = document.getElementById("newTableBodyAdded");
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+
+            cell1.innerHTML = name;
+            cell1.setAttribute("medicineValue", medicineValue);
+            cell2.innerHTML = quantity;
+            cell2.classList.add("editable");
+            cell2.onclick = function () {
+                convertTOTextBox(this);
+            };
+            cell3.innerHTML = '<button onclick="deleteThisRow(this)">' +
+                '<i class="fas fa-trash"></i></button>';
+            document.getElementById("nameSelect").selectedIndex = 0;
+            document.getElementById("nameSelect").focus();
+            document.getElementById("quantityInput").value = "";
+
+        }
+
+        function convertTOTextBox(td) {
+            // Only convert the cell if it has the "editable" class
+            if (td.classList.contains("editable")) {
+                var input = document.createElement("input");
+                input.type = "number";
+                input.value = td.innerHTML;
+                td.innerHTML = "";
+                td.classList.remove("editable");
+                td.appendChild(input);
+                input.select();
+
+                // Set the onkeydown event listener to detect when the user presses the Enter key
+                input.onkeydown = function (event) {
+                    if (event.keyCode === 13) {
+                        // If the user presses the Enter key, set the focus on the nameSelect dropdown
+                        document.getElementById("nameSelect").focus();
+                        // Prevent the default behavior of the Enter key
+                        event.preventDefault();
+                    }
+                };
+                input.onblur = function () {
+                    td.innerHTML = input.value;
+                    td.classList.add("editable");
+                };
+            }
+        }
+
+        function deleteThisRow(btn) {
+            var row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
+
+        function loadAllTreatment() {
+
+        }
+
+        function focusFirstInput(event) {
+            if (event.ctrlKey && event.key === 'f') {
+                document.getElementById('patient-id').focus();
+                event.preventDefault(); // Prevent default browser behavior for Ctrl+A
+            }
+            else if (event.ctrlKey && event.key === 'a') {
+                submitButtonClicked();
+                event.preventDefault(); // Prevent default browser behavior for Ctrl+A
+            }
+            else if (event.ctrlKey && event.key === 'q') {
+                document.getElementById('patient-name').focus();
+                event.preventDefault(); // Prevent default browser behavior for Ctrl+A
+            }
+        }
+
+        function onDomLoaded() {
+            $('#date').val(getDefaultValue('currentDate'));
+            populateDropdown();
+            getPatientRecordsOnLoad();
+        }
+
+        $(document).ready(async () => {
+            onDomLoaded();
+            document.addEventListener('keydown', focusFirstInput);
+        });
+
+    </script>
+
+    <style>
+        body {
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+    </style>
+
+
+
+
+</body>
+</html>

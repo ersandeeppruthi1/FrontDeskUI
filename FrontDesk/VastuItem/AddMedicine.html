@@ -1,0 +1,1378 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        //var apiURL = "https://localhost:44309";
+        var apiURL = "";
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+        }
+
+        .container {
+            /*max-width: 800px;*/
+            margin: auto;
+            padding: 20px;
+        }
+
+        .hamburger-menu {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 1100;
+        }
+
+        .menu-content {
+            display: none;
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+            .menu-content a {
+                display: block;
+                padding: 10px;
+                text-decoration: none;
+                color: #333;
+                transition: background-color 0.3s ease;
+            }
+
+                .menu-content a:hover {
+                    background-color: #e0e0e0;
+                    color: #000000; /* Black text for good contrast */
+                }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+            .input-group label {
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .input-group input {
+                width: 100%;
+                padding: 8px;
+                box-sizing: border-box;
+            }
+
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        #expense-report-grid,
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+            #expense-report-grid th,
+            #expense-report-grid td,
+            table, th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+
+                th.sortable,
+                #expense-report-grid th.sortable {
+                    background-color: #f2f2f2;
+                    cursor: pointer;
+                }
+
+        .grid {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+            .grid th, .grid td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+
+            .grid th {
+                background-color: #f2f2f2;
+                text-align: left;
+            }
+
+        .date-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        /*#search {
+            margin-bottom: 15px;
+        }*/
+
+        #loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            padding-top: 20%;
+        }
+
+        .loading {
+            display: none;
+            color: #007bff;
+            margin-top: 10px;
+        }
+
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .logout-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+            .logout-button button {
+                background-color: transparent;
+                border: none;
+                cursor: pointer;
+                font-size: 24px;
+                color: #dc3545;
+            }
+
+                .logout-button button:hover {
+                    color: #a71d2a;
+                }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .padding5px {
+            margin-bottom: 5px;
+        }
+    </style>
+
+    <style>
+        .main-header {
+            background-color: #fff;
+            padding: 10px;
+        }
+
+        .mobile-close-sidebar-panel {
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+
+        .main-sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: #fff;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand-box {
+            padding: 15px;
+            border-bottom: 1px solid #444;
+        }
+
+        .sidebar-brand-logo img {
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+
+
+    <style>
+        /******************** SIDEBAR TOGGLED *********************/
+        .sidebar-toggled #sidebarToggle::before {
+            content: "\f054";
+        }
+
+        .sidebar-toggled .main-header {
+            margin-left: 60px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .sidebar-toggled .main-container {
+            margin-left: 60px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .sidebar-toggled .sidebarTogglerBox, .sidebar-toggled .main-sidebar {
+            width: 3.77rem !important;
+            transition: width 0.3s;
+        }
+
+        .sidebar-toggled .sidebar-brand-box .sidebar-brand {
+            padding: 14px;
+            height: 63px;
+            transition: width 0.3s;
+        }
+
+        .sidebar-toggled .accordionItem.closeIt .accordionItemHeading::after, .sidebar-toggled .accordionItem.openIt .accordionItemHeading::after, .sidebar-toggled .sidebarTogglerBox p, .sidebar-toggled .nav-item span, .sidebar-toggled .sidebar-brand-name, .sidebar-toggled .accordionItemContent {
+            display: none;
+        }
+
+        .sidebar-toggled .sidebarTogglerBox button {
+            margin: 0 auto;
+        }
+
+        .sidebar-toggled .main-sidebar:hover, .sidebar-toggled .main-sidebar:hover ~ .sidebarTogglerBox {
+            width: 16rem !important;
+            z-index: 99;
+            transition: width 0.3s;
+        }
+
+            .sidebar-toggled .main-sidebar:hover ~ .sidebarTogglerBox p {
+                display: block;
+            }
+
+            .sidebar-toggled .main-sidebar:hover .sidebar-brand-logo {
+                margin: 0;
+                padding: 0;
+            }
+
+            .sidebar-toggled .main-sidebar:hover .sidebar-brand {
+                padding: 10px 16px 10px 20px;
+            }
+
+            .sidebar-toggled .main-sidebar:hover .collapse-inner {
+                display: block;
+            }
+
+            .sidebar-toggled .main-sidebar:hover .accordionItem.closeIt .accordionItemHeading::after, .sidebar-toggled .main-sidebar:hover .sidebarTogglerBox p, .sidebar-toggled .main-sidebar:hover .nav-item span, .sidebar-toggled .main-sidebar:hover .sidebar-brand-name, .sidebar-toggled .main-sidebar:hover .accordionItemContent, .sidebar-toggled .main-sidebar:hover .accordionItem.openIt .accordionItemHeading::after {
+                display: initial;
+                transition: width 0.3s;
+            }
+
+        @media (max-width: 1991.98px) {
+            .main-sidebar.toggled {
+                z-index: 9999;
+                transition: 0.3s;
+                overflow-x: inherit;
+                transform: translate3d(0px, 0, 0);
+            }
+        }
+
+        .sidebar-dark .sidebar-menu::-webkit-scrollbar {
+            width: 10px;
+            background: #262f3a;
+        }
+
+        .sidebar-dark .sidebar-menu::-webkit-scrollbar-thumb {
+            background-color: #585858;
+            border: 3px solid #262f3a;
+        }
+    </style>
+
+    <style>
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 1000;
+            display: none;
+            float: left;
+            min-width: 10rem;
+            padding: 0.5rem 0;
+            margin: 0.125rem 0 0;
+            font-size: 1rem;
+            color: #212529;
+            text-align: left;
+            list-style: none;
+            background-color: #fff;
+            background-clip: padding-box;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 0.25rem;
+        }
+
+        .dropdown-menu-left {
+            right: auto;
+            left: 0;
+        }
+
+        .dropdown-menu-right {
+            right: 0;
+            left: auto;
+        }
+
+        @media (min-width: 1576px) {
+            .dropdown-menu-sm-left {
+                right: auto;
+                left: 0;
+            }
+
+            .dropdown-menu-sm-right {
+                right: 0;
+                left: auto;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .dropdown-menu-md-left {
+                right: auto;
+                left: 0;
+            }
+
+            .dropdown-menu-md-right {
+                right: 0;
+                left: auto;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .dropdown-menu-lg-left {
+                right: auto;
+                left: 0;
+            }
+
+            .dropdown-menu-lg-right {
+                right: 0;
+                left: auto;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .dropdown-menu-xl-left {
+                right: auto;
+                left: 0;
+            }
+
+            .dropdown-menu-xl-right {
+                right: 0;
+                left: auto;
+            }
+        }
+
+        .dropup .dropdown-menu {
+            top: auto;
+            bottom: 100%;
+            margin-top: 0;
+            margin-bottom: 0.125rem;
+        }
+
+        .dropup .dropdown-toggle::after {
+            display: inline-block;
+            margin-left: 0.255em;
+            vertical-align: 0.255em;
+            content: "";
+            border-top: 0;
+            border-right: 0.3em solid transparent;
+            border-bottom: 0.3em solid;
+            border-left: 0.3em solid transparent;
+        }
+
+        .dropup .dropdown-toggle:empty::after {
+            margin-left: 0;
+        }
+
+        .dropright .dropdown-menu {
+            top: 0;
+            right: auto;
+            left: 100%;
+            margin-top: 0;
+            margin-left: 0.125rem;
+        }
+
+        .dropright .dropdown-toggle::after {
+            display: inline-block;
+            margin-left: 0.255em;
+            vertical-align: 0.255em;
+            content: "";
+            border-top: 0.3em solid transparent;
+            border-right: 0;
+            border-bottom: 0.3em solid transparent;
+            border-left: 0.3em solid;
+        }
+
+        .dropright .dropdown-toggle:empty::after {
+            margin-left: 0;
+        }
+
+        .dropright .dropdown-toggle::after {
+            vertical-align: 0;
+        }
+
+        .dropleft .dropdown-menu {
+            top: 0;
+            right: 100%;
+            left: auto;
+            margin-top: 0;
+            margin-right: 0.125rem;
+        }
+
+        .dropleft .dropdown-toggle::after {
+            display: inline-block;
+            margin-left: 0.255em;
+            vertical-align: 0.255em;
+            content: "";
+        }
+
+        .dropleft .dropdown-toggle::after {
+            display: none;
+        }
+
+        .dropleft .dropdown-toggle::before {
+            display: inline-block;
+            margin-right: 0.255em;
+            vertical-align: 0.255em;
+            content: "";
+            border-top: 0.3em solid transparent;
+            border-right: 0.3em solid;
+            border-bottom: 0.3em solid transparent;
+        }
+
+        .dropleft .dropdown-toggle:empty::after {
+            margin-left: 0;
+        }
+
+        .dropleft .dropdown-toggle::before {
+            vertical-align: 0;
+        }
+
+        .dropdown-menu[x-placement^=top], .dropdown-menu[x-placement^=right], .dropdown-menu[x-placement^=bottom], .dropdown-menu[x-placement^=left] {
+            right: auto;
+            bottom: auto;
+        }
+
+        .dropdown-divider {
+            height: 0;
+            margin: 0.5rem 0;
+            overflow: hidden;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 0.25rem 1.5rem;
+            clear: both;
+            font-weight: 400;
+            color: #212529;
+            text-align: inherit;
+            white-space: nowrap;
+            background-color: transparent;
+            border: 0;
+        }
+
+            .dropdown-item:hover, .dropdown-item:focus {
+                color: #16181b;
+                text-decoration: none;
+                background-color: #e9ecef;
+            }
+
+            .dropdown-item.active, .dropdown-item:active {
+                color: #fff;
+                text-decoration: none;
+                background-color: #1d82f5;
+            }
+
+            .dropdown-item.disabled, .dropdown-item:disabled {
+                color: #adb5bd;
+                pointer-events: none;
+                background-color: transparent;
+            }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-header {
+            display: block;
+            padding: 0.5rem 1.5rem;
+            margin-bottom: 0;
+            font-size: 0.875rem;
+            color: #6c757d;
+            white-space: nowrap;
+        }
+
+        .dropdown-item-text {
+            display: block;
+            padding: 0.25rem 1.5rem;
+            color: #212529;
+        }
+
+
+        .menu-collapse {
+            display: block;
+            margin-left: 28px;
+        }
+
+            .menu-collapse:before {
+                content: "";
+                position: absolute;
+                top: -5px;
+                left: -6px;
+                width: 45px;
+                height: 45px;
+                background: rgba(255, 255, 255, 0.12);
+                z-index: 0;
+            }
+
+        .mc-wrap .mcw-line {
+            width: 18px;
+            height: 2px;
+            background-color: #616e80;
+        }
+
+            .mc-wrap .mcw-line.center {
+                margin: 3px 0;
+            }
+
+        /******************** SIDEBAR MENU *********************/
+        .closeIt .accordionItemContent {
+            height: 0px;
+            transform: scaleY(0);
+            float: left;
+            display: block;
+        }
+
+        .openIt .accordionItemContent {
+            display: block;
+            transform: scaleY(1);
+            transform-origin: top;
+            box-sizing: border-box;
+        }
+
+        .accordionItem a.active {
+            color: #f7faff;
+        }
+
+        .sidebar-menu {
+            height: calc(100% - 111px);
+            z-index: 0;
+            /*display: block !important;*/
+            white-space: nowrap;
+            overflow: auto;
+            overflow-x: hidden;
+        }
+
+            /*        @media (max-width: 991.98px) {
+                    .sidebar-menu {
+                        height: calc(100% - 63px);
+                    }
+                }
+        */
+            .sidebar-menu li {
+                position: relative;
+                list-style: none;
+            }
+
+                .sidebar-menu li .accordionItemContent a {
+                    padding: 0.5rem 1.2rem;
+                    display: block;
+                    white-space: nowrap;
+                    margin-left: 36px;
+                }
+
+                    .sidebar-menu li .accordionItemContent a:hover {
+                        color: #000000 !important;
+                    }
+
+                .sidebar-menu li .nav-item {
+                    line-height: 1.87;
+                    white-space: nowrap;
+                    display: block;
+                    width: 230px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    align-items: center;
+                    padding: 10px 20px 10px 20px;
+                }
+
+                    .sidebar-menu li .nav-item:focus, .sidebar-menu li .nav-item:hover {
+                        color: #000000 !important;
+                    }
+
+        .side-icon {
+            width: 16px;
+            vertical-align: middle;
+            font-size: 16px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .accordionItem.openIt .accordionItemHeading::after {
+            content: "\e604";
+            font-family: "simple-line-icons";
+            display: inline-block;
+            font-style: normal;
+            font-stretch: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            font-weight: 900;
+            line-height: 27px;
+            font-size: 10px;
+            position: absolute;
+            right: 15px;
+        }
+
+        .accordionItem.closeIt .accordionItemHeading::after {
+            content: "\e606";
+            font-family: "simple-line-icons";
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+            font-weight: 900;
+            line-height: 27px;
+            font-size: 10px;
+            position: absolute;
+            right: 15px;
+        }
+
+        .sidebar-brand-logo {
+            max-width: 32px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        /******************** SIDEBAR TOGGLER BOX *********************/
+        .sidebarTogglerBox {
+            width: 240px;
+            transition: width 0.3s;
+            z-index: 2;
+            height: 48px;
+            bottom: 0;
+            padding: 0 16px;
+            border-top: 1px solid #252d37;
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebarTogglerBox {
+                display: none !important;
+            }
+        }
+
+        .sidebarTogglerBox #sidebarToggle {
+            font-family: "Font Awesome 5 Free";
+            -webkit-font-smoothing: antialiased;
+            display: inline-block;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            line-height: 1;
+            background-color: transparent;
+        }
+
+        .sidebarTogglerBox p {
+            display: block;
+        }
+
+        #sidebarToggle::before {
+            content: "\f053";
+        }
+
+        /******************** SIDEBAR TOGGLED *********************/
+        .sidebar-toggled #sidebarToggle::before {
+            content: "\f054";
+        }
+
+        .sidebar-toggled .main-header {
+            margin-left: 60px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .sidebar-toggled .main-container {
+            margin-left: 60px;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .sidebar-toggled .sidebarTogglerBox, .sidebar-toggled .main-sidebar {
+            width: 3.77rem !important;
+            transition: width 0.3s;
+        }
+
+        .sidebar-toggled .sidebar-brand-box .sidebar-brand {
+            padding: 14px;
+            height: 63px;
+            transition: width 0.3s;
+        }
+
+        .sidebar-toggled .accordionItem.closeIt .accordionItemHeading::after, .sidebar-toggled .accordionItem.openIt .accordionItemHeading::after, .sidebar-toggled .sidebarTogglerBox p, .sidebar-toggled .nav-item span, .sidebar-toggled .sidebar-brand-name, .sidebar-toggled .accordionItemContent {
+            display: none;
+        }
+
+        .sidebar-toggled .sidebarTogglerBox button {
+            margin: 0 auto;
+        }
+
+        .sidebar-toggled .main-sidebar:hover, .sidebar-toggled .main-sidebar:hover ~ .sidebarTogglerBox {
+            width: 16rem !important;
+            z-index: 99;
+            transition: width 0.3s;
+        }
+
+            .sidebar-toggled .main-sidebar:hover ~ .sidebarTogglerBox p {
+                display: block;
+            }
+
+            .sidebar-toggled .main-sidebar:hover .sidebar-brand-logo {
+                margin: 0;
+                padding: 0;
+            }
+
+            .sidebar-toggled .main-sidebar:hover .sidebar-brand {
+                padding: 10px 16px 10px 20px;
+            }
+
+            .sidebar-toggled .main-sidebar:hover .collapse-inner {
+                display: block;
+            }
+
+            .sidebar-toggled .main-sidebar:hover .accordionItem.closeIt .accordionItemHeading::after, .sidebar-toggled .main-sidebar:hover .sidebarTogglerBox p, .sidebar-toggled .main-sidebar:hover .nav-item span, .sidebar-toggled .main-sidebar:hover .sidebar-brand-name, .sidebar-toggled .main-sidebar:hover .accordionItemContent, .sidebar-toggled .main-sidebar:hover .accordionItem.openIt .accordionItemHeading::after {
+                display: initial;
+                transition: width 0.3s;
+            }
+
+        @media (max-width: 991.98px) {
+            .main-sidebar.toggled {
+                z-index: 9999;
+                transition: 0.3s;
+                overflow-x: inherit;
+                transform: translate3d(0px, 0, 0);
+            }
+        }
+
+        .sidebar-dark .sidebar-menu::-webkit-scrollbar {
+            width: 10px;
+            background: #262f3a;
+        }
+
+        .sidebar-dark .sidebar-menu::-webkit-scrollbar-thumb {
+            background-color: #585858;
+            border: 3px solid #262f3a;
+        }
+
+        .ui_header {
+            background-color: #131523;
+        }
+
+            .ui_header h2 {
+                padding: 34px 0px;
+                font-size: 28px;
+                font-weight: bold;
+                line-height: 1.14;
+                letter-spacing: 0.12px;
+                color: #fff;
+            }
+
+        .ui_box {
+            padding: 77px 0px;
+        }
+
+            .ui_box .ui_heading h4 {
+                font-size: 28px;
+                font-weight: 500;
+                line-height: 1.14;
+                letter-spacing: 0.12px;
+                color: #131523;
+                margin-bottom: 65px;
+            }
+
+            .ui_box .ntfcn_add_box {
+                margin-top: 94px;
+            }
+
+            .ui_box .ui_sub_heading h4 {
+                font-size: 28px;
+                font-weight: 500;
+                line-height: 1.14;
+                letter-spacing: 0.12px;
+                color: #28313c;
+                margin-bottom: 31.9px;
+            }
+
+        @media (max-width: 767.98px) {
+            .choose_ui_color .card {
+                padding-left: 0px;
+                padding-right: 0px;
+            }
+        }
+
+        .choose_ui_color .ui_color_title {
+            border-bottom: 1px solid #D5D7E3;
+            margin-bottom: 20.8px;
+        }
+
+            .choose_ui_color .ui_color_title p {
+                font-size: 16px;
+                line-height: 1.13;
+                letter-spacing: 0.1px;
+                color: #7e84a3;
+                margin-bottom: 23.5px;
+            }
+
+        .choose_ui_color .card-header {
+            height: 130px;
+            margin-bottom: 23.8px;
+        }
+
+        .choose_ui_color .card-body p {
+            font-size: 23.4px;
+            font-weight: 500;
+            line-height: 1.33;
+            text-align: left;
+            color: #354052;
+            margin-bottom: 0px;
+        }
+
+        /******************** MAIN SIDEBAR *********************/
+        .mobile-close-sidebar-panel {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .mobile-close-sidebar-panel.toggled {
+                height: 100%;
+                position: fixed;
+                top: 0;
+                left: 100px;
+                background-color: rgba(0, 0, 0, 0.4);
+                z-index: 99;
+                display: block;
+            }
+        }
+
+        .main-sidebar {
+            z-index: 2;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 240px;
+            transition: width 0.3s;
+        }
+
+        @media (max-width: 991.98px) {
+            .main-sidebar {
+                transition: 0.3s;
+                top: 0px;
+                overflow-x: auto;
+                transform: translate3d(-293px, 0, 0);
+            }
+        }
+
+        /******************** SIDEBAR BRAND *********************/
+        .sidebar-brand-box {
+            z-index: 1 !important;
+            transition: width 0.3s;
+        }
+
+            .sidebar-brand-box .sidebar-brand {
+                padding: 8px 20px 8px 20px;
+                transition: width 0.3s;
+                border-bottom: 1px solid #252d37;
+            }
+
+                .sidebar-brand-box .sidebar-brand:after {
+                    content: none;
+                }
+
+                .sidebar-brand-box .sidebar-brand .sidebar-brand-name {
+                    width: 80%;
+                    word-break: break-word;
+                    overflow: hidden;
+                }
+
+                    .sidebar-brand-box .sidebar-brand .sidebar-brand-name h1 {
+                        line-height: 1.38;
+                        white-space: nowrap;
+                        width: 140px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+
+                        .sidebar-brand-box .sidebar-brand .sidebar-brand-name h1 i {
+                            font-size: 10px;
+                            font-weight: 700;
+                        }
+
+                    .sidebar-brand-box .sidebar-brand .sidebar-brand-name .pro-name {
+                        line-height: 1.69;
+                        margin-left: 20px;
+                    }
+
+                        .sidebar-brand-box .sidebar-brand .sidebar-brand-name .pro-name span {
+                            width: 12px;
+                            height: 12px;
+                            position: absolute;
+                            top: 4px;
+                            left: -20px;
+                        }
+
+                        .sidebar-brand-box .sidebar-brand .sidebar-brand-name .pro-name p {
+                            white-space: nowrap;
+                            width: 140px;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                        }
+
+            .sidebar-brand-box .sidebar-brand-dropdown {
+                width: 300px;
+                left: 0px !important;
+                border-radius: 3px;
+                border: 1px solid #e8eef3;
+            }
+
+        @media (max-width: 991.98px) {
+            .sidebar-brand-box .sidebar-brand-dropdown {
+                transform: translate3d(-2px, 60px, 0px) !important;
+                padding-bottom: 10px;
+                position: fixed !important;
+                top: 0px;
+            }
+        }
+
+        .sidebar-brand-box .sidebar-brand-dropdown .profile-box {
+            padding: 16px 24px;
+        }
+
+            .sidebar-brand-box .sidebar-brand-dropdown .profile-box a {
+                color: #616e80;
+            }
+
+                .sidebar-brand-box .sidebar-brand-dropdown .profile-box a:hover {
+                    color: #1d82f5;
+                }
+
+            .sidebar-brand-box .sidebar-brand-dropdown .profile-box .profileImg {
+                width: 36px;
+                height: 36px;
+                border-radius: 3px;
+                border: solid 1px #e8eef3;
+                overflow: hidden;
+            }
+
+                .sidebar-brand-box .sidebar-brand-dropdown .profile-box .profileImg img {
+                    -o-object-fit: cover;
+                    object-fit: cover;
+                }
+
+            .sidebar-brand-box .sidebar-brand-dropdown .profile-box .ProfileData h3 {
+                line-height: 1.13;
+                margin-bottom: 5px;
+                word-break: break-all;
+                white-space: nowrap;
+                width: 177px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .sidebar-brand-box .sidebar-brand-dropdown .profile-box .ProfileData p {
+                line-height: 1.09;
+            }
+
+        .sidebar-brand-box .sidebar-brand-dropdown a.dropdown-item {
+            line-height: 1.87;
+            white-space: initial;
+            line-break: anywhere;
+        }
+
+            .sidebar-brand-box .sidebar-brand-dropdown a.dropdown-item:hover {
+                background-color: #1d82f5;
+                color: #fff !important;
+            }
+
+        .sidebar-brand-box .sidebar-brand-dropdown .custom-control.custom-switch {
+            margin-right: -8px;
+        }
+    </style>
+
+    <title></title>
+    <!-- Bootstrap CSS -->
+    <link href="/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/Default/select2.min.css" rel="stylesheet" />
+    <script src="/css/Default/jquery.min.js"></script>
+    <script src="/css/Default/moment.min.js"></script>
+    <script src="/css/Default/select2.min.js"></script>
+    <link href="/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="/css/Default/bootstrap.bundle.min.js"></script>
+
+    <link href="/css/app.css" rel="stylesheet" />
+
+    <!--<script src="css/Default/bootstrap-select.min.js"></script>-->
+    <!--<script src="JS/webpack-demo/dist/bundle.js?id=2024251342"></script>-->
+
+    <script src="/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="/JS/controls.js?id=081220258" type="module"></script>
+    <script src="/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="/css/Default/jspdf.umd.min.js"></script>
+    <script src="/css/Default/jspdf.plugin.autotable.min.js"></script>
+
+    <script src="/JS/utility.js?id=081220258"></script>
+    <script src="/css/Default/popper.min.js"></script>
+    <script src="/css/Default/bootstrap.min.js"></script>
+    <link href="/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="/css/Default/dayjs.js"></script>
+    <script src="/css/Default/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <script src="/css/Default/jspdf.plugin.autotable.min.js"></script>
+    <link href="/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- PDFMake -->
+    <script src="/css/Default/pdfmake.min.js"></script>
+    <script src="/css/Default/vfs_fonts.js"></script>
+
+    <script src="/css/Default/xlsx.full.min.js"></script>
+    <script src="/css/Default/moment.min.js"></script>
+
+    <script src="../../JS/system/html2canvas.min.js"></script>
+    <script src="../../JS/system/JsBarcode.all.min.js"></script>
+
+
+</head>
+<body>
+    <script src="../../css/Default/xlsx.full.min.js"></script>
+    <div class="container mt-5">
+        <h2 class="mb-4">Vastu Item Report</h2>
+
+        <!-- Search and Export Buttons -->
+        <div class="d-flex justify-content-between mb-3">
+            <input id="searchBox" type="text" class="form-control w-50" placeholder="Search Item">
+            <div>
+                <button id="exportPdf" class="btn btn-danger" onclick="exportPdf()">Export PDF</button>
+            </div>
+            <div>
+                <button id="exportPdf" class="btn btn-danger" onclick="exportPriceList()">Export Price List</button>
+            </div>
+
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="text-primary my-3"></div>
+
+        <!-- Table Container -->
+        <div id="tableContainer" class="table-responsive">
+            <table id="csvTable" class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th data-column="name" class="sortable">Item Name</th>
+                        <th data-column="totalAmount" class="sortable text-end">Total Amount</th>
+                        <th data-column="price" class="sortable text-end">Price</th>
+                        <th data-column="quantity" class="sortable text-end">Quantity</th>
+                    </tr>
+                    <tr>
+                        <th colspan="2"></th>
+                        <th id="totalAmountSummary" class="text-end"></th>
+                        <th colspan="2"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table Rows will be added dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let labContacts = [];
+        let filteredContacts = [];
+        let sortColumn = null;
+        let sortDirection = "asc"; // Default sorting direction
+
+        async function loadContactDetails() {
+            try {
+                showLoader();
+                labContacts = await DBHandler.fetchEntityRecord("vastuitem", "name, price, quantity", "", false);
+
+                // Add calculated totalAmount field to each record
+                labContacts = labContacts.map(contact => ({
+                    ...contact,
+                    totalAmount: contact.price * contact.quantity
+                }));
+
+                filteredContacts = [...labContacts];
+                renderTable();
+                updateTotalAmountSummary();
+                hideLoader();
+            } catch (error) {
+                console.error("Error loading contact details:", error);
+                document.getElementById("loader").textContent = "Error loading data.";
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.querySelector("#csvTable tbody");
+            tbody.innerHTML = ""; // Clear existing rows
+
+            filteredContacts.forEach((contact, index) => {
+                const row = `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${contact.name}</td>
+                                     <td class="text-end">${formatIndianCurrency(contact.totalAmount)}</td>
+                                    <td class="text-end">${formatIndianCurrency(contact.price)}</td>
+                                    <td class="text-end">${contact.quantity}</td>
+                                </tr>
+                            `;
+                tbody.insertAdjacentHTML("beforeend", row);
+            });
+        }
+
+        function updateTotalAmountSummary() {
+            const totalAmount = filteredContacts.reduce((sum, contact) => sum + contact.totalAmount, 0);
+            document.getElementById("totalAmountSummary").textContent = formatIndianCurrency(totalAmount);
+        }
+
+        function formatIndianCurrency(amount) {
+            return amount.toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function sortData(column) {
+            if (sortColumn === column) {
+                sortDirection = sortDirection === "asc" ? "desc" : "asc";
+            } else {
+                sortColumn = column;
+                sortDirection = "asc";
+            }
+
+            filteredContacts.sort((a, b) => {
+                const valueA = a[column];
+                const valueB = b[column];
+
+                if (typeof valueA === "string") {
+                    return sortDirection === "asc" ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
+                }
+
+                return sortDirection === "asc" ? valueA - valueB : valueB - valueA;
+            });
+
+            renderTable();
+        }
+
+        function setupSorting() {
+            const headers = document.querySelectorAll("#csvTable .sortable");
+            headers.forEach(header => {
+                header.addEventListener("click", () => {
+                    const column = header.getAttribute("data-column");
+                    sortData(column);
+                });
+            });
+        }
+
+        function filterTable() {
+            const query = document.getElementById("searchBox").value.toLowerCase();
+            filteredContacts = labContacts.filter(contact =>
+                contact.name.toLowerCase().includes(query)
+            );
+            renderTable();
+            updateTotalAmountSummary();
+        }
+
+        function exportCsv() {
+            const rows = [["#", "Total Amount", "Item Name", "Price", "Quantity"]];
+            filteredContacts.forEach((contact, index) => {
+                rows.push([
+                    index + 1,
+                    formatIndianCurrency(contact.totalAmount),
+                    contact.name,
+                    formatIndianCurrency(contact.price),
+                    contact.quantity
+                ]);
+            });
+
+            const csvContent = rows.map(row => row.join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "report.csv";
+            link.click();
+        }
+
+        async function exportPriceList() {
+            const { jsPDF } = window.jspdf;
+
+            let rows = filteredContacts
+                .map(c => ({ name: c.name, price: formatIndianCurrency(c.price) }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            rows = rows.filter(p => Number(p.price) !== 0);
+
+            let itemsToRemove = ["Balance", "Corier","TestItem_Sandeep"].map(x => x.toLowerCase());
+
+            rows = rows.filter(p =>
+                Number(p.price) !== 0 &&
+                !itemsToRemove.includes(p.name.toLowerCase())
+            );
+
+            let mid = Math.ceil(rows.length / 2);
+            let left = rows.slice(0, mid);
+            let right = rows.slice(mid);
+
+            let tableRows = [];
+            for (let i = 0; i < left.length; i++) {
+                tableRows.push([
+                    i + 1,
+                    left[i]?.name ?? "",
+                    left[i]?.price ?? "",
+                    "",
+                    mid + i + 1,
+                    right[i]?.name ?? "",
+                    right[i]?.price ?? ""
+                ]);
+            }
+
+            const doc = new jsPDF("p", "mm", "a4");
+
+            doc.setFontSize(16);
+            let pageWidth = doc.internal.pageSize.getWidth();
+            let title = "Vastu Item Price List";
+            let textWidth = doc.getTextWidth(title);
+            let x = (pageWidth - textWidth) / 2;
+
+            doc.text(title, x, 14);
+
+
+            doc.autoTable({
+                startY: 22,
+                head: [["#", "Item", "Price", "", "#", "Item", "Price"]],
+                body: tableRows,
+                theme: "grid",
+                styles: { halign: "left", fontSize: 11, textColor: 0 },
+                tableWidth: "auto",
+                columnStyles: {
+                    0: { cellWidth: 10 },
+                    1: { cellWidth: 55 },
+                    2: { cellWidth: 22 },
+                    3: { cellWidth: 10 },
+                    4: { cellWidth: 10 },
+                    5: { cellWidth: 55 },
+                    6: { cellWidth: 22 }
+                },
+                margin: { left: 14, right: 14 }
+            });
+
+            const today = new Date();
+            const day = today.getDate().toString().padStart(2, "0");
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const dateStr = `${day}-${monthNames[today.getMonth()]}-${today.getFullYear()}`;
+            const fileName = `VastuItemPriceList_${dateStr}.pdf`;
+
+            doc.save(fileName);
+        }
+
+
+        function exportPdf() {
+            const rows = filteredContacts.map((contact, index) => [
+                { text: index + 1, alignment: "center" },
+                { text: contact.name, alignment: "left" },
+                { text: formatIndianCurrency(contact.totalAmount), alignment: "right" },
+                { text: formatIndianCurrency(contact.price), alignment: "right" },
+                { text: contact.quantity, alignment: "right" }
+            ]);
+
+            const totalAmount = filteredContacts.reduce((sum, contact) => sum + contact.totalAmount, 0);
+
+            const docDefinition = {
+                content: [
+                    { text: "Vastu Item Report", style: "header" },
+                    {
+                        table: {
+                            headerRows: 1,
+                            widths: ["auto", "auto", "*", "auto", "auto"],
+                            body: [
+                                [
+                                    { text: "#", alignment: "center" },
+                                    { text: "Item Name", alignment: "left" },
+                                    { text: "Total Amount", alignment: "right" },
+                                    { text: "Price", alignment: "right" },
+                                    { text: "Quantity", alignment: "right" }
+                                ],
+                                ...rows,
+                                [
+                                    { text: "Total", colSpan: 2, alignment: "center" },
+                                    {},
+                                    "",
+                                    "",
+                                    { text: formatIndianCurrency(totalAmount), alignment: "right" }
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            };
+
+            pdfMake.createPdf(docDefinition).download("VastuBillItem.pdf");
+        }
+
+        function setupEventListeners() {
+            document.getElementById("searchBox").addEventListener("input", filterTable);
+            document.getElementById("exportCsv").addEventListener("click", exportCsv);
+        }
+
+        function onLoadRender() {
+            loadContactDetails();
+            setupSorting();
+            setupEventListeners();
+        }
+
+        $(document).ready(() => {
+            onLoadRender();
+        });
+
+    </script>
+
+
+
+</body>
+</html>

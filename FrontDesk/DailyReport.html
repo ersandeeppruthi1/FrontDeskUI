@@ -3,7 +3,7 @@
 <head>
     <script>
         let classMap = [];
-        var apiURL = "https://sittest.mahantsatishdassjicharitable.com";
+        var apiURL = "https://ectest3.mahantsatishdassjicharitable.com";
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -41,19 +41,946 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body>
-    <div class="container">
-     
-    <script>
-        function onDomLoaded() {
-        
-        }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            onDomLoaded();
+<body>
+
+    <div class="container mt-4" style="margin-top:0px !important;">
+<div class="fixed-summary" style="margin-left:50px">
+    <div><b>Total Than:</b> <span id="total-count-display">0</span></div>
+    <div><b>Total Meter:</b> <span id="total-sum-display">0</span></div>
+</div>
+
+<h2 class="mb-4" style="margin-top:0px !important;">Packaging Slip</h2>
+
+<!-- Item Dropdown -->
+<div class="mb-3">
+    <label for="itemDropdown" class="form-label"><b>Item Name </b></label>
+    <select id="itemDropdown" class="form-select">
+        <option value="">-- Select Item --</option>
+    </select>
+</div>
+
+<!-- Input Labels -->
+<div class="row mb-2">
+    <div class="col-md-4">
+        <label class="form-label"><b>Meter</b></label>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label"><b>Than</b></label>
+    </div>
+</div>
+
+<!-- Input Container -->
+<div id="input-container"></div>
+
+<!-- Add Item Button -->
+<button id="add-item-btn" tabindex="499" class="btn btn-primary mt-3">Add Item</button>
+
+<!-- Results Container -->
+<div id="results-container" class="mt-4"></div>
+
+</div>
+
+<script>
+
+class ClothMeterCalculator {
+    constructor() {
+        this.recordId = "";
+        this.packagingSlipNumber = "";
+        this.packagingnumbernew="";
+        this.itemData = {};
+        this.billingItemData = {};
+        this.resultsContainer = document.getElementById('results-container');
+        this.totalCountDisplay = document.getElementById('total-count-display');
+        this.totalSumDisplay = document.getElementById('total-sum-display');
+        this.container = document.getElementById('input-container');
+        this.addButton = document.getElementById('add-item-btn');
+        this.itemDropdown = $('#itemDropdown');
+        const buttonsContainer = this.createButtonsContainer();
+        this.exportButton = this.createExportButton(buttonsContainer);
+        this.boldOn = '\x1b\x45\x01';  // Turn bold mode on
+        this.boldOff = '\x1b\x45\x00'; // Turn bold mode off
+        this.newSlipButton = this.createNewSlipButton(buttonsContainer);
+        this.printButton = this.createPrintButton(buttonsContainer);
+        this.recordId = getQueryStringParam("id");
+        if (!this.recordId)
+            this.recordId = "";
+        else {
+            this.populatePackagingDetail(this.recordId);
+        }
+        this.initializePage();
+
+        this.updateSummary(true);
+    }
+    populatePackagingDetail(recordId) {
+        showLoader();
+        // Fetch data from the server using the record ID
+        DBHandler.fetchEntityRecord(
+            "packagingitemdetail",
+            "itemjson,packagingnumber,createdon,packagingnumbernew",
+            `id='${recordId}'`
+        )
+            .then(response => {
+                if (response && response.length > 0) {
+                    const record = response[0]; // Assuming the first record is the required one
+
+                    // Parse and populate itemData
+                    if (record.itemjson) {
+                        try {
+                            this.itemData = JSON.parse(record.itemjson);
+                        } catch (error) {
+                            console.error("Failed to parse itemjson:", error);
+                            this.itemData = {};
+                        }
+                    }
+
+                    // Populate packaging slip number
+                    if (record.packagingnumber) {
+                        this.packagingSlipNumber = record.packagingnumber;
+                        this.packagingnumbernew=record.packagingnumbernew;
+                        if(record.packagingnumbernew && record.packagingnumbernew.trim()!="")
+                            this.packagingSlipNumber=record.packagingnumbernew;
+                        this.createdon=record.createdon;
+                    }
+
+                    // Render the table and update the summary based on the populated data
+                    this.renderTable();
+                    this.updateSummary(true);
+                    hideLoader();
+                } else {
+                    console.warn("No data found for the provided record ID.");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching packaging details:", error);
+            });
+    }
+
+    createButtonsContainer() {
+        // Create a container div for the buttons
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mt-3');
+        buttonsContainer.style.width = '100%'; // Ensure full width for alignment
+        document.querySelector('.container').appendChild(buttonsContainer);
+        return buttonsContainer;
+    }
+
+    createExportButton(buttonsContainer) {
+        const button = document.createElement('button');
+        button.textContent = 'Export';
+        button.classList.add('btn', 'btn-success');
+        button.style.width = 'auto'; // Optional: Set width based on content
+        button.addEventListener('click', () => this.exportToPDF());
+        buttonsContainer.appendChild(button); // Add to the left side of the container
+        return button;
+    }
+
+    createPrintButton(buttonsContainer) {
+        const button = document.createElement('button');
+        button.textContent = 'Print';
+        button.classList.add('btn', 'btn-primary');
+        button.style.width = 'auto'; // Optional: Set width based on content
+        button.addEventListener('click', () => this.printTableViaBluetooth());
+        buttonsContainer.appendChild(button); // Add to the right side of the container
+        return button;
+    }
+
+    createNewSlipButton(buttonsContainer) {
+        const button = document.createElement('button');
+        button.textContent = 'New';
+        button.classList.add('btn', 'btn-warning');
+        button.style.width = 'auto'; // Optional: Set width based on content
+        button.addEventListener('click', () => this.clearData());
+        buttonsContainer.appendChild(button); // Add to the container
+        return button;
+    }
+
+    defineItemDropdown() {
+        this.itemDropdown.select2({
+            dropdownAutoWidth: true,
+            width: 'resolve',
+        });
+    }
+
+    async printTableViaBluetooth() {
+        try {
+            const lines = [];
+            const lineWidth = 48; // Character width for a 3-inch receipt
+debugger;
+            const rawDate = new Date(this.createdon);
+            const day = rawDate.getDate().toString().padStart(2, '0');
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames[rawDate.getMonth()];
+            const year = rawDate.getFullYear();
+            const dateofCreation = `${day}-${month}-${year}`;
+
+
+            // Add Packaging Slip Number
+            let  slipNumber = `
+<div>
+    Packaging Slip Number: 
+    <span id="packagingSlipNumber" style="cursor:pointer;" onclick="enableSlipNumberEdit('${this.recordId}')">
+        ${this.packagingSlipNumber || '...'}
+    </span>
+</div>
+`;
+ 
+            lines.push(centerText(slipNumber));
+            lines.push(centerText(dateofCreation));
+
+            
+            lines.push('-'.repeat(lineWidth)); // Divider line for thermal printers
+
+            lines.push('Item Name                Than      Meter');
+            lines.push('-'.repeat(lineWidth));
+
+            let totalOverallThan = 0;
+            let totalOverallMeter = 0;
+
+            const summaryData = Object.entries(this.itemData).map(([itemName, rows]) => {
+                const totalThan = rows.reduce((sum, row) => sum + row.count, 0);
+                const totalMeter = rows.reduce((sum, row) => sum + row.meter * row.count, 0);
+                totalOverallThan += totalThan;
+                totalOverallMeter += totalMeter;
+                return { itemName, totalThan, totalMeter };
+            });
+
+            summaryData.forEach(({ itemName, totalThan, totalMeter }) => {
+                if (totalThan != 0) {
+                    lines.push(
+                        `${this.boldOn}${itemName.padEnd(24)}${totalThan.toString().padStart(6)}${totalMeter.toFixed(2).padStart(10)}${this.boldOff}`
+                    );
+                }
+            });
+
+            // Add overall total row
+            lines.push('-'.repeat(lineWidth));
+            lines.push(`${'Total : '.padEnd(24)}${totalOverallThan.toString().padStart(6)}${totalOverallMeter.toFixed(2).padStart(10)}`);
+            lines.push('-'.repeat(lineWidth));
+
+            var newItemData = {};
+            Object.keys(this.itemData).forEach(itemName => {
+                const filteredRows = this.itemData[itemName].filter(x => x.meter != 0 && x.count != 0);
+                if (filteredRows.length) {
+                    newItemData[itemName] = filteredRows;
+                }
+            });
+
+            // Add Detailed Breakdown
+            Object.entries(newItemData).forEach(([itemName, rows]) => {
+                lines.push(this.boldOn + centerText(itemName) + this.boldOff);
+                lines.push('-'.repeat(lineWidth));
+
+                // Print rows in two columns
+                for (let i = 0; i < rows.length; i += 2) {
+                    const first = rows[i];
+                    const second = rows[i + 1];
+
+                    const firstText = `${first.meter.toFixed(2)} * ${first.count} = ${(first.meter * first.count).toFixed(2)}`.padEnd(lineWidth / 2, ' ');
+                    const secondText = second
+                        ? `${second.meter.toFixed(2)} * ${second.count} = ${(second.meter * second.count).toFixed(2)}`.padEnd(lineWidth / 2, ' ')
+                        : ''.padEnd(lineWidth / 2, ' ');
+
+                    lines.push(firstText + this.boldOn + secondText+this.boldOff);
+                }
+
+                // Add footer for the current item
+                const totalThan = rows.reduce((sum, row) => sum + row.count, 0);
+                const totalMeter = rows.reduce((sum, row) => sum + row.meter * row.count, 0);
+                lines.push('-'.repeat(lineWidth));
+                lines.push(this.boldOn + alignLeftRight(`Total Than: ${totalThan}`, `Total Meter: ${totalMeter.toFixed(2)}`) + this.boldOff);
+                lines.push('-'.repeat(lineWidth));
+            });
+
+            printerMinPrint(lines);
+        } catch (error) {
+            console.error('Error printing table via Bluetooth:', error);
+            alert(`Error printing: ${error.message}`);
+        }
+    }
+    
+
+
+    updateSummary(isStartup) {
+        let totalCount = 0;
+        let totalSum = 0;
+
+        Object.values(this.itemData).forEach((rows) => {
+            rows.forEach(({ meter, count }) => {
+                totalCount += count;
+                totalSum += meter * count;
+            });
         });
 
-    </script>
+        this.totalCountDisplay.textContent = totalCount;
+        this.totalSumDisplay.textContent = totalSum.toFixed(2);
 
+        const fixedSummary = document.querySelector('.fixed-summary');
+        // Show or hide the fixed-summary element
+        if (totalCount === 0 && totalSum === 0) {
+            fixedSummary.style.display = 'none';
+        } else {
+            fixedSummary.style.display = 'flex'; // Ensure it's visible when values are non-zero
+        }
+
+        // Show or hide the export, print, and new slip buttons based on data availability
+        const hasData = Object.keys(this.itemData).length > 0;
+        this.exportButton.style.display = hasData ? 'block' : 'none';
+        this.printButton.style.display = hasData ? 'block' : 'none';
+        this.newSlipButton.style.display = hasData ? 'block' : 'none';
+
+        if (!isStartup || isStartup !== true) {
+            setTimeout(() => {
+                this.submitDataToServer();
+            }, 10);
+        }
+    }
+
+renderTable() {
+    this.resultsContainer.innerHTML = '';
+
+    // Summary Table
+    const summaryData = Object.entries(this.itemData).map(([itemName, rows]) => {
+        const totalThan = rows.reduce((sum, row) => sum + row.count, 0);
+        const totalMeter = rows.reduce((sum, row) => sum + row.meter * row.count, 0);
+        return { itemName, totalThan, totalMeter };
+    });
+
+    const totalOverallThan = summaryData.reduce((sum, item) => sum + item.totalThan, 0);
+    const totalOverallMeter = summaryData.reduce((sum, item) => sum + item.totalMeter, 0);
+
+    let html = `
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered table-sm summary-table">
+                <thead>
+                    <tr><th colspan="3" class="text-center">
+                        Packaging Slip Number: <span id="packagingSlipNumber" style="cursor:pointer;" onclick="enableSlipNumberEdit('${this.recordId}')">${this.packagingSlipNumber}</span></th></tr>
+                    <tr><th>Item Name</th><th>Total Than</th><th>Total Meter</th></tr>
+                </thead>
+                <tbody>
+                    ${summaryData.map(({ itemName, totalThan, totalMeter }) => `
+                        <tr>
+                            <td>${itemName}</td>
+                            <td>${totalThan}</td>
+                            <td>${totalMeter.toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+                <tfoot>
+                    <tr><th>Overall Total</th><th>${totalOverallThan}</th><th>${totalOverallMeter.toFixed(2)}</th></tr>
+                </tfoot>
+            </table>
+        </div>
+    `;
+
+    // Item-specific tables with Item Name in <th>
+    Object.entries(this.itemData).forEach(([itemName, rows]) => {
+        html += `
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered table-sm" data-item-name="${itemName}">
+                    <thead>
+                        <tr>
+                            <th colspan="5" class="editable-item-name" style="cursor:pointer;text-align:center">${itemName}</th>
+                        </tr>
+                        <tr><th>Meter</th><th>Than</th><th>Total</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        ${rows.map(({ meter, count }, index) => `
+                            <tr>
+                                <td>${meter.toFixed(2)}</td>
+                                <td>${count}</td>
+                                <td>${(meter * count).toFixed(2)}</td>
+                                <td><button class="btn btn-danger btn-sm delete-row" data-item="${itemName}" data-index="${index}">X</button></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                    <tfoot>
+                        <tr><th>Total</th><th>${rows.reduce((sum, r) => sum + r.count, 0)}</th><th>${rows.reduce((sum, r) => sum + r.meter * r.count, 0).toFixed(2)}</th><th></th></tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
+    });
+
+    this.resultsContainer.innerHTML = html;
+}
+enableInlineEditing() {
+    this.resultsContainer.addEventListener('dblclick', (e) => {
+        const cell = e.target;
+
+        // ✅ Handle Item Name in <th>
+        if (cell.tagName === 'TH' && cell.classList.contains('editable-item-name')) {
+            const table = cell.closest('table');
+            const oldItemName = table.getAttribute('data-item-name');
+
+            // Create dropdown
+            const select = document.createElement('select');
+            select.classList.add('form-select', 'item-edit-dropdown');
+            cell.innerHTML = '';
+            cell.appendChild(select);
+
+            // ✅ Populate dropdown from this.billingItemData
+            if (Array.isArray(this.billingItemData) && this.billingItemData.length > 0) {
+                select.append(new Option('-- Select Item --', ''));
+                this.billingItemData.forEach(record => {
+                    const option = new Option(record.name, record.name);
+                    select.append(option);
+                });
+            } else {
+                console.warn('billingItemData is empty or not loaded.');
+            }
+
+            // ✅ Initialize Select2
+            $(select).select2({ dropdownAutoWidth: true, width: 'resolve' });
+
+            // ✅ Handle selection change
+            $(select).on('select2:select', (e) => {
+    const newItemName = e.params.data.text; // Get selected text
+    if (newItemName && newItemName !== oldItemName) {
+        // ✅ Update itemData
+        this.itemData[newItemName] = this.itemData[oldItemName];
+        delete this.itemData[oldItemName];
+
+        // ✅ Convert back to read-only mode
+        cell.innerHTML = newItemName;
+
+        // ✅ Refresh table and summary
+        this.renderTable();
+        this.updateSummary();
+    } else {
+        cell.innerHTML = oldItemName; // Revert if no change
+    }
+});
+        }
+
+        // ✅ Handle Meter and Than inline editing
+        if (cell.tagName === 'TD' && cell.closest('tbody')) {
+            const row = cell.closest('tr');
+            const table = cell.closest('table');
+            const itemName = table.getAttribute('data-item-name');
+            const cellIndex = Array.from(row.children).indexOf(cell);
+            const rowIndex = Array.from(table.querySelector('tbody').children).indexOf(row);
+
+            if ([0, 1].includes(cellIndex)) {
+                const currentValue = parseFloat(cell.textContent) || 0;
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.value = currentValue;
+                input.classList.add('form-control');
+                cell.innerHTML = '';
+                cell.appendChild(input);
+                input.focus();
+
+                input.addEventListener('blur', () => {
+                    const newValue = parseFloat(input.value) || 0;
+                    if (cellIndex === 0) this.itemData[itemName][rowIndex].meter = newValue;
+                    if (cellIndex === 1) this.itemData[itemName][rowIndex].count = newValue;
+                    this.renderTable();
+                    this.updateSummary();
+                });
+
+                input.addEventListener('keydown', (ev) => {
+                    if (ev.key === 'Enter') input.blur();
+                });
+            }
+        }
+    });
+
+    // ✅ Delete row
+    this.resultsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('delete-row')) {
+            const itemName = e.target.dataset.item;
+            const index = parseInt(e.target.dataset.index);
+            this.itemData[itemName].splice(index, 1);
+            if (!this.itemData[itemName].length) delete this.itemData[itemName];
+            this.renderTable();
+            this.updateSummary();
+        }
+    });
+}
+    generateNextRow(isLastRow) {
+        const rows = Array.from(this.container.querySelectorAll('.row'));
+        const lastRow = rows[rows.length - 2];
+
+        // 1) Validate the last row (meter, count) before adding new rows
+        if (lastRow) {
+            const meterVal = parseFloat(lastRow.querySelector('.meter-input').value) || 0;
+            const countVal = parseFloat(lastRow.querySelector('.count-input').value) || 1;
+            if (meterVal === 0 && isLastRow && isLastRow == true) {
+                this.addButton.click();
+                return;
+            }
+
+            if (meterVal === 0 || countVal === 0) {
+                return;
+            }
+        }
+        var totallendth = 2;
+        const lastRow2 = rows[rows.length - 1];
+        if (lastRow2)
+            totallendth = 1;
+
+        // 2) We want to add two new rows
+        for (let i = 0; i < totallendth; i++) {
+            // Create each new row
+            const newRow = document.createElement('div');
+            newRow.classList.add('row', 'mb-2');
+
+            // Calculate tabindex dynamically based on current row count and loop index
+            // We add 1 because rows.length is zero-based, plus i to differentiate the second row
+            const meterTabIndex = rows.length + i + 1;
+            const countTabIndex = (rows.length + 250 + i) * 2 + 1;
+
+            const meterInput = document.createElement('input');
+            meterInput.type = 'number';
+            meterInput.classList.add('form-control', 'meter-input');
+            meterInput.placeholder = 'Meter';
+            meterInput.min = '0';
+            meterInput.setAttribute('tabindex', meterTabIndex);
+
+            const countInput = document.createElement('input');
+            countInput.type = 'number';
+            countInput.classList.add('form-control', 'count-input');
+            countInput.placeholder = '1';
+            countInput.value = '';
+            countInput.setAttribute('tabindex', countTabIndex);
+
+            // Create column divs and append inputs
+            const meterCol = document.createElement('div');
+            meterCol.classList.add('col-md-4');
+            meterCol.appendChild(meterInput);
+
+            const countCol = document.createElement('div');
+            countCol.classList.add('col-md-4');
+            countCol.appendChild(countInput);
+
+            // Append columns to the row
+            newRow.appendChild(meterCol);
+            newRow.appendChild(countCol);
+
+            // Add the new row to the container
+            this.container.appendChild(newRow);
+
+            // Keep track that we have added one more row to `rows`
+            rows.push(newRow);
+        }
+    }
+
+
+    handleAddItem() {
+        this.addButton.addEventListener('click', () => {
+            const itemName = this.itemDropdown.find(':selected').text(); // Get the selected option's text
+
+
+            if (!itemName) {
+                // Get the Select2 container
+                const dropdownContainer = this.itemDropdown.siblings('.select2-container');
+
+                // Add red border to the Select2 container
+                dropdownContainer.css('border', '2px solid red');
+
+                // Optionally add a title or tooltip to indicate the issue
+                dropdownContainer.attr('title', 'Please select an item');
+
+                // Remove the red border after a timeout (optional)
+                setTimeout(() => {
+                    dropdownContainer.css('border', ''); // Remove the border
+                    dropdownContainer.removeAttr('title'); // Remove the tooltip
+                }, 3000);
+
+                return;
+            }
+            const rows = this.container.querySelectorAll('.row');
+            const newRows = Array.from(rows)
+                .map((row) => {
+                    const meter = parseFloat(row.querySelector('.meter-input').value) || 0;
+                    const count = parseFloat(row.querySelector('.count-input').value) || 1;
+                    return meter > 0 && count > 0 ? { meter, count } : null;
+                })
+                .filter(Boolean);
+
+            if (!newRows.length) {
+                return;
+            }
+
+            this.itemData[itemName] = (this.itemData[itemName] || []).concat(newRows);
+
+            this.container.innerHTML = '';
+            this.generateNextRow();
+
+            this.itemDropdown.val(null).trigger('change');
+            this.renderTable();
+            this.updateSummary();
+        });
+    }
+
+    exportToPDF() {
+        const { jsPDF } = window.jspdf;
+
+        // Set custom page size: Half of A4 (105mm x 297mm)
+        const doc = new jsPDF({
+            orientation: "portrait", // Use "landscape" for horizontal layout
+            unit: "mm",
+            format: [105, 297] // Width: 105mm, Height: 297mm
+        });
+
+        // Set the filename
+        const filename = `Packaging_Slip_${this.packagingSlipNumber || 'Unknown'}_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+        // Add packaging slip number centered at the top
+        const packagingSlipHeader = `Packaging Slip Number: ${this.packagingSlipNumber || 'Unknown'}`;
+        const pageWidth = doc.internal.pageSize.getWidth(); // Get the page width
+        const textWidth = doc.getTextWidth(packagingSlipHeader); // Calculate text width
+        const xOffset = (pageWidth - textWidth) / 2; // Center the text
+        doc.setFontSize(12);
+        doc.text(packagingSlipHeader, xOffset, 15); // Position at centered xOffset, y:15
+
+        let yOffset = 20; // Adjust starting y position to leave space for the header
+
+        // Summary Table
+        const summaryData = Object.entries(this.itemData).map(([itemName, rows]) => {
+            const totalThan = rows.reduce((sum, row) => sum + row.count, 0);
+            const totalMeter = rows.reduce((sum, row) => sum + row.meter * row.count, 0);
+            return [itemName, totalThan, totalMeter.toFixed(2)]; // Ensure two decimal places for meters
+        });
+
+        const totalOverallThan = summaryData.reduce((sum, row) => sum + row[1], 0);
+        const totalOverallMeter = summaryData.reduce((sum, row) => sum + parseFloat(row[2]), 0);
+
+        doc.autoTable({
+            head: [["Item Name", "Total Than", "Total Meter"]],
+            body: summaryData,
+            foot: [
+                [
+                    { content: "Overall Total", styles: { halign: "left" } },
+                    { content: totalOverallThan.toString(), styles: { halign: "center" } },
+                    { content: totalOverallMeter.toFixed(2), styles: { halign: "right" } },
+                ],
+            ],
+            startY: yOffset,
+            theme: "grid",
+            tableWidth: "auto", // Make the table fit the full width of the page
+            headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: "bold" },
+            bodyStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
+            footStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: "bold" },
+            columnStyles: {
+                1: { halign: "center" }, // Align "Total Than" column to center
+                2: { halign: "right" }, // Align "Total Meter" column to right
+            },
+            styles: {
+                fontSize: 10,
+                cellPadding: 1.5, // Compact rows
+                lineColor: [0, 0, 0],
+                lineWidth: 0.1,
+            },
+        });
+
+        yOffset = doc.lastAutoTable.finalY + 5; // Reduced space after the first table
+
+        // Detailed Breakdown Tables
+        Object.entries(this.itemData).forEach(([itemName, rows]) => {
+            const tableData = rows.map(({ meter, count }) => [
+                parseFloat(meter).toFixed(2), // Always show meter with two decimal places
+                count,
+                (meter * count).toFixed(2),
+            ]);
+            const totalThan = rows.reduce((sum, row) => sum + row.count, 0);
+            const totalMeter = rows.reduce((sum, row) => sum + row.meter * row.count, 0);
+
+            doc.autoTable({
+                head: [
+                    [{ content: itemName, colSpan: 3, styles: { halign: "center", fontStyle: "bold" } }],
+                    ["Meter", "Than", "Total"],
+                ],
+                body: tableData,
+                foot: [
+                    [
+                        { content: "Total", styles: { halign: "left" } },
+                        { content: totalThan, styles: { halign: "center" } },
+                        { content: totalMeter.toFixed(2), styles: { halign: "right" } },
+                    ],
+                ],
+                startY: yOffset,
+                theme: "grid",
+                tableWidth: "auto", // Ensure the table width fits the full width of the page
+                headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: "bold" },
+                bodyStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
+                footStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: "bold" },
+                columnStyles: {
+                    1: { halign: "center" }, // Align the Meter column to the right
+                    2: { halign: "right" }, // Align the Total column to the right
+                },
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 1.5, // Compact rows
+                    lineColor: [0, 0, 0],
+                    lineWidth: 0.1,
+                },
+            });
+
+            yOffset = doc.lastAutoTable.finalY + 5; // Reduced space after each breakdown table
+        });
+
+        // Save the PDF
+        doc.save(filename);
+    }
+
+    clearData() {
+        this.recordId = "";
+        this.packagingSlipNumber = "";
+        this.createdon="";
+        this.itemData = {};
+        this.container.innerHTML = '';
+        this.resultsContainer.innerHTML = '';
+        this.totalCountDisplay.textContent = '0';
+        this.totalSumDisplay.textContent = '0';
+        this.generateNextRow();
+        this.updateSummary(true);
+    }
+
+    initializePage() {
+        this.defineItemDropdown();
+
+        this.container.addEventListener('input', (e) => {
+            if (e.target.classList.contains('meter-input') || e.target.classList.contains('count-input')) {
+                let currentTotalCount = 0;
+                let currentTotalSum = 0;
+
+                // Get all rows in the container
+                const allrows = Array.from(this.container.querySelectorAll('.row'));
+
+                // Calculate totals
+                allrows.forEach((row) => {
+                    const meter = parseFloat(row.querySelector('.meter-input')?.value) || 0;
+                    const count = parseFloat(row.querySelector('.count-input')?.value) || 1;
+
+                    if (meter > 0 && count > 0) {
+                        currentTotalCount += count;
+                        currentTotalSum += meter * count;
+                    }
+                });
+
+                // Update total count and sum display
+                this.totalCountDisplay.textContent = currentTotalCount;
+                this.totalSumDisplay.textContent = currentTotalSum;
+
+                // Identify the current row
+                const currentRow = e.target.closest('.row');
+
+                // Check if the current row is the last row
+                const isLastRow = allrows.indexOf(currentRow) === allrows.length - 1;
+
+                // Automatically add a new row if it's the last row
+                this.generateNextRow(isLastRow);
+            }
+        });
+
+        // Add blur event listener for "Than" column
+        this.container.addEventListener('blur', (e) => {
+            if (e.target.classList.contains('count-input')) {
+                const currentRow = e.target.closest('.row');
+                const allrows = Array.from(this.container.querySelectorAll('.row'));
+                const currentRowIndex = allrows.indexOf(currentRow);
+
+                // Focus on the next row's "Meter" input, if available
+                if (currentRowIndex < allrows.length - 1) {
+                    const nextRow = allrows[currentRowIndex + 1];
+                    const nextMeterInput = nextRow.querySelector('.meter-input');
+                    if (nextMeterInput) {
+                        nextMeterInput.focus();
+                    }
+                }
+            }
+        }, true);
+
+        this.handleAddItem();
+        this.enableInlineEditing();
+        this.generateNextRow();
+        this.loadDropdown();
+    }
+
+loadDropdown() {
+    const controlId = "itemDropdown"; // ID of the dropdown
+    const key = "name"; // Field for option value
+    const value = "name"; // Field(s) for option text
+    const entityName = "billingitem";
+    const columns = "id,name";
+    const sortColumn = "createdon";
+    const sortDirection = "desc";
+    const filterClause = "isforpackaging=1";
+
+    // Fetch records using StaticDBHandler
+    StaticDBHandler.fetchEntityRecord(entityName, columns, filterClause, false)
+        .then(records => {
+            const control = $('#' + controlId);
+            if (!control.length) {
+                console.error(`Control with ID "${controlId}" not found.`);
+                return;
+            }
+
+            // Split value fields for concatenation
+            const valueFields = value.split(',');
+
+            // Clear existing options
+            control.empty();
+
+            // Add default placeholder
+            control.append(new Option('-- Select --', ''));
+
+            // Populate dropdown
+            records.forEach(record => {
+                const keyData = record[key];
+                const valueData = valueFields.map(field => record[field]).join(' -- ');
+                control.append(new Option(valueData, keyData));
+            });
+            this.billingItemData = records;
+            // Initialize Select2 for better UI
+            control.select2({ dropdownAutoWidth: true, width: 'resolve' });
+        })
+        .catch(error => {
+            console.error('Error loading dropdown:', error);
+            if (error.status === 401) {
+                window.location.href = (apiURL ? apiURL : '') + "login.html";
+            } else {
+                alert('Failed to load items. Please try again.');
+            }
+        });
+  }
+
+    submitDataToServer() {
+        try {
+            const recordId = this.recordId; // Get record ID from the query string or internal state
+            const formData = {};
+            formData["itemjson"] = JSON.stringify(this.itemData);
+
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const dd = String(today.getDate()).padStart(2, '0');
+
+            formData["slipdate"] = `${yyyy}-${mm}-${dd}`;
+            formData["packagingcreatedby"] = getCookie("displayName");
+
+            const loader = document.createElement("span");
+            loader.classList.add("spinner-border", "spinner-border-sm", "text-light");
+            loader.style.marginRight = "5px";
+            const totalThanElement = document.querySelector("#total-count-display").parentElement;
+            totalThanElement.prepend(loader);
+
+            // Submit data to the server
+            DBHandler.submitRecordData("packagingitemdetail", formData, recordId, false)
+                .then((response) => {
+                    if (!this.recordId) this.recordId = response;
+
+                    if (!this.packagingSlipNumber) {
+                        StaticDBHandler.fetchEntityRecord(
+                            "packagingitemdetail",
+                            "packagingnumber,createdon",
+                            `id='${this.recordId}'`
+                        )
+                            .then((p) => {
+                                this.packagingSlipNumber = p[0].packagingnumber;
+                                this.createdon =p[0].createdon;
+                                this.renderTable();
+                            })
+                            .catch((error) => {
+                                alert("Error fetching packaging slip number:", error);
+                            });
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error submitting data:", error);
+                    alert("Failed to submit the data. Please try again.");
+                })
+                .finally(() => {
+                    // Hide the loader
+                    loader.remove();
+                });
+        } catch (error) {
+            console.error("Error in submitDataToServer:", error);
+            alert("An unexpected error occurred. Please try again.");
+        }
+    }
+}
+$(document).ready(function () {
+    new ClothMeterCalculator();
+});
+</script>
+<script>
+
+function enableSlipNumberEdit(recordId) {
+    const span = document.getElementById('packagingSlipNumber');
+    const currentValue = span.textContent.trim();
+
+    // Create input field
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = currentValue;
+    input.id = 'packagingSlipInput';
+    input.className = 'form-control';
+    input.style.width = '250px';
+
+    // Replace span with input
+    span.replaceWith(input);
+    input.focus();
+
+    // Save on blur or Enter
+    input.addEventListener('blur', () => saveSlipNumber(input.value, recordId));
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') saveSlipNumber(input.value, recordId);
+    });
+}
+
+async function saveSlipNumber(newValue, recordId) {
+    if (!newValue.trim()) {
+        alert('Slip number cannot be empty.');
+        revertToSpan(this.packagingSlipNumber);
+        return;
+    }
+
+    try {
+        showLoader();
+
+        // Prepare data for DB
+        const updatedData = {
+            packagingnumbernew: newValue
+        };
+
+        // Update DB
+        await DBHandler.submitRecordData('packagingitemdetail', updatedData, recordId, false);
+
+        // Update local state
+        this.packagingSlipNumber = newValue;
+
+        // ✅ Convert back to span
+        revertToSpan(newValue,recordId);
+
+        showSuccessMessage('Packaging Slip Number updated successfully!');
+    } catch (error) {
+        console.error('Error updating slip number:', error);
+        alert('Failed to update slip number.');
+        revertToSpan(this.packagingSlipNumber,recordId);
+    } finally {
+        hideLoader();
+    }
+}
+
+function revertToSpan(value,recordId) {
+    const span = document.createElement('span');
+    span.id = 'packagingSlipNumber';
+    span.className = 'editable-slip-number';
+    span.textContent = value;
+    span.style.cursor = 'pointer';
+    span.onclick = enableSlipNumberEdit(recordId);
+
+    const input = document.getElementById('packagingSlipInput');
+    if (input) input.replaceWith(span);
+}
+
+
+</script>
+
+    
 </body>
 </html>
