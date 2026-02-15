@@ -11,12 +11,7 @@
         //var apiURL = "";
     </script>
 
-
-    <title></title>
-    <!-- Bootstrap CSS -->
     <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" />
     <link href="https://apisit.vsservices.in/css/Default/select2.min.css" rel="stylesheet" />
     <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
@@ -24,13 +19,8 @@
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
-
     <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-    <!--<script src="css/Default/bootstrap-select.min.js"></script>-->
-    <!--<script src="JS/webpack-demo/dist/bundle.js?id=2024251342"></script>-->
     <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
     <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
@@ -40,17 +30,13 @@
     <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
 
-    <script src="https://apisit.vsservices.in/css/Default/jspdf.umd.min.js"></script>
-    <script src="https://apisit.vsservices.in/css/Default/jspdf.plugin.autotable.min.js"></script>
-
     <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
     <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
     <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
-    <script src="https://apisit.vsservices.in/css/Default/jspdf.umd.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
-    <script src="https://apisit.vsservices.in/css/Default/jspdf.plugin.autotable.min.js"></script>
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
     <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
@@ -58,9 +44,6 @@
 
     <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
-
-    <script src="https://apisit.vsservices.in/JS/system/html2canvas.min.js"></script>
-    <script src="https://apisit.vsservices.in/JS/system/JsBarcode.all.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
@@ -88,12 +71,12 @@
         <div class="toolbar">
             <div class="row g-3 align-items-end">
                 <div class="col-sm-6 col-md-3">
-                    <label for="startDate" class="form-label">From date</label>
-                    <input type="date" id="startDate" class="form-control" onchange="loadAppointments2()">
+                    <label for="startDate">From date</label>
+                    <input id="startDate" class="form-control" onchange="loadAppointments2()">
                 </div>
                 <div class="col-sm-6 col-md-3">
-                    <label for="endDate" class="form-label">To date</label>
-                    <input type="date" id="endDate" class="form-control" onchange="loadAppointments2()">
+                    <label for="endDate">To date</label>
+                    <input id="endDate" class="form-control" onchange="loadAppointments2()">
                 </div>
             </div>
         </div>
@@ -114,23 +97,7 @@
                         <form id="appointmentForm">
                             <div class="mb-3">
                                 <label>Date<span style="color: red;">*</span>:</label>
-                                <div class="input-group date" id="datepicker" data-provide="datepicker">
-                                    <input type="text" class="form-control" id="appointmentDate"
-                                        dbcolumnname="appointmentDate" data-date-format="mm/dd/yyyy"
-                                        placeholder="mm/dd/yyyy" />
-                                    <div class="input-group-append">
-                                        <!-- Add the cursor style directly or via CSS class -->
-                                        <span class="input-group-text" style="cursor: pointer;">
-                                            <i class="fa fa-calendar"></i>
-                                        </span>
-                                    </div>
-                                <!-- <div class="date-container"
-                                    style="position: relative; display: flex; align-items: center;">
-                                    <input id="appointmentDate" type="date" dbcolumnname="appointmentDate"
-                                        class="form-control">
-                                     <i class="date-icon fa fa-calendar" aria-hidden="true" style="position: absolute; right: 10px; cursor: pointer;" onclick="this.previousElementSibling.focus();"></i> 
-                                     onfocus="this.style.outline='2px solid blue'; this.style.boxShadow='0 0 5px skyblue';"
-                                </div> -->
+                                <input class="form-control" id="appointmentDate" dbcolumnname="appointmentDate" />
                             </div>
                             <div class="mb-3">
                                 <label>Treatment<span style="color: red;">*</span>:</label>
@@ -139,21 +106,7 @@
                             </div>
                             <div class="mb-3">
                                 <label>Next Appointment:</label>
-                                <div class="input-group date" id="datepicker" data-provide="datepicker">
-                                    <input type="text" class="form-control" id="nextAppointment"
-                                        dbcolumnname="nextAppointment" data-date-format="mm/dd/yyyy"
-                                        placeholder="mm/dd/yyyy" />
-                                    <div class="input-group-append">
-                                        <!-- Add the cursor style directly or via CSS class -->
-                                        <span class="input-group-text" style="cursor: pointer;">
-                                            <i class="fa fa-calendar"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                                <!-- <div class="date-container"
-                                    style="position: relative; display: flex; align-items: center;">
-                                    <i class="date-icon fa fa-calendar" aria-hidden="true" style="position: absolute; right: 10px; cursor: pointer;" onclick="this.previousElementSibling.focus();"></i>
-                                </div> -->
+                                <input class="form-control" id="nextAppointment" dbcolumnname="nextAppointment" />
                             </div>
                             <div class="mb-3">
                                 <label>Practitioner<span style="color: red;">*</span>:</label> <br>
@@ -322,25 +275,37 @@
         }
 
         async function loadAppointments2() {
-            var startDate = $('#startDate').val();
-            var endDate = $('#endDate').val();
 
-            const filter = "dentalappointment.treatmentdate >= '" + startDate + "' AND dentalappointment.treatmentdate<= '" + endDate + "'";
+            const startDate = getDatePickerValue('startDate');
+            const endDate = getDatePickerValue('endDate');
+
+            if (!startDate || !endDate) return;
+
+            const start = startDate + " 00:00:00";
+            const end = endDate + " 23:59:59";
+
+            const filter = `dentalappointment.treatmentdate >= '${start}'
+                    AND dentalappointment.treatmentdate <= '${end}'`;
+
             var joinCondition = "LEFT JOIN dentaldetails ON dentaldetails.id = dentalappointment.patientid";
+
             try {
+
                 const appointments = await DBHandler.fetchEntityRecords(
                     'dentalappointment',
-                    'dentalappointment.*,dentaldetails.name as PatientName',
+                    'dentalappointment.*, dentaldetails.name as PatientName',
                     'dentalappointment.treatmentdate',
                     'desc',
                     filter, true,
                     0,
                     joinCondition
                 );
+
                 appointmentsMain = appointments || [];
-                // Map to grid data and add serial numbers descending
+
                 let serialNumber = 1;
-                const rows = appointmentsMain.map((a) => ({
+
+                const rows = appointmentsMain.map(a => ({
                     id: a.id,
                     srno: serialNumber++,
                     treatmentdate: normalizeDate(a.treatmentdate),
@@ -349,11 +314,12 @@
                     practitioner: a.practitioner || '',
                     createdon: normalizeDate(a.createdon),
                     modifiedon: normalizeDate(a.modifiedon),
-                    PatientName: a.PatientName,
+                    PatientName: a.PatientName
                 }));
 
                 grid.dataSource = rows;
                 grid.refresh();
+
             } catch (err) {
                 console.error('Failed to load appointments:', err);
             }
@@ -366,12 +332,71 @@
         }
 
         $(document).ready(async () => {
-            $('#startDate').val(getDefaultValue('currentDate'));
-            $('#endDate').val(getDefaultValue('currentDate'));
+            applyDatePicker('startDate,endDate,appointmentDate', new Date());
+            applyDatePicker('nextAppointment');
             initGrid(columns, 'patientAppointmentGrid');
             loadAppointments2();
         });
 
+        function applyDatePicker(ids, value) {
+            ids.split(',').forEach(id => {
+                id = id.trim();
+                if (id && document.getElementById(id)) {
+                    new ej.calendars.DatePicker({
+                        placeholder: "Select a date",
+                        format: "dd-MMM-yyyy",
+                        value: value || null
+                    }).appendTo('#' + id);
+                }
+            });
+        }
+
+        function getDatePickerValue(id) {
+            const picker = document.getElementById(id)?.ej2_instances?.[0];
+            if (!picker?.value) return null;
+
+            const intl = new ej.base.Internationalization();
+
+            return intl.formatDate(picker.value, {
+                format: "yyyy-MM-dd"
+            });
+        }
+
+        async function addAppointment() {
+
+            const appointmentDate = getDatePickerValue('appointmentDate'),
+                nextAppointment = getDatePickerValue('nextAppointment'),
+                treatment = document.getElementById('appointmentTreatment').value.trim(),
+                practitioner = document.getElementById('appointmentPractitioner').value;
+
+            if (!appointmentDate) return alert("Please select appointment date");
+            if (!treatment) return alert("Please enter treatment");
+            if (!practitioner) return alert("Please select practitioner");
+
+            try {
+                await DBHandler.submitRecordData('dentalappointment', {
+                    treatmentdate: appointmentDate,
+                    nextappointment: nextAppointment || null,
+                    treatment,
+                    practitioner
+                }, null, false);
+
+                bootstrap.Modal.getInstance(
+                    document.getElementById('appointmentModal')
+                ).hide();
+
+                document.getElementById('appointmentTreatment').value = '';
+                document.getElementById('appointmentPractitioner').value = '';
+                document.getElementById('appointmentDate').ej2_instances[0].value = new Date();
+                document.getElementById('nextAppointment').ej2_instances[0].value = null;
+
+                loadAppointments2();
+
+            } catch (err) {
+                console.error(err);
+                alert("Failed to save appointment");
+            }
+        }
 
     </script>
 
