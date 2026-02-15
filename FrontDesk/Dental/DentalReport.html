@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head runat="server">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,6 +15,8 @@
     <title></title>
     <!-- Bootstrap CSS -->
     <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/css/bootstrap-datepicker.min.css" />
     <link href="https://apisit.vsservices.in/css/Default/select2.min.css" rel="stylesheet" />
     <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
@@ -21,6 +24,8 @@
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.10.0/js/bootstrap-datepicker.min.js"></script>
 
     <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
@@ -60,7 +65,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
@@ -101,31 +106,58 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Add Appointment</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
                     <div class="modal-body">
                         <form id="appointmentForm">
                             <div class="mb-3">
                                 <label>Date<span style="color: red;">*</span>:</label>
-                                <div class="date-container" style="position: relative; display: flex; align-items: center;">
-                                    <input id="appointmentDate" type="textDate" dbcolumnname="appointmentDate" class="form-control datepicker hasDatepicker">
-                                    <i class="date-icon fa fa-calendar" aria-hidden="true" style="position: absolute; right: 10px; cursor: pointer;" onclick="this.previousElementSibling.focus();"></i>
-                                </div>
+                                <div class="input-group date" id="datepicker" data-provide="datepicker">
+                                    <input type="text" class="form-control" id="appointmentDate"
+                                        dbcolumnname="appointmentDate" data-date-format="mm/dd/yyyy"
+                                        placeholder="mm/dd/yyyy" />
+                                    <div class="input-group-append">
+                                        <!-- Add the cursor style directly or via CSS class -->
+                                        <span class="input-group-text" style="cursor: pointer;">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
+                                <!-- <div class="date-container"
+                                    style="position: relative; display: flex; align-items: center;">
+                                    <input id="appointmentDate" type="date" dbcolumnname="appointmentDate"
+                                        class="form-control">
+                                     <i class="date-icon fa fa-calendar" aria-hidden="true" style="position: absolute; right: 10px; cursor: pointer;" onclick="this.previousElementSibling.focus();"></i> 
+                                     onfocus="this.style.outline='2px solid blue'; this.style.boxShadow='0 0 5px skyblue';"
+                                </div> -->
                             </div>
                             <div class="mb-3">
                                 <label>Treatment<span style="color: red;">*</span>:</label>
-                                <textarea id="appointmentTreatment" name="w3review" rows="4" cols="55"></textarea>
+                                <textarea id="appointmentTreatment" name="w3review" rows="4" cols="60"
+                                    style="  width: 100%; min-height: 120px; box-sizing: border-box; resize: vertical; padding: 10px; font-size: 1rem;"></textarea>
                             </div>
                             <div class="mb-3">
                                 <label>Next Appointment:</label>
-                                <div class="date-container" style="position: relative; display: flex; align-items: center;">
-                                    <input id="nextAppointment" type="textDate" dbcolumnname="nextAppointment" class="form-control datepicker hasDatepicker">
-                                    <i class="date-icon fa fa-calendar" aria-hidden="true" style="position: absolute; right: 10px; cursor: pointer;" onclick="this.previousElementSibling.focus();"></i>
+                                <div class="input-group date" id="datepicker" data-provide="datepicker">
+                                    <input type="text" class="form-control" id="nextAppointment"
+                                        dbcolumnname="nextAppointment" data-date-format="mm/dd/yyyy"
+                                        placeholder="mm/dd/yyyy" />
+                                    <div class="input-group-append">
+                                        <!-- Add the cursor style directly or via CSS class -->
+                                        <span class="input-group-text" style="cursor: pointer;">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    </div>
                                 </div>
+                                <!-- <div class="date-container"
+                                    style="position: relative; display: flex; align-items: center;">
+                                    <i class="date-icon fa fa-calendar" aria-hidden="true" style="position: absolute; right: 10px; cursor: pointer;" onclick="this.previousElementSibling.focus();"></i>
+                                </div> -->
                             </div>
                             <div class="mb-3">
-                                <label>Practitioner<span style="color: red;">*</span>:</label>
-                                <select class="form-select" id="appointmentPractitioner">
+                                <label>Practitioner<span style="color: red;">*</span>:</label> <br>
+                                <select class="form-control" id="appointmentPractitioner">
                                     <option value="">Select Practitioner</option>
                                     <option value="Dr. Saket">Dr. Saket</option>
                                     <option value="Dr. Kuldeep">Dr. Kuldeep</option>
@@ -134,7 +166,8 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onclick="addAppointment()">Save Appointment</button>
+                        <button type="button" class="btn btn-primary" onclick="addAppointment()">Save
+                            Appointment</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -349,4 +382,5 @@
     </style>
 
 </body>
+
 </html>
