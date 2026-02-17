@@ -83,55 +83,31 @@
         <div id="patientAppointmentGrid"></div>
     </div>
 
-    <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Add Appointment</h5>
+                        <h5 class="modal-title">Add User</h5>
                         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form id="appointmentForm">
+                        <form id="userForm">
                             <div class="mb-3">
-                                <label>Date<span style="color: red;">*</span>:</label>
-                                <input class="form-control" id="appointmentDate" dbcolumnname="appointmentDate" />
+                                <label>User Name<span style="color: red;">*</span>:</label>
+                                <input class="form-control" id="userName" dbcolumnname="userName" />
                             </div>
-                            <div class="mb-3">
-                                <label >Appointment Type</label>
-                                <select id="appointmentType" class="form-control">
-                                    <option value="">Select Type</option>
-                                    <option value="Advise">Advise</option>
-                                    <option value="Medication">Medication</option>
-                                    <option value="Treatment">Treatment</option>
-                                    <option value="Routine">Routine</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label>Treatment<span style="color: red;">*</span>:</label>
-                                <textarea id="appointmentTreatment" name="w3review" rows="4" cols="60"
-                                    style="  width: 100%; min-height: 120px; box-sizing: border-box; resize: vertical; padding: 10px; font-size: 1rem;"></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label>Next Appointment:</label>
-                                <input class="form-control" id="nextAppointment" dbcolumnname="nextAppointment" />
-                            </div>
-                            <div class="mb-3">
-                                <label>Practitioner<span style="color: red;">*</span>:</label> <br>
-                                <select class="form-control" id="appointmentPractitioner">
-                                    <option value="">Select Practitioner</option>
-                                    <option value="Dr. Saket">Dr. Saket</option>
-                                    <option value="Dr. Kuldeep">Dr. Kuldeep</option>
-                                </select>
+                                <div class="mb-3">
+                                <label>Display Name<span style="color: red;">*</span>:</label>
+                                <input class="form-control" id="displayName" dbcolumnname="displayName" />
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onclick="addAppointment()">Save
-                            Appointment</button>
+                        <button type="button" class="btn btn-primary" onclick="addUser()">Save
+                            User</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -147,15 +123,8 @@
         let appointmentsMain = [];
         var columns = [
             { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
-            { field: 'treatmentdate', headerText: 'Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 130, allowPdfExport: false },
-            { field: 'PatientName', headerText: 'Patient Name', width: 220 },
-            { field: 'appointmenttype', headerText: 'Type', width: 130 },
-            { field: 'treatment', headerText: 'Treatment', width: 220 },
-            { field: 'nextappointment', headerText: 'Next Appointment', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 160, visible: false },
-            { field: 'practitioner', headerText: 'Practitioner', width: 160, visible: false },
-            { field: 'createdon', headerText: 'Created On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
-            { field: 'modifiedon', headerText: 'Modified On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, visible: false, allowPdfExport: false },
-            { headerText: 'Actions', width: 160, textAlign: 'Center', template: actionTemplate, allowPdfExport: false, visible: false }
+            { field: 'username', headerText: 'User Name', width: 130 },
+            { field: 'displayname', headerText: 'Display Name', width: 220 }
         ];
 
         function initGrid(columns, patientGrid) {
@@ -184,10 +153,10 @@
                     'ExcelExport',
                     'PdfExport',
                     {
-                        text: 'New Appointment',
-                        tooltipText: 'New Appointment',
+                        text: 'New User',
+                        tooltipText: 'New User',
                         prefixIcon: 'e-icons e-plus',
-                        id: 'newAppointment'
+                        id: 'newUser'
                     }],
                 //height: 480,
                 columns: columns,
@@ -243,17 +212,17 @@
                         });
                     }
 
-                    if (args.item.id === 'newAppointment') {
-                        openNewAppointment(); // your function
+                    if (args.item.id === 'newUser') {
+                        openNewUser(); // your function
                     }
                 }
             });
             grid.appendTo('#' + patientGrid);
         }
 
-        function openNewAppointment() {
+        function openNewUser() {
             const modal = new bootstrap.Modal(
-                document.getElementById('appointmentModal'),
+                document.getElementById('userModal'),
                 { backdrop: 'static', keyboard: false }
             );
             modal.show();
@@ -288,25 +257,15 @@
 
         async function loadAppointments2() {
 
-            const startDate = getDatePickerValue('startDate');
-            const endDate = getDatePickerValue('endDate');
+            const filter = '';
 
-            if (!startDate || !endDate) return;
-
-            const start = startDate + " 00:00:00";
-            const end = endDate + " 23:59:59";
-
-            const filter = `dentalappointment.treatmentdate >= '${start}'
-                    AND dentalappointment.treatmentdate <= '${end}'`;
-
-            var joinCondition = "LEFT JOIN dentaldetails ON dentaldetails.id = dentalappointment.patientid";
-
+            const joinCondition="";
             try {
 
                 const appointments = await DBHandler.fetchEntityRecords(
-                    'dentalappointment',
-                    'dentalappointment.*, dentaldetails.name as PatientName',
-                    'dentalappointment.treatmentdate',
+                    'masteruser',
+                    'masteruser.*, masteruser.displayname as DisplayName',
+                    'masteruser.createdon',
                     'desc',
                     filter, true,
                     0,
@@ -320,14 +279,10 @@
                 const rows = appointmentsMain.map(a => ({
                     id: a.id,
                     srno: serialNumber++,
-                    treatmentdate: normalizeDate(a.treatmentdate),
-                    nextappointment: normalizeDate(a.nextappointment),
-                    treatment: a.treatment || '',
-                    practitioner: a.practitioner || '',
+                    displayname: a.displayname,
+                    username: a.username,
                     createdon: normalizeDate(a.createdon),
                     modifiedon: normalizeDate(a.modifiedon),
-                    PatientName: a.PatientName,
-                    appointmenttype: a.appointmenttype || ''
                 }));
 
                 grid.dataSource = rows;
@@ -375,31 +330,24 @@
             });
         }
 
-        async function addAppointment() {
+        async function addUser() {
 
-            const appointmentDate = getDatePickerValue('appointmentDate'),
-                nextAppointment = getDatePickerValue('nextAppointment'),
-                treatment = document.getElementById('appointmentTreatment').value.trim(),
-                practitioner = document.getElementById('appointmentPractitioner').value,
-                appointmentType = document.getElementById('appointmentType').value,
+            const
+                displayName = document.getElementById('displayName').value.trim(),
+                userName = document.getElementById('userName').value.trim(),
                 btn = event.target;
 
-            if (!appointmentDate) return alert("Please select appointment date");
-            if (!treatment) return alert("Please enter treatment");
-            if (!practitioner) return alert("Please select practitioner");
-            if (!appointmentType) return alert("Please select appointment type");
+            if (!displayName) return alert("Please enter display name");
+            if (!userName) return alert("Please enter user name");
 
             try {
 
                 btn.disabled = true;
                 btn.innerText = "Saving...";
 
-                await DBHandler.submitRecordData('dentalappointment', {
-                    treatmentdate: appointmentDate,
-                    nextappointment: nextAppointment || null,
-                    treatment,
-                    practitioner,
-                    appointmenttype: appointmentType   // ✅ NEW FIELD
+                await DBHandler.submitRecordData('masteruser', {
+                    displayname: displayName,
+                    username: userName
                 }, null, false);
 
                 bootstrap.Modal.getInstance(
