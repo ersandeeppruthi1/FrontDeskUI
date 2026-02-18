@@ -85,22 +85,26 @@
 
     <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Add Appointment</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="appointmentForm">
-                            <div class="mb-3">
-                                <label>Date<span style="color: red;">*</span>:</label>
-                                <input class="form-control" id="appointmentDate" dbcolumnname="appointmentDate" />
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Appointment</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="appointmentForm">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Date<span style="color:red">*</span></label>
+                                <input class="form-control" id="appointmentDate" />
                             </div>
-                            <div class="mb-3">
-                                <label >Appointment Type</label>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Appointment Type</label>
                                 <select id="appointmentType" class="form-control">
                                     <option value="">Select Type</option>
                                     <option value="Advise">Advise</option>
@@ -109,37 +113,42 @@
                                     <option value="Routine">Routine</option>
                                 </select>
                             </div>
+                        </div>
 
-                            <div class="mb-3">
-                                <label>Treatment<span style="color: red;">*</span>:</label>
-                                <textarea id="appointmentTreatment" name="w3review" rows="4" cols="60"
-                                    style="  width: 100%; min-height: 120px; box-sizing: border-box; resize: vertical; padding: 10px; font-size: 1rem;"></textarea>
+
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Next Appointment</label>
+                                <input class="form-control" id="nextAppointment" />
                             </div>
-                            <div class="mb-3">
-                                <label>Next Appointment:</label>
-                                <input class="form-control" id="nextAppointment" dbcolumnname="nextAppointment" />
-                            </div>
-                            <div class="mb-3">
-                                <label>Practitioner<span style="color: red;">*</span>:</label> <br>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Practitioner<span style="color:red">*</span></label>
                                 <select class="form-control" id="appointmentPractitioner">
                                     <option value="">Select Practitioner</option>
                                     <option value="Dr. Saket">Dr. Saket</option>
                                     <option value="Dr. Kuldeep">Dr. Kuldeep</option>
                                 </select>
                             </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onclick="addAppointment()">Save
-                            Appointment</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label>Treatment<span style="color:red">*</span></label>
+                                <textarea id="appointmentTreatment" class="form-control" rows="4"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addAppointment()">Save Appointment</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
 
             </div>
         </div>
     </div>
-
 
     <script>
 
@@ -193,9 +202,6 @@
                 columns: columns,
                 allowExcelExport: true,
                 allowPdfExport: true,
-
-
-                // ✅ Handle toolbar clicks
                 toolbarClick: function (args) {
                     if (args.item.id === patientGrid + '_excelexport') {
                         grid.excelExport({
