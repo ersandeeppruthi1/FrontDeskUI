@@ -67,7 +67,7 @@
 </head>
 
 <body>
-    <div class="container2">
+    <!-- <div class="container2">
         <div class="toolbar">
             <div class="row g-3 align-items-end">
                 <div class="col-sm-6 col-md-3">
@@ -79,8 +79,9 @@
                     <input id="endDate" class="form-control" onchange="loadAppointments2()">
                 </div>
             </div>
-        </div>
-        <div id="patientAppointmentGrid"></div>
+        </div> -->
+    <!-- Add New User Button -->
+    <div id="patientAppointmentGrid"></div>
     </div>
 
     <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
@@ -94,14 +95,43 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form id="userForm">
-                            <div class="mb-3">
+                        <form id="userForm" class="row g-3">
+                            <div class="col-12">
                                 <label>User Name<span style="color: red;">*</span>:</label>
                                 <input class="form-control" id="userName" dbcolumnname="userName" />
                             </div>
-                                <div class="mb-3">
+                            <div class="col-12">
                                 <label>Display Name<span style="color: red;">*</span>:</label>
                                 <input class="form-control" id="displayName" dbcolumnname="displayName" />
+                            </div>
+                            <div class="col-12">
+                                <label>Password<span style="color: red;">*</span>:</label>
+                                <input type="password" class="form-control" id="password" dbcolumnname="password" />
+                            </div>
+                            <div class="col-12">
+                                <label>Is System Administrator</label>
+                                <select id="issystemadministrator" class="form-control">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label>Disable User</label>
+                                <select id="disableuser" class="form-control">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Permisson or Role<span style="color: red;">*</span>:</label><br>
+                                <button type="button">New</button>
+                                <button type="button">Edit</button>
+                            </div>
+                            <div>
+                                <label>Menu/Items<span style="color: red;">*</span>:</label><br>
+                                <button type="button">New</button>
+                                <button type="button">Edit</button>
                             </div>
                         </form>
                     </div>
@@ -124,7 +154,17 @@
         var columns = [
             { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
             { field: 'username', headerText: 'User Name', width: 130 },
-            { field: 'displayname', headerText: 'Display Name', width: 220 }
+            { field: 'displayname', headerText: 'Display Name', width: 220 },
+            { field: 'issystemadministrator', headerText: 'IsSystemAdministrator', width: 220 },
+            { field: 'id', headerText: 'id', width: 130 ,visible: false},
+            { field: 'createdon', headerText: 'Createdon', width: 130 ,type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false,visible: false},
+            { field: 'modifiedon', headerText: 'Modifiedon', width: 130 ,type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false,visible: false},
+            { field: 'createdby', headerText: 'CreatedBy', width: 130,visible: false },
+            { field: 'modifiedby', headerText: 'Modofiedon', width: 130 ,visible: false},
+            { field: 'permissonid', headerText: 'Permisson Id', width: 130 ,visible: false},
+            { field: 'menuid', headerText: 'Menu Id', width: 130 ,visible: false},
+            { field: 'permissonjson', headerText: 'Permisson Json', width: 130,visible: false },
+            { field: 'menujson', headerText: 'Menu Json', width: 130,visible: false },
         ];
 
         function initGrid(columns, patientGrid) {
@@ -157,7 +197,14 @@
                         tooltipText: 'New User',
                         prefixIcon: 'e-icons e-plus',
                         id: 'newUser'
-                    }],
+                    },{
+                        text: 'Delete',
+                        tooltipText: 'Delete',
+                        prefixIcon: 'e-icons e-minus',
+                        id: 'Delete'
+                    },],
+                    
+                    
                 //height: 480,
                 columns: columns,
                 allowExcelExport: true,
@@ -187,7 +234,7 @@
                                 contents: [
                                     {
                                         type: 'Text',
-                                        value: 'Dental Treatment',
+                                        value: 'User Management',
                                         position: { x: 280, y: 0 },
                                         style: {
                                             textBrushColor: '#C25050',
@@ -228,18 +275,18 @@
             modal.show();
         }
 
-        function saveAppointment() {
-            const form = document.getElementById('appointmentForm');
+        function saveUser() {
+            const form = document.getElementById('userForm');
 
             if (!form.checkValidity()) {
                 form.reportValidity();
                 return;
             }
 
-            alert('Appointment saved (demo)');
+            alert('User saved (demo)');
 
             bootstrap.Modal.getInstance(
-                document.getElementById('appointmentModal')
+                document.getElementById('userModal')
             ).hide();
 
             loadAppointments2(); // refresh grid
@@ -259,7 +306,7 @@
 
             const filter = '';
 
-            const joinCondition="";
+            const joinCondition = "";
             try {
 
                 const appointments = await DBHandler.fetchEntityRecords(
@@ -351,23 +398,23 @@
                 }, null, false);
 
                 bootstrap.Modal.getInstance(
-                    document.getElementById('appointmentModal')
+                    document.getElementById('userModal')
                 ).hide();
 
-                document.getElementById('appointmentTreatment').value = '';
-                document.getElementById('appointmentPractitioner').value = '';
-                document.getElementById('appointmentType').value = '';   // ✅ RESET
-                document.getElementById('appointmentDate').ej2_instances[0].value = new Date();
-                document.getElementById('nextAppointment').ej2_instances[0].value = null;
+                document.getElementById('userName').value = '';
+                document.getElementById('displayName').value = '';
+                document.getElementById('password').value = '';   // ✅ RESET
+                document.getElementById('issystemadministrator').value = '';
+                document.getElementById('disableUser').value = '';
 
                 loadAppointments2();
 
             } catch (err) {
                 console.error(err);
-                alert("Failed to save appointment");
+                alert("Failed to save User");
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Save Appointment";
+                btn.innerText = "Save User";
             }
         }
     </script>
