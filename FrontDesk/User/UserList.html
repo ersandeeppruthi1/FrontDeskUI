@@ -17,6 +17,8 @@
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/select2.min.js"></script>
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
     <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
@@ -67,363 +69,397 @@
 </head>
 
 <body>
-    <!-- <div class="container2">
-        <div class="toolbar">
-            <div class="row g-3 align-items-end">
-                <div class="col-sm-6 col-md-3">
-                    <label for="startDate">From date</label>
-                    <input id="startDate" class="form-control" onchange="loadAppointments2()">
-                </div>
-                <div class="col-sm-6 col-md-3">
-                    <label for="endDate">To date</label>
-                    <input id="endDate" class="form-control" onchange="loadAppointments2()">
-                </div>
-            </div>
-        </div> -->
-    <!-- Add New User Button -->
     <div id="patientAppointmentGrid"></div>
-    </div>
 
     <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Add User</h5>
-                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="userForm" class="row g-3">
-                            <div class="col-12">
-                                <label>User Name<span style="color: red;">*</span>:</label>
-                                <input class="form-control" id="userName" dbcolumnname="userName" />
-                            </div>
-                            <div class="col-12">
-                                <label>Display Name<span style="color: red;">*</span>:</label>
-                                <input class="form-control" id="displayName" dbcolumnname="displayName" />
-                            </div>
-                            <div class="col-12">
-                                <label>Password<span style="color: red;">*</span>:</label>
-                                <input type="password" class="form-control" id="password" dbcolumnname="password" />
-                            </div>
-                            <div class="col-12">
-                                <label>Is System Administrator</label>
-                                <select id="issystemadministrator" class="form-control">
-                                    <option value="Yes">Yes</option>
-                                    <option value="No">No</option>
-                                </select>
-                            </div>
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable" style="
+.modal-xl {
+    max-width: 90%;     /* Increase width slightly */
+}">
 
-                            <div class="col-12">
-                                <label>Disable User</label>
-                                <select id="disableuser" class="form-control">
-                                    <option value="Yes">Yes</option>
-                                    <option value="No">No</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label>Permisson or Role<span style="color: red;">*</span>:</label><br>
-                                <button type="button">New</button>
-                                <button type="button">Edit</button>
-                            </div>
-                            <div>
-                                <label>Menu/Items<span style="color: red;">*</span>:</label><br>
-                                <button type="button">New</button>
-                                <button type="button">Edit</button>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onclick="addUser()">Save
-                            User</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+            <div class="modal-content custom-modal" style="modal-content {
+    min-height: 80vh;   /* Increase height */
+}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add User</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
+                <div class="modal-body">
+                    <form id="userForm" class="row g-5">
+                        <div class="col-md-6">
+                            <label>User Name<span style="color: red;">*</span>:</label>
+                            <input class="form-control" id="userName" dbcolumnname="userName" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Display Name<span style="color: red;">*</span>:</label>
+                            <input class="form-control" id="displayName" dbcolumnname="displayName" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Password<span style="color: red;">*</span>:</label>
+                            <input type="password" class="form-control" id="password" dbcolumnname="password" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Is System Administrator</label>
+                            <select id="isSystemAdministrator" class="form-control">
+                                <option value="">Select Type</option>
+                                <option value="1">Yes</option>
+                                <option value="2">No</option>
+                            </select>
+                        </div>
 
+
+
+                        <!-- Permission -->
+                        <div class="col-md-6 col-12">
+                            <label>Permission or Role <span class="text-danger">*</span></label>
+                            <div class="input-group w-100">
+                                <select class="form-control ">
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fa fa-pen"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Menu -->
+                        <div class="col-md-6 col-12">
+                            <label>Menu/Items <span class="text-danger">*</span></label>
+                            <div class="input-group w-100">
+                                <select class="form-control">
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fa fa-pen"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">Save User</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
-    </div>
 
 
-    <script>
 
-        let grid;
-        let appointmentsMain = [];
-        var columns = [
-            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
-            { field: 'username', headerText: 'User Name', width: 130 },
-            { field: 'displayname', headerText: 'Display Name', width: 220 },
-            { field: 'issystemadministrator', headerText: 'IsSystemAdministrator', width: 220 },
-            { field: 'id', headerText: 'id', width: 130 ,visible: false},
-            { field: 'createdon', headerText: 'Createdon', width: 130 ,type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false,visible: false},
-            { field: 'modifiedon', headerText: 'Modifiedon', width: 130 ,type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false,visible: false},
-            { field: 'createdby', headerText: 'CreatedBy', width: 130,visible: false },
-            { field: 'modifiedby', headerText: 'Modofiedon', width: 130 ,visible: false},
-            { field: 'permissonid', headerText: 'Permisson Id', width: 130 ,visible: false},
-            { field: 'menuid', headerText: 'Menu Id', width: 130 ,visible: false},
-            { field: 'permissonjson', headerText: 'Permisson Json', width: 130,visible: false },
-            { field: 'menujson', headerText: 'Menu Json', width: 130,visible: false },
-        ];
+        <script>
 
-        function initGrid(columns, patientGrid) {
-            ej.grids.Grid.Inject(
-                ej.grids.Filter,
-                ej.grids.Group,
-                ej.grids.Page,
-                ej.grids.Sort,
-                ej.grids.Toolbar,
-                ej.grids.ColumnChooser,
-                ej.grids.ExcelExport,
-                ej.grids.PdfExport
-            );
+            let grid;
+            let appointmentsMain = [];
+            var columns = [
+                { type: 'checkbox', width: 50 }, 
+                { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+                { field: 'username', headerText: 'User Name', width: 130 },
+                { field: 'displayname', headerText: 'Display Name', width: 220 },
+                { field: 'issystemadministrator', headerText: 'Is System Administrator', width: 220 },
+                { field: 'id', headerText: 'id', width: 130, visible: false },
+                { field: 'createdon', headerText: 'Createdon', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
+                { field: 'modifiedon', headerText: 'Modifiedon', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
+                { field: 'createdby', headerText: 'CreatedBy', width: 130, visible: false },
+                { field: 'modifiedby', headerText: 'Modofiedon', width: 130, visible: false },
+                { field: 'permissonid', headerText: 'Permisson Id', width: 130, visible: false },
+                { field: 'menuid', headerText: 'Menu Id', width: 130, visible: false },
+                { field: 'permissonjson', headerText: 'Permisson Json', width: 130, visible: false },
+                { field: 'menujson', headerText: 'Menu Json', width: 130, visible: false },
+            ];
 
-            grid = new ej.grids.Grid({
-                dataSource: [],
-                allowPaging: true,
-                pageSettings: { pageSize: 10 },
-                allowSorting: true,
-                allowFiltering: true,
-                filterSettings: { type: 'Excel' },
-                showColumnChooser: true,
-                //enablePersistence: true,
-                toolbar: ['ColumnChooser',
-                    'Search',
-                    'ExcelExport',
-                    'PdfExport',
-                    {
-                        text: 'New User',
-                        tooltipText: 'New User',
-                        prefixIcon: 'e-icons e-plus',
-                        id: 'newUser'
-                    },{
-                        text: 'Delete',
-                        tooltipText: 'Delete',
-                        prefixIcon: 'e-icons e-minus',
-                        id: 'Delete'
-                    },],
-                    
-                    
-                //height: 480,
-                columns: columns,
-                allowExcelExport: true,
-                allowPdfExport: true,
-
-
-                // ✅ Handle toolbar clicks
-                toolbarClick: function (args) {
-                    if (args.item.id === patientGrid + '_excelexport') {
-                        grid.excelExport({
-                            fileName: `Appointments_${formatDate(new Date())}.xlsx`,
-                            // Export current view records (respects filtering/sorting/paging)
-                            exportType: 'AllPages', // or 'AllPages'
-                        });
-                    }
-                    if (args.item.id === patientGrid + '_pdfexport') {
-                        grid.pdfExport({
-                            fileName: `Appointments_${formatDate(new Date())}.pdf`,
-                            exportType: 'CurrentPage', // or 'AllPages'
-                            theme: { header: { fontColor: '#000000' } },
-                            // Optional: page setup
-                            pageOrientation: 'Landscape', // 'Portrait' | 'Landscape'
-                            pageSize: 'LETTER',          // e.g., 'A4', 'LETTER'
-                            header: {
-                                fromTop: 0,
-                                height: 120,
-                                contents: [
-                                    {
-                                        type: 'Text',
-                                        value: 'User Management',
-                                        position: { x: 280, y: 0 },
-                                        style: {
-                                            textBrushColor: '#C25050',
-                                            fontSize: 25
-                                        },
-                                    }
-                                ]
-                            },
-                            footer: {
-                                fromBottom: 160,
-                                height: 150,
-                                contents: [
-                                    {
-                                        type: 'PageNumber',
-                                        pageNumberType: 'Arabic',
-                                        format: 'Page {$current} of {$total}',
-                                        position: { x: 520, y: 10 },
-                                        style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' }
-                                    }
-                                ]
-                            }
-                        });
-                    }
-
-                    if (args.item.id === 'newUser') {
-                        openNewUser(); // your function
-                    }
-                }
-            });
-            grid.appendTo('#' + patientGrid);
-        }
-
-        function openNewUser() {
-            const modal = new bootstrap.Modal(
-                document.getElementById('userModal'),
-                { backdrop: 'static', keyboard: false }
-            );
-            modal.show();
-        }
-
-        function saveUser() {
-            const form = document.getElementById('userForm');
-
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-
-            alert('User saved (demo)');
-
-            bootstrap.Modal.getInstance(
-                document.getElementById('userModal')
-            ).hide();
-
-            loadAppointments2(); // refresh grid
-        }
-
-
-        function actionTemplate() {
-            return (
-                '<div class="d-grid gap-2 d-md-flex justify-content-md-center">' +
-                '<button class="btn btn-sm btn-warning" onclick="onEditAppointment(this)">Edit</button>' +
-                '<button class="btn btn-sm btn-danger ms-2" onclick="onDeleteAppointment(this)">Delete</button>' +
-                '</div>'
-            );
-        }
-
-        async function loadAppointments2() {
-
-            const filter = '';
-
-            const joinCondition = "";
-            try {
-
-                const appointments = await DBHandler.fetchEntityRecords(
-                    'masteruser',
-                    'masteruser.*, masteruser.displayname as DisplayName',
-                    'masteruser.createdon',
-                    'desc',
-                    filter, true,
-                    0,
-                    joinCondition
+            function initGrid(columns, patientGrid) {
+                ej.grids.Grid.Inject(
+                    ej.grids.Filter,
+                    ej.grids.Group,
+                    ej.grids.Page,
+                    ej.grids.Sort,
+                    ej.grids.Toolbar,
+                    ej.grids.ColumnChooser,
+                    ej.grids.ExcelExport,
+                    ej.grids.PdfExport
                 );
 
-                appointmentsMain = appointments || [];
+                grid = new ej.grids.Grid({
+                    dataSource: [],
+                    allowPaging: true,
+                    pageSettings: { pageSize: 10 },
+                    allowSorting: true,
+                    allowFiltering: true,
+                    filterSettings: { type: 'Excel' },
+                    showColumnChooser: true,
+                    //enablePersistence: true,
+                    toolbar: ['ColumnChooser',
+                        'Search',
+                        'ExcelExport',
+                        'PdfExport',
+                        {
+                            text: 'New User',
+                            tooltipText: 'New User',
+                            prefixIcon: 'e-icons e-plus',
+                            id: 'newUser'
+                        }, {
+                            text: 'Delete',
+                            tooltipText: 'Delete',
+                            prefixIcon: 'e-icons e-delete',
+                            id: 'deleteUser'
+                        },],
 
-                let serialNumber = 1;
 
-                const rows = appointmentsMain.map(a => ({
-                    id: a.id,
-                    srno: serialNumber++,
-                    displayname: a.displayname,
-                    username: a.username,
-                    createdon: normalizeDate(a.createdon),
-                    modifiedon: normalizeDate(a.modifiedon),
-                }));
+                    //height: 480,
+                    columns: columns,
+                    allowExcelExport: true,
+                    allowPdfExport: true,
 
-                grid.dataSource = rows;
-                grid.refresh();
 
-            } catch (err) {
-                console.error('Failed to load appointments:', err);
+                    // ✅ Handle toolbar clicks
+                    toolbarClick: function (args) {
+                        if (args.item.id === patientGrid + '_excelexport') {
+                            grid.excelExport({
+                                fileName: `Appointments_${formatDate(new Date())}.xlsx`,
+                                // Export current view records (respects filtering/sorting/paging)
+                                exportType: 'AllPages', // or 'AllPages'
+                            });
+                        }
+
+                        if (args.item.id === 'deleteUser') {
+                        deleteUser();
+                    }
+                        if (args.item.id === patientGrid + '_pdfexport') {
+                            grid.pdfExport({
+                                fileName: `Appointments_${formatDate(new Date())}.pdf`,
+                                exportType: 'CurrentPage', // or 'AllPages'
+                                theme: { header: { fontColor: '#000000' } },
+                                // Optional: page setup
+                                pageOrientation: 'Landscape', // 'Portrait' | 'Landscape'
+                                pageSize: 'LETTER',          // e.g., 'A4', 'LETTER'
+                                header: {
+                                    fromTop: 0,
+                                    height: 120,
+                                    contents: [
+                                        {
+                                            type: 'Text',
+                                            value: 'User Management',
+                                            position: { x: 280, y: 0 },
+                                            style: {
+                                                textBrushColor: '#C25050',
+                                                fontSize: 25
+                                            },
+                                        }
+                                    ]
+                                },
+                                footer: {
+                                    fromBottom: 160,
+                                    height: 150,
+                                    contents: [
+                                        {
+                                            type: 'PageNumber',
+                                            pageNumberType: 'Arabic',
+                                            format: 'Page {$current} of {$total}',
+                                            position: { x: 520, y: 10 },
+                                            style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' }
+                                        }
+                                    ]
+                                }
+                            });
+                        }
+
+                        if (args.item.id === 'newUser') {
+                            openNewUser(); // your function
+                        }
+                    }
+                });
+                grid.appendTo('#' + patientGrid);
             }
-        }
 
-        function normalizeDate(val) {
-            if (!val) return null;
-            const d = val instanceof Date ? val : new Date(val);
-            return isNaN(d) ? null : d;
-        }
+            async function deleteUser() {
+            const selectedRecords = grid.getSelectedRecords();
+            if (!selectedRecords.length) {
+                return alert("Please select User(s)) to delete");
+            }
 
-        $(document).ready(async () => {
-            applyDatePicker('startDate,endDate,appointmentDate', new Date());
-            applyDatePicker('nextAppointment');
-            initGrid(columns, 'patientAppointmentGrid');
+            if (!confirm(`Delete ${selectedRecords.length} appointment(s)?`)) {
+                return;
+            }
+            for (const record of selectedRecords) {
+                await deleteRecordData('masteruser', record.id, false, true);
+            }
             loadAppointments2();
-        });
-
-        function applyDatePicker(ids, value) {
-            ids.split(',').forEach(id => {
-                id = id.trim();
-                if (id && document.getElementById(id)) {
-                    new ej.calendars.DatePicker({
-                        placeholder: "Select a date",
-                        format: "dd-MMM-yyyy",
-                        value: value || null
-                    }).appendTo('#' + id);
-                }
-            });
         }
 
-        function getDatePickerValue(id) {
-            const picker = document.getElementById(id)?.ej2_instances?.[0];
-            if (!picker?.value) return null;
 
-            const intl = new ej.base.Internationalization();
-
-            return intl.formatDate(picker.value, {
-                format: "yyyy-MM-dd"
-            });
-        }
-
-        async function addUser() {
-
-            const
-                displayName = document.getElementById('displayName').value.trim(),
-                userName = document.getElementById('userName').value.trim(),
-                btn = event.target;
-
-            if (!displayName) return alert("Please enter display name");
-            if (!userName) return alert("Please enter user name");
-
-            try {
-
-                btn.disabled = true;
-                btn.innerText = "Saving...";
-
-                await DBHandler.submitRecordData('masteruser', {
-                    displayname: displayName,
-                    username: userName
-                }, null, false);
-
-                bootstrap.Modal.getInstance(
-                    document.getElementById('userModal')
-                ).hide();
-
-                document.getElementById('userName').value = '';
-                document.getElementById('displayName').value = '';
-                document.getElementById('password').value = '';   // ✅ RESET
-                document.getElementById('issystemadministrator').value = '';
-                document.getElementById('disableUser').value = '';
-
-                loadAppointments2();
-
-            } catch (err) {
-                console.error(err);
-                alert("Failed to save User");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Save User";
+            function openNewUser() {
+                debugger;
+                const modal = new bootstrap.Modal(
+                    document.getElementById('userModal'),
+                    { backdrop: 'static', keyboard: false }
+                );
+                modal.show();
             }
-        }
-    </script>
 
-    <style>
-        #patientAppointmentGrid_toolbarItems {
-            height: 10px !important;
-        }
-    </style>
+            // function saveUser() {debugger;
+            //     const form = document.getElementById('userForm');
+
+            //     if (!form.checkValidity()) {
+            //         form.reportValidity();
+            //         return;
+            //     }
+
+            //     alert('User saved (demo)');
+
+            //     bootstrap.Modal.getInstance(
+            //         document.getElementById('userModal')
+            //     ).hide();
+
+            //     loadAppointments2(); // refresh grid
+            // }
+
+
+            function actionTemplate() {
+                return (
+                    '<div class="d-grid gap-2 d-md-flex justify-content-md-center">' +
+                    '<button class="btn btn-sm btn-warning" onclick="onEditAppointment(this)">Edit</button>' +
+                    '<button class="btn btn-sm btn-danger ms-2" onclick="onDeleteAppointment(this)">Delete</button>' +
+                    '</div>'
+                );
+            }
+
+            async function loadAppointments2() {
+
+                const filter = '';
+
+                const joinCondition = "";
+                try {
+
+                    const appointments = await DBHandler.fetchEntityRecords(
+                        'masteruser',
+                        'masteruser.*, masteruser.displayname as DisplayName',
+                        'masteruser.createdon',
+                        'desc',
+                        filter, true,
+                        0,
+                        joinCondition
+                    );
+
+                    appointmentsMain = appointments || [];
+
+                    let serialNumber = 1;
+
+                    const rows = appointmentsMain.map(a => ({
+                        id: a.id,
+                        srno: serialNumber++,
+                        displayname: a.displayname,
+                        username: a.username,
+                        createdon: normalizeDate(a.createdon),
+                        modifiedon: normalizeDate(a.modifiedon),
+                        issystemadministrator: a.issystemadministrator || '',
+                        
+                    }));
+
+                    grid.dataSource = rows;
+                    grid.refresh();
+
+                } catch (err) {
+                    console.error('Failed to load appointments:', err);
+                }
+            }
+
+            function normalizeDate(val) {
+                if (!val) return null;
+                const d = val instanceof Date ? val : new Date(val);
+                return isNaN(d) ? null : d;
+            }
+
+            $(document).ready(async () => {
+                applyDatePicker('startDate,endDate,appointmentDate', new Date());
+                applyDatePicker('nextAppointment');
+                initGrid(columns, 'patientAppointmentGrid');
+                loadAppointments2();
+            });
+
+            function applyDatePicker(ids, value) {
+                ids.split(',').forEach(id => {
+                    id = id.trim();
+                    if (id && document.getElementById(id)) {
+                        new ej.calendars.DatePicker({
+                            placeholder: "Select a date",
+                            format: "dd-MMM-yyyy",
+                            value: value || null
+                        }).appendTo('#' + id);
+                    }
+                });
+            }
+
+            function getDatePickerValue(id) {
+                const picker = document.getElementById(id)?.ej2_instances?.[0];
+                if (!picker?.value) return null;
+
+                const intl = new ej.base.Internationalization();
+
+                return intl.formatDate(picker.value, {
+                    format: "yyyy-MM-dd"
+                });
+            }
+
+            async function saveUser() {
+
+                const
+                    displayName = document.getElementById('displayName').value.trim(),
+                    userName = document.getElementById('userName').value.trim(),
+                    isSystemAdministrator= document.getElementById('isSystemAdministrator').value,
+                    btn = event.target;
+
+                if (!displayName) return alert("Please enter display name");
+                if (!userName) return alert("Please enter user name");
+                if (!isSystemAdministrator) return alert("Please select system administrator");
+                if (!password) return alert("Please enter Password");
+
+                try {
+
+                    btn.disabled = true;
+                    btn.innerText = "Saving...";
+
+                    await DBHandler.submitRecordData('masteruser', {
+                        displayname: displayName,
+                        username: userName,
+                        issystemadministrator: isSystemAdministrator,
+                    }, null, false);
+
+                    bootstrap.Modal.getInstance(
+                        document.getElementById('userModal')
+                    ).hide();
+
+                    document.getElementById('userName').value = '';
+                    document.getElementById('displayName').value = '';
+                    document.getElementById('password').value = '';   // ✅ RESET
+                    document.getElementById('isSystemAdministrator').value = '';
+                    document.getElementById('disabledUser').value = '';
+
+                    loadAppointments2();
+
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to save User");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = "Save User";
+                }
+            }
+        </script>
+
+        <style>
+            #patientAppointmentGrid_toolbarItems {
+                height: 10px !important;
+            }
+        </style>
 
 </body>
 
