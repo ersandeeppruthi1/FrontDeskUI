@@ -11,11 +11,8 @@
         //var apiURL = "";
     </script>
 
-    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://apisit.vsservices.in/css/Default/select2.min.css" rel="stylesheet" />
     <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
-    <script src="https://apisit.vsservices.in/css/Default/select2.min.js"></script>
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
@@ -32,17 +29,7 @@
 
     <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
-    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
-    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
-    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
-
-    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
-    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
-
-    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -52,14 +39,9 @@
 
     <script src="https://apisit.vsservices.in/JS/ej2.min.vk02bdl5ad.js"></script>
 
-        <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet">
-    <link href="https://apisit.vsservices.in/css/Default/select2.min.css" rel="stylesheet">
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet">
-    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet">
 
-    <link href="https://apisit.vsservices.in//css/Default/font-awesome-all.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://free-crm.csharpasp.net/lib/syncfusion/css/bootstrap5.dvnzgvxkcq.css" />
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.css">
     <link href="https://apisit.vsservices.in/css/app.css" rel="stylesheet">
 
@@ -154,6 +136,7 @@
         let grid;
         let appointmentsMain = [];
         var columns = [
+            { type: 'checkbox', width: 50 },   // ✅ MUST be first
             { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
             { field: 'treatmentdate', headerText: 'Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 130, allowPdfExport: false },
             { field: 'PatientName', headerText: 'Patient Name', width: 220 },
@@ -186,6 +169,10 @@
                 allowFiltering: true,
                 filterSettings: { type: 'Excel' },
                 showColumnChooser: true,
+                selectionSettings: {
+                    type: 'Multiple'   // or 'Single'
+                },
+
                 //enablePersistence: true,
                 toolbar: ['ColumnChooser',
                     'Search',
@@ -196,6 +183,11 @@
                         tooltipText: 'New Appointment',
                         prefixIcon: 'e-icons e-plus',
                         id: 'newAppointment'
+                    }, {
+                        text: 'Delete Appointment',
+                        tooltipText: 'Delete Appointment',
+                        prefixIcon: 'e-icons e-delete',
+                        id: 'deleteAppointment'
                     }],
                 //height: 480,
                 columns: columns,
@@ -209,6 +201,10 @@
                             exportType: 'AllPages', // or 'AllPages'
                         });
                     }
+                    if (args.item.id === 'deleteAppointment') {
+                        deleteAppointment();
+                    }
+
                     if (args.item.id === patientGrid + '_pdfexport') {
                         grid.pdfExport({
                             fileName: `Appointments_${formatDate(new Date())}.pdf`,
@@ -255,6 +251,23 @@
             });
             grid.appendTo('#' + patientGrid);
         }
+
+
+        async function deleteAppointment() {
+            const selectedRecords = grid.getSelectedRecords();
+            if (!selectedRecords.length) {
+                return alert("Please select appointment(s) to delete");
+            }
+
+            if (!confirm(`Delete ${selectedRecords.length} appointment(s)?`)) {
+                return;
+            }
+            for (const record of selectedRecords) {
+                await deleteRecordData('dentalappointment', record.id, false, true);
+            }
+            loadAppointments2();
+        }
+
 
         function openNewAppointment() {
             const modal = new bootstrap.Modal(
