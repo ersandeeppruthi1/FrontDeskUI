@@ -48,406 +48,461 @@
 </head>
 
 <body>
-    <div class="container2">
-        <div class="toolbar">
-            <div class="row g-3 align-items-end">
-                <div class="col-sm-6 col-md-3">
-                    <label for="startDate">From date</label>
-                    <input id="startDate" class="form-control" onchange="loadAppointments2()">
-                </div>
-                <div class="col-sm-6 col-md-3">
-                    <label for="endDate">To date</label>
-                    <input id="endDate" class="form-control" onchange="loadAppointments2()">
-                </div>
-            </div>
-        </div>
-        <div id="patientAppointmentGrid"></div>
-    </div>
+   <div class="container2">
+       <div class="toolbar" style="margin-bottom:10px;">
+           <div class="row g-3 align-items-end">
+               <div class="col-sm-6 col-md-3">
+                   <label for="startDate">From date</label>
+                   <input id="startDate" class="form-control" datatype="date" defaultValue="currentDate" onchange="loadAppointments2()">
+               </div>
+               <div class="col-sm-6 col-md-3">
+                   <label for="endDate">To date</label>
+                   <input id="endDate" class="form-control" datatype="date" defaultValue="currentDate" onchange="loadAppointments2()">
+               </div>
+           </div>
+       </div>
+       <div id="patientAppointmentGrid"></div>
+   </div>
 
-    <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
+   <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
+       <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+           <div class="modal-content">
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Appointment</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
+               <div class="modal-header">
+                   <h5 class="modal-title">Add Appointment</h5>
+                   <button type="button" class="close" data-bs-dismiss="modal">
+                       <span>&times;</span>
+                   </button>
+               </div>
 
-                <div class="modal-body">
-                    <form id="appointmentForm">
+               <div class="modal-body">
+                   <form id="appointmentForm">
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label>Date<span style="color:red">*</span></label>
-                                <input class="form-control" id="appointmentDate" />
-                            </div>
+                       <div class="row">
+                           <div class="col-md-6">
+                               <label>Patient Id<span style="color:red">*</span></label>
+                               <div class="input-group">
+                                   <input type="number" class="form-control" id="patientid"
+                                          onfocus="clearPreviousValue();" onchange="clearBelowFields()" required
+                                          onkeyup="handleKeyPress(event)" onblur="patientSearchClick()" min="1" max="9999999999">
+                                   <div class="input-group-append">
+                                       <button type="button" class="btn btn-primary" id="go-button" onclick="patientSearchClick()">
+                                           <i class="fas fa-arrow-right"></i> <!-- Go icon -->
+                                       </button>
+                                   </div>
+                               </div>
+                           </div>
+                           <div class="col-md-6">
+                               <label>Patient Detail<span style="color:red">*</span></label>
+                               <input id="patientDetail" class="form-control" datatype="text" disabled />
+                               <input id="patientguid" datatype="text" style="display:none;" />
+                           </div>
+                       </div>
+                       <div class="row">
+                           <div class="col-md-6">
+                               <label>Date<span style="color:red">*</span></label>
+                               <input id="appointmentDate" class="form-control" datatype="date" defaultValue="currentDate" />
+                           </div>
+                           <div class="col-md-6">
+                               <label>Appointment Type</label>
+                               <select id="appointmentType" class="form-control">
+                                   <option value="">Select Type</option>
+                                   <option value="Advise">Advise</option>
+                                   <option value="Medication">Medication</option>
+                                   <option value="Treatment">Treatment</option>
+                                   <option value="Routine">Routine</option>
+                               </select>
+                           </div>
+                       </div>
+                       <div class="row">
+                           <div class="col-md-6">
+                               <label>Next Appointment</label>
+                               <input class="form-control" id="nextAppointment" datatype="date" />
+                           </div>
 
-                            <div class="col-md-6 mb-3">
-                                <label>Appointment Type</label>
-                                <select id="appointmentType" class="form-control">
-                                    <option value="">Select Type</option>
-                                    <option value="Advise">Advise</option>
-                                    <option value="Medication">Medication</option>
-                                    <option value="Treatment">Treatment</option>
-                                    <option value="Routine">Routine</option>
-                                </select>
-                            </div>
-                        </div>
+                           <div class="col-md-6">
+                               <label>Practitioner<span style="color:red">*</span></label>
+                               <select class="form-control" id="appointmentPractitioner">
+                                   <option value="">Select Practitioner</option>
+                                   <option value="Dr. Saket">Dr. Saket</option>
+                                   <option value="Dr. Kuldeep">Dr. Kuldeep</option>
+                               </select>
+                           </div>
+                       </div>
+                       <div class="row">
+                           <div class="col-md-12">
+                               <label>Treatment<span style="color:red">*</span></label>
+                               <textarea id="appointmentTreatment" class="form-control" rows="4"></textarea>
+                           </div>
+                       </div>
+                   </form>
+               </div>
+
+               <div class="modal-footer">
+                   <button type="button" class="btn btn-primary" onclick="addAppointment()">Save Appointment</button>
+                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+               </div>
+
+           </div>
+       </div>
+   </div>
+
+   <script>
+
+       let grid;
+       let appointmentsMain = [];
+       var columns = [
+           { type: 'checkbox', width: 50 },   // ✅ MUST be first
+           { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+           { field: 'treatmentdate', headerText: 'Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 130, allowPdfExport: false },
+           { field: 'PatientName', headerText: 'Patient Name', width: 220 },
+           { field: 'appointmenttype', headerText: 'Type', width: 130 },
+           { field: 'treatment', headerText: 'Treatment', width: 220 },
+           { field: 'nextappointment', headerText: 'Next Appointment', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 160, visible: false },
+           { field: 'practitioner', headerText: 'Practitioner', width: 160, visible: false },
+           { field: 'createdon', headerText: 'Created On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
+           { field: 'modifiedon', headerText: 'Modified On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, visible: false, allowPdfExport: false },
+           { field: 'patientid', headerText: 'patientid', width: 150, visible: false, allowPdfExport: false },
+           { field: 'uhid', headerText: 'uhid', width: 150, visible: false, allowPdfExport: false },
+
+           // { headerText: 'Actions', width: 160, textAlign: 'Center', template: actionTemplate, allowPdfExport: false, visible: false }
+       ];
+
+       function initGrid(columns, patientGrid) {
+           ej.grids.Grid.Inject(
+               ej.grids.Filter,
+               ej.grids.Group,
+               ej.grids.Page,
+               ej.grids.Sort,
+               ej.grids.Toolbar,
+               ej.grids.ColumnChooser,
+               ej.grids.ExcelExport,
+               ej.grids.PdfExport
+           );
+
+           grid = new ej.grids.Grid({
+               dataSource: [],
+               allowPaging: true,
+               pageSettings: { pageSize: 10 },
+               allowSorting: true,
+               allowFiltering: true,
+               filterSettings: { type: 'Excel' },
+               showColumnChooser: true,
+               selectionSettings: {
+                   type: 'Multiple'   // or 'Single'
+               },
+               rowSelected: toggleEditButton,
+               rowDeselected: toggleEditButton,
+               //enablePersistence: true,
+               toolbar: ['ColumnChooser',
+                   'Search',
+                   {
+                       prefixIcon: 'e-icons e-excelexport',
+                       tooltipText: 'Export Excel',
+                       id: 'excelExport'
+                   },
+                   {
+                       prefixIcon: 'e-icons e-pdfexport',
+                       tooltipText: 'Export PDF',
+                       id: 'pdfExport'
+                   },
+                   {
+                       prefixIcon: 'e-icons e-refresh',
+                       tooltipText: 'Refresh Grid',
+                       id: 'refreshGrid'
+                   },
+                   {
+                       text: 'New Appointment',
+                       tooltipText: 'New Appointment',
+                       prefixIcon: 'e-icons e-plus',
+                       id: 'newAppointment'
+                   },
+                   { text: 'Edit Appointment', prefixIcon: 'e-icons e-edit', id: 'editAppointment', disabled: true },
+                   {
+                       text: 'Delete Appointment',
+                       tooltipText: 'Delete Appointment',
+                       prefixIcon: 'e-icons e-delete',
+                       id: 'deleteAppointment'
+                   }],
+               //height: 480,
+               columns: columns,
+               allowExcelExport: true,
+               allowPdfExport: true,
+               toolbarClick: function (args) {
+                   if (args.item.id === 'excelExport') {
+                       grid.excelExport({
+                           fileName: `Appointments_${formatDate(new Date())}.xlsx`,
+                           // Export current view records (respects filtering/sorting/paging)
+                           exportType: 'AllPages', // or 'AllPages'
+                       });
+                   }
+                   if (args.item.id === 'deleteAppointment') {
+                       deleteAppointment();
+                   }
+
+                   if (args.item.id === 'pdfExport') {
+                       grid.pdfExport({
+                           fileName: `Appointments_${formatDate(new Date())}.pdf`,
+                           exportType: 'CurrentPage',
+                           pageOrientation: 'Landscape',
+                           pageSize: 'LETTER'
+                       });
+                   }
+
+                   // ✅ REFRESH BUTTON CLICK
+                   if (args.item.id === 'refreshGrid') {
+                       loadAppointments2();
+                   }
+
+                   if (args.item.id === 'newAppointment') {
+                       openNewAppointment(); // your function
+                   }
+
+                   if (args.item.id === 'editAppointment') {
+                       editAppointment();
+                   }
+               }
+           });
+           grid.appendTo('#' + patientGrid);
+       }
+
+       let editingId = null;
+
+       function editAppointment() {
+           const selectedRecords = grid.getSelectedRecords();
+           if (selectedRecords.length !== 1) {
+               return alert("Please select one appointment to edit");
+           }
+           const record = selectedRecords[0];
+           editingId = record.id;
+
+           document.getElementById('appointmentTreatment').value = record.treatment;
+           document.getElementById('appointmentPractitioner').value = record.practitioner;
+           document.getElementById('appointmentType').value = record.appointmenttype;
+
+           document.getElementById('patientid').value = record.uhid;
+           if (record.uhid && record.uhid != "") {
+               patientSearchClick();
+           }
+
+           document.getElementById('appointmentDate').ej2_instances[0].value = record.treatmentdate;
+           document.getElementById('nextAppointment').ej2_instances[0].value = record.nextappointment;
+
+           // ✅ Update modal title
+           document.querySelector('#appointmentModal .modal-title').innerText = "Edit Appointment";
+
+           openNewAppointment();
+       }
+
+       function toggleEditButton() {
+           const selected = grid.getSelectedRecords();
+           const editBtn = grid.toolbarModule.toolbar.items
+               .find(item => item.id === "editAppointment");
+           if (!editBtn) return;
+           editBtn.disabled = selected.length !== 1;  // ✅ only one row
+       }
+
+       async function deleteAppointment() {
+           const selectedRecords = grid.getSelectedRecords();
+           if (!selectedRecords.length) {
+               return alert("Please select appointment(s) to delete");
+           }
+           if (!confirm(`Delete ${selectedRecords.length} appointment(s)?`)) {
+               return;
+           }
+           const ids = selectedRecords.map(r => r.id);
+           await deleteRecordData('dentalappointment', ids, true, true);
+           loadAppointments2();
+       }
 
 
+       function openNewAppointment() {
+           const modal = new bootstrap.Modal(
+               document.getElementById('appointmentModal'),
+               { backdrop: 'static', keyboard: false }
+           );
+           modal.show();
+       }
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label>Next Appointment</label>
-                                <input class="form-control" id="nextAppointment" />
-                            </div>
+       function actionTemplate() {
+           return (
+               '<div class="d-grid gap-2 d-md-flex justify-content-md-center">' +
+               '<button class="btn btn-sm btn-warning" onclick="onEditAppointment(this)">Edit</button>' +
+               '<button class="btn btn-sm btn-danger ms-2" onclick="onDeleteAppointment(this)">Delete</button>' +
+               '</div>'
+           );
+       }
 
-                            <div class="col-md-6 mb-3">
-                                <label>Practitioner<span style="color:red">*</span></label>
-                                <select class="form-control" id="appointmentPractitioner">
-                                    <option value="">Select Practitioner</option>
-                                    <option value="Dr. Saket">Dr. Saket</option>
-                                    <option value="Dr. Kuldeep">Dr. Kuldeep</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label>Treatment<span style="color:red">*</span></label>
-                                <textarea id="appointmentTreatment" class="form-control" rows="4"></textarea>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+       async function loadAppointments2() {
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addAppointment()">Save Appointment</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+           const startDate = getDatePickerValue('startDate');
+           const endDate = getDatePickerValue('endDate');
 
-            </div>
-        </div>
-    </div>
+           if (!startDate || !endDate) return;
 
-    <script>
+           const start = startDate + " 00:00:00";
+           const end = endDate + " 23:59:59";
 
-        let grid;
-        let appointmentsMain = [];
-        var columns = [
-            { type: 'checkbox', width: 50 },   // ✅ MUST be first
-            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
-            { field: 'treatmentdate', headerText: 'Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 130, allowPdfExport: false },
-            { field: 'PatientName', headerText: 'Patient Name', width: 220 },
-            { field: 'appointmenttype', headerText: 'Type', width: 130 },
-            { field: 'treatment', headerText: 'Treatment', width: 220 },
-            { field: 'nextappointment', headerText: 'Next Appointment', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 160, visible: false },
-            { field: 'practitioner', headerText: 'Practitioner', width: 160, visible: false },
-            { field: 'createdon', headerText: 'Created On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
-            { field: 'modifiedon', headerText: 'Modified On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, visible: false, allowPdfExport: false },
-            // { headerText: 'Actions', width: 160, textAlign: 'Center', template: actionTemplate, allowPdfExport: false, visible: false }
-        ];
+           const filter = `dentalappointment.treatmentdate >= '${start}'
+                                                                                   AND dentalappointment.treatmentdate <= '${end}'`;
 
-        function initGrid(columns, patientGrid) {
-            ej.grids.Grid.Inject(
-                ej.grids.Filter,
-                ej.grids.Group,
-                ej.grids.Page,
-                ej.grids.Sort,
-                ej.grids.Toolbar,
-                ej.grids.ColumnChooser,
-                ej.grids.ExcelExport,
-                ej.grids.PdfExport
-            );
+           var joinCondition = "LEFT JOIN dentaldetails ON dentaldetails.id = dentalappointment.patientid";
 
-            grid = new ej.grids.Grid({
-                dataSource: [],
-                allowPaging: true,
-                pageSettings: { pageSize: 10 },
-                allowSorting: true,
-                allowFiltering: true,
-                filterSettings: { type: 'Excel' },
-                showColumnChooser: true,
-                selectionSettings: {
-                    type: 'Multiple'   // or 'Single'
-                },
+           try {
 
-                //enablePersistence: true,
-                toolbar: ['ColumnChooser',
-                    'Search',
-                    'ExcelExport',
-                    'PdfExport',
-                    {
-                        text: 'New Appointment',
-                        tooltipText: 'New Appointment',
-                        prefixIcon: 'e-icons e-plus',
-                        id: 'newAppointment'
-                    }, {
-                        text: 'Delete Appointment',
-                        tooltipText: 'Delete Appointment',
-                        prefixIcon: 'e-icons e-delete',
-                        id: 'deleteAppointment'
-                    }],
-                //height: 480,
-                columns: columns,
-                allowExcelExport: true,
-                allowPdfExport: true,
-                toolbarClick: function (args) {
-                    if (args.item.id === patientGrid + '_excelexport') {
-                        grid.excelExport({
-                            fileName: `Appointments_${formatDate(new Date())}.xlsx`,
-                            // Export current view records (respects filtering/sorting/paging)
-                            exportType: 'AllPages', // or 'AllPages'
-                        });
-                    }
-                    if (args.item.id === 'deleteAppointment') {
-                        deleteAppointment();
-                    }
+               const appointments = await DBHandler.fetchEntityRecords(
+                   'dentalappointment',
+                   'dentalappointment.*, dentaldetails.name as PatientName,dentaldetails.uhid as uhid',
+                   'dentalappointment.treatmentdate',
+                   'desc',
+                   filter, true,
+                   0,
+                   joinCondition
+               );
 
-                    if (args.item.id === patientGrid + '_pdfexport') {
-                        grid.pdfExport({
-                            fileName: `Appointments_${formatDate(new Date())}.pdf`,
-                            exportType: 'CurrentPage', // or 'AllPages'
-                            theme: { header: { fontColor: '#000000' } },
-                            // Optional: page setup
-                            pageOrientation: 'Landscape', // 'Portrait' | 'Landscape'
-                            pageSize: 'LETTER',          // e.g., 'A4', 'LETTER'
-                            header: {
-                                fromTop: 0,
-                                height: 120,
-                                contents: [
-                                    {
-                                        type: 'Text',
-                                        value: 'Dental Treatment',
-                                        position: { x: 280, y: 0 },
-                                        style: {
-                                            textBrushColor: '#C25050',
-                                            fontSize: 25
-                                        },
-                                    }
-                                ]
-                            },
-                            footer: {
-                                fromBottom: 160,
-                                height: 150,
-                                contents: [
-                                    {
-                                        type: 'PageNumber',
-                                        pageNumberType: 'Arabic',
-                                        format: 'Page {$current} of {$total}',
-                                        position: { x: 520, y: 10 },
-                                        style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' }
-                                    }
-                                ]
-                            }
-                        });
-                    }
+               appointmentsMain = appointments || [];
 
-                    if (args.item.id === 'newAppointment') {
-                        openNewAppointment(); // your function
-                    }
-                }
-            });
-            grid.appendTo('#' + patientGrid);
-        }
+               let serialNumber = 1;
+
+               const rows = appointmentsMain.map(a => ({
+                   id: a.id,
+                   srno: serialNumber++,
+                   treatmentdate: normalizeDate(a.treatmentdate),
+                   nextappointment: normalizeDate(a.nextappointment),
+                   treatment: a.treatment || '',
+                   practitioner: a.practitioner || '',
+                   createdon: normalizeDate(a.createdon),
+                   modifiedon: normalizeDate(a.modifiedon),
+                   PatientName: a.PatientName,
+                   appointmenttype: a.appointmenttype || '',
+                   uhid: a.uhid || ''
+               }));
+
+               grid.dataSource = rows;
+               grid.refresh();
+
+           } catch (err) {
+               console.error('Failed to load appointments:', err);
+           }
+       }
+
+       function normalizeDate(val) {
+           if (!val) return null;
+           const d = val instanceof Date ? val : new Date(val);
+           return isNaN(d) ? null : d;
+       }
+
+       $(document).ready(async () => {
+           applyDatePicker();
+           initGrid(columns, 'patientAppointmentGrid');
+           loadAppointments2();
+       });
 
 
-        async function deleteAppointment() {
-            const selectedRecords = grid.getSelectedRecords();
-            if (!selectedRecords.length) {
-                return alert("Please select appointment(s) to delete");
-            }
+       async function addAppointment() {
 
-            if (!confirm(`Delete ${selectedRecords.length} appointment(s)?`)) {
-                return;
-            }
-            for (const record of selectedRecords) {
-                await deleteRecordData('dentalappointment', record.id, false, true);
-            }
-            loadAppointments2();
-        }
+           const appointmentDate = getDatePickerValue('appointmentDate'),
+               nextAppointment = getDatePickerValue('nextAppointment'),
+               treatment = document.getElementById('appointmentTreatment').value.trim(),
+               practitioner = document.getElementById('appointmentPractitioner').value,
+               appointmentType = document.getElementById('appointmentType').value,
+               patientId = document.getElementById('patientguid').value,
+               btn = event.target;
+
+           if (!appointmentDate) return alert("Please select appointment date");
+           if (!treatment) return alert("Please enter treatment");
+           if (!practitioner) return alert("Please select practitioner");
+           if (!appointmentType) return alert("Please select appointment type");
+
+           try {
+
+               btn.disabled = true;
+               btn.innerText = "Saving...";
+
+               await DBHandler.submitRecordData('dentalappointment', {
+                   treatmentdate: appointmentDate,
+                   nextappointment: nextAppointment || null,
+                   treatment,
+                   practitioner,
+                   appointmenttype: appointmentType,
+                   patientid: patientId,
+               }, editingId, false);
+
+               bootstrap.Modal.getInstance(
+                   document.getElementById('appointmentModal')
+               ).hide();
+
+               editingId = null;
+
+               document.querySelector('#appointmentModal .modal-title').innerText = "Add Appointment";
+
+               document.getElementById('patientDetail').value = '';
+               document.getElementById('patientid').value = '';
+               document.getElementById('patientguid').value = '';
+               document.getElementById('appointmentTreatment').value = '';
+               document.getElementById('appointmentPractitioner').value = '';
+               document.getElementById('appointmentType').value = '';   // ✅ RESET
+               document.getElementById('appointmentDate').ej2_instances[0].value = new Date();
+               document.getElementById('nextAppointment').ej2_instances[0].value = null;
+
+               loadAppointments2();
+
+           } catch (err) {
+               console.error(err);
+               alert("Failed to save appointment");
+           } finally {
+               btn.disabled = false;
+               btn.innerText = "Save Appointment";
+           }
+       }
 
 
-        function openNewAppointment() {
-            const modal = new bootstrap.Modal(
-                document.getElementById('appointmentModal'),
-                { backdrop: 'static', keyboard: false }
-            );
-            modal.show();
-        }
+       async function patientSearchClick() {
 
-        function saveAppointment() {
-            const form = document.getElementById('appointmentForm');
+           const patientId = document.getElementById("patientid").value;
 
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
+           if (patientId === "") {
+               document.getElementById("patientDetail").value = "";
+               return;
+           }
 
-            alert('Appointment saved (demo)');
+           try {
+               showLoader();
+               var filter = "uhid='" + patientId + "'";
 
-            bootstrap.Modal.getInstance(
-                document.getElementById('appointmentModal')
-            ).hide();
+               let data = await DBHandler.fetchEntityRecord(
+                   "dentaldetails",
+                   "name,age,phonenumber,createdon,id",
+                   filter
+               );
 
-            loadAppointments2(); // refresh grid
-        }
+               if (data && data.length > 0) {
+                   data = data.sort((a, b) => new Date(b.createdon) - new Date(a.createdon))[0];
+                   //const gender = (data.gender || "").toLowerCase() === "female"
+                   //    ? "Female"
+                   //    : "Male";
+                   document.getElementById("patientguid").value = data.id;
+                   document.getElementById("patientDetail").value =
+                       `${data.name || ""} | Age: ${data.age || ""} | ${data.phonenumber || ""}`;
 
+               } else {
+                   alert("No patient found with the provided ID.");
+               }
+               hideLoader();
+           } catch (err) {
+               console.error(err);
+               alert("Error fetching patient details");
+               hideLoader();
+           }
+       }
+   </script>
 
-        function actionTemplate() {
-            return (
-                '<div class="d-grid gap-2 d-md-flex justify-content-md-center">' +
-                '<button class="btn btn-sm btn-warning" onclick="onEditAppointment(this)">Edit</button>' +
-                '<button class="btn btn-sm btn-danger ms-2" onclick="onDeleteAppointment(this)">Delete</button>' +
-                '</div>'
-            );
-        }
-
-        async function loadAppointments2() {
-
-            const startDate = getDatePickerValue('startDate');
-            const endDate = getDatePickerValue('endDate');
-
-            if (!startDate || !endDate) return;
-
-            const start = startDate + " 00:00:00";
-            const end = endDate + " 23:59:59";
-
-            const filter = `dentalappointment.treatmentdate >= '${start}'
-                    AND dentalappointment.treatmentdate <= '${end}'`;
-
-            var joinCondition = "LEFT JOIN dentaldetails ON dentaldetails.id = dentalappointment.patientid";
-
-            try {
-
-                const appointments = await DBHandler.fetchEntityRecords(
-                    'dentalappointment',
-                    'dentalappointment.*, dentaldetails.name as PatientName',
-                    'dentalappointment.treatmentdate',
-                    'desc',
-                    filter, true,
-                    0,
-                    joinCondition
-                );
-
-                appointmentsMain = appointments || [];
-
-                let serialNumber = 1;
-
-                const rows = appointmentsMain.map(a => ({
-                    id: a.id,
-                    srno: serialNumber++,
-                    treatmentdate: normalizeDate(a.treatmentdate),
-                    nextappointment: normalizeDate(a.nextappointment),
-                    treatment: a.treatment || '',
-                    practitioner: a.practitioner || '',
-                    createdon: normalizeDate(a.createdon),
-                    modifiedon: normalizeDate(a.modifiedon),
-                    PatientName: a.PatientName,
-                    appointmenttype: a.appointmenttype || ''
-                }));
-
-                grid.dataSource = rows;
-                grid.refresh();
-
-            } catch (err) {
-                console.error('Failed to load appointments:', err);
-            }
-        }
-
-        function normalizeDate(val) {
-            if (!val) return null;
-            const d = val instanceof Date ? val : new Date(val);
-            return isNaN(d) ? null : d;
-        }
-
-        $(document).ready(async () => {
-            applyDatePicker('startDate,endDate,appointmentDate', new Date());
-            applyDatePicker('nextAppointment');
-            initGrid(columns, 'patientAppointmentGrid');
-            loadAppointments2();
-        });
-
-        function applyDatePicker(ids, value) {
-            ids.split(',').forEach(id => {
-                id = id.trim();
-                if (id && document.getElementById(id)) {
-                    new ej.calendars.DatePicker({
-                        placeholder: "Select a date",
-                        format: "dd-MMM-yyyy",
-                        value: value || null
-                    }).appendTo('#' + id);
-                }
-            });
-        }
-
-        function getDatePickerValue(id) {
-            const picker = document.getElementById(id)?.ej2_instances?.[0];
-            if (!picker?.value) return null;
-
-            const intl = new ej.base.Internationalization();
-
-            return intl.formatDate(picker.value, {
-                format: "yyyy-MM-dd"
-            });
-        }
-
-        async function addAppointment() {
-
-            const appointmentDate = getDatePickerValue('appointmentDate'),
-                nextAppointment = getDatePickerValue('nextAppointment'),
-                treatment = document.getElementById('appointmentTreatment').value.trim(),
-                practitioner = document.getElementById('appointmentPractitioner').value,
-                appointmentType = document.getElementById('appointmentType').value,
-                btn = event.target;
-
-            if (!appointmentDate) return alert("Please select appointment date");
-            if (!treatment) return alert("Please enter treatment");
-            if (!practitioner) return alert("Please select practitioner");
-            if (!appointmentType) return alert("Please select appointment type");
-
-            try {
-
-                btn.disabled = true;
-                btn.innerText = "Saving...";
-
-                await DBHandler.submitRecordData('dentalappointment', {
-                    treatmentdate: appointmentDate,
-                    nextappointment: nextAppointment || null,
-                    treatment,
-                    practitioner,
-                    appointmenttype: appointmentType   // ✅ NEW FIELD
-                }, null, false);
-
-                bootstrap.Modal.getInstance(
-                    document.getElementById('appointmentModal')
-                ).hide();
-
-                document.getElementById('appointmentTreatment').value = '';
-                document.getElementById('appointmentPractitioner').value = '';
-                document.getElementById('appointmentType').value = '';   // ✅ RESET
-                document.getElementById('appointmentDate').ej2_instances[0].value = new Date();
-                document.getElementById('nextAppointment').ej2_instances[0].value = null;
-
-                loadAppointments2();
-
-            } catch (err) {
-                console.error(err);
-                alert("Failed to save appointment");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Save Appointment";
-            }
-        }
-    </script>
-
-    <style>
-        #patientAppointmentGrid_toolbarItems {
-            height: 10px !important;
-        }
-    </style>
-
+   <style>
+       #patientAppointmentGrid_toolbarItems {
+           height: 10px !important;
+       }
+   </style>
+   
 </body>
 
 </html>
