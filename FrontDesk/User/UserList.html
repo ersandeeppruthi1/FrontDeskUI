@@ -105,7 +105,7 @@
                             <select id="isSystemAdministrator" class="form-control">
                                 <option value="">Select Type</option>
                                 <option value="1">Yes</option>
-                                <option value="2">No</option>
+                                <option value="0">No</option>
                             </select>
                         </div>
 
@@ -160,7 +160,7 @@
             let grid;
             let appointmentsMain = [];
             var columns = [
-                { type: 'checkbox', width: 50 }, 
+                { type: 'checkbox', width: 50 },
                 { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
                 { field: 'username', headerText: 'User Name', width: 130 },
                 { field: 'displayname', headerText: 'Display Name', width: 220 },
@@ -231,8 +231,8 @@
                         }
 
                         if (args.item.id === 'deleteUser') {
-                        deleteUser();
-                    }
+                            deleteUser();
+                        }
                         if (args.item.id === patientGrid + '_pdfexport') {
                             grid.pdfExport({
                                 fileName: `Appointments_${formatDate(new Date())}.pdf`,
@@ -281,19 +281,19 @@
             }
 
             async function deleteUser() {
-            const selectedRecords = grid.getSelectedRecords();
-            if (!selectedRecords.length) {
-                return alert("Please select User(s)) to delete");
-            }
+                const selectedRecords = grid.getSelectedRecords();
+                if (!selectedRecords.length) {
+                    return alert("Please select User(s)) to delete");
+                }
 
-            if (!confirm(`Delete ${selectedRecords.length} appointment(s)?`)) {
-                return;
+                if (!confirm(`Delete ${selectedRecords.length} appointment(s)?`)) {
+                    return;
+                }
+                for (const record of selectedRecords) {
+                    await deleteRecordData('masteruser', record.id, false, true);
+                }
+                loadAppointments2();
             }
-            for (const record of selectedRecords) {
-                await deleteRecordData('masteruser', record.id, false, true);
-            }
-            loadAppointments2();
-        }
 
 
             function openNewUser() {
@@ -360,8 +360,8 @@
                         username: a.username,
                         createdon: normalizeDate(a.createdon),
                         modifiedon: normalizeDate(a.modifiedon),
-                        issystemadministrator: a.issystemadministrator || '',
-                        
+                        issystemadministrator: a.issystemadministrator == 1 ? "Yes" : "No",
+
                     }));
 
                     grid.dataSource = rows;
@@ -414,8 +414,9 @@
                 const
                     displayName = document.getElementById('displayName').value.trim(),
                     userName = document.getElementById('userName').value.trim(),
-                    isSystemAdministrator= document.getElementById('isSystemAdministrator').value,
-                    btn = event.target;
+                    isSystemAdministrator = document.getElementById('isSystemAdministrator').value,
+                    password = document.getElementById('password').value.trim();
+                btn = event.target;
 
                 if (!displayName) return alert("Please enter display name");
                 if (!userName) return alert("Please enter user name");
@@ -423,15 +424,19 @@
                 if (!password) return alert("Please enter Password");
 
                 try {
-
-                    btn.disabled = true;
-                    btn.innerText = "Saving...";
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.innerText = "Saving...";
+                    }
 
                     await DBHandler.submitRecordData('masteruser', {
                         displayname: displayName,
                         username: userName,
                         issystemadministrator: isSystemAdministrator,
+                        password: password,
                     }, null, false);
+
+                    await loadAppointments2();
 
                     bootstrap.Modal.getInstance(
                         document.getElementById('userModal')
@@ -443,14 +448,15 @@
                     document.getElementById('isSystemAdministrator').value = '';
                     document.getElementById('disabledUser').value = '';
 
-                    loadAppointments2();
 
                 } catch (err) {
                     console.error(err);
                     alert("Failed to save User");
                 } finally {
-                    btn.disabled = false;
-                    btn.innerText = "Save User";
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = "Save User";
+                    }
                 }
             }
         </script>
