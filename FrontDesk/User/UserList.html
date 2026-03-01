@@ -65,7 +65,7 @@
 </head>
 
 <body>
-    <div id="patientAppointmentGrid"></div>
+    <div id="userGrid"></div>
 
     <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -81,7 +81,15 @@
                     <form id="userForm" class="row g-5">
                         <div class="col-md-6">
                             <label>User Name<span style="color: red;">*</span>:</label>
-                            <input class="form-control" id="userName" dbcolumnname="userName" />
+                            <div class="input-group">
+                                <input class="form-control" id="userName" dbcolumnname="userName" />
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary" id="go-button"
+                                        onclick="fetchUserByUsername(document.getElementById('userName').value)">
+                                        <i class="fas fa-arrow-right"></i> <!-- Go icon -->
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label>Display Name<span style="color: red;">*</span>:</label>
@@ -103,8 +111,8 @@
                         <div class="col-md-6 col-12">
                             <label>Permission or Role <span class="text-danger">*</span></label>
                             <div class="input-group-append">
-                                <input id="permissonid" class="form-control" datatype="dropdown"
-                                    dbcolumnname="permissonid" />
+                                <input id="permissionid" class="form-control" datatype="dropdown"
+                                    dbcolumnname="permissionid" />
                                 <button class="btn btn-outline-secondary px-3" type="button">
                                     <i class="fa fa-plus"></i>
                                 </button>
@@ -139,7 +147,7 @@
                                             }
                                         }
                                     });
-                                    listObj.appendTo('#permissonid');
+                                    listObj.appendTo('#permissionid');
                                 });
                             });
                         </script>
@@ -185,6 +193,15 @@
                                 });
                             });
                         </script>
+                        <!-- <div class="col-md-6 col-12">
+                                <label>Default Page <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input id="defaultpageid"
+                                        class="form-control"
+                                        datatype="dropdown"
+                                        dbcolumnname="defaultpageid" />
+                                </div>
+                            </div> -->
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -199,7 +216,7 @@
         <script>
 
             let grid;
-            let appointmentsMain = [];
+            let usersMain = [];
             var columns = [
                 { type: 'checkbox', width: 50 },
                 { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
@@ -211,7 +228,7 @@
                 { field: 'modifiedon', headerText: 'Modifiedon', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
                 { field: 'createdby', headerText: 'CreatedBy', width: 130, visible: false },
                 { field: 'modifiedby', headerText: 'Modofiedon', width: 130, visible: false },
-                { field: 'permissonid', headerText: 'Permisson Id', width: 130, visible: false },
+                { field: 'permissionid', headerText: 'Permisson Id', width: 130, visible: false },
                 { field: 'menuid', headerText: 'Menu Id', width: 130, visible: false },
                 { field: 'permissonjson', headerText: 'Permisson Json', width: 130, visible: false },
                 { field: 'menujson', headerText: 'Menu Json', width: 130, visible: false },
@@ -240,8 +257,16 @@
                     //enablePersistence: true,
                     toolbar: ['ColumnChooser',
                         'Search',
-                        'ExcelExport',
-                        'PdfExport',
+                        {
+                            prefixIcon: 'e-icons e-excelexport',
+                            tooltipText: 'Export Excel',
+                            id: 'excelExport'
+                        },
+                        {
+                            prefixIcon: 'e-icons e-pdfexport',
+                            tooltipText: 'Export PDF',
+                            id: 'pdfExport'
+                        },
                         {
                             prefixIcon: 'e-icons e-refresh',
                             tooltipText: 'Refresh Grid',
@@ -252,7 +277,14 @@
                             tooltipText: 'New User',
                             prefixIcon: 'e-icons e-plus',
                             id: 'newUser'
-                        }, {
+                        },
+                        {
+                            text: 'Edit User',
+                            tooltipText: 'Edit User',
+                            prefixIcon: 'e-icons e-edit',
+                            id: 'editUser',
+                        },
+                        {
                             text: 'Delete',
                             tooltipText: 'Delete',
                             prefixIcon: 'e-icons e-delete',
@@ -319,14 +351,57 @@
                         }
 
                         if (args.item.id === 'refreshGrid') {
-                       loadAppointments2();
-                   }
+                            loadUserGrid();
+                        }
                         if (args.item.id === 'newUser') {
-                            openNewUser(); // your function
+                            openUserModal(); // your function
+                        }
+
+                        if (args.item.id === 'editUser') {
+                            editUser();
                         }
                     }
                 });
                 grid.appendTo('#' + patientGrid);
+            }
+
+            let editingId = null;
+
+            function editUser() {
+
+                const selectedRecords = grid.getSelectedRecords();
+                if (selectedRecords.length !== 1) {
+                    return alert("Please select one user to edit");
+                }
+                const record = selectedRecords[0];
+                editingId = record.id;
+
+                document.getElementById('isSystemAdministrator').value = record.issystemadministrator;
+                document.getElementById('displayName').value = record.displayname;
+                document.getElementById('password').value = record.password;
+                document.getElementById('permissionid').value = record.permissionid;
+                document.getElementById('menuid').value = record.menuid;
+
+                document.getElementById('userName').value = record.username;
+                if (record.username && record.username != "") {
+                    fetchUserByUsername(record.username);
+                }
+
+                // document.getElementById('appointmentDate').ej2_instances[0].value = record.treatmentdate;
+                // document.getElementById('nextAppointment').ej2_instances[0].value = record.nextappointment;
+
+                // ✅ Update modal title
+                document.querySelector('#userModal .modal-title').innerText = "Edit User";
+
+                openUserModal();
+            }
+
+            function toggleEditButton() {
+                const selected = grid.getSelectedRecords();
+                const editBtn = grid.toolbarModule.toolbar.items
+                    .find(item => item.id === "editUser");
+                if (!editBtn) return;
+                editBtn.disabled = selected.length !== 1;  // ✅ only one row
             }
 
             async function deleteUser() {
@@ -341,35 +416,17 @@
                 for (const record of selectedRecords) {
                     await deleteRecordData('masteruser', record.id, false, true);
                 }
-                loadAppointments2();
+                loadUserGrid();
             }
 
 
-            function openNewUser() {
+            function openUserModal() {
                 const modal = new bootstrap.Modal(
                     document.getElementById('userModal'),
                     { backdrop: 'static', keyboard: false }
                 );
                 modal.show();
             }
-
-            // function saveUser() {debugger;
-            //     const form = document.getElementById('userForm');
-
-            //     if (!form.checkValidity()) {
-            //         form.reportValidity();
-            //         return;
-            //     }
-
-            //     alert('User saved (demo)');
-
-            //     bootstrap.Modal.getInstance(
-            //         document.getElementById('userModal')
-            //     ).hide();
-
-            //     loadAppointments2(); // refresh grid
-            // }
-
 
             function actionTemplate() {
                 return (
@@ -380,14 +437,14 @@
                 );
             }
 
-            async function loadAppointments2() {
+            async function loadUserGrid() {
 
                 const filter = '';
 
                 const joinCondition = "";
                 try {
 
-                    const appointments = await DBHandler.fetchEntityRecords(
+                    const users = await DBHandler.fetchEntityRecords(
                         'masteruser',
                         'masteruser.*, masteruser.displayname as DisplayName',
                         'masteruser.createdon',
@@ -397,11 +454,11 @@
                         joinCondition
                     );
 
-                    appointmentsMain = appointments || [];
+                    usersMain = users || [];
 
                     let serialNumber = 1;
 
-                    const rows = appointmentsMain.map(a => ({
+                    const rows = usersMain.map(a => ({
                         id: a.id,
                         srno: serialNumber++,
                         displayname: a.displayname,
@@ -409,7 +466,8 @@
                         createdon: normalizeDate(a.createdon),
                         modifiedon: normalizeDate(a.modifiedon),
                         issystemadministrator: a.issystemadministrator == 1 ? "Yes" : "No",
-
+                        permissionid: a.permissionid,
+                        menuid: a.menuid,
                     }));
 
                     grid.dataSource = rows;
@@ -427,10 +485,10 @@
             }
 
             $(document).ready(async () => {
-                applyDatePicker('startDate,endDate,appointmentDate', new Date());
-                applyDatePicker('nextAppointment');
-                initGrid(columns, 'patientAppointmentGrid');
-                loadAppointments2();
+                // applyDatePicker('startDate,endDate,appointmentDate', new Date());
+                // applyDatePicker('nextAppointment');
+                initGrid(columns, 'userGrid');
+                loadUserGrid();
             });
 
             function applyDatePicker(ids, value) {
@@ -463,13 +521,17 @@
                     displayName = document.getElementById('displayName').value.trim(),
                     userName = document.getElementById('userName').value.trim(),
                     isSystemAdministrator = document.getElementById('isSystemAdministrator').value,
-                    password = document.getElementById('password').value.trim();
+                    password = document.getElementById('password').value.trim(),
+                    permissionId = document.getElementById('permissionid').value,
+                    menuId = document.getElementById('menuid').value;
                 btn = event.target;
 
                 if (!displayName) return alert("Please enter display name");
                 if (!userName) return alert("Please enter user name");
                 if (!isSystemAdministrator) return alert("Please select system administrator");
                 if (!password) return alert("Please enter Password");
+                if (!permissionId) return alert("Please select Permission Id");
+                if (!menuId) return alert("Please select Menu Id");
 
                 try {
                     if (btn) {
@@ -478,23 +540,31 @@
                     }
 
                     await DBHandler.submitRecordData('masteruser', {
-                        displayname: displayName,
                         username: userName,
-                        issystemadministrator: isSystemAdministrator,
+                        displayname: displayName,
                         password: password,
-                    }, null, false);
+                        issystemadministrator: isSystemAdministrator,
+                        permissionid: permissionId,
+                        menuid: menuId,
+                        defaultpage:'user',
+                        disableduser: false,
+                        menujson:`{menu1:${menuId}}`,
+                    }, editingId, false);
 
-                    await loadAppointments2();
+                    await loadUserGrid();
 
                     bootstrap.Modal.getInstance(
                         document.getElementById('userModal')
                     ).hide();
 
+                    editingId = null;
+
                     document.getElementById('userName').value = '';
                     document.getElementById('displayName').value = '';
                     document.getElementById('password').value = '';   // ✅ RESET
                     document.getElementById('isSystemAdministrator').value = '';
-                    document.getElementById('disabledUser').value = '';
+                    document.getElementById('permissionid').value = '';
+                    document.getElementById('menuid').value = '';
 
 
                 } catch (err) {
@@ -507,10 +577,49 @@
                     }
                 }
             }
+
+            async function fetchUserByUsername(username) {
+                try {
+                    // ✅ Show loader while fetching
+                    showLoader();
+
+                    // Build filter string for DB query
+                    const filter = "username='" + username + "'";
+
+                    // Fetch records from masteruser entity
+                    let data = await DBHandler.fetchEntityRecord(
+                        "masteruser",                          // entity/table name
+                        "id,username,displayname,issystemadministrator,permissionid,menuid", // columns you want
+                        filter                                 // filter condition
+                    );
+
+                    // If data found
+                    if (data && data.length > 0) {
+                        const userRecord = data[0]
+                        console.log(userRecord)
+                        document.getElementById("displayName").value = userRecord.displayname;
+                        document.getElementById("isSystemAdministrator").value = userRecord.issystemadministrator;
+                        document.getElementById("password").value = userRecord.password;
+                        document.getElementById("permissionid").value = userRecord.permissionid;
+                        document.getElementById("menuid").value = userRecord.menuid;
+                    } else {
+                        alert("No user found with the provided username.");
+                        return null;
+                    }
+                } catch (err) {
+                    console.error("Error fetching user:", err);
+                    alert("Error fetching user details");
+                    return null;
+                } finally {
+                    // ✅ Always hide loader
+                    hideLoader();
+                }
+            }
+
         </script>
 
         <style>
-            #patientAppointmentGrid_toolbarItems {
+            #userGrid_toolbarItems {
                 height: 10px !important;
             }
         </style>

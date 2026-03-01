@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220259"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <script src="https://apisit.vsservices.in/JS/ej2.min.vk02bdl5ad.js"></script>
+
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://free-crm.csharpasp.net/lib/syncfusion/css/bootstrap5.dvnzgvxkcq.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.css">
+    <link href="https://apisit.vsservices.in/css/app.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="container2">
+        <div id="webResourceGrid"></div>
+    </div>
+
+    <div class="modal fade" id="webResourceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Web Resource</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="webResourceForm" class="row g-5">
+                        <div class="col-md-6">
+                            <label>Name<span style="color: red;">*</span>:</label>
+                            <input class="form-control" id="name" dbcolumnname="name" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Resource Type</label>
+                            <select id="resourcetype" class="form-control">
+                                <option value="">Select Type</option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Title<span style="color: red;">*</span>:</label>
+                            <input type="text" class="form-control" id="title" dbcolumnname="title" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Page Title<span style="color: red;">*</span>:</label>
+                            <input type="text" class="form-control" id="pagetitle" dbcolumnname="pagetitle" />
+                        </div>
+                            <div class="col-md-12">
+                                <label>Resource Text<span style="color:red">*</span></label>
+                                <textarea id="resourcetext" class="form-control" rows="4"></textarea>
+                            </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="saveWebResourceModal()">Add Web
+                        Resource</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+
+            let grid;
+            let resourcesMain = [];
+            var columns = [
+                { type: 'checkbox', width: 50 },   // ✅ MUST be first
+                { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+                { field: 'name', headerText: ' Name', width: 220 },
+                { field: 'resourcetype', headerText: 'Resource Type', width: 130 },
+                { field: 'title', headerText: 'Title', width: 220 },
+                { field: 'id', headerText: 'Id', width: 220 },
+                { field: 'pagetitle', headerText: 'Page Title', width: 160, visible: false },
+                { field: 'createdon', headerText: 'Created On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
+                { field: 'modifiedon', headerText: 'Modified On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, visible: false, allowPdfExport: false },
+                { field: 'resourcetext', headerText: 'Resource Text', width: 150, visible: false, allowPdfExport: false },
+                // { field: 'uhid', headerText: 'uhid', width: 150, visible: false, allowPdfExport: false },
+
+                // { headerText: 'Actions', width: 160, textAlign: 'Center', template: actionTemplate, allowPdfExport: false, visible: false }
+            ];
+
+            function initGrid(columns, webResourceGrid) {
+                ej.grids.Grid.Inject(
+                    ej.grids.Filter,
+                    ej.grids.Group,
+                    ej.grids.Page,
+                    ej.grids.Sort,
+                    ej.grids.Toolbar,
+                    ej.grids.ColumnChooser,
+                    ej.grids.ExcelExport,
+                    ej.grids.PdfExport
+                );
+
+                grid = new ej.grids.Grid({
+                    dataSource: [],
+                    allowPaging: true,
+                    pageSettings: { pageSize: 10 },
+                    allowSorting: true,
+                    allowFiltering: true,
+                    filterSettings: { type: 'Excel' },
+                    showColumnChooser: true,
+                    selectionSettings: {
+                        type: 'Multiple'   // or 'Single'
+                    },
+                    rowSelected: toggleEditButton,
+                    rowDeselected: toggleEditButton,
+                    //enablePersistence: true,
+                    toolbar: ['ColumnChooser',
+                        'Search',
+                        {
+                            prefixIcon: 'e-icons e-excelexport',
+                            tooltipText: 'Export Excel',
+                            id: 'excelExport'
+                        },
+                        {
+                            prefixIcon: 'e-icons e-pdfexport',
+                            tooltipText: 'Export PDF',
+                            id: 'pdfExport'
+                        },
+                        {
+                            prefixIcon: 'e-icons e-refresh',
+                            tooltipText: 'Refresh Grid',
+                            id: 'refreshGrid'
+                        },
+                        {
+                            text: 'Add WebResource',
+                            tooltipText: 'Add WebResource',
+                            prefixIcon: 'e-icons e-plus',
+                            id: 'addWebResource'
+                        },
+                        { text: 'Edit WebResource',
+                         prefixIcon: 'e-icons e-edit',
+                          id: 'editWebResource',
+                           disabled: true },
+                        {
+                            text: 'Delete WebResource',
+                            tooltipText: 'Delete Appointment',
+                            prefixIcon: 'e-icons e-delete',
+                            id: 'deleteWebResource'
+                        }],
+                    //height: 480,
+                    columns: columns,
+                    allowExcelExport: true,
+                    allowPdfExport: true,
+                    toolbarClick: function (args) {
+                        if (args.item.id === 'excelExport') {
+                            grid.excelExport({
+                                fileName: `Web Resources_${formatDate(new Date())}.xlsx`,
+                                // Export current view records (respects filtering/sorting/paging)
+                                exportType: 'AllPages', // or 'AllPages'
+                            });
+                        }
+                        if (args.item.id === 'deleteWebResource') {
+                            deleteWebResource();
+                        }
+
+                        if (args.item.id === 'pdfExport') {
+                            grid.pdfExport({
+                                fileName: `Web Resources_${formatDate(new Date())}.pdf`,
+                                exportType: 'CurrentPage',
+                                pageOrientation: 'Landscape',
+                                pageSize: 'LETTER'
+                            });
+                        }
+
+                        // ✅ REFRESH BUTTON CLICK
+                        if (args.item.id === 'refreshGrid') {
+                            loadWebResource();
+                        }
+
+                        if (args.item.id === 'addWebResource') {
+                            const webResourceModal = document.getElementById('webResourceModal')
+                            webResourceForm.reset();
+                            WebResourceModal(); // your function
+                            document.querySelector('#webResourceModal .modal-title').innerText = "Add WebResource";
+                        }
+
+                        if (args.item.id === 'editWebResource') {
+                            editWebResource();
+                        }
+                    }
+                });
+                grid.appendTo('#' + webResourceGrid);
+            }
+
+            let editingId = null;
+
+            function editWebResource() {
+                const selectedRecords = grid.getSelectedRecords();
+                if (selectedRecords.length !== 1) {
+                    return alert("Please select one web resource to edit");
+                }
+                const record = selectedRecords[0];
+                editingId = record.id;
+
+                document.getElementById('name').value = record.name;
+                document.getElementById('resourcetype').value = record.resourcetype;
+                document.getElementById('title').value = record.title;
+                document.getElementById('pagetitle').value = record.pagetitle;
+                document.getElementById('resourcetext').value = record.resourcetext;
+
+                document.querySelector('#webResourceModal .modal-title').innerText = "Edit Webresource";
+
+                WebResourceModal();
+            }
+
+            function toggleEditButton() {
+                const selected = grid.getSelectedRecords();
+                const editBtn = grid.toolbarModule.toolbar.items
+                    .find(item => item.id === "editWebResource");
+                if (!editBtn) return;
+                editBtn.disabled = selected.length !== 1;  // ✅ only one row
+            }
+
+            async function deleteWebResource() {
+                const selectedRecords = grid.getSelectedRecords();
+                if (!selectedRecords.length) {
+                    return alert("Please select web resource(s) to delete");
+                }
+                if (!confirm(`Delete ${selectedRecords.length} web resource(s)?`)) {
+                    return;
+                }
+                const ids = selectedRecords.map(r => r.id);
+                await deleteRecordData('webresource', ids, true, true);
+                loadWebResource();
+            }
+
+
+            function WebResourceModal() {
+                const webResourceForm = document.getElementById('webResourceForm')
+                const modal = new bootstrap.Modal(
+                    webResourceModal,
+                    { backdrop: 'static', keyboard: false }
+                );
+                modal.show();
+            }
+
+            function actionTemplate() {
+                return (
+                    '<div class="d-grid gap-2 d-md-flex justify-content-md-center">' +
+                    '<button class="btn btn-sm btn-warning" onclick="onEditAppointment(this)">Edit</button>' +
+                    '<button class="btn btn-sm btn-danger ms-2" onclick="onDeleteAppointment(this)">Delete</button>' +
+                    '</div>'
+                );
+            }
+
+            async function loadWebResource() {
+
+                const filter = '';
+                const joinCondition = "";
+
+                try {
+
+                    const resources = await DBHandler.fetchEntityRecords(
+                        'webresource',
+                        'webresource.*',
+                        'webresource.createdon',
+                        'desc',
+                        filter, true,
+                        0,
+                        joinCondition
+                    );
+
+                    resourcesMain = resources || [];
+
+                    let serialNumber = 1;
+
+                    const rows = resourcesMain.map(a => ({
+                        id: a.id,
+                        srno: serialNumber++,
+                        name: a.name,
+                        resourcetype: a.resourcetype,
+                        createdon: normalizeDate(a.createdon),
+                        modifiedon: normalizeDate(a.modifiedon),
+                        title: a.title,
+                        pagetitle:a.pagetitle,
+                        resourcetext: a.resourcetext,
+                    }));
+
+                    grid.dataSource = rows;
+                    grid.refresh();
+
+                } catch (err) {
+                    console.error('Failed to load web resources:', err);
+                }
+            }
+
+            function normalizeDate(val) {
+                if (!val) return null;
+                const d = val instanceof Date ? val : new Date(val);
+                return isNaN(d) ? null : d;
+            }
+
+            $(document).ready(async () => {
+                // applyDatePicker();
+                initGrid(columns, 'webResourceGrid');
+                loadWebResource();
+            });
+
+
+            async function saveWebResourceModal() {
+                const
+                    name = document.getElementById('name').value.trim(),
+                    resourceType = document.getElementById('resourcetype').value,
+                    title = document.getElementById('title').value.trim(),
+                    pageTitle = document.getElementById('pagetitle').value.trim(),
+                    resourceText = document.getElementById('resourcetext').value.trim();
+                    btn=event.target;
+
+                if (!name) return alert("Please enter name");
+                if (!resourceType) return alert("Please salect resourcetype ");
+                if (!title) return alert("Please enter title");
+                if (!pageTitle) return alert("Please enter pagetitle");
+                if (!resourceText) return alert("Please enter resource text");
+
+                try {
+
+                    btn.disabled = true;
+                    btn.innerText = "Saving...";
+
+                    await DBHandler.submitRecordData('webresource', {
+                        name,
+                        resourcetype: resourceType,
+                        title,
+                        pagetitle: pageTitle,
+                        resourcetext: resourceText
+                    }, editingId, false);
+
+                    bootstrap.Modal.getInstance(
+                        document.getElementById('webResourceModal')
+                    ).hide();
+
+                    editingId = null;
+
+                    document.getElementById('name').value = '';
+                    document.getElementById('resourcetype').value = '';
+                    document.getElementById('title').value = '';
+                    document.getElementById('pagetitle').value = '';
+                    document.getElementById('resourcetext').value = '';
+
+                    loadWebResource();
+
+                } catch (err) {
+                    console.error(err);
+                    alert("Failed to save web resource");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = "Save web resource";
+                }
+            }
+
+        </script>
+
+        <style>
+            #webResourceGrid_toolbarItems {
+                height: 10px !important;
+            }
+        </style>
+
+</body>
+
+</html>
