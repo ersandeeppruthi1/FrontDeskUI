@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container2">
+        <div id="roomGrid"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="roomModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Room</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="roomForm">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label>Room Number <span class="text-danger">*</span></label>
+                                <input type="text" id="rm_roomnumber" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Name</label>
+                                <input type="text" id="rm_name" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Capacity</label>
+                                <input type="number" id="rm_capacity" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Room Type</label>
+                                <select id="rm_roomtype" class="form-control">
+                                    <option value="">Select Type</option>
+                                    <option value="Single">Single</option>
+                                    <option value="Double">Double</option>
+                                    <option value="Suite">Suite</option>
+                                    <option value="Deluxe">Deluxe</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Floor Number</label>
+                                <input type="number" id="rm_floornumber" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Price Per Night</label>
+                                <input type="number" step="0.01" id="rm_pricepernight" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Booking Status</label>
+                                <select id="rm_bookingstatus" class="form-control">
+                                    <option value="Available">Available</option>
+                                    <option value="Booked">Booked</option>
+                                    <option value="Maintenance">Maintenance</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveRoom()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        let roomGrid;
+        let editingRoomId = null;
+        let roomModal;
+
+        var roomColumns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
+            { field: 'roomnumber', headerText: 'Room No', width: 120 },
+            { field: 'name', headerText: 'Name', width: 150 },
+            { field: 'capacity', headerText: 'Capacity', width: 100 },
+            { field: 'roomtype', headerText: 'Type', width: 120 },
+            { field: 'floornumber', headerText: 'Floor', width: 100 },
+            { field: 'pricepernight', headerText: 'Price/Night', width: 120, format: 'C2' },
+            { field: 'bookingstatus', headerText: 'Status', width: 130 },
+            { field: 'isactive', headerText: 'Active', width: 100 },
+            {
+                field: 'createdon',
+                headerText: 'Created On',
+                type: 'date',
+                format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' },
+                width: 160
+            },
+            { field: 'id', visible: false }
+        ];
+
+        // INIT GRID
+        function initRoomGrid() {
+
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            roomGrid = new ej.grids.Grid({
+
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                pageSettings: { pageSize: 10 },
+
+                toolbar: [
+                    'Search',
+                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' }
+                ],
+
+                columns: roomColumns,
+
+                toolbarClick: function (args) {
+
+                    if (args.item.id === 'new') {
+                        clearRoomForm();
+                        editingRoomId = null;
+                        document.querySelector('#roomModal .modal-title').innerText = "Add Room";
+                        openRoomModal();
+                    }
+
+                    if (args.item.id === 'edit') {
+                        editRoom();
+                    }
+
+                    if (args.item.id === 'delete') {
+                        deleteRoom();
+                    }
+                }
+            });
+
+            roomGrid.appendTo('#roomGrid');
+        }
+
+
+        // LOAD DATA
+        async function loadRooms() {
+
+            const data = await DBHandler.fetchEntityRecords(
+                'roommaster',
+                '*',
+                'createdon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
+
+            let sr = 1;
+
+            roomGrid.dataSource = (data || []).map(r => ({
+                ...r,
+                srno: sr++,
+                isactiveid: r.isactive,
+                isactive: r.isactive == 1 ? "Yes" : "No"
+            }));
+
+            roomGrid.refresh();
+        }
+
+
+        // MODAL
+        function openRoomModal() {
+            if (!roomModal) {
+                roomModal = new bootstrap.Modal(document.getElementById('roomModal'));
+            }
+            roomModal.show();
+        }
+
+        function clearRoomForm() {
+            document.getElementById('roomForm').reset();
+        }
+
+
+        // EDIT
+        function editRoom() {
+
+            const selected = roomGrid.getSelectedRecords();
+            if (selected.length !== 1) {
+                return alert("Select one record to edit");
+            }
+
+            const r = selected[0];
+            editingRoomId = r.id;
+
+            document.getElementById('rm_roomnumber').value = r.roomnumber;
+            document.getElementById('rm_name').value = r.name;
+            document.getElementById('rm_capacity').value = r.capacity;
+            document.getElementById('rm_roomtype').value = r.roomtype;
+            document.getElementById('rm_floornumber').value = r.floornumber;
+            document.getElementById('rm_pricepernight').value = r.pricepernight;
+            document.getElementById('rm_bookingstatus').value = r.bookingstatus;
+
+            document.querySelector('#roomModal .modal-title').innerText = "Edit Room";
+
+            openRoomModal();
+        }
+
+
+        // SAVE
+        async function saveRoom() {
+
+            const roomnumber = document.getElementById('rm_roomnumber').value.trim();
+            if (!roomnumber) return alert("Room Number is required");
+
+            await DBHandler.submitRecordData('roommaster', {
+
+                roomnumber: roomnumber,
+                name: document.getElementById('rm_name').value,
+                capacity: document.getElementById('rm_capacity').value,
+                roomtype: document.getElementById('rm_roomtype').value,
+                floornumber: document.getElementById('rm_floornumber').value,
+                pricepernight: document.getElementById('rm_pricepernight').value,
+                bookingstatus: document.getElementById('rm_bookingstatus').value,
+
+            }, editingRoomId, false);
+
+            bootstrap.Modal.getInstance(document.getElementById('roomModal')).hide();
+
+            editingRoomId = null;
+            loadRooms();
+        }
+
+
+        // DELETE
+        async function deleteRoom() {
+
+            const selected = roomGrid.getSelectedRecords();
+            if (!selected.length) return alert("Select record(s) to delete");
+
+            if (!confirm("Delete selected rooms?")) return;
+
+            const ids = selected.map(r => r.id);
+
+            await deleteRecordData('roommaster', ids, true, true);
+
+            loadRooms();
+        }
+        $(document).ready(function () {
+            initRoomGrid();
+            loadRooms();
+        });
+    </script>
+  <style>
+        #roomGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
+
+
+</body>
+
+</html>
