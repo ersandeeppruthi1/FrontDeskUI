@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+    <div class="container2 mt-4">
+        <div id="permissionGrid"></div>
+    </div>
+
+    <div class="modal fade" id="permissionModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Master Permission</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+
+                    <form id="permissionForm">
+
+                        <div class="row">
+
+                            <div class="col-md-12 mb-3">
+                                <label>Permission Name</label>
+                                <input id="permission_name" type="text" class="form-control" required />
+                            </div>
+
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="permission-details-section">
+                                    <h6><i class="fa fa-shield-alt"></i> Permission Details</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped" id="permissionDetailsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 40%;">Entity</th>
+                                                    <th style="width: 15%;">Read</th>
+                                                    <th style="width: 15%;">Write</th>
+                                                    <th style="width: 15%;">Delete</th>
+                                                    <th style="width: 15%;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="permissionDetailsBody">
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-success" onclick="addPermissionRow()">
+                                        <i class="fa fa-plus"></i> Add Permission
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="savePermission()">Save</button>
+                    <button class="btn btn-success" onclick="saveAndNew()">Save and New</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        let permissionGrid;
+        let editingPermissionId = null;
+        let entityList = [];
+        let permissionDetailCounter = 0;
+
+        async function initPermissionGrid() {
+
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport,
+                ej.grids.ColumnChooser
+            );
+
+            permissionGrid = new ej.grids.Grid({
+
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                allowExcelExport: true,
+                allowPdfExport: true,
+                filterSettings: { type: 'Excel' },
+                showColumnChooser: true,
+
+                toolbar: [
+                    'Search',
+                    'ColumnChooser',
+                    { prefixIcon: 'e-icons e-excelexport', tooltipText: 'Export Excel', id: 'excelExport' },
+                    { prefixIcon: 'e-icons e-pdfexport', tooltipText: 'Export PDF', id: 'pdfExport' },
+                    { prefixIcon: 'e-icons e-refresh', tooltipText: 'Refresh', id: 'refreshGrid' },
+                    { text: 'New Permission', prefixIcon: 'e-icons e-plus', id: 'newPermission' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editPermission' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deletePermission' }
+                ],
+
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'name', headerText: 'Permission Name', width: 300 },
+                    { field: 'createdon', headerText: 'Created On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 180 },
+                    { field: 'modifiedon', headerText: 'Modified On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 180, visible: false }
+                ],
+
+                toolbarClick: async function (args) {
+
+                    if (args.item.id === 'excelExport') {
+                        permissionGrid.excelExport({ fileName: `MasterPermissions_${Date.now()}.xlsx`, exportType: 'AllPages' });
+                    }
+
+                    if (args.item.id === 'pdfExport') {
+                        permissionGrid.pdfExport({ fileName: `MasterPermissions_${Date.now()}.pdf`, pageOrientation: 'Landscape' });
+                    }
+
+                    if (args.item.id === 'refreshGrid') {
+                        loadPermissions();
+                    }
+
+                    if (args.item.id === 'newPermission') {
+                        openPermissionModal();
+                    }
+
+                    if (args.item.id === 'editPermission') {
+                        editPermission();
+                    }
+
+                    if (args.item.id === 'deletePermission') {
+                        deletePermission();
+                    }
+
+                }
+
+            });
+
+            permissionGrid.appendTo('#permissionGrid');
+
+            await loadPermissions();
+            await loadEntities();
+        }
+
+        async function loadPermissions() {
+
+            const data = await DBHandler.fetchEntityRecords(
+                'masterpermission',
+                'masterpermission.*',
+                'masterpermission.modifiedon',
+                'desc',
+                '',
+                true,
+                0
+            );
+
+            permissionGrid.dataSource = data || [];
+
+        }
+
+        async function loadEntities() {
+            try {
+                const entities = await DBHandler.fetchEntityRecords(
+                    'entities',
+                    'entities.*',
+                    'entities.name',
+                    'asc',
+                    '',
+                    true,
+                    0
+                );
+                entityList = entities || [];
+            } catch (error) {
+                console.error('Error loading entities:', error);
+                entityList = [];
+            }
+        }
+
+        function addPermissionRow(entityId = '', read = false, write = false, deletePermission = false) {
+            permissionDetailCounter++;
+            const rowId = 'perm_' + permissionDetailCounter;
+            
+            let entityOptions = '<option value="">Select Entity</option>';
+            entityList.forEach(entity => {
+                const selected = entity.id == entityId ? 'selected' : '';
+                entityOptions += `<option value="${entity.id}" ${selected}>${entity.name}</option>`;
+            });
+
+            const rowHtml = `
+                <tr data-row-id="${rowId}">
+                    <td>
+                        <select class="form-control entity-select" data-row-id="${rowId}">
+                            ${entityOptions}
+                        </select>
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" class="form-check-input read-permission" ${read ? 'checked' : ''} data-row-id="${rowId}">
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" class="form-check-input write-permission" ${write ? 'checked' : ''} data-row-id="${rowId}">
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" class="form-check-input delete-permission" ${deletePermission ? 'checked' : ''} data-row-id="${rowId}">
+                    </td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removePermissionRow('${rowId}')">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            
+            document.getElementById('permissionDetailsBody').insertAdjacentHTML('beforeend', rowHtml);
+        }
+
+        function removePermissionRow(rowId) {
+            const row = document.querySelector(`tr[data-row-id="${rowId}"]`);
+            if (row) {
+                row.remove();
+            }
+        }
+
+        function clearPermissionDetails() {
+            document.getElementById('permissionDetailsBody').innerHTML = '';
+            permissionDetailCounter = 0;
+        }
+
+        function getPermissionDetailsAsJson() {
+            const rows = document.querySelectorAll('#permissionDetailsBody tr');
+            const permissions = [];
+            
+            rows.forEach(row => {
+                const entitySelect = row.querySelector('.entity-select');
+                const readCheck = row.querySelector('.read-permission');
+                const writeCheck = row.querySelector('.write-permission');
+                const deleteCheck = row.querySelector('.delete-permission');
+                
+                if (entitySelect.value) {
+                    const entityName = entitySelect.options[entitySelect.selectedIndex].text;
+                    permissions.push({
+                        entityId: entitySelect.value,
+                        entityName: entityName,
+                        read: readCheck.checked,
+                        write: writeCheck.checked,
+                        delete: deleteCheck.checked
+                    });
+                }
+            });
+            
+            return JSON.stringify(permissions);
+        }
+
+        function loadPermissionDetailsFromJson(permissionJson) {
+            clearPermissionDetails();
+            
+            if (!permissionJson) return;
+            
+            try {
+                const permissions = JSON.parse(permissionJson);
+                permissions.forEach(perm => {
+                    addPermissionRow(perm.entityId, perm.read, perm.write, perm.delete);
+                });
+            } catch (error) {
+                console.error('Error parsing permission JSON:', error);
+            }
+        }
+
+        function openPermissionModal() {
+
+            editingPermissionId = null;
+
+            document.getElementById('permissionForm').reset();
+            clearPermissionDetails();
+
+            const modal = new bootstrap.Modal(permissionModal, { focus: false });
+            modal.show();
+
+            ej.base.enableRipple(true);
+
+            document.querySelector('#permissionModal .modal-title').innerText = "Add Master Permission";
+
+        }
+
+        function editPermission() {
+
+            const selected = permissionGrid.getSelectedRecords();
+
+            if (selected.length !== 1)
+                return alert("Select one permission to edit");
+
+            const record = selected[0];
+
+            openPermissionModal();
+
+            editingPermissionId = record.id;
+
+            setTimeout(() => {
+
+                document.querySelector('#permissionModal .modal-title').innerText = "Edit Master Permission";
+
+                document.getElementById('permission_name').value = record.name || '';
+                
+                // Load permission details from JSON
+                loadPermissionDetailsFromJson(record.permissionjson);
+
+            }, 300);
+
+        }
+
+        async function savePermission() {
+
+            const name = document.getElementById('permission_name').value;
+
+            if (!name)
+                return alert("Permission name is required");
+
+            const permissionJson = getPermissionDetailsAsJson();
+
+            if (!permissionJson || permissionJson === '[]')
+                return alert("Please add at least one permission detail");
+
+            await DBHandler.submitRecordData('masterpermission', {
+
+                name: name,
+                permissionjson: permissionJson
+
+            }, editingPermissionId, false);
+
+            bootstrap.Modal.getInstance(permissionModal).hide();
+
+            loadPermissions();
+
+        }
+
+        async function saveAndNew() {
+
+            const name = document.getElementById('permission_name').value;
+
+            if (!name)
+                return alert("Permission name is required");
+
+            const permissionJson = getPermissionDetailsAsJson();
+
+            if (!permissionJson || permissionJson === '[]')
+                return alert("Please add at least one permission detail");
+
+            await DBHandler.submitRecordData('masterpermission', {
+
+                name: name,
+                permissionjson: permissionJson
+
+            }, editingPermissionId, false);
+
+            // Clear fields for new entry
+            document.getElementById('permission_name').value = '';
+            clearPermissionDetails();
+
+            // Reset editing mode
+            editingPermissionId = null;
+            document.querySelector('#permissionModal .modal-title').innerText = "Add Master Permission";
+
+            // Refresh grid data
+            loadPermissions();
+
+        }
+
+        async function deletePermission() {
+
+            const selected = permissionGrid.getSelectedRecords();
+
+            if (!selected.length)
+                return alert("Select record(s) to delete");
+
+            if (!confirm("Delete selected permission(s)?"))
+                return;
+
+            const ids = selected.map(r => r.id);
+
+            await deleteRecordData('masterpermission', ids, true, true);
+
+            loadPermissions();
+
+        }
+
+        $(document).ready(() => {
+
+            initPermissionGrid();
+
+            $('#permissionModal').on('shown.bs.modal', function () {
+                $(document).off('focusin.modal');
+            });
+
+        });
+
+    </script>
+
+    <style>
+        #permissionGrid_toolbarItems {
+            height: 10px !important;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        #permissionDetailsTable {
+            font-size: 14px;
+        }
+
+        #permissionDetailsTable th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        #permissionDetailsTable td {
+            vertical-align: middle;
+        }
+
+        .entity-select {
+            font-size: 13px;
+        }
+
+        .form-check-input {
+            transform: scale(1.1);
+            margin: 0 auto;
+            display: block;
+        }
+
+        .permission-details-section {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</body>
+
+</html>
