@@ -90,7 +90,7 @@
 
         <!-- Room Stats -->
         <div class="row g-4">
-            <div class="col-md-3">
+            <div class="col-md-2-4">
                 <div class="card shadow-sm border-0 text-center">
                     <div class="card-body">
                         <h6 class="text-muted">Total Rooms</h6>
@@ -100,7 +100,7 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2-4">
                 <div class="card shadow-sm border-0 text-center bg-success text-white">
                     <div class="card-body">
                         <h6>Available Rooms</h6>
@@ -110,7 +110,7 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2-4">
                 <div class="card shadow-sm border-0 text-center bg-danger text-white">
                     <div class="card-body">
                         <h6>Booked Rooms</h6>
@@ -121,12 +121,22 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2-4">
                 <div class="card shadow-sm border-0 text-center bg-warning text-dark">
                     <div class="card-body">
                         <h6>Under Maintenance</h6>
                         <h2 id="maintenanceRooms" class="fw-bold dashboard-link dashboard-number"
                             data-type="maintenance" onclick="showBookingList(this.dataset.type)">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2-4">
+                <div class="card shadow-sm border-0 text-center bg-dark text-white">
+                    <div class="card-body">
+                        <h6>Overdue Check-outs</h6>
+                        <h2 id="overdueRooms" class="fw-bold dashboard-link dashboard-number" data-type="overdue"
+                            onclick="showBookingList(this.dataset.type)">0</h2>
                     </div>
                 </div>
             </div>
@@ -697,6 +707,10 @@
             // Animate maintenance rooms count
             animateNumber("maintenanceRooms", maintenanceRoomsCount);
 
+            // Calculate overdue check-outs from cache
+            const overdueCount = getOverdueCheckOutsCount();
+            animateNumber("overdueRooms", overdueCount, true);
+
             // Calculate today's check-ins from cache
             const todayCheckInsCount = getTodayCheckInsCount();
             animateNumber("todayCheckIns", todayCheckInsCount, true);
@@ -715,12 +729,23 @@
                 filteredBookings = getTodayCheckOuts();
             } else if (type === "booked") {
                 filteredBookings = getActiveBookings();
+            } else if (type === "overdue") {
+                filteredBookings = getOverdueBookings();
             }
 
             const container = document.getElementById("bookingListContainer");
             container.innerHTML = "";
 
             filteredBookings.forEach(item => {
+                // Calculate overdue hours for overdue bookings
+                let overdueInfo = "";
+                if (type === "overdue" && item.checkoutdatetime) {
+                    const expectedCheckOut = new Date(item.checkoutdatetime);
+                    const now = new Date();
+                    const overdueDuration = Math.floor((now - expectedCheckOut) / (1000 * 60 * 60)); // hours
+                    overdueInfo = `<br><small class="text-danger"><strong>Overdue by: ${overdueDuration} hour(s)</strong></small>`;
+                }
+
                 container.innerHTML += `
             <li class="list-group-item">
                 <div class="d-flex justify-content-between align-items-start">
@@ -730,8 +755,10 @@
                         <small>Mobile: ${item.mobilenumber || 'N/A'}</small><br>
                         <small>Room: ${item.roomnumber || 'N/A'}</small><br>
                         <small>Check-in: ${new Date(item.checkindatetime).toLocaleString()}</small><br>
+                        ${item.checkoutdatetime ? `<small>Expected Check-out: ${new Date(item.checkoutdatetime).toLocaleString()}</small><br>` : ''}
                         <small>Guests: ${(item.gentscount || 0)} Gents, ${(item.ladiescount || 0)} Ladies</small>
                         ${item.referencedetail ? `<br><small>Reference: ${item.referencedetail}</small>` : ''}
+                        ${overdueInfo}
                     </div>
                     <div class="text-end">
                         <small class="text-muted">Status: ${item.bookingstatus == 1 ? 'Active' : 'Completed'}</small>
@@ -746,7 +773,8 @@
                 type === "checkin" ? "Today's Check-ins" :
                     type === "checkout" ? "Today's Check-outs" :
                         type === "booked" ? "Currently Booked Rooms" :
-                            "Bookings";
+                            type === "overdue" ? "Overdue Check-outs" :
+                                "Bookings";
 
             const modal = new bootstrap.Modal(document.getElementById('bookingListModal'), {
                 focus: false
@@ -1000,6 +1028,62 @@
             });
 
             return uniqueBookings.filter(booking => booking.bookingstatus === 1);
+        }
+
+        // Helper function to get overdue check-outs count
+        function getOverdueCheckOutsCount() {
+            if (!bookingsCacheLoaded) return 0;
+            const now = new Date();
+
+            // Get unique bookings by ID to avoid duplicates from JOINs
+            const uniqueBookings = [];
+            const seenIds = new Set();
+
+            bookingsCache.forEach(booking => {
+                if (!seenIds.has(booking.id)) {
+                    seenIds.add(booking.id);
+                    uniqueBookings.push(booking);
+                }
+            });
+
+            return uniqueBookings.filter(booking => {
+                // Check if booking is active and has expected checkout time
+                if (booking.bookingstatus !== 1 || !booking.checkoutdatetime) return false;
+                
+                // Parse expected checkout datetime
+                const expectedCheckOut = new Date(booking.checkoutdatetime);
+                
+                // Return true if current time is past expected checkout time
+                return now > expectedCheckOut;
+            }).length;
+        }
+
+        // Helper function to get overdue bookings
+        function getOverdueBookings() {
+            if (!bookingsCacheLoaded) return [];
+            const now = new Date();
+
+            // Get unique bookings by ID to avoid duplicates from JOINs
+            const uniqueBookings = [];
+            const seenIds = new Set();
+
+            bookingsCache.forEach(booking => {
+                if (!seenIds.has(booking.id)) {
+                    seenIds.add(booking.id);
+                    uniqueBookings.push(booking);
+                }
+            });
+
+            return uniqueBookings.filter(booking => {
+                // Check if booking is active and has expected checkout time
+                if (booking.bookingstatus !== 1 || !booking.checkoutdatetime) return false;
+                
+                // Parse expected checkout datetime
+                const expectedCheckOut = new Date(booking.checkoutdatetime);
+                
+                // Return true if current time is past expected checkout time
+                return now > expectedCheckOut;
+            });
         }
 
         function loadAvailableRooms() {
@@ -1366,6 +1450,29 @@
 
         .bg-warning:hover {
             background: linear-gradient(45deg, #ffc107, #ffcd3c) !important;
+        }
+
+        .bg-dark:hover {
+            background: linear-gradient(45deg, #343a40, #495057) !important;
+        }
+
+        /* Custom column for 5 cards layout */
+        .col-md-2-4 {
+            flex: 0 0 auto;
+            width: 20%;
+        }
+
+        @media (max-width: 768px) {
+            .col-md-2-4 {
+                width: 50%;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .col-md-2-4 {
+                width: 100%;
+            }
         }
 
         /* Loading shimmer effect */
