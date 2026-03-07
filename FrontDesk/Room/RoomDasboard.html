@@ -164,6 +164,24 @@
 
                     <div class="row g-3">
 
+                        <!-- Display Name -->
+                        <div class="col-md-6">
+                            <label class="form-label">Display Name <span class="text-danger">*</span></label>
+                            <input type="text" id="displayName" class="form-control" required>
+                        </div>
+
+                        <!-- Mobile Number -->
+                        <div class="col-md-6">
+                            <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
+                            <input type="tel" id="mobileNumber" class="form-control" required>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="col-md-12">
+                            <label class="form-label">Address</label>
+                            <textarea id="address" class="form-control" rows="2"></textarea>
+                        </div>
+
                         <!-- Check-In Date -->
                         <div class="col-md-6">
                             <label class="form-label">Check-In Date & Time</label>
@@ -176,9 +194,26 @@
                             <input type="datetime-local" id="checkOutDateTime" class="form-control">
                         </div>
 
+                        <!-- Guest Count -->
+                        <div class="col-md-6">
+                            <label class="form-label">Gents Count</label>
+                            <input type="number" id="gentsCount" class="form-control" min="0" value="0">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Ladies Count</label>
+                            <input type="number" id="ladiesCount" class="form-control" min="0" value="0">
+                        </div>
+
+                        <!-- Reference Detail -->
+                        <div class="col-md-12">
+                            <label class="form-label">Reference Detail</label>
+                            <input type="text" id="referenceDetail" class="form-control">
+                        </div>
+
                         <!-- Room Selection (MULTIPLE) -->
                         <div class="col-md-12">
-                            <label class="form-label ">Select Rooms</label><br>
+                            <label class="form-label">Select Rooms <span class="text-danger">*</span></label><br>
                             <select id="checkInRoom" class="form-select w-100" multiple size="1"></select>
                         </div>
 
@@ -251,7 +286,14 @@
         $(document).ready(new function () {
             document.getElementById("btnCheckIn").addEventListener("click", function () {
                 setCurrentCheckInTime();
-                document.getElementById("checkOutDateTime").value = "";   // 👈 clears checkout field
+                document.getElementById("checkOutDateTime").value = "";
+                // Clear form fields
+                document.getElementById("displayName").value = "";
+                document.getElementById("mobileNumber").value = "";
+                document.getElementById("address").value = "";
+                document.getElementById("gentsCount").value = "0";
+                document.getElementById("ladiesCount").value = "0";
+                document.getElementById("referenceDetail").value = "";
                 loadAvailableRooms();
                 new bootstrap.Modal(
                     document.getElementById('checkInModal')
@@ -283,13 +325,29 @@
 
                     const bookingId = crypto.randomUUID();
 
+                    // Get form values
+                    const displayName = document.getElementById("displayName").value.trim();
+                    const mobileNumber = document.getElementById("mobileNumber").value.trim();
+                    const address = document.getElementById("address").value.trim();
                     const checkInDate = document.getElementById("checkInDateTime").value;
                     const checkOutDate = document.getElementById("checkOutDateTime").value;
+                    const gentsCount = parseInt(document.getElementById("gentsCount").value) || 0;
+                    const ladiesCount = parseInt(document.getElementById("ladiesCount").value) || 0;
+                    const referenceDetail = document.getElementById("referenceDetail").value.trim();
 
                     const selectedRooms =
                         Array.from(document.getElementById("checkInRoom").selectedOptions)
                             .map(o => o.value);
 
+                    // Validation
+                    if (!displayName) {
+                        alert("Please enter Display Name");
+                        return;
+                    }
+                    if (!mobileNumber) {
+                        alert("Please enter Mobile Number");
+                        return;
+                    }
                     if (selectedRooms.length === 0) {
                         alert("Select at least one room");
                         return;
@@ -298,12 +356,15 @@
                     // 1️⃣ Create Main Booking
                     await DBHandler.submitRecordData('roombooking', {
                         bookingnumber: "BK-" + Date.now(),
+                        displayname: displayName,
+                        mobilenumber: mobileNumber,
+                        address: address,
                         checkindatetime: checkInDate,
                         checkoutdatetime: checkOutDate,
                         bookingstatus: 1,
-                        gentscount: 0,
-                        ladiescount: 0,
-                        referencedetail: '',
+                        gentscount: gentsCount,
+                        ladiescount: ladiesCount,
+                        referencedetail: referenceDetail,
                         feedbackrating: 0,
                         feedbackremarks: '',
                         donationamount: 0
@@ -447,14 +508,21 @@
 
             data.forEach(item => {
                 container.innerHTML += `
-            <li class="list-group-item d-flex justify-content-between">
-                <div>
-                    <strong>Booking: ${item.bookingnumber || 'N/A'}</strong><br>
-                    <small>Room: ${item.roomnumber || 'N/A'}</small><br>
-                    <small>Check-in: ${new Date(item.checkindatetime).toLocaleString()}</small>
-                </div>
-                <div class="text-end">
-                    <small class="text-muted">Status: ${item.bookingstatus == 1 ? 'Active' : 'Completed'}</small>
+            <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>Booking: ${item.bookingnumber || 'N/A'}</strong><br>
+                        <strong>Name: ${item.displayname || 'N/A'}</strong><br>
+                        <small>Mobile: ${item.mobilenumber || 'N/A'}</small><br>
+                        <small>Room: ${item.roomnumber || 'N/A'}</small><br>
+                        <small>Check-in: ${new Date(item.checkindatetime).toLocaleString()}</small><br>
+                        <small>Guests: ${(item.gentscount || 0)} Gents, ${(item.ladiescount || 0)} Ladies</small>
+                        ${item.referencedetail ? `<br><small>Reference: ${item.referencedetail}</small>` : ''}
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">Status: ${item.bookingstatus == 1 ? 'Active' : 'Completed'}</small>
+                        ${item.donationamount > 0 ? `<br><small class="text-success">Donation: ₹${item.donationamount}</small>` : ''}
+                    </div>
                 </div>
             </li>
         `;
