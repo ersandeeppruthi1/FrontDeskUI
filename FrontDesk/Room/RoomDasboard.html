@@ -283,8 +283,12 @@
     </div>
 
     <script>
+        // Local cache for rooms
+        let roomsCache = [];
+        let roomsCacheLoaded = false;
+
         function openCheckInModal() {
-            
+
             setCurrentCheckInTime();
             document.getElementById("checkOutDateTime").value = "";
             // Clear form fields
@@ -294,17 +298,24 @@
             document.getElementById("gentsCount").value = "0";
             document.getElementById("ladiesCount").value = "0";
             document.getElementById("referenceDetail").value = "";
-            new bootstrap.Modal(
-                document.getElementById('checkInModal')
-            ).show();
-            
+            const modal = new bootstrap.Modal(document.getElementById('checkInModal'), {
+                focus: false
+            });
+            modal.show();
+
             loadAvailableRooms();
-            
+
         }
 
         $(document).ready(new function () {
+            // Initialize rooms cache on page load
+            loadRoomsCache();
+            
             document.getElementById("btnCheckOut").addEventListener("click", function () {
-                new bootstrap.Modal(document.getElementById('checkOutModal')).show();
+                const modal = new bootstrap.Modal(document.getElementById('checkOutModal'), {
+                    focus: false
+                });
+                modal.show();
             });
             bindClickMethod();
 
@@ -547,7 +558,10 @@
                         type === "booked" ? "Currently Booked Rooms" :
                             "Bookings";
 
-            new bootstrap.Modal(document.getElementById('bookingListModal')).show();
+            const modal = new bootstrap.Modal(document.getElementById('bookingListModal'), {
+                focus: false
+            });
+            modal.show();
         }
 
         function setCurrentCheckInTime() {
@@ -564,8 +578,39 @@
             document.getElementById("checkInDateTime").value = formattedDate;
 
         }
-        function loadAvailableRooms() {
+        
+        async function loadRoomsCache() {
+            if (!roomsCacheLoaded) {
+                try {
+                    const rooms = await DBHandler.fetchEntityRecords(
+                        'roommaster',
+                        'id,roomnumber',
+                        'roomnumber',
+                        'asc',
+                        "isactive = 1",
+                        false,
+                        0
+                    );
+                    roomsCache = rooms || [];
+                    roomsCacheLoaded = true;
+                    console.log("Rooms cache loaded:", roomsCache.length, "rooms");
+                } catch (error) {
+                    console.error("Error loading rooms cache:", error);
+                    roomsCache = [];
+                }
+            }
+        }
 
+        function loadAvailableRooms() {
+            // Use cached rooms if available
+            if (roomsCacheLoaded && roomsCache.length > 0) {
+                checkInRoomDropdown.dataSource = roomsCache;
+                checkInRoomDropdown.dataBind();
+                console.log("Using cached rooms:", roomsCache.length, "rooms");
+                return;
+            }
+
+            // Load from database if cache is empty
             DBHandler.fetchEntityRecords(
                 'roommaster',
                 'id,roomnumber',
@@ -575,21 +620,33 @@
                 false,
                 0
             ).then(function (rooms) {
-
                 rooms = rooms || [];
+                
+                // Update cache
+                roomsCache = rooms;
+                roomsCacheLoaded = true;
 
                 // Update the dropdown data source
                 checkInRoomDropdown.dataSource = rooms;
                 checkInRoomDropdown.dataBind();
+                console.log("Loaded and cached rooms:", rooms.length, "rooms");
 
             }).catch(function (error) {
-
                 console.error("Error loading rooms:", error);
                 checkInRoomDropdown.dataSource = [];
                 checkInRoomDropdown.dataBind();
-
             });
+        }
 
+        // Function to refresh rooms cache when needed
+        function refreshRoomsCache() {
+            roomsCacheLoaded = false;
+            loadRoomsCache().then(() => {
+                if (checkInRoomDropdown) {
+                    checkInRoomDropdown.dataSource = roomsCache;
+                    checkInRoomDropdown.dataBind();
+                }
+            });
         }
     </script>
 
