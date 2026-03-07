@@ -94,6 +94,11 @@
                             </div>
 
                             <div class="col-md-6">
+                                <label>Web Resource (Optional)</label>
+                                <input id="menu_webresource" type="text" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6">
                                 <label>Name</label>
                                 <input type="text" id="menu_name" class="form-control" required>
                             </div>
@@ -135,8 +140,10 @@
 
         let parentDropdown;
         let userDropdown;
+        let webResourceDropdown;
 
         let usersData = [];
+        let webResourcesData = [];
         let sortOrderCache = {}; // Cache for sort order data by user and parent
 
         async function initMenuGrid() {
@@ -216,6 +223,7 @@
 
             await loadMenus();
             await loadUsers();
+            await loadWebResources();
         }
 
         async function loadUsers() {
@@ -226,6 +234,20 @@
                 'username',
                 'asc',
                 'isdeleted = 0',
+                false,
+                0
+            ) || [];
+
+        }
+
+        async function loadWebResources() {
+
+            webResourcesData = await DBHandler.fetchEntityRecords(
+                'webresource',
+                'id,name,resourcetype',
+                'name',
+                'asc',
+                'isactive = 1',
                 false,
                 0
             ) || [];
@@ -350,6 +372,7 @@
 
             if (parentDropdown) parentDropdown.destroy();
             if (userDropdown) userDropdown.destroy();
+            if (webResourceDropdown) webResourceDropdown.destroy();
 
             const modal = new bootstrap.Modal(menuModal, { focus: false });
             modal.show();
@@ -381,6 +404,43 @@
             });
 
             userDropdown.appendTo('#menu_user');
+
+            webResourceDropdown = new ej.dropdowns.DropDownList({
+
+                dataSource: webResourcesData,
+                fields: { text: 'name', value: 'id' },
+                placeholder: 'Select Web Resource (Optional)',
+                allowFiltering: true,
+                filterBarPlaceholder: 'Search Web Resource...',
+                filterType: 'Contains',
+                ignoreCase: true,
+
+                change: function (args) {
+                    if (args.value) {
+                        // Find the selected web resource
+                        const selectedResource = webResourcesData.find(wr => wr.id == args.value);
+                        if (selectedResource) {
+                            // Auto-fill name and link
+                            document.getElementById('menu_name').value = selectedResource.name;
+                            
+                            // Generate link based on resource type
+                            let typeStr = 'html';
+                            switch (parseInt(selectedResource.resourcetype)) {
+                                case 1: typeStr = 'javascript'; break;
+                                case 2: typeStr = 'html'; break;
+                                case 3: typeStr = 'css'; break;
+                                case 4: typeStr = 'json'; break;
+                                default: typeStr = 'html';
+                            }
+                            
+                            document.getElementById('menu_link').value = `/main.html?type=${typeStr}&webresourceid=${selectedResource.id}`;
+                        }
+                    }
+                }
+
+            });
+
+            webResourceDropdown.appendTo('#menu_webresource');
 
             parentDropdown = new ej.dropdowns.DropDownList({
 
