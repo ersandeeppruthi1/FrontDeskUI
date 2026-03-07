@@ -66,483 +66,366 @@
 
 <body>
 
-    <div class="container2 mt-4">
-        <div id="menuGrid"></div>
-    </div>
+<div class="container2 mt-4">
+    <div id="menuGrid"></div>
+</div>
 
+<div class="modal fade" id="menuModal" tabindex="-1">
+<div class="modal-dialog modal-xl modal-dialog-centered">
+
+<div class="modal-content">
+
+<div class="modal-header">
+<h5 class="modal-title">Add Menu Item</h5>
+<button type="button" class="close" data-bs-dismiss="modal">
+<span>&times;</span>
+</button>
+</div>
+
+<div class="modal-body">
+
+<form id="menuForm">
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>User</label>
+<input id="menu_user" type="text" class="form-control"/>
+</div>
+
+<div class="col-md-6">
+<label>Name</label>
+<input type="text" id="menu_name" class="form-control" required>
+</div>
+
+<div class="col-md-6">
+<label>Parent Menu</label>
+<input type="text" id="menu_parent" class="form-control">
+</div>
+
+<div class="col-md-6">
+<label>Type</label>
+<select id="menu_type" class="form-control">
+<option value="1">Create</option>
+<option value="2">View</option>
+</select>
+</div>
+
+<div class="col-md-6">
+<label>Link</label>
+<input type="text" id="menu_link" class="form-control">
+</div>
+
+<div class="col-md-6">
+<label>Sort Order</label>
+<input type="number" id="menu_sort" class="form-control">
+</div>
+
+</div>
+
+</form>
+
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-primary" onclick="saveMenu()">Save</button>
+<button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+
+let menuGrid;
+let editingMenuId = null;
+
+let parentDropdown;
+let userDropdown;
+
+let usersData = [];
+
+async function initMenuGrid(){
+
+ej.grids.Grid.Inject(
+ej.grids.Page,
+ej.grids.Sort,
+ej.grids.Filter,
+ej.grids.Toolbar,
+ej.grids.ExcelExport,
+ej.grids.PdfExport,
+ej.grids.ColumnChooser
+);
+
+menuGrid = new ej.grids.Grid({
+
+dataSource: [],
+allowPaging:true,
+allowSorting:true,
+allowFiltering:true,
+allowExcelExport:true,
+allowPdfExport:true,
+filterSettings:{type:'Excel'},
+showColumnChooser:true,
+
+toolbar:[
+'Search',
+'ColumnChooser',
+{prefixIcon:'e-icons e-excelexport',tooltipText:'Export Excel',id:'excelExport'},
+{prefixIcon:'e-icons e-pdfexport',tooltipText:'Export PDF',id:'pdfExport'},
+{prefixIcon:'e-icons e-refresh',tooltipText:'Refresh',id:'refreshGrid'},
+{text:'New Menu',prefixIcon:'e-icons e-plus',id:'newMenu'},
+{text:'Edit',prefixIcon:'e-icons e-edit',id:'editMenu'},
+{text:'Delete',prefixIcon:'e-icons e-delete',id:'deleteMenu'}
+],
+
+columns:[
+{type:'checkbox',width:50},
+{field:'name',headerText:'Menu Name',width:200},
+{field:'parentname',headerText:'Parent Menu',width:200},
+{field:'type',headerText:'Type',width:120},
+{field:'link',headerText:'Link',width:200},
+{field:'sortorder',headerText:'Order',width:100}
+],
 
-    <div class="modal fade" id="menuModal" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
+toolbarClick:async function(args){
 
-            <div class="modal-content">
+if(args.item.id==='excelExport'){
+menuGrid.excelExport({fileName:`Menus_${Date.now()}.xlsx`,exportType:'AllPages'});
+}
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Menu Item</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
+if(args.item.id==='pdfExport'){
+menuGrid.pdfExport({fileName:`Menus_${Date.now()}.pdf`,pageOrientation:'Landscape'});
+}
 
+if(args.item.id==='refreshGrid'){
+loadMenus();
+}
 
-                <div class="modal-body">
+if(args.item.id==='newMenu'){
+openMenuModal();
+}
 
-                    <form id="menuForm">
+if(args.item.id==='editMenu'){
+editMenu();
+}
 
-                        <div class="row">
+if(args.item.id==='deleteMenu'){
+deleteMenu();
+}
 
-                            <div class="col-md-6 mb-3">
-                                <label>User</label>
-                                <input id="menu_user" type="text" class="form-control" />
-                            </div>
+}
 
-                            <div class="col-md-6">
-                                <label>Name</label>
-                                <input type="text" id="menu_name" class="form-control" required>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Parent Menu</label>
-                                <input type="text" id="menu_parent" class="form-control">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Type</label>
-                                <select id="menu_type" class="form-control">
-                                    <option value="1">Create</option>
-                                    <option value="2">View</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Link</label>
-                                <input type="text" id="menu_link" class="form-control">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Sort Order</label>
-                                <input type="number" id="menu_sort" class="form-control">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Entity</label>
-                                <input id="menu_entity" type="text" class="form-control">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Form Id</label>
-                                <input id="menu_form" type="text" class="form-control">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>View Id</label>
-                                <input id="menu_view" type="text" class="form-control">
-                            </div>
-
-                        </div>
-
-                    </form>
-
-                </div>
-
-
-                <div class="modal-footer">
-                    <button class="btn btn-primary" onclick="saveMenu()">Save</button>
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+});
 
-            </div>
-        </div>
-    </div>
-    <script>
+menuGrid.appendTo('#menuGrid');
 
-        let menuGrid;
-        let editingMenuId = null;
-
-        let parentDropdown;
-        let entityDropdown;
-
-        let entitiesData = [];
-
-        let userDropdown;
-        let usersData = [];
-
-        async function initMenuGrid() {
-
-            ej.grids.Grid.Inject(
-                ej.grids.Page,
-                ej.grids.Sort,
-                ej.grids.Filter,
-                ej.grids.Toolbar,
-                ej.grids.ExcelExport,
-                ej.grids.PdfExport,
-                ej.grids.ColumnChooser
-            );
-
-            menuGrid = new ej.grids.Grid({
-
-                dataSource: [],
-                allowPaging: true,
-                allowSorting: true,
-                allowFiltering: true,
-                allowExcelExport: true,
-                allowPdfExport: true,
-                filterSettings: { type: 'Excel' },
-                showColumnChooser: true,
-
-                toolbar: [
-                    'Search',
-                    'ColumnChooser',
-                    {
-                        prefixIcon: 'e-icons e-excelexport',
-                        tooltipText: 'Export Excel',
-                        id: 'excelExport'
-                    },
-                    {
-                        prefixIcon: 'e-icons e-pdfexport',
-                        tooltipText: 'Export PDF',
-                        id: 'pdfExport'
-                    },
-                    {
-                        prefixIcon: 'e-icons e-refresh',
-                        tooltipText: 'Refresh',
-                        id: 'refreshGrid'
-                    },
-                    {
-                        text: 'New Menu',
-                        prefixIcon: 'e-icons e-plus',
-                        id: 'newMenu'
-                    },
-                    {
-                        text: 'Edit',
-                        prefixIcon: 'e-icons e-edit',
-                        id: 'editMenu'
-                    },
-
-                    {
-                        text: 'Delete',
-                        prefixIcon: 'e-icons e-delete',
-                        id: 'deleteMenu'
-                    },
-
-
-                ],
-
-                columns: [
-
-                    { type: 'checkbox', width: 50 },
-
-                    { field: 'name', headerText: 'Menu Name', width: 200 },
-
-                    { field: 'parentname', headerText: 'Parent Menu', width: 200 },
-
-                    { field: 'type', headerText: 'Type', width: 120 },
-
-                    { field: 'link', headerText: 'Link', width: 200 },
-
-                    { field: 'menuicon', headerText: 'Icon', width: 120 },
-
-                    { field: 'sortorder', headerText: 'Order', width: 100 }
-
-                ],
-
-                toolbarClick: async function (args) {
-
-                    if (args.item.id === 'excelExport') {
-                        menuGrid.excelExport({
-                            fileName: `Menus_${new Date().getTime()}.xlsx`,
-                            exportType: 'AllPages'
-                        });
-                    }
-
-                    if (args.item.id === 'pdfExport') {
-                        menuGrid.pdfExport({
-                            fileName: `Menus_${new Date().getTime()}.pdf`,
-                            pageOrientation: 'Landscape'
-                        });
-                    }
-
-                    if (args.item.id === 'refreshGrid') {
-                        loadMenus();
-                    }
-
-                    if (args.item.id === 'newMenu') {
-                        openMenuModal();
-                    }
-
-                    if (args.item.id === 'editMenu') {
-                        editMenu();
-                    }
+await loadMenus();
+await loadUsers();
+}
 
-                    if (args.item.id === 'deleteMenu') {
-                        deleteMenu();
-                    }
+async function loadUsers(){
 
-                }
+usersData = await DBHandler.fetchEntityRecords(
+'users',
+'id,username',
+'username',
+'asc',
+'isdeleted = 0',
+true,
+0
+) || [];
 
-            });
+}
 
-            menuGrid.appendTo('#menuGrid');
+async function loadParentMenus(userId){
 
-            await loadMenus();
-            await loadEntities();
-            await loadUsers();
-        }
+const parentMenus = await DBHandler.fetchEntityRecords(
+'menuitem',
+'id,name',
+'name',
+'asc',
+`userid = '${userId}'`,
+true,
+0
+) || [];
 
+parentDropdown.dataSource = parentMenus;
+parentDropdown.dataBind();
 
+}
 
-        async function loadUsers() {
+async function loadMenus(){
 
-            usersData = await DBHandler.fetchEntityRecords(
-                'users',
-                'id,username',
-                'username',
-                'asc',
-                'isdeleted = 0',
-                true,
-                0
-            ) || [];
-        }
+const joinCondition =
+"LEFT JOIN menuitem parent ON parent.id = menuitem.parentmenuid";
 
-        async function loadParentMenus(userId) {
+const data = await DBHandler.fetchEntityRecords(
+'menuitem',
+'menuitem.*, parent.name as parentname',
+'menuitem.sortorder',
+'asc',
+'',
+true,
+0,
+joinCondition
+);
 
-            const parentMenus = await DBHandler.fetchEntityRecords(
-                'menuitem',
-                'id,name',
-                'name',
-                'asc',
-                `userid = '${userId}'`,
-                true,
-                0
-            ) || [];
+menuGrid.dataSource = data || [];
 
-            parentDropdown.dataSource = parentMenus;
-            parentDropdown.dataBind();
-        }
-        async function loadMenus() {
+}
 
-            const joinCondition =
-                "LEFT JOIN menuitem parent ON parent.id = menuitem.parentmenuid";
+function openMenuModal(){
 
-            const data = await DBHandler.fetchEntityRecords(
-                'menuitem',
-                'menuitem.*, parent.name as parentname',
-                'menuitem.sortorder',
-                'asc',
-                '',
-                true,
-                0,
-                joinCondition
-            );
+editingMenuId = null;
 
-            menuGrid.dataSource = data || [];
+document.getElementById('menuForm').reset();
 
-        }
+if(parentDropdown) parentDropdown.destroy();
+if(userDropdown) userDropdown.destroy();
 
-        async function loadEntities() {
+const modal = new bootstrap.Modal(menuModal,{focus:false});
+modal.show();
 
-            entitiesData = await DBHandler.fetchEntityRecords(
-                'entities',
-                'id,name',
-                'name',
-                'asc'
-            ) || [];
+ej.base.enableRipple(true);
 
-        }
+userDropdown = new ej.dropdowns.DropDownList({
 
+dataSource:usersData,
+fields:{text:'username',value:'id'},
+placeholder:'Select User',
+allowFiltering:true,
+filterBarPlaceholder:'Search User...',
 
+change:function(args){
 
-        function openMenuModal() {
+if(args.value){
+loadParentMenus(args.value);
+}
 
-            editingMenuId = null;
+}
 
-            document.getElementById('menuForm').reset();
+});
 
-            if (parentDropdown) parentDropdown.destroy();
-            if (entityDropdown) entityDropdown.destroy();
-            if (userDropdown) userDropdown.destroy();
+userDropdown.appendTo('#menu_user');
 
-            const modal = new bootstrap.Modal(menuModal, { focus: false });
-            modal.show();
+parentDropdown = new ej.dropdowns.DropDownList({
 
-            ej.base.enableRipple(true);
-            userDropdown = new ej.dropdowns.DropDownList({
+dataSource:[],
+fields:{text:'name',value:'id'},
+placeholder:'Select Parent Menu',
+allowFiltering:true,
+filterBarPlaceholder:'Search Parent Menu...'
 
-                dataSource: usersData,
+});
 
-                fields: { text: 'username', value: 'id' },
+parentDropdown.appendTo('#menu_parent');
 
-                placeholder: 'Select User',
+document.querySelector('#menuModal .modal-title').innerText="Add Menu Item";
 
-                allowFiltering: true,
+}
 
-                filterBarPlaceholder: 'Search User...',
+function editMenu(){
 
-                change: function (args) {
+const selected = menuGrid.getSelectedRecords();
 
-                    if (args.value) {
-                        loadParentMenus(args.value);
-                    }
+if(selected.length!==1)
+return alert("Select one menu to edit");
 
-                }
+const record = selected[0];
 
-            });
+openMenuModal();
 
-            userDropdown.appendTo('#menu_user');
+editingMenuId = record.id;
 
-            parentDropdown = new ej.dropdowns.DropDownList({
+setTimeout(()=>{
 
-                dataSource: [],
+document.querySelector('#menuModal .modal-title').innerText="Edit Menu Item";
 
-                fields: { text: 'name', value: 'id' },
+document.getElementById('menu_name').value = record.name || '';
+document.getElementById('menu_link').value = record.link || '';
+document.getElementById('menu_sort').value = record.sortorder || '';
+document.getElementById('menu_type').value = record.type || '';
 
-                placeholder: 'Select Parent Menu',
+userDropdown.value = record.userid || null;
 
-                allowFiltering: true,
+loadParentMenus(record.userid);
 
-                filterBarPlaceholder: 'Search Parent Menu...'
+setTimeout(()=>{
+parentDropdown.value = record.parentmenuid || null;
+},300);
 
-            });
+},300);
 
-            parentDropdown.appendTo('#menu_parent');
+}
 
+async function saveMenu(){
 
-            entityDropdown = new ej.dropdowns.DropDownList({
+const name = document.getElementById('menu_name').value;
 
-                dataSource: entitiesData,
+if(!name)
+return alert("Name is required");
 
-                fields: { text: 'name', value: 'id' },
+await DBHandler.submitRecordData('menuitem',{
 
-                placeholder: 'Select Entity',
+name:name,
+userid:userDropdown.value,
+parentmenuid:parentDropdown.value,
+link:document.getElementById('menu_link').value,
+sortorder:document.getElementById('menu_sort').value,
+type:document.getElementById('menu_type').value
 
-                allowFiltering: true,
+},editingMenuId,false);
 
-                filterBarPlaceholder: 'Search Entity...',
+bootstrap.Modal.getInstance(menuModal).hide();
 
-            });
+loadMenus();
 
-            entityDropdown.appendTo('#menu_entity');
+}
 
-            document.querySelector('#menuModal .modal-title').innerText = "Add Menu Item";
-        }
+async function deleteMenu(){
 
+const selected = menuGrid.getSelectedRecords();
 
+if(!selected.length)
+return alert("Select record");
 
-        function editMenu() {
+if(!confirm("Delete selected menu(s)?"))
+return;
 
-            const selected = menuGrid.getSelectedRecords();
+const ids = selected.map(r=>r.id);
 
-            if (selected.length !== 1)
-                return alert("Select one menu to edit");
+await deleteRecordData('menuitem',ids,true,true);
 
-            document.querySelector('#menuModal .modal-title').innerText = "Edit Menu Item";
+loadMenus();
 
+}
 
-            loadParentMenus(record.userid);
+$(document).ready(()=>{
 
-            setTimeout(() => {
-                parentDropdown.value = record.parentmenuid;
-            }, 300);
-            openMenuModal();
+initMenuGrid();
 
-            const record = selected[0];
+$('#menuModal').on('shown.bs.modal',function(){
+$(document).off('focusin.modal');
+});
 
-            editingMenuId = record.id;
+});
 
-            document.getElementById('menu_name').value = record.name || '';
-            document.getElementById('menu_link').value = record.link || '';
-            document.getElementById('menu_sort').value = record.sortorder || '';
-            document.getElementById('menu_type').value = record.type || '';
+</script>
 
-            userDropdown.value = record.userid || null;
-            parentDropdown.value = record.parentmenuid || null;
-            entityDropdown.value = record.entityid || null;
+<style>
 
-        }
+#menuGrid_toolbarItems{
+height:10px!important;
+}
 
+label{
+font-weight:bold;
+}
 
+</style>
 
-        async function saveMenu() {
-
-            const name = document.getElementById('menu_name').value;
-
-            if (!name)
-                return alert("Name is required");
-
-
-            await DBHandler.submitRecordData('menuitem', {
-
-                name: name,
-
-                userid: userDropdown.value,
-
-                parentmenuid: parentDropdown.value,
-
-                link: document.getElementById('menu_link').value,
-
-                sortorder: document.getElementById('menu_sort').value,
-
-                type: document.getElementById('menu_type').value,
-
-                entityid: entityDropdown.value,
-
-                formid: document.getElementById('menu_form').value,
-
-                viewid: document.getElementById('menu_view').value
-
-            }, editingMenuId, false);
-
-
-            bootstrap.Modal.getInstance(menuModal).hide();
-
-            loadMenus();
-
-        }
-
-
-
-        async function deleteMenu() {
-
-            const selected = menuGrid.getSelectedRecords();
-
-            if (!selected.length)
-                return alert("Select record");
-
-            if (!confirm("Delete selected menu(s)?"))
-                return;
-
-            const ids = selected.map(r => r.id);
-
-            await deleteRecordData('menuitem', ids, true, true);
-
-            loadMenus();
-
-        }
-
-
-
-        $(document).ready(() => {
-
-            initMenuGrid();
-
-            $('#menuModal').on('shown.bs.modal', function () {
-
-                $(document).off('focusin.modal');
-
-            });
-
-        });
-
-    </script>
-
-    <style>
-        #menuGrid_toolbarItems {
-            height: 10px !important;
-        }
-
-        label {
-            font-weight: bold;
-        }
-    </style>
 </body>
 
 </html>
