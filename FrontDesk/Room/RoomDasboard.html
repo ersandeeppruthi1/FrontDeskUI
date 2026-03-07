@@ -77,7 +77,9 @@
                 <button class="btn btn-danger me-2" id="btnCheckOut" onclick="openCheckOutModal()">
                     <i class="bi bi-box-arrow-right"></i> Check-Out
                 </button>
+            </div>
 
+            <div>
                 <button class="btn btn-primary" id="btnRefresh" onclick="refreshDashboard()">
                     <i class="fas fa-sync-alt"></i> Refresh
                 </button>
@@ -123,8 +125,8 @@
                 <div class="card shadow-sm border-0 text-center bg-warning text-dark">
                     <div class="card-body">
                         <h6>Under Maintenance</h6>
-                        <h2 id="maintenanceRooms" class="fw-bold dashboard-link dashboard-number" data-type="maintenance"
-                            onclick="showBookingList(this.dataset.type)">0</h2>
+                        <h2 id="maintenanceRooms" class="fw-bold dashboard-link dashboard-number"
+                            data-type="maintenance" onclick="showBookingList(this.dataset.type)">0</h2>
                     </div>
                 </div>
             </div>
@@ -139,8 +141,9 @@
                 <div class="card shadow-sm border-0 text-center">
                     <div class="card-body">
                         <h6 class="text-muted">Today's Check-Ins</h6>
-                        <h2 id="todayCheckIns" class="fw-bold text-primary dashboard-link dashboard-number" data-type="checkin"
-                            defaultValue="currentDate" onclick="showBookingList(this.dataset.type)">0</h2>
+                        <h2 id="todayCheckIns" class="fw-bold text-primary dashboard-link dashboard-number"
+                            data-type="checkin" defaultValue="currentDate" onclick="showBookingList(this.dataset.type)">
+                            0</h2>
                     </div>
                 </div>
             </div>
@@ -149,8 +152,8 @@
                 <div class="card shadow-sm border-0 text-center">
                     <div class="card-body">
                         <h6 class="text-muted">Today's Check-Outs</h6>
-                        <h2 id="todayCheckOuts" class="fw-bold text-secondary dashboard-link dashboard-number" data-type="checkout"
-                            onclick="showBookingList(this.dataset.type)">0
+                        <h2 id="todayCheckOuts" class="fw-bold text-secondary dashboard-link dashboard-number"
+                            data-type="checkout" onclick="showBookingList(this.dataset.type)">0
                         </h2>
                     </div>
                 </div>
@@ -602,22 +605,35 @@
         // Animation utility functions
         function animateCounter(element, targetValue, duration = 1000) {
             const startValue = parseInt(element.innerText) || 0;
+
+            // Clean up any existing animation classes
+            element.classList.remove('animate-count', 'animate-glow', 'updating');
+
+            if (startValue === targetValue) {
+                // If values are the same, just apply the animation effect
+                element.classList.add('animate-count');
+                setTimeout(() => {
+                    element.classList.remove('animate-count');
+                }, 1400);
+                return;
+            }
+
             const increment = targetValue > startValue ? 1 : -1;
             const stepTime = Math.abs(Math.floor(duration / Math.abs(targetValue - startValue)));
-            
+
             // Add animation classes
             element.classList.add('updating');
-            
+
             let current = startValue;
             const timer = setInterval(() => {
                 current += increment;
                 element.innerText = current;
-                
+
                 if (current === targetValue) {
                     clearInterval(timer);
                     element.classList.remove('updating');
                     element.classList.add('animate-count');
-                    
+
                     // Remove animation class after animation completes
                     setTimeout(() => {
                         element.classList.remove('animate-count');
@@ -629,9 +645,12 @@
         function animateNumber(elementId, value, shouldGlow = false) {
             const element = document.getElementById(elementId);
             if (!element) return;
-            
+
             const currentValue = parseInt(element.innerText) || 0;
-            
+
+            // Always clean up existing animation classes first
+            element.classList.remove('animate-count', 'animate-glow', 'updating');
+
             if (currentValue !== value) {
                 // Show loading shimmer for very quick updates
                 if (Math.abs(value - currentValue) <= 3) {
@@ -645,12 +664,19 @@
                     // Use counter animation for larger changes
                     animateCounter(element, value, 800);
                 }
-                
+
                 if (shouldGlow) {
                     setTimeout(() => {
                         element.classList.add('animate-glow');
                         setTimeout(() => element.classList.remove('animate-glow'), 1500);
                     }, 900);
+                }
+            } else {
+                // Even if values are the same, ensure the value is set and apply glow animation if requested
+                element.innerText = value;
+                if (shouldGlow) {
+                    element.classList.add('animate-glow');
+                    setTimeout(() => element.classList.remove('animate-glow'), 1500);
                 }
             }
         }
@@ -1044,14 +1070,14 @@
             roomsCacheLoaded = false;
             totalRoomsCount = 0;
             maintenanceRoomsCount = 0;
-            loadRoomsCache().then(() => {
+            return loadRoomsCache().then(() => {
                 if (checkInRoomDropdown) {
                     filterRoomsForCheckIn(); // Use filter function for dynamic calculation
                 }
                 // Update dashboard with new counts (dashboard will calculate available rooms dynamically)
                 animateNumber("totalRooms", totalRoomsCount);
                 animateNumber("maintenanceRooms", maintenanceRoomsCount);
-                loadDashboard(); // This will calculate available and booked rooms dynamically
+                return loadDashboard(); // This will calculate available and booked rooms dynamically
             });
         }
 
@@ -1059,8 +1085,8 @@
         function refreshBookingsCache() {
             bookingsCacheLoaded = false;
             bookedRoomsCacheLoaded = false;
-            loadBookingsCache().then(() => { // This now also refreshes booked rooms cache
-                loadDashboard(); // Refresh all counts
+            return loadBookingsCache().then(() => { // This now also refreshes booked rooms cache
+                return loadDashboard(); // Refresh all counts
             });
         }
 
@@ -1083,26 +1109,31 @@
                 roomsCacheLoaded = false;
                 bookingsCacheLoaded = false;
                 bookedRoomsCacheLoaded = false;
-                
+
                 roomsCache = [];
                 bookingsCache = [];
                 bookedRoomsCache = [];
+
+                // Reset all counts
+                totalRoomsCount = 0;
+                availableRoomsCount = 0;
+                maintenanceRoomsCount = 0;
 
                 // Show loading shimmer on all numbers
                 document.querySelectorAll('.dashboard-number').forEach(element => {
                     element.innerHTML = '<span class="loading-shimmer"></span>';
                 });
 
-                // Reload all caches in parallel
-                await Promise.all([
-                    loadRoomsCache(),
-                    loadBookingsCache()
-                ]);
+                // Reload all caches in sequence to ensure proper counts
+                await loadRoomsCache();
+                await loadBookingsCache();
 
                 // Update dashboard with fresh data
                 await loadDashboard();
 
                 console.log("Dashboard refreshed successfully");
+                console.log("Total rooms:", totalRoomsCount);
+                console.log("Maintenance rooms:", maintenanceRoomsCount);
             } catch (error) {
                 console.error("Error refreshing dashboard:", error);
                 alert("Error refreshing dashboard. Please try again.");
@@ -1251,7 +1282,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transition: left 0.5s ease;
         }
 
@@ -1265,10 +1296,12 @@
                 transform: translateY(20px);
                 opacity: 0;
             }
+
             50% {
                 transform: translateY(-5px);
                 opacity: 0.7;
             }
+
             100% {
                 transform: translateY(0);
                 opacity: 1;
@@ -1279,9 +1312,11 @@
             0% {
                 transform: scale(1);
             }
+
             50% {
                 transform: scale(1.1);
             }
+
             100% {
                 transform: scale(1);
             }
@@ -1289,13 +1324,15 @@
 
         @keyframes glow {
             0% {
-                text-shadow: 0 0 5px rgba(255,255,255,0.3);
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
             }
+
             50% {
-                text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.6);
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 255, 255, 0.6);
             }
+
             100% {
-                text-shadow: 0 0 5px rgba(255,255,255,0.3);
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
             }
         }
 
@@ -1315,7 +1352,7 @@
 
         .card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
         }
 
         /* Specific colors for different card types */
@@ -1336,6 +1373,7 @@
             0% {
                 background-position: -200px 0;
             }
+
             100% {
                 background-position: calc(200px + 100%) 0;
             }
@@ -1391,6 +1429,7 @@
             0% {
                 transform: rotate(0deg);
             }
+
             100% {
                 transform: rotate(359deg);
             }
@@ -1404,7 +1443,7 @@
         #btnRefresh:hover:not(:disabled) {
             background: linear-gradient(45deg, #007bff, #0056b3);
             transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
         }
     </style>
 </body>
