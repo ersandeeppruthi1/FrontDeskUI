@@ -327,7 +327,6 @@
         }
 
         async function submitCheckIn() {
-            const bookingId = crypto.randomUUID();
 
             // Get form values
             const displayName = document.getElementById("displayName").value.trim();
@@ -356,7 +355,7 @@
             }
 
             // 1️⃣ Create Main Booking
-            await DBHandler.submitRecordData('roombooking', {
+            var bookingId = await DBHandler.submitRecordData('roombooking', {
                 bookingnumber: "BK-" + Date.now(),
                 displayname: displayName,
                 mobilenumber: mobileNumber,
@@ -370,7 +369,7 @@
                 feedbackrating: 0,
                 feedbackremarks: '',
                 donationamount: 0
-            }, bookingId, false);
+            }, null, false);
 
             // 2️⃣ Insert Multiple Rooms
             for (const roomId of selectedRooms) {
