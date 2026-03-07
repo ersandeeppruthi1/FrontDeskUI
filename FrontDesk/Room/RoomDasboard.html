@@ -287,38 +287,17 @@
         // Local cache for rooms
         let roomsCache = [];
         let roomsCacheLoaded = false;
+        let totalRoomsCount = 0;
+        let availableRoomsCount = 0;
+        let maintenanceRoomsCount = 0;
+        
+        // Local cache for bookings
+        let bookingsCache = [];
+        let bookingsCacheLoaded = false;
+        
         let checkInRoomDropdown;
 
-        $(document).ready(new function () {
-            // Initialize Syncfusion DateTimePicker
-            new ej.calendars.DateTimePicker({
-                placeholder: "Select Check-Out Time"
-            }).appendTo('#checkOutDateTime');
 
-            // Initialize Room DropDownList with multiselect
-            checkInRoomDropdown = new ej.dropdowns.MultiSelect({
-                placeholder: "Select Rooms",
-                mode: 'CheckBox',
-                showSelectAll: true,
-                filterBarPlaceholder: 'Search rooms...',
-                allowFiltering: true,
-                fields: { text: 'roomnumber', value: 'id' },
-                dataSource: []
-            });
-            checkInRoomDropdown.appendTo('#checkInRoom');
-
-            // Load initial data
-            loadRoomsCache();
-            loadDashboard();
-
-            // Bind dashboard link events
-            document.querySelectorAll('.dashboard-link')
-                .forEach(el => {
-                    el.addEventListener('click', function () {
-                        showBookingList(this.dataset.type);
-                    });
-                });
-        });
 
         function openCheckInModal() {
 
@@ -406,7 +385,7 @@
                 document.getElementById('checkInModal')
             ).hide();
 
-            loadDashboard();
+            refreshBookingsCache(); // Refresh booking data after new check-in
         }
 
         async function submitCheckOut() {
@@ -419,112 +398,48 @@
             bootstrap.Modal.getInstance(
                 document.getElementById('checkOutModal')).hide();
 
-            loadDashboard();
+            refreshBookingsCache(); // Refresh booking data after check-out
         }
 
         async function loadDashboard() {
 
-            // Total Rooms
-            const totalRooms = await DBHandler.fetchEntityRecords(
-                'roommaster',
-                'id,COUNT(*) as count',
-                'id',
-                'desc',
-                ' group by id'
-            );
+            // Use cached total rooms count
+            document.getElementById("totalRooms").innerText = totalRoomsCount;
 
-            document.getElementById("totalRooms").innerText =
-                totalRooms?.[0]?.count || 0;
+            // Use cached available rooms count
+            document.getElementById("availableRooms").innerText = availableRoomsCount;
 
-            // Available Rooms
-            const availableRooms = await DBHandler.fetchEntityRecords(
-                'roommaster',
-                'COUNT(*) as count',
-                '',
-                '',
-                "bookingstatus = 'Available'"
-            );
+            // Calculate booked rooms from cache
+            const bookedRoomsCount = getBookedRoomsCount();
+            document.getElementById("bookedRooms").innerText = bookedRoomsCount;
 
-            document.getElementById("availableRooms").innerText =
-                availableRooms?.[0]?.count || 0;
+            // Use cached maintenance rooms count
+            document.getElementById("maintenanceRooms").innerText = maintenanceRoomsCount;
 
-            // Booked Rooms
-            const bookedRooms = await DBHandler.fetchEntityRecords(
-                'bookingroom br LEFT JOIN roombooking rb ON rb.id = br.bookingid',
-                'COUNT(DISTINCT br.roomid) as count',
-                '',
-                '',
-                "rb.bookingstatus = 1"
-            );
+            // Calculate today's check-ins from cache
+            const todayCheckInsCount = getTodayCheckInsCount();
+            document.getElementById("todayCheckIns").innerText = todayCheckInsCount;
 
-            document.getElementById("bookedRooms").innerText =
-                bookedRooms?.[0]?.count || 0;
-
-            // Maintenance
-            const maintenanceRooms = await DBHandler.fetchEntityRecords(
-                'roommaster',
-                'COUNT(*) as count',
-                '',
-                '',
-                "isactive = 0"
-            );
-
-            document.getElementById("maintenanceRooms").innerText =
-                maintenanceRooms?.[0]?.count || 0;
-
-            // Today's Check-ins
-            const todayCheckins = await DBHandler.fetchEntityRecords(
-                'roombooking',
-                'COUNT(*) as count',
-                '',
-                '',
-                "DATE(checkindatetime) = CURDATE()"
-            );
-
-            document.getElementById("todayCheckIns").innerText =
-                todayCheckins?.[0]?.count || 0;
-
-            // Today's Check-outs
-            const todayCheckouts = await DBHandler.fetchEntityRecords(
-                'roombooking',
-                'COUNT(*) as count',
-                '',
-                '',
-                "DATE(checkoutdatetime) = CURDATE()"
-            );
-
-            document.getElementById("todayCheckOuts").innerText =
-                todayCheckouts?.[0]?.count || 0;
+            // Calculate today's check-outs from cache
+            const todayCheckOutsCount = getTodayCheckOutsCount();
+            document.getElementById("todayCheckOuts").innerText = todayCheckOutsCount;
         }
 
         async function showBookingList(type) {
+            let filteredBookings = [];
 
-            let condition = "";
-
-            if (type === "checkin")
-                condition = "DATE(rb.checkindatetime) = CURDATE()";
-
-            if (type === "checkout")
-                condition = "DATE(rb.checkoutdatetime) = CURDATE()";
-
-            if (type === "booked")
-                condition = "rb.bookingstatus = 1";
-
-            const data = await DBHandler.fetchEntityRecords(
-                'roombooking rb',
-                'rb.*, rm.roomnumber',
-                'rb.checkindatetime',
-                'desc',
-                condition,
-                false,
-                0,
-                'LEFT JOIN bookingroom br ON br.bookingid = rb.id LEFT JOIN roommaster rm ON rm.id = br.roomid'
-            );
+            if (type === "checkin") {
+                filteredBookings = getTodayCheckIns();
+            } else if (type === "checkout") {
+                filteredBookings = getTodayCheckOuts();
+            } else if (type === "booked") {
+                filteredBookings = getActiveBookings();
+            }
 
             const container = document.getElementById("bookingListContainer");
             container.innerHTML = "";
 
-            data.forEach(item => {
+            filteredBookings.forEach(item => {
                 container.innerHTML += `
             <li class="list-group-item">
                 <div class="d-flex justify-content-between align-items-start">
@@ -576,35 +491,137 @@
         async function loadRoomsCache() {
             if (!roomsCacheLoaded) {
                 try {
+                    // Fetch all room data with all columns
                     const rooms = await DBHandler.fetchEntityRecords(
                         'roommaster',
-                        'id,roomnumber',
+                        '*',
                         'roomnumber',
                         'asc',
-                        "isactive = 1",
+                        "",
                         false,
                         0
                     );
                     roomsCache = rooms || [];
+
+                    // Calculate counts from cached data
+                    totalRoomsCount = roomsCache.length;
+                    availableRoomsCount = roomsCache.filter(room =>
+                        room.isactive === 1 && room.bookingstatus === 'Available'
+                    ).length;
+                    maintenanceRoomsCount = roomsCache.filter(room =>
+                        room.isactive === 0
+                    ).length;
+
                     roomsCacheLoaded = true;
                     console.log("Rooms cache loaded:", roomsCache.length, "rooms");
+                    console.log("Total rooms count cached:", totalRoomsCount);
+                    console.log("Available rooms count cached:", availableRoomsCount);
+                    console.log("Maintenance rooms count cached:", maintenanceRoomsCount);
                 } catch (error) {
                     console.error("Error loading rooms cache:", error);
                     roomsCache = [];
+                    totalRoomsCount = 0;
+                    availableRoomsCount = 0;
+                    maintenanceRoomsCount = 0;
                 }
             }
+        }
+
+        async function loadBookingsCache() {
+            if (!bookingsCacheLoaded) {
+                try {
+                    // Fetch all booking data with room information
+                    const bookings = await DBHandler.fetchEntityRecords(
+                        'roombooking rb',
+                        'rb.*, rm.roomnumber',
+                        'rb.checkindatetime',
+                        'desc',
+                        "",
+                        false,
+                        0,
+                        'LEFT JOIN bookingroom br ON br.bookingid = rb.id LEFT JOIN roommaster rm ON rm.id = br.roomid'
+                    );
+                    bookingsCache = bookings || [];
+                    bookingsCacheLoaded = true;
+                    console.log("Bookings cache loaded:", bookingsCache.length, "bookings");
+                } catch (error) {
+                    console.error("Error loading bookings cache:", error);
+                    bookingsCache = [];
+                }
+            }
+        }
+
+        // Helper function to get booked rooms count
+        function getBookedRoomsCount() {
+            if (!bookingsCacheLoaded) return 0;
+            const bookedRoomIds = new Set();
+            bookingsCache.filter(booking => booking.bookingstatus === 1)
+                .forEach(booking => {
+                    if (booking.roomid) bookedRoomIds.add(booking.roomid);
+                });
+            return bookedRoomIds.size;
+        }
+
+        // Helper function to get today's check-ins count
+        function getTodayCheckInsCount() {
+            if (!bookingsCacheLoaded) return 0;
+            const today = new Date().toISOString().split('T')[0];
+            return bookingsCache.filter(booking => {
+                const checkInDate = new Date(booking.checkindatetime).toISOString().split('T')[0];
+                return checkInDate === today;
+            }).length;
+        }
+
+        // Helper function to get today's check-outs count
+        function getTodayCheckOutsCount() {
+            if (!bookingsCacheLoaded) return 0;
+            const today = new Date().toISOString().split('T')[0];
+            return bookingsCache.filter(booking => {
+                if (!booking.checkoutdatetime) return false;
+                const checkOutDate = new Date(booking.checkoutdatetime).toISOString().split('T')[0];
+                return checkOutDate === today;
+            }).length;
+        }
+
+        // Helper function to get today's check-ins
+        function getTodayCheckIns() {
+            if (!bookingsCacheLoaded) return [];
+            const today = new Date().toISOString().split('T')[0];
+            return bookingsCache.filter(booking => {
+                const checkInDate = new Date(booking.checkindatetime).toISOString().split('T')[0];
+                return checkInDate === today;
+            });
+        }
+
+        // Helper function to get today's check-outs
+        function getTodayCheckOuts() {
+            if (!bookingsCacheLoaded) return [];
+            const today = new Date().toISOString().split('T')[0];
+            return bookingsCache.filter(booking => {
+                if (!booking.checkoutdatetime) return false;
+                const checkOutDate = new Date(booking.checkoutdatetime).toISOString().split('T')[0];
+                return checkOutDate === today;
+            });
+        }
+
+        // Helper function to get active bookings
+        function getActiveBookings() {
+            if (!bookingsCacheLoaded) return [];
+            return bookingsCache.filter(booking => booking.bookingstatus === 1);
         }
 
         function loadAvailableRooms() {
             // Use cached rooms if available
             if (roomsCacheLoaded && roomsCache.length > 0) {
-                checkInRoomDropdown.dataSource = roomsCache;
+                // Filter only active rooms for dropdown
+                const activeRooms = roomsCache.filter(room => room.isactive === 1);
+                checkInRoomDropdown.dataSource = activeRooms;
                 checkInRoomDropdown.dataBind();
-                console.log("Using cached rooms:", roomsCache.length, "rooms");
+                console.log("Using cached active rooms:", activeRooms.length, "rooms");
                 return;
             }
 
-            // Load from database if cache is empty
+            // Load from database if cache is empty (fallback)
             DBHandler.fetchEntityRecords(
                 'roommaster',
                 'id,roomnumber',
@@ -616,14 +633,10 @@
             ).then(function (rooms) {
                 rooms = rooms || [];
 
-                // Update cache
-                roomsCache = rooms;
-                roomsCacheLoaded = true;
-
                 // Update the dropdown data source
                 checkInRoomDropdown.dataSource = rooms;
                 checkInRoomDropdown.dataBind();
-                console.log("Loaded and cached rooms:", rooms.length, "rooms");
+                console.log("Loaded active rooms from database:", rooms.length, "rooms");
 
             }).catch(function (error) {
                 console.error("Error loading rooms:", error);
@@ -635,13 +648,93 @@
         // Function to refresh rooms cache when needed
         function refreshRoomsCache() {
             roomsCacheLoaded = false;
+            totalRoomsCount = 0;
+            availableRoomsCount = 0;
+            maintenanceRoomsCount = 0;
             loadRoomsCache().then(() => {
                 if (checkInRoomDropdown) {
-                    checkInRoomDropdown.dataSource = roomsCache;
+                    const activeRooms = roomsCache.filter(room => room.isactive === 1);
+                    checkInRoomDropdown.dataSource = activeRooms;
                     checkInRoomDropdown.dataBind();
+                }
+                // Update dashboard with new counts
+                document.getElementById("totalRooms").innerText = totalRoomsCount;
+                document.getElementById("availableRooms").innerText = availableRoomsCount;
+                document.getElementById("maintenanceRooms").innerText = maintenanceRoomsCount;
+            });
+        }
+
+        // Function to refresh bookings cache when needed
+        function refreshBookingsCache() {
+            bookingsCacheLoaded = false;
+            loadBookingsCache().then(() => {
+                loadDashboard(); // Refresh all counts
+            });
+        }
+
+        // Function to refresh all caches
+        function refreshAllCaches() {
+            refreshRoomsCache();
+            refreshBookingsCache();
+        }
+
+        // Helper function to get rooms by status
+        function getRoomsByStatus(status) {
+            if (!roomsCacheLoaded) return [];
+            return roomsCache.filter(room => {
+                switch (status) {
+                    case 'active':
+                        return room.isactive === 1;
+                    case 'inactive':
+                        return room.isactive === 0;
+                    case 'available':
+                        return room.isactive === 1 && room.bookingstatus === 'Available';
+                    case 'maintenance':
+                        return room.isactive === 0;
+                    default:
+                        return true;
                 }
             });
         }
+
+        // Helper function to get room by ID
+        function getRoomById(roomId) {
+            if (!roomsCacheLoaded) return null;
+            return roomsCache.find(room => room.id === roomId);
+        }
+
+        $(document).ready(new function () {
+            // Initialize Syncfusion DateTimePicker
+            new ej.calendars.DateTimePicker({
+                placeholder: "Select Check-Out Time"
+            }).appendTo('#checkOutDateTime');
+
+            // Initialize Room DropDownList with multiselect
+            checkInRoomDropdown = new ej.dropdowns.MultiSelect({
+                placeholder: "Select Rooms",
+                mode: 'CheckBox',
+                showSelectAll: true,
+                filterBarPlaceholder: 'Search rooms...',
+                allowFiltering: true,
+                fields: { text: 'roomnumber', value: 'id' },
+                dataSource: []
+            });
+            checkInRoomDropdown.appendTo('#checkInRoom');
+
+            // Load initial data
+            loadRoomsCache();
+            loadBookingsCache();
+            loadDashboard();
+
+            // Bind dashboard link events
+            document.querySelectorAll('.dashboard-link')
+                .forEach(el => {
+                    el.addEventListener('click', function () {
+                        showBookingList(this.dataset.type);
+                    });
+                });
+        });
+
     </script>
 
     <style>
