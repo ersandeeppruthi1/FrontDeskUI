@@ -184,17 +184,6 @@
 
                     </div>
 
-                    <hr>
-
-                    <!-- Guest Section -->
-                    <h6>Guest Details</h6>
-
-                    <div id="guestContainer"></div>
-
-                    <button type="button" class="btn btn-sm btn-primary mt-2" onclick="addGuestRow()">
-                        + Add Guest
-                    </button>
-
                 </div>
 
                 <div class="modal-footer">
@@ -264,7 +253,6 @@
                 setCurrentCheckInTime();
                 document.getElementById("checkOutDateTime").value = "";   // 👈 clears checkout field
                 loadAvailableRooms();
-                addGuestRow(); // add one guest by default
                 new bootstrap.Modal(
                     document.getElementById('checkInModal')
                 ).show();
@@ -330,22 +318,6 @@
                             roomstatus: 1
                         }, null, false);
 
-                    }
-
-                    // 3️⃣ Insert Guests
-                    const guestRows =
-                        document.querySelectorAll(".guest-row");
-
-                    for (const row of guestRows) {
-
-                        await DBHandler.submitRecordData('bookingguest', {
-                            bookingid: bookingId,
-                            guestname: row.querySelector('.guest-name').value,
-                            age: row.querySelector('.guest-age').value || 0,
-                            gender: row.querySelector('.guest-gender').value || '',
-                            mobilenumber: row.querySelector('.guest-mobile').value || '',
-                            address: ''
-                        }, null, false);
                     }
 
                     bootstrap.Modal.getInstance(
@@ -460,16 +432,14 @@
                 condition = "rb.bookingstatus = 1";
 
             const data = await DBHandler.fetchEntityRecords(
-                'roombooking rb ' +
-                'LEFT JOIN bookingguest bg ON bg.bookingid = rb.id',
-                'rb.id, rb.bookingnumber, MIN(bg.guestname) as guestname',
-                '',
-                '',
+                'roombooking rb',
+                'rb.*, rm.roomnumber',
+                'rb.checkindatetime',
+                'desc',
                 condition,
-                true,
+                false,
                 0,
-                '',
-                'GROUP BY rb.id'
+                'LEFT JOIN bookingroom br ON br.bookingid = rb.id LEFT JOIN roommaster rm ON rm.id = br.roomid'
             );
 
             const container = document.getElementById("bookingListContainer");
@@ -478,42 +448,25 @@
             data.forEach(item => {
                 container.innerHTML += `
             <li class="list-group-item d-flex justify-content-between">
-                <span><b>${item.bookingnumber}</b></span>
-                <span>${item.guestname || ''}</span>
+                <div>
+                    <strong>Booking: ${item.bookingnumber || 'N/A'}</strong><br>
+                    <small>Room: ${item.roomnumber || 'N/A'}</small><br>
+                    <small>Check-in: ${new Date(item.checkindatetime).toLocaleString()}</small>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">Status: ${item.bookingstatus == 1 ? 'Active' : 'Completed'}</small>
+                </div>
             </li>
         `;
             });
 
             document.getElementById("bookingListTitle").innerText =
-                "Booking List - " + type;
+                type === "checkin" ? "Today's Check-ins" :
+                type === "checkout" ? "Today's Check-outs" :
+                type === "booked" ? "Currently Booked Rooms" :
+                "Bookings";
 
             new bootstrap.Modal(document.getElementById('bookingListModal')).show();
-        }
-
-        function addGuestRow() {
-
-            const container = document.getElementById("guestContainer");
-
-            container.innerHTML += `
-        <div class="row g-2 mb-2 guest-row">
-            <div class="col-md-3">
-                <input type="text" placeholder="Guest Name"
-                       class="form-control guest-name">
-            </div>
-    
-            <div class="col-md-3">
-                <input type="text" placeholder="Mobile"
-                       class="form-control guest-mobile">
-            </div>
-            <div class="col-md-2">
-                <button type="button"
-                        class="btn btn-danger btn-sm"
-                        onclick="this.closest('.guest-row').remove()">
-                    X
-                </button>
-            </div>
-        </div>
-    `;
         }
 
         function setCurrentCheckInTime() {
