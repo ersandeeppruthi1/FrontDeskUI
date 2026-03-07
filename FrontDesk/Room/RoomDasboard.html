@@ -74,8 +74,12 @@
                     <i class="bi bi-box-arrow-in-right"></i> Check-In
                 </button>
 
-                <button class="btn btn-danger" id="btnCheckOut" onclick="openCheckOutModal()">
+                <button class="btn btn-danger me-2" id="btnCheckOut" onclick="openCheckOutModal()">
                     <i class="bi bi-box-arrow-right"></i> Check-Out
+                </button>
+
+                <button class="btn btn-primary" id="btnRefresh" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i> Refresh
                 </button>
             </div>
 
@@ -1066,6 +1070,51 @@
             refreshBookingsCache();
         }
 
+        // Function to refresh dashboard numbers manually
+        async function refreshDashboard() {
+            // Add spinning animation to refresh button
+            const refreshBtn = document.getElementById('btnRefresh');
+            const refreshIcon = refreshBtn.querySelector('i');
+            refreshIcon.classList.add('fa-spin');
+            refreshBtn.disabled = true;
+
+            try {
+                // Clear all caches and reload
+                roomsCacheLoaded = false;
+                bookingsCacheLoaded = false;
+                bookedRoomsCacheLoaded = false;
+                
+                roomsCache = [];
+                bookingsCache = [];
+                bookedRoomsCache = [];
+
+                // Show loading shimmer on all numbers
+                document.querySelectorAll('.dashboard-number').forEach(element => {
+                    element.innerHTML = '<span class="loading-shimmer"></span>';
+                });
+
+                // Reload all caches in parallel
+                await Promise.all([
+                    loadRoomsCache(),
+                    loadBookingsCache()
+                ]);
+
+                // Update dashboard with fresh data
+                await loadDashboard();
+
+                console.log("Dashboard refreshed successfully");
+            } catch (error) {
+                console.error("Error refreshing dashboard:", error);
+                alert("Error refreshing dashboard. Please try again.");
+            } finally {
+                // Remove spinning animation
+                setTimeout(() => {
+                    refreshIcon.classList.remove('fa-spin');
+                    refreshBtn.disabled = false;
+                }, 500);
+            }
+        }
+
         // Helper function to get rooms by status
         function getRoomsByStatus(status) {
             if (!roomsCacheLoaded) return [];
@@ -1331,6 +1380,31 @@
         .input-group-text {
             background-color: #e9ecef;
             border: 1px solid #ced4da;
+        }
+
+        /* Refresh button animation */
+        .fa-spin {
+            animation: fa-spin 1s infinite linear;
+        }
+
+        @keyframes fa-spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(359deg);
+            }
+        }
+
+        #btnRefresh:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #btnRefresh:hover:not(:disabled) {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
         }
     </style>
 </body>
