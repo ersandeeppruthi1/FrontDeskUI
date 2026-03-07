@@ -290,11 +290,11 @@
         let totalRoomsCount = 0;
         let availableRoomsCount = 0;
         let maintenanceRoomsCount = 0;
-        
+
         // Local cache for bookings
         let bookingsCache = [];
         let bookingsCacheLoaded = false;
-        
+
         let checkInRoomDropdown;
 
 
@@ -703,7 +703,7 @@
             return roomsCache.find(room => room.id === roomId);
         }
 
-        $(document).ready(new function () {
+        $(document).ready(() => {
             // Initialize Syncfusion DateTimePicker
             new ej.calendars.DateTimePicker({
                 placeholder: "Select Check-Out Time"
