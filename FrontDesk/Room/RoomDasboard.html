@@ -354,14 +354,18 @@
                 return;
             }
 
+            // Format dates properly for database
+            const formattedCheckInDate = checkInDate ? new Date(checkInDate).toISOString().slice(0, 19).replace('T', ' ') : null;
+            const formattedCheckOutDate = checkOutDate ? new Date(checkOutDate).toISOString().slice(0, 19).replace('T', ' ') : null;
+
             // 1️⃣ Create Main Booking
             var bookingId = await DBHandler.submitRecordData('roombooking', {
                 bookingnumber: "BK-" + Date.now(),
                 displayname: displayName,
                 mobilenumber: mobileNumber,
                 address: address,
-                checkindatetime: checkInDate,
-                checkoutdatetime: checkOutDate,
+                checkindatetime: formattedCheckInDate,
+                checkoutdatetime: formattedCheckOutDate,
                 bookingstatus: 1,
                 gentscount: gentsCount,
                 ladiescount: ladiesCount,
