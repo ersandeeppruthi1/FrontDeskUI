@@ -70,7 +70,7 @@
         <!-- Top Action Row -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <button class="btn btn-success me-2" id="btnCheckIn">
+                <button class="btn btn-success me-2" id="btnCheckIn" onclick="openCheckInModal()">
                     <i class="bi bi-box-arrow-in-right"></i> Check-In
                 </button>
 
@@ -181,7 +181,10 @@
                             <label class="form-label">Address</label>
                             <textarea id="address" class="form-control" rows="2"></textarea>
                         </div>
-
+                        <div class="col-md-12">
+                            <label class="form-label">Select Rooms <span class="text-danger">*</span></label><br>
+                            <input type="text" id="checkInRoom" />
+                        </div>
                         <!-- Check-In Date -->
                         <div class="col-md-6">
                             <label class="form-label">Check-In Date & Time</label>
@@ -212,10 +215,7 @@
                         </div>
 
                         <!-- Room Selection (MULTIPLE) -->
-                        <div class="col-md-12">
-                            <label class="form-label">Select Rooms <span class="text-danger">*</span></label><br>
-                            <select id="checkInRoom" class="form-select w-100" multiple size="1"></select>
-                        </div>
+
 
                     </div>
 
@@ -283,23 +283,26 @@
     </div>
 
     <script>
-        $(document).ready(new function () {
-            document.getElementById("btnCheckIn").addEventListener("click", function () {
-                setCurrentCheckInTime();
-                document.getElementById("checkOutDateTime").value = "";
-                // Clear form fields
-                document.getElementById("displayName").value = "";
-                document.getElementById("mobileNumber").value = "";
-                document.getElementById("address").value = "";
-                document.getElementById("gentsCount").value = "0";
-                document.getElementById("ladiesCount").value = "0";
-                document.getElementById("referenceDetail").value = "";
-                loadAvailableRooms();
-                new bootstrap.Modal(
-                    document.getElementById('checkInModal')
-                ).show();
-            });
+        function openCheckInModal() {
+            
+            setCurrentCheckInTime();
+            document.getElementById("checkOutDateTime").value = "";
+            // Clear form fields
+            document.getElementById("displayName").value = "";
+            document.getElementById("mobileNumber").value = "";
+            document.getElementById("address").value = "";
+            document.getElementById("gentsCount").value = "0";
+            document.getElementById("ladiesCount").value = "0";
+            document.getElementById("referenceDetail").value = "";
+            new bootstrap.Modal(
+                document.getElementById('checkInModal')
+            ).show();
+            
+            loadAvailableRooms();
+            
+        }
 
+        $(document).ready(new function () {
             document.getElementById("btnCheckOut").addEventListener("click", function () {
                 new bootstrap.Modal(document.getElementById('checkOutModal')).show();
             });
@@ -319,6 +322,18 @@
             placeholder: "Select Check-Out Time"
         }).appendTo('#checkOutDateTime');
 
+        // Initialize Room DropDownList with multiselect
+        let checkInRoomDropdown = new ej.dropdowns.MultiSelect({
+            placeholder: "Select Rooms",
+            mode: 'CheckBox',
+            showSelectAll: true,
+            filterBarPlaceholder: 'Search rooms...',
+            allowFiltering: true,
+            fields: { text: 'roomnumber', value: 'id' },
+            dataSource: []
+        });
+        checkInRoomDropdown.appendTo('#checkInRoom');
+
         function bindClickMethod() {
             document.getElementById("saveCheckIn")
                 .addEventListener("click", async function () {
@@ -335,9 +350,7 @@
                     const ladiesCount = parseInt(document.getElementById("ladiesCount").value) || 0;
                     const referenceDetail = document.getElementById("referenceDetail").value.trim();
 
-                    const selectedRooms =
-                        Array.from(document.getElementById("checkInRoom").selectedOptions)
-                            .map(o => o.value);
+                    const selectedRooms = checkInRoomDropdown.value || [];
 
                     // Validation
                     if (!displayName) {
@@ -530,9 +543,9 @@
 
             document.getElementById("bookingListTitle").innerText =
                 type === "checkin" ? "Today's Check-ins" :
-                type === "checkout" ? "Today's Check-outs" :
-                type === "booked" ? "Currently Booked Rooms" :
-                "Bookings";
+                    type === "checkout" ? "Today's Check-outs" :
+                        type === "booked" ? "Currently Booked Rooms" :
+                            "Bookings";
 
             new bootstrap.Modal(document.getElementById('bookingListModal')).show();
         }
@@ -553,11 +566,6 @@
         }
         function loadAvailableRooms() {
 
-            const select = document.getElementById("checkInRoom");
-
-            // Show loading text immediately
-            select.innerHTML = `<option>Loading rooms...</option>`;
-
             DBHandler.fetchEntityRecords(
                 'roommaster',
                 'id,roomnumber',
@@ -570,22 +578,15 @@
 
                 rooms = rooms || [];
 
-                select.innerHTML = "";
-
-                rooms.forEach(function (room) {
-
-                    const option = document.createElement("option");
-                    option.value = room.id;
-                    option.textContent = room.roomnumber;
-
-                    select.appendChild(option);
-
-                });
+                // Update the dropdown data source
+                checkInRoomDropdown.dataSource = rooms;
+                checkInRoomDropdown.dataBind();
 
             }).catch(function (error) {
 
                 console.error("Error loading rooms:", error);
-                select.innerHTML = `<option>Error loading rooms</option>`;
+                checkInRoomDropdown.dataSource = [];
+                checkInRoomDropdown.dataBind();
 
             });
 
