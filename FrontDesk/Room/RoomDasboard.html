@@ -88,7 +88,8 @@
                 <div class="card shadow-sm border-0 text-center">
                     <div class="card-body">
                         <h6 class="text-muted">Total Rooms</h6>
-                        <h2 id="totalRooms" class="fw-bold dashboard-link" data-type="total">0</h2>
+                        <h2 id="totalRooms" class="fw-bold dashboard-link" data-type="total"
+                            onclick="showBookingList(this.dataset.type)">0</h2>
                     </div>
                 </div>
             </div>
@@ -97,7 +98,8 @@
                 <div class="card shadow-sm border-0 text-center bg-success text-white">
                     <div class="card-body">
                         <h6>Available Rooms</h6>
-                        <h2 id="availableRooms" class="fw-bold dashboard-link" data-type="available">0</h2>
+                        <h2 id="availableRooms" class="fw-bold dashboard-link" data-type="available"
+                            onclick="showBookingList(this.dataset.type)">0</h2>
                     </div>
                 </div>
             </div>
@@ -106,7 +108,8 @@
                 <div class="card shadow-sm border-0 text-center bg-danger text-white">
                     <div class="card-body">
                         <h6>Booked Rooms</h6>
-                        <h2 id="bookedRooms" class="fw-bold dashboard-link" data-type="booked">0</h2>
+                        <h2 id="bookedRooms" class="fw-bold dashboard-link" data-type="booked"
+                            onclick="showBookingList(this.dataset.type)">0</h2>
 
                     </div>
                 </div>
@@ -116,7 +119,8 @@
                 <div class="card shadow-sm border-0 text-center bg-warning text-dark">
                     <div class="card-body">
                         <h6>Under Maintenance</h6>
-                        <h2 id="maintenanceRooms" class="fw-bold dashboard-link" data-type="maintenance">0</h2>
+                        <h2 id="maintenanceRooms" class="fw-bold dashboard-link" data-type="maintenance"
+                            onclick="showBookingList(this.dataset.type)">0</h2>
                     </div>
                 </div>
             </div>
@@ -132,7 +136,7 @@
                     <div class="card-body">
                         <h6 class="text-muted">Today's Check-Ins</h6>
                         <h2 id="todayCheckIns" class="fw-bold text-primary dashboard-link" data-type="checkin"
-                            defaultValue="currentDate">0</h2>
+                            defaultValue="currentDate" onclick="showBookingList(this.dataset.type)">0</h2>
                     </div>
                 </div>
             </div>
@@ -141,7 +145,8 @@
                 <div class="card shadow-sm border-0 text-center">
                     <div class="card-body">
                         <h6 class="text-muted">Today's Check-Outs</h6>
-                        <h2 id="todayCheckOuts" class="fw-bold text-secondary dashboard-link" data-type="checkout">0
+                        <h2 id="todayCheckOuts" class="fw-bold text-secondary dashboard-link" data-type="checkout"
+                            onclick="showBookingList(this.dataset.type)">0
                         </h2>
                     </div>
                 </div>
@@ -185,7 +190,8 @@
                         <!-- Room Filter Option -->
                         <div class="col-md-12">
                             <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" id="showOnlyAvailableRooms" checked onchange="filterRoomsForCheckIn()">
+                                <input class="form-check-input" type="checkbox" id="showOnlyAvailableRooms" checked
+                                    onchange="filterRoomsForCheckIn()">
                                 <label class="form-check-label" for="showOnlyAvailableRooms">
                                     Show only available rooms
                                 </label>
@@ -254,7 +260,8 @@
 
                     <!-- Booking Selection -->
                     <div class="mb-3">
-                        <label class="form-label">Select Bookings to Check-Out <span class="text-danger">*</span></label>
+                        <label class="form-label">Select Bookings to Check-Out <span
+                                class="text-danger">*</span></label>
                         <input type="text" id="checkOutBookings" />
                         <small class="text-muted">Select active bookings to check out</small>
                     </div>
@@ -281,7 +288,8 @@
                     <!-- Feedback Comments -->
                     <div class="mb-3 mt-3">
                         <label class="form-label">Feedback Comments</label>
-                        <textarea id="feedbackComments" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+                        <textarea id="feedbackComments" class="form-control" rows="3"
+                            placeholder="Share your experience..."></textarea>
                     </div>
 
                     <!-- Donation Amount -->
@@ -289,7 +297,8 @@
                         <label class="form-label">Donation Amount (Optional)</label>
                         <div class="input-group">
                             <span class="input-group-text">₹</span>
-                            <input type="number" id="donationAmount" class="form-control" min="0" step="0.01" placeholder="0.00">
+                            <input type="number" id="donationAmount" class="form-control" min="0" step="0.01"
+                                placeholder="0.00">
                         </div>
                     </div>
 
@@ -297,7 +306,8 @@
 
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-danger" id="saveCheckOut" onclick="submitCheckOut()">Confirm Check-Out</button>
+                    <button class="btn btn-danger" id="saveCheckOut" onclick="submitCheckOut()">Confirm
+                        Check-Out</button>
                 </div>
 
             </div>
@@ -333,7 +343,7 @@
         // Local cache for bookings
         let bookingsCache = [];
         let bookingsCacheLoaded = false;
-        
+
         // Local cache for booked rooms
         let bookedRoomsCache = [];
         let bookedRoomsCacheLoaded = false;
@@ -354,10 +364,10 @@
             document.getElementById("gentsCount").value = "0";
             document.getElementById("ladiesCount").value = "0";
             document.getElementById("referenceDetail").value = "";
-            
+
             // Reset filter to show only available rooms
             document.getElementById("showOnlyAvailableRooms").checked = true;
-            
+
             const modal = new bootstrap.Modal(document.getElementById('checkInModal'), {
                 focus: false
             });
@@ -370,12 +380,12 @@
         function openCheckOutModal() {
             // Set current check-out time
             setCurrentCheckOutTime();
-            
+
             // Clear form fields
             document.getElementById("feedbackRating").value = "";
             document.getElementById("feedbackComments").value = "";
             document.getElementById("donationAmount").value = "";
-            
+
             const modal = new bootstrap.Modal(document.getElementById('checkOutModal'), {
                 focus: false
             });
@@ -517,7 +527,7 @@
 
             // Refresh both caches after new check-in
             refreshAllCaches();
-            
+
             // Show success message
             alert(`Successfully checked in ${selectedRooms.length} room(s) for ${displayName}!`);
         }
@@ -543,7 +553,7 @@
 
             try {
                 // Format check-out date for database
-                const formattedCheckOutDate = checkOutDateTime ? 
+                const formattedCheckOutDate = checkOutDateTime ?
                     new Date(checkOutDateTime).toISOString().slice(0, 19).replace('T', ' ') : null;
 
                 // Process each selected booking
@@ -581,7 +591,7 @@
 
                 // Refresh both room and booking data
                 refreshAllCaches();
-                
+
                 // Show success message
                 alert(`Successfully checked out ${selectedBookings.length} booking(s)!`);
 
@@ -696,10 +706,10 @@
 
                     // Calculate counts from cached data
                     totalRoomsCount = roomsCache.length;
-                    
+
                     // Calculate available rooms dynamically (active rooms that are not currently booked)
                     availableRoomsCount = roomsCache.filter(room => room.isactive === 1).length;
-                    
+
                     maintenanceRoomsCount = roomsCache.filter(room =>
                         room.isactive === 0
                     ).length;
@@ -726,7 +736,7 @@
                     // Fetch all booking data with room information
                     const bookings = await DBHandler.fetchEntityRecords(
                         'roombooking rb',
-                        'rb.*, rm.roomnumber',
+                        'rb.*, rm.roomnumber, br.roomid',
                         'rb.checkindatetime',
                         'desc',
                         "",
@@ -737,12 +747,34 @@
                     bookingsCache = bookings || [];
                     bookingsCacheLoaded = true;
                     console.log("Bookings cache loaded:", bookingsCache.length, "bookings");
-                    
-                    // Also load booked rooms cache
-                    await loadBookedRoomsCache();
+
+                    // Extract and populate booked rooms cache from bookings data
+                    const bookedRoomsSet = new Set();
+                    const bookedRoomsData = [];
+
+                    bookingsCache.forEach(booking => {
+                        // Only include active bookings with active room status
+                        if (booking.bookingstatus === 1 && booking.roomid && !bookedRoomsSet.has(booking.roomid)) {
+                            bookedRoomsSet.add(booking.roomid);
+                            bookedRoomsData.push({
+                                roomid: booking.roomid,
+                                roomnumber: booking.roomnumber
+                            });
+                        }
+                    });
+
+                    // Populate booked rooms cache
+                    bookedRoomsCache = bookedRoomsData;
+                    bookedRoomsCacheLoaded = true;
+                    console.log("Booked rooms cache populated from bookings:", bookedRoomsCache.length, "booked rooms");
+                    console.log("Booked rooms details:", bookedRoomsCache);
+                    loadDashboard();
                 } catch (error) {
                     console.error("Error loading bookings cache:", error);
                     bookingsCache = [];
+                    bookedRoomsCache = [];
+                    bookingsCacheLoaded = true;
+                    bookedRoomsCacheLoaded = true;
                 }
             }
         }
@@ -750,34 +782,26 @@
         async function loadBookedRoomsCache() {
             if (!bookedRoomsCacheLoaded) {
                 try {
-                    // Get active bookings first
-                    const activeBookings = bookingsCache.filter(booking => booking.bookingstatus === 1);
-                    
-                    if (activeBookings.length > 0) {
-                        const activeBookingIds = activeBookings.map(booking => booking.id);
-                        
-                        // Query bookingroom table to get room IDs for active bookings
-                        const bookedRooms = await DBHandler.fetchEntityRecords(
-                            'bookingroom br',
-                            'DISTINCT br.roomid, rm.roomnumber',
-                            'br.roomid',
-                            'asc',
-                            `br.bookingid IN ('${activeBookingIds.join("','")}') AND br.roomstatus = 1`,
-                            false,
-                            0,
-                            'LEFT JOIN roommaster rm ON rm.id = br.roomid'
-                        );
-                        
-                        bookedRoomsCache = bookedRooms || [];
-                    } else {
-                        bookedRoomsCache = [];
-                    }
-                    
+                    // Directly query for currently booked rooms
+                    const bookedRooms = await DBHandler.fetchEntityRecords(
+                        'bookingroom br',
+                        'DISTINCT br.roomid, rm.roomnumber',
+                        'br.roomid',
+                        'asc',
+                        'br.roomstatus = 1 AND EXISTS (SELECT 1 FROM roombooking rb WHERE rb.id = br.bookingid AND rb.bookingstatus = 1)',
+                        false,
+                        0,
+                        'LEFT JOIN roommaster rm ON rm.id = br.roomid'
+                    );
+
+                    bookedRoomsCache = bookedRooms || [];
                     bookedRoomsCacheLoaded = true;
                     console.log("Booked rooms cache loaded:", bookedRoomsCache.length, "booked rooms");
+                    console.log("Booked rooms details:", bookedRoomsCache);
                 } catch (error) {
                     console.error("Error loading booked rooms cache:", error);
                     bookedRoomsCache = [];
+                    bookedRoomsCacheLoaded = true; // Set to true even on error to prevent infinite loops
                 }
             }
         }
@@ -792,7 +816,20 @@
         function getTodayCheckInsCount() {
             if (!bookingsCacheLoaded) return 0;
             const today = new Date().toISOString().split('T')[0];
-            return bookingsCache.filter(booking => {
+
+            // Get unique bookings by ID to avoid duplicates from JOINs
+            const uniqueBookings = [];
+            const seenIds = new Set();
+
+            bookingsCache.forEach(booking => {
+                if (!seenIds.has(booking.id)) {
+                    seenIds.add(booking.id);
+                    uniqueBookings.push(booking);
+                }
+            });
+
+            return uniqueBookings.filter(booking => {
+                if (!booking.checkindatetime) return false;
                 const checkInDate = new Date(booking.checkindatetime).toISOString().split('T')[0];
                 return checkInDate === today;
             }).length;
@@ -802,7 +839,19 @@
         function getTodayCheckOutsCount() {
             if (!bookingsCacheLoaded) return 0;
             const today = new Date().toISOString().split('T')[0];
-            return bookingsCache.filter(booking => {
+
+            // Get unique bookings by ID to avoid duplicates from JOINs
+            const uniqueBookings = [];
+            const seenIds = new Set();
+
+            bookingsCache.forEach(booking => {
+                if (!seenIds.has(booking.id)) {
+                    seenIds.add(booking.id);
+                    uniqueBookings.push(booking);
+                }
+            });
+
+            return uniqueBookings.filter(booking => {
                 if (!booking.checkoutdatetime) return false;
                 const checkOutDate = new Date(booking.checkoutdatetime).toISOString().split('T')[0];
                 return checkOutDate === today;
@@ -813,7 +862,20 @@
         function getTodayCheckIns() {
             if (!bookingsCacheLoaded) return [];
             const today = new Date().toISOString().split('T')[0];
-            return bookingsCache.filter(booking => {
+
+            // Get unique bookings by ID to avoid duplicates from JOINs
+            const uniqueBookings = [];
+            const seenIds = new Set();
+
+            bookingsCache.forEach(booking => {
+                if (!seenIds.has(booking.id)) {
+                    seenIds.add(booking.id);
+                    uniqueBookings.push(booking);
+                }
+            });
+
+            return uniqueBookings.filter(booking => {
+                if (!booking.checkindatetime) return false;
                 const checkInDate = new Date(booking.checkindatetime).toISOString().split('T')[0];
                 return checkInDate === today;
             });
@@ -823,7 +885,19 @@
         function getTodayCheckOuts() {
             if (!bookingsCacheLoaded) return [];
             const today = new Date().toISOString().split('T')[0];
-            return bookingsCache.filter(booking => {
+
+            // Get unique bookings by ID to avoid duplicates from JOINs
+            const uniqueBookings = [];
+            const seenIds = new Set();
+
+            bookingsCache.forEach(booking => {
+                if (!seenIds.has(booking.id)) {
+                    seenIds.add(booking.id);
+                    uniqueBookings.push(booking);
+                }
+            });
+
+            return uniqueBookings.filter(booking => {
                 if (!booking.checkoutdatetime) return false;
                 const checkOutDate = new Date(booking.checkoutdatetime).toISOString().split('T')[0];
                 return checkOutDate === today;
@@ -833,7 +907,19 @@
         // Helper function to get active bookings
         function getActiveBookings() {
             if (!bookingsCacheLoaded) return [];
-            return bookingsCache.filter(booking => booking.bookingstatus === 1);
+
+            // Get unique bookings by ID to avoid duplicates from JOINs
+            const uniqueBookings = [];
+            const seenIds = new Set();
+
+            bookingsCache.forEach(booking => {
+                if (!seenIds.has(booking.id)) {
+                    seenIds.add(booking.id);
+                    uniqueBookings.push(booking);
+                }
+            });
+
+            return uniqueBookings.filter(booking => booking.bookingstatus === 1);
         }
 
         function loadAvailableRooms() {
@@ -869,7 +955,7 @@
 
         function filterRoomsForCheckIn() {
             if (!roomsCacheLoaded || !checkInRoomDropdown) return;
-            
+
             const showOnlyAvailable = document.getElementById("showOnlyAvailableRooms").checked;
             let filteredRooms = [];
 
@@ -881,9 +967,9 @@
                         if (bookedRoom.roomid) bookedRoomIds.add(bookedRoom.roomid);
                     });
                 }
-                
+
                 // Show only active rooms that are not currently booked
-                filteredRooms = roomsCache.filter(room => 
+                filteredRooms = roomsCache.filter(room =>
                     room.isactive === 1 && !bookedRoomIds.has(room.id)
                 );
             } else {
@@ -894,7 +980,7 @@
             // Update the dropdown data source
             checkInRoomDropdown.dataSource = filteredRooms;
             checkInRoomDropdown.dataBind();
-            
+
             const filterText = showOnlyAvailable ? "available" : "all active";
             console.log(`Showing ${filterText} rooms:`, filteredRooms.length, "rooms");
         }
@@ -919,7 +1005,7 @@
         function refreshBookingsCache() {
             bookingsCacheLoaded = false;
             bookedRoomsCacheLoaded = false;
-            loadBookingsCache().then(() => {
+            loadBookingsCache().then(() => { // This now also refreshes booked rooms cache
                 loadDashboard(); // Refresh all counts
             });
         }
@@ -933,7 +1019,7 @@
         // Helper function to get rooms by status
         function getRoomsByStatus(status) {
             if (!roomsCacheLoaded) return [];
-            
+
             // Get currently booked room IDs from booked rooms cache
             const bookedRoomIds = new Set();
             if (bookedRoomsCacheLoaded) {
@@ -941,7 +1027,7 @@
                     if (bookedRoom.roomid) bookedRoomIds.add(bookedRoom.roomid);
                 });
             }
-            
+
             return roomsCache.filter(room => {
                 switch (status) {
                     case 'active':
@@ -966,13 +1052,16 @@
             return roomsCache.find(room => room.id === roomId);
         }
 
-        $(document).ready(() => {
-            // Initialize Syncfusion DateTimePicker
+        // Initialize Syncfusion components
+        function initializeSyncfusionControls() {
+            // Initialize DateTimePicker for checkout
             new ej.calendars.DateTimePicker({
                 placeholder: "Select Check-Out Time"
             }).appendTo('#checkOutDateTime');
+        }
 
-            // Initialize Room DropDownList with multiselect for Check-In
+        // Initialize room dropdown for check-in
+        function initializeRoomDropdown() {
             checkInRoomDropdown = new ej.dropdowns.MultiSelect({
                 placeholder: "Select Rooms",
                 mode: 'CheckBox',
@@ -983,8 +1072,10 @@
                 dataSource: []
             });
             checkInRoomDropdown.appendTo('#checkInRoom');
+        }
 
-            // Initialize Bookings DropDownList with multiselect for Check-Out
+        // Initialize bookings dropdown for check-out
+        function initializeBookingsDropdown() {
             checkOutBookingsDropdown = new ej.dropdowns.MultiSelect({
                 placeholder: "Select Bookings to Check-Out",
                 mode: 'CheckBox',
@@ -999,19 +1090,24 @@
                     '</div>'
             });
             checkOutBookingsDropdown.appendTo('#checkOutBookings');
+        }
 
-            // Load initial data
+        // Load all initial data caches
+        function initializeDataCaches() {
             loadRoomsCache();
-            loadBookingsCache();
-            loadDashboard();
+            loadBookingsCache(); // This now also populates booked rooms cache
+        }
 
-            // Bind dashboard link events
-            document.querySelectorAll('.dashboard-link')
-                .forEach(el => {
-                    el.addEventListener('click', function () {
-                        showBookingList(this.dataset.type);
-                    });
-                });
+        // Main initialization function
+        function initializeApplication() {
+            initializeSyncfusionControls();
+            initializeRoomDropdown();
+            initializeBookingsDropdown();
+            initializeDataCaches();
+        }
+
+        $(document).ready(() => {
+            initializeApplication();
         });
 
     </script>
