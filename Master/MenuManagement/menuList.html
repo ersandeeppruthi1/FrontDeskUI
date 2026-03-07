@@ -302,6 +302,22 @@
                 0
             ) || [];
         }
+
+        async function loadParentMenus(userId) {
+
+            const parentMenus = await DBHandler.fetchEntityRecords(
+                'menuitem',
+                'id,name',
+                'name',
+                'asc',
+                `userid = '${userId}'`,
+                true,
+                0
+            ) || [];
+
+            parentDropdown.dataSource = parentMenus;
+            parentDropdown.dataBind();
+        }
         async function loadMenus() {
 
             const joinCondition =
@@ -349,7 +365,6 @@
             modal.show();
 
             ej.base.enableRipple(true);
-
             userDropdown = new ej.dropdowns.DropDownList({
 
                 dataSource: usersData,
@@ -362,13 +377,21 @@
 
                 filterBarPlaceholder: 'Search User...',
 
+                change: function (args) {
+
+                    if (args.value) {
+                        loadParentMenus(args.value);
+                    }
+
+                }
+
             });
 
             userDropdown.appendTo('#menu_user');
 
             parentDropdown = new ej.dropdowns.DropDownList({
 
-                dataSource: menuGrid.dataSource,
+                dataSource: [],
 
                 fields: { text: 'name', value: 'id' },
 
@@ -376,7 +399,7 @@
 
                 allowFiltering: true,
 
-                filterBarPlaceholder: 'Search Parentmenu...',
+                filterBarPlaceholder: 'Search Parent Menu...'
 
             });
 
@@ -413,6 +436,12 @@
 
             document.querySelector('#menuModal .modal-title').innerText = "Edit Menu Item";
 
+
+            loadParentMenus(record.userid);
+
+            setTimeout(() => {
+                parentDropdown.value = record.parentmenuid;
+            }, 300);
             openMenuModal();
 
             const record = selected[0];
@@ -506,6 +535,10 @@
     </script>
 
     <style>
+        #menuGrid_toolbarItems {
+            height: 10px !important;
+        }
+
         label {
             font-weight: bold;
         }
