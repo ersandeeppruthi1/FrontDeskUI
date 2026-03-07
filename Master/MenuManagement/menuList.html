@@ -104,14 +104,6 @@
 </div>
 
 <div class="col-md-6">
-<label>Type</label>
-<select id="menu_type" class="form-control">
-<option value="1">Create</option>
-<option value="2">View</option>
-</select>
-</div>
-
-<div class="col-md-6">
 <label>Link</label>
 <input type="text" id="menu_link" class="form-control">
 </div>
@@ -184,7 +176,6 @@ columns:[
 {type:'checkbox',width:50},
 {field:'name',headerText:'Menu Name',width:200},
 {field:'parentname',headerText:'Parent Menu',width:200},
-{field:'type',headerText:'Type',width:120},
 {field:'link',headerText:'Link',width:200},
 {field:'sortorder',headerText:'Order',width:100}
 ],
@@ -346,7 +337,6 @@ document.querySelector('#menuModal .modal-title').innerText="Edit Menu Item";
 document.getElementById('menu_name').value = record.name || '';
 document.getElementById('menu_link').value = record.link || '';
 document.getElementById('menu_sort').value = record.sortorder || '';
-document.getElementById('menu_type').value = record.type || '';
 
 userDropdown.value = record.userid || null;
 
@@ -374,7 +364,7 @@ userid:userDropdown.value,
 parentmenuid:parentDropdown.value,
 link:document.getElementById('menu_link').value,
 sortorder:document.getElementById('menu_sort').value,
-type:document.getElementById('menu_type').value
+type:1
 
 },editingMenuId,false);
 
