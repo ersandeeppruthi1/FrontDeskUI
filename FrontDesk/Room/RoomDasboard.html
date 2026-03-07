@@ -333,6 +333,10 @@
         // Local cache for bookings
         let bookingsCache = [];
         let bookingsCacheLoaded = false;
+        
+        // Local cache for booked rooms
+        let bookedRoomsCache = [];
+        let bookedRoomsCacheLoaded = false;
 
         let checkInRoomDropdown;
         let checkOutBookingsDropdown;
@@ -733,6 +737,9 @@
                     bookingsCache = bookings || [];
                     bookingsCacheLoaded = true;
                     console.log("Bookings cache loaded:", bookingsCache.length, "bookings");
+                    
+                    // Also load booked rooms cache
+                    await loadBookedRoomsCache();
                 } catch (error) {
                     console.error("Error loading bookings cache:", error);
                     bookingsCache = [];
@@ -740,15 +747,45 @@
             }
         }
 
+        async function loadBookedRoomsCache() {
+            if (!bookedRoomsCacheLoaded) {
+                try {
+                    // Get active bookings first
+                    const activeBookings = bookingsCache.filter(booking => booking.bookingstatus === 1);
+                    
+                    if (activeBookings.length > 0) {
+                        const activeBookingIds = activeBookings.map(booking => booking.id);
+                        
+                        // Query bookingroom table to get room IDs for active bookings
+                        const bookedRooms = await DBHandler.fetchEntityRecords(
+                            'bookingroom br',
+                            'DISTINCT br.roomid, rm.roomnumber',
+                            'br.roomid',
+                            'asc',
+                            `br.bookingid IN ('${activeBookingIds.join("','")}') AND br.roomstatus = 1`,
+                            false,
+                            0,
+                            'LEFT JOIN roommaster rm ON rm.id = br.roomid'
+                        );
+                        
+                        bookedRoomsCache = bookedRooms || [];
+                    } else {
+                        bookedRoomsCache = [];
+                    }
+                    
+                    bookedRoomsCacheLoaded = true;
+                    console.log("Booked rooms cache loaded:", bookedRoomsCache.length, "booked rooms");
+                } catch (error) {
+                    console.error("Error loading booked rooms cache:", error);
+                    bookedRoomsCache = [];
+                }
+            }
+        }
+
         // Helper function to get booked rooms count
         function getBookedRoomsCount() {
-            if (!bookingsCacheLoaded) return 0;
-            const bookedRoomIds = new Set();
-            bookingsCache.filter(booking => booking.bookingstatus === 1)
-                .forEach(booking => {
-                    if (booking.roomid) bookedRoomIds.add(booking.roomid);
-                });
-            return bookedRoomIds.size;
+            if (!bookedRoomsCacheLoaded) return 0;
+            return bookedRoomsCache.length;
         }
 
         // Helper function to get today's check-ins count
@@ -837,13 +874,12 @@
             let filteredRooms = [];
 
             if (showOnlyAvailable) {
-                // Get currently booked room IDs
+                // Get currently booked room IDs from booked rooms cache
                 const bookedRoomIds = new Set();
-                if (bookingsCacheLoaded) {
-                    bookingsCache.filter(booking => booking.bookingstatus === 1)
-                        .forEach(booking => {
-                            if (booking.roomid) bookedRoomIds.add(booking.roomid);
-                        });
+                if (bookedRoomsCacheLoaded) {
+                    bookedRoomsCache.forEach(bookedRoom => {
+                        if (bookedRoom.roomid) bookedRoomIds.add(bookedRoom.roomid);
+                    });
                 }
                 
                 // Show only active rooms that are not currently booked
@@ -882,6 +918,7 @@
         // Function to refresh bookings cache when needed
         function refreshBookingsCache() {
             bookingsCacheLoaded = false;
+            bookedRoomsCacheLoaded = false;
             loadBookingsCache().then(() => {
                 loadDashboard(); // Refresh all counts
             });
@@ -897,13 +934,12 @@
         function getRoomsByStatus(status) {
             if (!roomsCacheLoaded) return [];
             
-            // Get currently booked room IDs for dynamic calculation
+            // Get currently booked room IDs from booked rooms cache
             const bookedRoomIds = new Set();
-            if (bookingsCacheLoaded) {
-                bookingsCache.filter(booking => booking.bookingstatus === 1)
-                    .forEach(booking => {
-                        if (booking.roomid) bookedRoomIds.add(booking.roomid);
-                    });
+            if (bookedRoomsCacheLoaded) {
+                bookedRoomsCache.forEach(bookedRoom => {
+                    if (bookedRoom.roomid) bookedRoomIds.add(bookedRoom.roomid);
+                });
             }
             
             return roomsCache.filter(room => {
