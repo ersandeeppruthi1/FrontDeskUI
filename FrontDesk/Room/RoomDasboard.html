@@ -181,6 +181,17 @@
                             <label class="form-label">Address</label>
                             <textarea id="address" class="form-control" rows="2"></textarea>
                         </div>
+
+                        <!-- Room Filter Option -->
+                        <div class="col-md-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="showOnlyAvailableRooms" checked onchange="filterRoomsForCheckIn()">
+                                <label class="form-check-label" for="showOnlyAvailableRooms">
+                                    Show only available rooms
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="col-md-12">
                             <label class="form-label">Select Rooms <span class="text-danger">*</span></label><br>
                             <input type="text" id="checkInRoom" />
@@ -310,6 +321,10 @@
             document.getElementById("gentsCount").value = "0";
             document.getElementById("ladiesCount").value = "0";
             document.getElementById("referenceDetail").value = "";
+            
+            // Reset filter to show only available rooms
+            document.getElementById("showOnlyAvailableRooms").checked = true;
+            
             const modal = new bootstrap.Modal(document.getElementById('checkInModal'), {
                 focus: false
             });
@@ -617,21 +632,17 @@
         function loadAvailableRooms() {
             // Use cached rooms if available
             if (roomsCacheLoaded && roomsCache.length > 0) {
-                // Filter only active rooms for dropdown
-                const activeRooms = roomsCache.filter(room => room.isactive === 1);
-                checkInRoomDropdown.dataSource = activeRooms;
-                checkInRoomDropdown.dataBind();
-                console.log("Using cached active rooms:", activeRooms.length, "rooms");
+                filterRoomsForCheckIn();
                 return;
             }
 
             // Load from database if cache is empty (fallback)
             DBHandler.fetchEntityRecords(
                 'roommaster',
-                'id,roomnumber',
+                'id,roomnumber,isactive,bookingstatus',
                 'roomnumber',
                 'asc',
-                "isactive = 1",
+                "",
                 false,
                 0
             ).then(function (rooms) {
@@ -640,13 +651,38 @@
                 // Update the dropdown data source
                 checkInRoomDropdown.dataSource = rooms;
                 checkInRoomDropdown.dataBind();
-                console.log("Loaded active rooms from database:", rooms.length, "rooms");
+                console.log("Loaded rooms from database:", rooms.length, "rooms");
 
             }).catch(function (error) {
                 console.error("Error loading rooms:", error);
                 checkInRoomDropdown.dataSource = [];
                 checkInRoomDropdown.dataBind();
             });
+        }
+
+        function filterRoomsForCheckIn() {
+            if (!roomsCacheLoaded || !checkInRoomDropdown) return;
+            
+            const showOnlyAvailable = document.getElementById("showOnlyAvailableRooms").checked;
+            let filteredRooms = [];
+
+            if (showOnlyAvailable) {
+                // Show only active and available rooms
+                filteredRooms = roomsCache.filter(room => 
+                    room.isactive === 1 && 
+                    (room.bookingstatus === 'Available' || room.bookingstatus === null || room.bookingstatus === '')
+                );
+            } else {
+                // Show all active rooms
+                filteredRooms = roomsCache.filter(room => room.isactive === 1);
+            }
+
+            // Update the dropdown data source
+            checkInRoomDropdown.dataSource = filteredRooms;
+            checkInRoomDropdown.dataBind();
+            
+            const filterText = showOnlyAvailable ? "available" : "all active";
+            console.log(`Showing ${filterText} rooms:`, filteredRooms.length, "rooms");
         }
 
         // Function to refresh rooms cache when needed
