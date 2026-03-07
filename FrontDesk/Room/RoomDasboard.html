@@ -520,6 +520,7 @@
                     console.log("Total rooms count cached:", totalRoomsCount);
                     console.log("Available rooms count cached:", availableRoomsCount);
                     console.log("Maintenance rooms count cached:", maintenanceRoomsCount);
+                    loadDashboard();
                 } catch (error) {
                     console.error("Error loading rooms cache:", error);
                     roomsCache = [];
