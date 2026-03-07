@@ -137,6 +137,7 @@
         let userDropdown;
 
         let usersData = [];
+        let sortOrderCache = {}; // Cache for sort order data by user and parent
 
         async function initMenuGrid() {
 
@@ -231,6 +232,78 @@
 
         }
 
+        async function loadSortOrderCache(userId) {
+            // Load all menu items for the user to cache sort order data
+            const menuItems = await DBHandler.fetchEntityRecords(
+                'menuitem',
+                'id,sortorder,parentmenuid',
+                'sortorder',
+                'desc',
+                `userid = '${userId}'`,
+                true,
+                0
+            ) || [];
+
+            // Initialize cache for this user
+            sortOrderCache[userId] = {
+                maxWithoutParent: 0,
+                maxByParent: {}
+            };
+
+            // Process menu items to find max sort orders
+            menuItems.forEach(item => {
+                const sortOrder = parseInt(item.sortorder) || 0;
+                
+                if (!item.parentmenuid) {
+                    // Items without parent
+                    if (sortOrder > sortOrderCache[userId].maxWithoutParent) {
+                        sortOrderCache[userId].maxWithoutParent = sortOrder;
+                    }
+                } else {
+                    // Items with parent
+                    const parentId = item.parentmenuid;
+                    if (!sortOrderCache[userId].maxByParent[parentId] || 
+                        sortOrder > sortOrderCache[userId].maxByParent[parentId]) {
+                        sortOrderCache[userId].maxByParent[parentId] = sortOrder;
+                    }
+                }
+            });
+        }
+
+        function getNextSortOrder(userId, parentId) {
+            if (!sortOrderCache[userId]) {
+                return 1; // Default if cache not loaded
+            }
+
+            if (!parentId) {
+                // No parent - use max without parent + 1
+                return sortOrderCache[userId].maxWithoutParent + 1;
+            } else {
+                // Has parent - use max for that parent + 1
+                return (sortOrderCache[userId].maxByParent[parentId] || 0) + 1;
+            }
+        }
+
+        function updateSortOrderCache(userId, parentId, newSortOrder) {
+            if (!sortOrderCache[userId]) {
+                sortOrderCache[userId] = {
+                    maxWithoutParent: 0,
+                    maxByParent: {}
+                };
+            }
+
+            if (!parentId) {
+                if (newSortOrder > sortOrderCache[userId].maxWithoutParent) {
+                    sortOrderCache[userId].maxWithoutParent = newSortOrder;
+                }
+            } else {
+                if (!sortOrderCache[userId].maxByParent[parentId] || 
+                    newSortOrder > sortOrderCache[userId].maxByParent[parentId]) {
+                    sortOrderCache[userId].maxByParent[parentId] = newSortOrder;
+                }
+            }
+        }
+
         async function loadParentMenus(userId) {
 
             DBHandler.fetchEntityRecords(
@@ -295,6 +368,12 @@
 
                     if (args.value) {
                         loadParentMenus(args.value);
+                        // Load sort order cache for the selected user
+                        loadSortOrderCache(args.value).then(() => {
+                            // Update sort order based on no parent initially
+                            const nextSortOrder = getNextSortOrder(args.value, null);
+                            document.getElementById('menu_sort').value = nextSortOrder;
+                        });
                     }
 
                 }
@@ -309,7 +388,16 @@
                 fields: { text: 'name', value: 'id' },
                 placeholder: 'Select Parent Menu',
                 allowFiltering: true,
-                filterBarPlaceholder: 'Search Parent Menu...'
+                filterBarPlaceholder: 'Search Parent Menu...',
+
+                change: function (args) {
+                    // Update sort order when parent menu changes
+                    const userId = userDropdown.value;
+                    if (userId) {
+                        const nextSortOrder = getNextSortOrder(userId, args.value);
+                        document.getElementById('menu_sort').value = nextSortOrder;
+                    }
+                }
 
             });
 
@@ -342,6 +430,10 @@
 
                 userDropdown.value = record.userid || null;
 
+                if (record.userid) {
+                    loadSortOrderCache(record.userid);
+                }
+
                 loadParentMenus(record.userid);
 
                 setTimeout(() => {
@@ -369,6 +461,10 @@
                 type: 1
 
             }, editingMenuId, false);
+
+            // Update cache with the new sort order
+            const sortOrder = parseInt(document.getElementById('menu_sort').value);
+            updateSortOrderCache(userDropdown.value, parentDropdown.value, sortOrder);
 
             bootstrap.Modal.getInstance(menuModal).hide();
 
