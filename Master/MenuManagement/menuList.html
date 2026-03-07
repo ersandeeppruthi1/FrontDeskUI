@@ -186,7 +186,9 @@
                     { field: 'username', headerText: 'User Name', width: 150 },
                     { field: 'parentname', headerText: 'Parent Menu', width: 200 },
                     { field: 'link', headerText: 'Link', width: 200 },
-                    { field: 'sortorder', headerText: 'Order', width: 100 }
+                    { field: 'sortorder', headerText: 'Order', width: 100 },
+                    { field: 'createdon', headerText: 'Created On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 160, visible: false },
+                    { field: 'modifiedon', headerText: 'Modified On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 160, visible: false }
                 ],
 
                 toolbarClick: async function (args) {
