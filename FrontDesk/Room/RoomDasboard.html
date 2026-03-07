@@ -74,7 +74,7 @@
                     <i class="bi bi-box-arrow-in-right"></i> Check-In
                 </button>
 
-                <button class="btn btn-danger" id="btnCheckOut">
+                <button class="btn btn-danger" id="btnCheckOut" onclick="openCheckOutModal()">
                     <i class="bi bi-box-arrow-right"></i> Check-Out
                 </button>
             </div>
@@ -223,7 +223,7 @@
 
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-success" id="saveCheckIn">Confirm Check-In</button>
+                    <button class="btn btn-success" id="saveCheckIn" onclick="submitCheckIn()">Confirm Check-In</button>
                 </div>
 
             </div>
@@ -257,7 +257,7 @@
 
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-danger" id="saveCheckOut">Confirm Check-Out</button>
+                    <button class="btn btn-danger" id="saveCheckOut" onclick="submitCheckOut()">Confirm Check-Out</button>
                 </div>
 
             </div>
@@ -307,17 +307,90 @@
 
         }
 
-        $(document).ready(new function () {
-            // Initialize rooms cache on page load
-            loadRoomsCache();
-            
-            document.getElementById("btnCheckOut").addEventListener("click", function () {
-                const modal = new bootstrap.Modal(document.getElementById('checkOutModal'), {
-                    focus: false
-                });
-                modal.show();
+        function openCheckOutModal() {
+            const modal = new bootstrap.Modal(document.getElementById('checkOutModal'), {
+                focus: false
             });
-            bindClickMethod();
+            modal.show();
+        }
+
+        async function submitCheckIn() {
+            const bookingId = crypto.randomUUID();
+
+            // Get form values
+            const displayName = document.getElementById("displayName").value.trim();
+            const mobileNumber = document.getElementById("mobileNumber").value.trim();
+            const address = document.getElementById("address").value.trim();
+            const checkInDate = document.getElementById("checkInDateTime").value;
+            const checkOutDate = document.getElementById("checkOutDateTime").value;
+            const gentsCount = parseInt(document.getElementById("gentsCount").value) || 0;
+            const ladiesCount = parseInt(document.getElementById("ladiesCount").value) || 0;
+            const referenceDetail = document.getElementById("referenceDetail").value.trim();
+
+            const selectedRooms = checkInRoomDropdown.value || [];
+
+            // Validation
+            if (!displayName) {
+                alert("Please enter Display Name");
+                return;
+            }
+            if (!mobileNumber) {
+                alert("Please enter Mobile Number");
+                return;
+            }
+            if (selectedRooms.length === 0) {
+                alert("Select at least one room");
+                return;
+            }
+
+            // 1️⃣ Create Main Booking
+            await DBHandler.submitRecordData('roombooking', {
+                bookingnumber: "BK-" + Date.now(),
+                displayname: displayName,
+                mobilenumber: mobileNumber,
+                address: address,
+                checkindatetime: checkInDate,
+                checkoutdatetime: checkOutDate,
+                bookingstatus: 1,
+                gentscount: gentsCount,
+                ladiescount: ladiesCount,
+                referencedetail: referenceDetail,
+                feedbackrating: 0,
+                feedbackremarks: '',
+                donationamount: 0
+            }, bookingId, false);
+
+            // 2️⃣ Insert Multiple Rooms
+            for (const roomId of selectedRooms) {
+                await DBHandler.submitRecordData('bookingroom', {
+                    bookingid: bookingId,
+                    roomid: roomId,
+                    roomstatus: 1
+                }, null, false);
+            }
+
+            bootstrap.Modal.getInstance(
+                document.getElementById('checkInModal')
+            ).hide();
+
+            loadDashboard();
+        }
+
+        async function submitCheckOut() {
+            const roomId = document.getElementById("checkOutRoom").value;
+
+            await DBHandler.submitRecordData('bookingroom', {
+                roomstatus: 0
+            }, roomId, true);
+
+            bootstrap.Modal.getInstance(
+                document.getElementById('checkOutModal')).hide();
+
+            loadDashboard();
+        }
+
+        $(document).ready(new function () {
+            loadRoomsCache();
 
             loadDashboard();
 
@@ -344,89 +417,6 @@
             dataSource: []
         });
         checkInRoomDropdown.appendTo('#checkInRoom');
-
-        function bindClickMethod() {
-            document.getElementById("saveCheckIn")
-                .addEventListener("click", async function () {
-
-                    const bookingId = crypto.randomUUID();
-
-                    // Get form values
-                    const displayName = document.getElementById("displayName").value.trim();
-                    const mobileNumber = document.getElementById("mobileNumber").value.trim();
-                    const address = document.getElementById("address").value.trim();
-                    const checkInDate = document.getElementById("checkInDateTime").value;
-                    const checkOutDate = document.getElementById("checkOutDateTime").value;
-                    const gentsCount = parseInt(document.getElementById("gentsCount").value) || 0;
-                    const ladiesCount = parseInt(document.getElementById("ladiesCount").value) || 0;
-                    const referenceDetail = document.getElementById("referenceDetail").value.trim();
-
-                    const selectedRooms = checkInRoomDropdown.value || [];
-
-                    // Validation
-                    if (!displayName) {
-                        alert("Please enter Display Name");
-                        return;
-                    }
-                    if (!mobileNumber) {
-                        alert("Please enter Mobile Number");
-                        return;
-                    }
-                    if (selectedRooms.length === 0) {
-                        alert("Select at least one room");
-                        return;
-                    }
-
-                    // 1️⃣ Create Main Booking
-                    await DBHandler.submitRecordData('roombooking', {
-                        bookingnumber: "BK-" + Date.now(),
-                        displayname: displayName,
-                        mobilenumber: mobileNumber,
-                        address: address,
-                        checkindatetime: checkInDate,
-                        checkoutdatetime: checkOutDate,
-                        bookingstatus: 1,
-                        gentscount: gentsCount,
-                        ladiescount: ladiesCount,
-                        referencedetail: referenceDetail,
-                        feedbackrating: 0,
-                        feedbackremarks: '',
-                        donationamount: 0
-                    }, bookingId, false);
-
-                    // 2️⃣ Insert Multiple Rooms
-                    for (const roomId of selectedRooms) {
-
-                        await DBHandler.submitRecordData('bookingroom', {
-                            bookingid: bookingId,
-                            roomid: roomId,
-                            roomstatus: 1
-                        }, null, false);
-
-                    }
-
-                    bootstrap.Modal.getInstance(
-                        document.getElementById('checkInModal')
-                    ).hide();
-
-                    loadDashboard();
-                });
-
-            document.getElementById("saveCheckOut")
-                .addEventListener("click", async function () {
-
-                    const roomId = document.getElementById("checkOutRoom").value;
-
-                    await DBHandler.submitRecordData('bookingroom', {
-                        roomstatus: 0
-                    }, roomId, true);
-
-                    bootstrap.Modal.getInstance(
-                        document.getElementById('checkOutModal')).hide();
-
-                    loadDashboard();
-                });
-        }
 
         async function loadDashboard() {
 
