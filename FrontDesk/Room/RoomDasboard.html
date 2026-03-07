@@ -88,7 +88,7 @@
                 <div class="card shadow-sm border-0 text-center">
                     <div class="card-body">
                         <h6 class="text-muted">Total Rooms</h6>
-                        <h2 id="totalRooms" class="fw-bold dashboard-link" data-type="total"
+                        <h2 id="totalRooms" class="fw-bold dashboard-link dashboard-number" data-type="total"
                             onclick="showBookingList(this.dataset.type)">0</h2>
                     </div>
                 </div>
@@ -98,7 +98,7 @@
                 <div class="card shadow-sm border-0 text-center bg-success text-white">
                     <div class="card-body">
                         <h6>Available Rooms</h6>
-                        <h2 id="availableRooms" class="fw-bold dashboard-link" data-type="available"
+                        <h2 id="availableRooms" class="fw-bold dashboard-link dashboard-number" data-type="available"
                             onclick="showBookingList(this.dataset.type)">0</h2>
                     </div>
                 </div>
@@ -108,7 +108,7 @@
                 <div class="card shadow-sm border-0 text-center bg-danger text-white">
                     <div class="card-body">
                         <h6>Booked Rooms</h6>
-                        <h2 id="bookedRooms" class="fw-bold dashboard-link" data-type="booked"
+                        <h2 id="bookedRooms" class="fw-bold dashboard-link dashboard-number" data-type="booked"
                             onclick="showBookingList(this.dataset.type)">0</h2>
 
                     </div>
@@ -119,7 +119,7 @@
                 <div class="card shadow-sm border-0 text-center bg-warning text-dark">
                     <div class="card-body">
                         <h6>Under Maintenance</h6>
-                        <h2 id="maintenanceRooms" class="fw-bold dashboard-link" data-type="maintenance"
+                        <h2 id="maintenanceRooms" class="fw-bold dashboard-link dashboard-number" data-type="maintenance"
                             onclick="showBookingList(this.dataset.type)">0</h2>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
                 <div class="card shadow-sm border-0 text-center">
                     <div class="card-body">
                         <h6 class="text-muted">Today's Check-Ins</h6>
-                        <h2 id="todayCheckIns" class="fw-bold text-primary dashboard-link" data-type="checkin"
+                        <h2 id="todayCheckIns" class="fw-bold text-primary dashboard-link dashboard-number" data-type="checkin"
                             defaultValue="currentDate" onclick="showBookingList(this.dataset.type)">0</h2>
                     </div>
                 </div>
@@ -145,7 +145,7 @@
                 <div class="card shadow-sm border-0 text-center">
                     <div class="card-body">
                         <h6 class="text-muted">Today's Check-Outs</h6>
-                        <h2 id="todayCheckOuts" class="fw-bold text-secondary dashboard-link" data-type="checkout"
+                        <h2 id="todayCheckOuts" class="fw-bold text-secondary dashboard-link dashboard-number" data-type="checkout"
                             onclick="showBookingList(this.dataset.type)">0
                         </h2>
                     </div>
@@ -275,13 +275,7 @@
 
                         <div class="col-md-6">
                             <label class="form-label">Feedback Rating</label>
-                            <select id="feedbackRating" class="form-select">
-                                <option value="">Select Rating</option>
-                                <option value="1">Bad</option>
-                                <option value="2">Good</option>
-                                <option value="3">Very Good</option>
-                                <option value="4">Excellent</option>
-                            </select>
+                            <input type="text" id="feedbackRating" />
                         </div>
                     </div>
 
@@ -350,6 +344,7 @@
 
         let checkInRoomDropdown;
         let checkOutBookingsDropdown;
+        let feedbackRatingDropdown;
 
 
 
@@ -382,7 +377,9 @@
             setCurrentCheckOutTime();
 
             // Clear form fields
-            document.getElementById("feedbackRating").value = "";
+            if (feedbackRatingDropdown) {
+                feedbackRatingDropdown.value = null;
+            }
             document.getElementById("feedbackComments").value = "";
             document.getElementById("donationAmount").value = "";
 
@@ -536,7 +533,7 @@
             // Get form values
             const selectedBookings = checkOutBookingsDropdown.value || [];
             const checkOutDateTime = document.getElementById("checkOutDateTime").value;
-            const feedbackRating = parseInt(document.getElementById("feedbackRating").value) || 0;
+            const feedbackRating = feedbackRatingDropdown ? parseInt(feedbackRatingDropdown.value) || 0 : 0;
             const feedbackComments = document.getElementById("feedbackComments").value.trim();
             const donationAmount = parseFloat(document.getElementById("donationAmount").value) || 0;
 
@@ -601,29 +598,85 @@
             }
         }
 
+        // Animation utility functions
+        function animateCounter(element, targetValue, duration = 1000) {
+            const startValue = parseInt(element.innerText) || 0;
+            const increment = targetValue > startValue ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / Math.abs(targetValue - startValue)));
+            
+            // Add animation classes
+            element.classList.add('updating');
+            
+            let current = startValue;
+            const timer = setInterval(() => {
+                current += increment;
+                element.innerText = current;
+                
+                if (current === targetValue) {
+                    clearInterval(timer);
+                    element.classList.remove('updating');
+                    element.classList.add('animate-count');
+                    
+                    // Remove animation class after animation completes
+                    setTimeout(() => {
+                        element.classList.remove('animate-count');
+                    }, 1400);
+                }
+            }, stepTime);
+        }
+
+        function animateNumber(elementId, value, shouldGlow = false) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const currentValue = parseInt(element.innerText) || 0;
+            
+            if (currentValue !== value) {
+                // Show loading shimmer for very quick updates
+                if (Math.abs(value - currentValue) <= 3) {
+                    element.innerHTML = '<span class="loading-shimmer"></span>';
+                    setTimeout(() => {
+                        element.innerText = value;
+                        element.classList.add('animate-glow');
+                        setTimeout(() => element.classList.remove('animate-glow'), 1500);
+                    }, 300);
+                } else {
+                    // Use counter animation for larger changes
+                    animateCounter(element, value, 800);
+                }
+                
+                if (shouldGlow) {
+                    setTimeout(() => {
+                        element.classList.add('animate-glow');
+                        setTimeout(() => element.classList.remove('animate-glow'), 1500);
+                    }, 900);
+                }
+            }
+        }
+
         async function loadDashboard() {
 
-            // Use cached total rooms count
-            document.getElementById("totalRooms").innerText = totalRoomsCount;
+            // Animate total rooms count
+            animateNumber("totalRooms", totalRoomsCount);
 
             // Calculate booked rooms from cache
             const bookedRoomsCount = getBookedRoomsCount();
-            document.getElementById("bookedRooms").innerText = bookedRoomsCount;
+            animateNumber("bookedRooms", bookedRoomsCount, true);
 
             // Calculate available rooms dynamically (total active rooms - booked rooms)
             const dynamicAvailableRoomsCount = Math.max(0, (roomsCache.filter(room => room.isactive === 1).length) - bookedRoomsCount);
-            document.getElementById("availableRooms").innerText = dynamicAvailableRoomsCount;
+            animateNumber("availableRooms", dynamicAvailableRoomsCount, true);
 
-            // Use cached maintenance rooms count
-            document.getElementById("maintenanceRooms").innerText = maintenanceRoomsCount;
+            // Animate maintenance rooms count
+            animateNumber("maintenanceRooms", maintenanceRoomsCount);
 
             // Calculate today's check-ins from cache
             const todayCheckInsCount = getTodayCheckInsCount();
-            document.getElementById("todayCheckIns").innerText = todayCheckInsCount;
+            animateNumber("todayCheckIns", todayCheckInsCount, true);
 
             // Calculate today's check-outs from cache
             const todayCheckOutsCount = getTodayCheckOutsCount();
-            document.getElementById("todayCheckOuts").innerText = todayCheckOutsCount;
+            animateNumber("todayCheckOuts", todayCheckOutsCount, true);
         }
 
         async function showBookingList(type) {
@@ -995,8 +1048,8 @@
                     filterRoomsForCheckIn(); // Use filter function for dynamic calculation
                 }
                 // Update dashboard with new counts (dashboard will calculate available rooms dynamically)
-                document.getElementById("totalRooms").innerText = totalRoomsCount;
-                document.getElementById("maintenanceRooms").innerText = maintenanceRoomsCount;
+                animateNumber("totalRooms", totalRoomsCount);
+                animateNumber("maintenanceRooms", maintenanceRoomsCount);
                 loadDashboard(); // This will calculate available and booked rooms dynamically
             });
         }
@@ -1058,6 +1111,21 @@
             new ej.calendars.DateTimePicker({
                 placeholder: "Select Check-Out Time"
             }).appendTo('#checkOutDateTime');
+
+            // Initialize Feedback Rating Dropdown
+            feedbackRatingDropdown = new ej.dropdowns.DropDownList({
+                placeholder: "Select Rating",
+                dataSource: [
+                    { value: 1, text: "Bad" },
+                    { value: 2, text: "Good" },
+                    { value: 3, text: "Very Good" },
+                    { value: 4, text: "Excellent" }
+                ],
+                fields: { text: 'text', value: 'value' },
+                allowFiltering: false,
+                width: '100%'
+            });
+            feedbackRatingDropdown.appendTo('#feedbackRating');
         }
 
         // Initialize room dropdown for check-in
@@ -1121,6 +1189,122 @@
             text-decoration: underline;
         }
 
+        /* Animated counter styles */
+        .dashboard-number {
+            display: inline-block;
+            font-weight: bold;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-number::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .dashboard-number.updating::before {
+            left: 100%;
+        }
+
+        /* Number animation keyframes */
+        @keyframes countUp {
+            0% {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            50% {
+                transform: translateY(-5px);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                text-shadow: 0 0 5px rgba(255,255,255,0.3);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 30px rgba(255,255,255,0.6);
+            }
+            100% {
+                text-shadow: 0 0 5px rgba(255,255,255,0.3);
+            }
+        }
+
+        .animate-count {
+            animation: countUp 0.6s ease-out, pulse 0.8s ease-out 0.6s;
+        }
+
+        .animate-glow {
+            animation: glow 1.5s ease-in-out;
+        }
+
+        /* Card hover effects */
+        .card {
+            transition: all 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+
+        /* Specific colors for different card types */
+        .bg-success:hover {
+            background: linear-gradient(45deg, #28a745, #34ce57) !important;
+        }
+
+        .bg-danger:hover {
+            background: linear-gradient(45deg, #dc3545, #e55560) !important;
+        }
+
+        .bg-warning:hover {
+            background: linear-gradient(45deg, #ffc107, #ffcd3c) !important;
+        }
+
+        /* Loading shimmer effect */
+        @keyframes shimmer {
+            0% {
+                background-position: -200px 0;
+            }
+            100% {
+                background-position: calc(200px + 100%) 0;
+            }
+        }
+
+        .loading-shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200px 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+            height: 2rem;
+            width: 3rem;
+            display: inline-block;
+        }
+
         #checkOutDateTime:invalid::-webkit-datetime-edit {
             color: transparent;
         }
@@ -1144,23 +1328,6 @@
             font-size: 12px;
             color: #666;
             margin-top: 2px;
-        }
-
-        /* Feedback rating styling */
-        #feedbackRating option[value="1"] {
-            color: #dc3545;
-        }
-
-        #feedbackRating option[value="2"] {
-            color: #ffc107;
-        }
-
-        #feedbackRating option[value="3"] {
-            color: #28a745;
-        }
-
-        #feedbackRating option[value="4"] {
-            color: #007bff;
         }
 
         /* Donation input styling */
