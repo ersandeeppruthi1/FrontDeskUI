@@ -99,24 +99,12 @@
                             <div class="col-12">
                                 <div class="permission-details-section">
                                     <h6><i class="fa fa-shield-alt"></i> Permission Details</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped" id="permissionDetailsTable">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width: 40%;">Entity</th>
-                                                    <th style="width: 15%;">Read</th>
-                                                    <th style="width: 15%;">Write</th>
-                                                    <th style="width: 15%;">Delete</th>
-                                                    <th style="width: 15%;">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="permissionDetailsBody">
-                                            </tbody>
-                                        </table>
+                                    <div id="permissionDetailsGrid"></div>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-success" onclick="addPermissionRow()">
+                                            <i class="fa fa-plus"></i> Add Permission
+                                        </button>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-success" onclick="addPermissionRow()">
-                                        <i class="fa fa-plus"></i> Add Permission
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -138,6 +126,7 @@
     <script>
 
         let permissionGrid;
+        let permissionDetailsGrid;
         let editingPermissionId = null;
         let entityList = [];
         let permissionDetailCounter = 0;
@@ -217,6 +206,86 @@
 
             await loadPermissions();
             await loadEntities();
+            await initPermissionDetailsGrid();
+        }
+
+        async function initPermissionDetailsGrid() {
+            
+            ej.grids.Grid.Inject(
+                ej.grids.Edit,
+                ej.grids.Toolbar,
+                ej.grids.ForeignKey
+            );
+
+            permissionDetailsGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowEditing: true,
+                editSettings: { 
+                    allowEditing: true, 
+                    allowAdding: true, 
+                    allowDeleting: true, 
+                    mode: 'Normal' 
+                },
+                toolbar: ['Add', 'Delete'],
+                columns: [
+                    {
+                        field: 'entityId',
+                        headerText: 'Entity',
+                        width: 200,
+                        editType: 'dropdownedit',
+                        dataSource: entityList,
+                        foreignKeyField: 'id',
+                        foreignKeyValue: 'name',
+                        validationRules: { required: true },
+                        edit: {
+                            params: {
+                                allowFiltering: true,
+                                filterType: 'Contains',
+                                placeholder: 'Select Entity',
+                                floatLabelType: 'Auto'
+                            }
+                        }
+                    },
+                    {
+                        field: 'read',
+                        headerText: 'Read',
+                        width: 100,
+                        type: 'boolean',
+                        editType: 'booleanedit',
+                        displayAsCheckBox: true,
+                        textAlign: 'Center'
+                    },
+                    {
+                        field: 'write',
+                        headerText: 'Write',
+                        width: 100,
+                        type: 'boolean',
+                        editType: 'booleanedit',
+                        displayAsCheckBox: true,
+                        textAlign: 'Center'
+                    },
+                    {
+                        field: 'delete',
+                        headerText: 'Delete',
+                        width: 100,
+                        type: 'boolean',
+                        editType: 'booleanedit',
+                        displayAsCheckBox: true,
+                        textAlign: 'Center'
+                    }
+                ],
+                height: 300,
+                actionBegin: function(args) {
+                    if (args.requestType === 'beginEdit' || args.requestType === 'add') {
+                        // Update the dropdown datasource when editing
+                        const entityColumn = this.getColumnByField('entityId');
+                        entityColumn.dataSource = entityList;
+                        entityColumn.edit.params.dataSource = entityList;
+                    }
+                }
+            });
+
+            permissionDetailsGrid.appendTo('#permissionDetailsGrid');
         }
 
         async function loadPermissions() {
@@ -254,72 +323,43 @@
         }
 
         function addPermissionRow(entityId = '', read = false, write = false, deletePermission = false) {
-            permissionDetailCounter++;
-            const rowId = 'perm_' + permissionDetailCounter;
+            const newRow = {
+                entityId: entityId,
+                read: read,
+                write: write,
+                delete: deletePermission
+            };
             
-            let entityOptions = '<option value="">Select Entity</option>';
-            entityList.forEach(entity => {
-                const selected = entity.id == entityId ? 'selected' : '';
-                entityOptions += `<option value="${entity.id}" ${selected}>${entity.name}</option>`;
-            });
-
-            const rowHtml = `
-                <tr data-row-id="${rowId}">
-                    <td>
-                        <select class="form-control entity-select" data-row-id="${rowId}">
-                            ${entityOptions}
-                        </select>
-                    </td>
-                    <td class="text-center">
-                        <input type="checkbox" class="form-check-input read-permission" ${read ? 'checked' : ''} data-row-id="${rowId}">
-                    </td>
-                    <td class="text-center">
-                        <input type="checkbox" class="form-check-input write-permission" ${write ? 'checked' : ''} data-row-id="${rowId}">
-                    </td>
-                    <td class="text-center">
-                        <input type="checkbox" class="form-check-input delete-permission" ${deletePermission ? 'checked' : ''} data-row-id="${rowId}">
-                    </td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removePermissionRow('${rowId}')">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-            
-            document.getElementById('permissionDetailsBody').insertAdjacentHTML('beforeend', rowHtml);
+            const currentData = permissionDetailsGrid.dataSource || [];
+            currentData.push(newRow);
+            permissionDetailsGrid.dataSource = currentData;
+            permissionDetailsGrid.refresh();
         }
 
         function removePermissionRow(rowId) {
-            const row = document.querySelector(`tr[data-row-id="${rowId}"]`);
-            if (row) {
-                row.remove();
-            }
+            // This will be handled by the grid's delete functionality
         }
 
         function clearPermissionDetails() {
-            document.getElementById('permissionDetailsBody').innerHTML = '';
-            permissionDetailCounter = 0;
+            permissionDetailsGrid.dataSource = [];
+            permissionDetailsGrid.refresh();
         }
 
         function getPermissionDetailsAsJson() {
-            const rows = document.querySelectorAll('#permissionDetailsBody tr');
+            const gridData = permissionDetailsGrid.dataSource || [];
             const permissions = [];
             
-            rows.forEach(row => {
-                const entitySelect = row.querySelector('.entity-select');
-                const readCheck = row.querySelector('.read-permission');
-                const writeCheck = row.querySelector('.write-permission');
-                const deleteCheck = row.querySelector('.delete-permission');
-                
-                if (entitySelect.value) {
-                    const entityName = entitySelect.options[entitySelect.selectedIndex].text;
+            gridData.forEach(row => {
+                if (row.entityId) {
+                    const entity = entityList.find(e => e.id == row.entityId);
+                    const entityName = entity ? entity.name : '';
+                    
                     permissions.push({
-                        entityId: entitySelect.value,
+                        entityId: row.entityId,
                         entityName: entityName,
-                        read: readCheck.checked,
-                        write: writeCheck.checked,
-                        delete: deleteCheck.checked
+                        read: row.read || false,
+                        write: row.write || false,
+                        delete: row.delete || false
                     });
                 }
             });
@@ -334,9 +374,15 @@
             
             try {
                 const permissions = JSON.parse(permissionJson);
-                permissions.forEach(perm => {
-                    addPermissionRow(perm.entityId, perm.read, perm.write, perm.delete);
-                });
+                const gridData = permissions.map(perm => ({
+                    entityId: perm.entityId,
+                    read: perm.read || false,
+                    write: perm.write || false,
+                    delete: perm.delete || false
+                }));
+                
+                permissionDetailsGrid.dataSource = gridData;
+                permissionDetailsGrid.refresh();
             } catch (error) {
                 console.error('Error parsing permission JSON:', error);
             }
@@ -480,36 +526,23 @@
             font-weight: bold;
         }
 
-        #permissionDetailsTable {
-            font-size: 14px;
-        }
-
-        #permissionDetailsTable th {
-            background-color: #f8f9fa;
-            font-weight: 600;
-            text-align: center;
-            vertical-align: middle;
-        }
-
-        #permissionDetailsTable td {
-            vertical-align: middle;
-        }
-
-        .entity-select {
-            font-size: 13px;
-        }
-
-        .form-check-input {
-            transform: scale(1.1);
-            margin: 0 auto;
-            display: block;
-        }
-
         .permission-details-section {
             background-color: #f8f9fa;
             border-radius: 5px;
             padding: 15px;
             margin-top: 15px;
+        }
+
+        #permissionDetailsGrid {
+            margin-bottom: 10px;
+        }
+
+        #permissionDetailsGrid .e-grid .e-content {
+            min-height: 200px;
+        }
+
+        #permissionDetailsGrid .e-grid .e-toolbar {
+            min-height: 35px;
         }
     </style>
 </body>
