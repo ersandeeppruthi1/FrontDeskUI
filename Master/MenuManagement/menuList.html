@@ -175,6 +175,7 @@
                 columns: [
                     { type: 'checkbox', width: 50 },
                     { field: 'name', headerText: 'Menu Name', width: 200 },
+                    { field: 'username', headerText: 'User Name', width: 150 },
                     { field: 'parentname', headerText: 'Parent Menu', width: 200 },
                     { field: 'link', headerText: 'Link', width: 200 },
                     { field: 'sortorder', headerText: 'Order', width: 100 }
@@ -250,11 +251,12 @@
         async function loadMenus() {
 
             const joinCondition =
-                "LEFT JOIN menuitem parent ON parent.id = menuitem.parentmenuid";
+                "LEFT JOIN menuitem parent ON parent.id = menuitem.parentmenuid " +
+                "LEFT JOIN users ON users.id = menuitem.userid";
 
             const data = await DBHandler.fetchEntityRecords(
                 'menuitem',
-                'menuitem.*, parent.name as parentname',
+                'menuitem.*, parent.name as parentname, users.username',
                 'menuitem.sortorder',
                 'asc',
                 '',
