@@ -257,7 +257,8 @@
 
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-danger" id="saveCheckOut" onclick="submitCheckOut()">Confirm Check-Out</button>
+                    <button class="btn btn-danger" id="saveCheckOut" onclick="submitCheckOut()">Confirm
+                        Check-Out</button>
                 </div>
 
             </div>
@@ -286,6 +287,38 @@
         // Local cache for rooms
         let roomsCache = [];
         let roomsCacheLoaded = false;
+        let checkInRoomDropdown;
+
+        $(document).ready(new function () {
+            // Initialize Syncfusion DateTimePicker
+            new ej.calendars.DateTimePicker({
+                placeholder: "Select Check-Out Time"
+            }).appendTo('#checkOutDateTime');
+
+            // Initialize Room DropDownList with multiselect
+            checkInRoomDropdown = new ej.dropdowns.MultiSelect({
+                placeholder: "Select Rooms",
+                mode: 'CheckBox',
+                showSelectAll: true,
+                filterBarPlaceholder: 'Search rooms...',
+                allowFiltering: true,
+                fields: { text: 'roomnumber', value: 'id' },
+                dataSource: []
+            });
+            checkInRoomDropdown.appendTo('#checkInRoom');
+
+            // Load initial data
+            loadRoomsCache();
+            loadDashboard();
+
+            // Bind dashboard link events
+            document.querySelectorAll('.dashboard-link')
+                .forEach(el => {
+                    el.addEventListener('click', function () {
+                        showBookingList(this.dataset.type);
+                    });
+                });
+        });
 
         function openCheckInModal() {
 
@@ -388,35 +421,6 @@
 
             loadDashboard();
         }
-
-        $(document).ready(new function () {
-            loadRoomsCache();
-
-            loadDashboard();
-
-            document.querySelectorAll('.dashboard-link')
-                .forEach(el => {
-                    el.addEventListener('click', function () {
-                        showBookingList(this.dataset.type);
-                    });
-                });
-        });
-
-        new ej.calendars.DateTimePicker({
-            placeholder: "Select Check-Out Time"
-        }).appendTo('#checkOutDateTime');
-
-        // Initialize Room DropDownList with multiselect
-        let checkInRoomDropdown = new ej.dropdowns.MultiSelect({
-            placeholder: "Select Rooms",
-            mode: 'CheckBox',
-            showSelectAll: true,
-            filterBarPlaceholder: 'Search rooms...',
-            allowFiltering: true,
-            fields: { text: 'roomnumber', value: 'id' },
-            dataSource: []
-        });
-        checkInRoomDropdown.appendTo('#checkInRoom');
 
         async function loadDashboard() {
 
@@ -568,7 +572,7 @@
             document.getElementById("checkInDateTime").value = formattedDate;
 
         }
-        
+
         async function loadRoomsCache() {
             if (!roomsCacheLoaded) {
                 try {
@@ -611,7 +615,7 @@
                 0
             ).then(function (rooms) {
                 rooms = rooms || [];
-                
+
                 // Update cache
                 roomsCache = rooms;
                 roomsCacheLoaded = true;
