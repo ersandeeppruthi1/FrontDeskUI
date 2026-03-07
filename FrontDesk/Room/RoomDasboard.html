@@ -422,7 +422,7 @@
                     'rb.bookingstatus = 1',
                     false,
                     0,
-                    'LEFT JOIN bookingroom br ON br.bookingid = rb.id LEFT JOIN roommaster rm ON rm.id = br.roomid'
+                    'LEFT JOIN bookingroom br ON CAST(br.bookingid AS CHAR) = CAST(rb.id AS CHAR) LEFT JOIN roommaster rm ON rm.id = br.roomid'
                 ).then(function (bookings) {
                     const formattedBookings = (bookings || []).map(booking => ({
                         id: booking.id,
@@ -499,6 +499,7 @@
 
             // 2️⃣ Insert Multiple Rooms
             for (const roomId of selectedRooms) {
+                // Insert booking room record
                 await DBHandler.submitRecordData('bookingroom', {
                     bookingid: bookingId,
                     roomid: roomId,
@@ -510,7 +511,11 @@
                 document.getElementById('checkInModal')
             ).hide();
 
-            refreshBookingsCache(); // Refresh booking data after new check-in
+            // Refresh both caches after new check-in
+            refreshAllCaches();
+            
+            // Show success message
+            alert(`Successfully checked in ${selectedRooms.length} room(s) for ${displayName}!`);
         }
 
         async function submitCheckOut() {
@@ -548,18 +553,19 @@
                         donationamount: donationAmount
                     }, bookingId, true);
 
-                    // Update all associated room bookings to checked out
+                    // Get all associated room bookings and update both booking room status and actual room status
                     const roomBookings = await DBHandler.fetchEntityRecords(
                         'bookingroom',
-                        'id',
+                        'id, roomid',
                         'id',
                         'desc',
-                        `bookingid = ${bookingId} AND roomstatus = 1`
+                        `bookingid = '${bookingId}' AND roomstatus = 1`
                     );
 
                     for (const roomBooking of (roomBookings || [])) {
+                        // Update booking room status to checked out
                         await DBHandler.submitRecordData('bookingroom', {
-                            roomstatus: 0 // Mark room as available
+                            roomstatus: 0 // Mark booking room as checked out
                         }, roomBooking.id, true);
                     }
                 }
@@ -569,8 +575,8 @@
                     document.getElementById('checkOutModal')
                 ).hide();
 
-                // Refresh data
-                refreshBookingsCache();
+                // Refresh both room and booking data
+                refreshAllCaches();
                 
                 // Show success message
                 alert(`Successfully checked out ${selectedBookings.length} booking(s)!`);
@@ -586,12 +592,13 @@
             // Use cached total rooms count
             document.getElementById("totalRooms").innerText = totalRoomsCount;
 
-            // Use cached available rooms count
-            document.getElementById("availableRooms").innerText = availableRoomsCount;
-
             // Calculate booked rooms from cache
             const bookedRoomsCount = getBookedRoomsCount();
             document.getElementById("bookedRooms").innerText = bookedRoomsCount;
+
+            // Calculate available rooms dynamically (total active rooms - booked rooms)
+            const dynamicAvailableRoomsCount = Math.max(0, (roomsCache.filter(room => room.isactive === 1).length) - bookedRoomsCount);
+            document.getElementById("availableRooms").innerText = dynamicAvailableRoomsCount;
 
             // Use cached maintenance rooms count
             document.getElementById("maintenanceRooms").innerText = maintenanceRoomsCount;
@@ -685,9 +692,10 @@
 
                     // Calculate counts from cached data
                     totalRoomsCount = roomsCache.length;
-                    availableRoomsCount = roomsCache.filter(room =>
-                        room.isactive === 1 && room.bookingstatus === 'Available'
-                    ).length;
+                    
+                    // Calculate available rooms dynamically (active rooms that are not currently booked)
+                    availableRoomsCount = roomsCache.filter(room => room.isactive === 1).length;
+                    
                     maintenanceRoomsCount = roomsCache.filter(room =>
                         room.isactive === 0
                     ).length;
@@ -720,7 +728,7 @@
                         "",
                         false,
                         0,
-                        'LEFT JOIN bookingroom br ON br.bookingid = rb.id LEFT JOIN roommaster rm ON rm.id = br.roomid'
+                        'LEFT JOIN bookingroom br ON CAST(br.bookingid AS CHAR) = CAST(rb.id AS CHAR) LEFT JOIN roommaster rm ON rm.id = br.roomid'
                     );
                     bookingsCache = bookings || [];
                     bookingsCacheLoaded = true;
@@ -829,10 +837,18 @@
             let filteredRooms = [];
 
             if (showOnlyAvailable) {
-                // Show only active and available rooms
+                // Get currently booked room IDs
+                const bookedRoomIds = new Set();
+                if (bookingsCacheLoaded) {
+                    bookingsCache.filter(booking => booking.bookingstatus === 1)
+                        .forEach(booking => {
+                            if (booking.roomid) bookedRoomIds.add(booking.roomid);
+                        });
+                }
+                
+                // Show only active rooms that are not currently booked
                 filteredRooms = roomsCache.filter(room => 
-                    room.isactive === 1 && 
-                    (room.bookingstatus === 'Available' || room.bookingstatus === null || room.bookingstatus === '')
+                    room.isactive === 1 && !bookedRoomIds.has(room.id)
                 );
             } else {
                 // Show all active rooms
@@ -851,18 +867,15 @@
         function refreshRoomsCache() {
             roomsCacheLoaded = false;
             totalRoomsCount = 0;
-            availableRoomsCount = 0;
             maintenanceRoomsCount = 0;
             loadRoomsCache().then(() => {
                 if (checkInRoomDropdown) {
-                    const activeRooms = roomsCache.filter(room => room.isactive === 1);
-                    checkInRoomDropdown.dataSource = activeRooms;
-                    checkInRoomDropdown.dataBind();
+                    filterRoomsForCheckIn(); // Use filter function for dynamic calculation
                 }
-                // Update dashboard with new counts
+                // Update dashboard with new counts (dashboard will calculate available rooms dynamically)
                 document.getElementById("totalRooms").innerText = totalRoomsCount;
-                document.getElementById("availableRooms").innerText = availableRoomsCount;
                 document.getElementById("maintenanceRooms").innerText = maintenanceRoomsCount;
+                loadDashboard(); // This will calculate available and booked rooms dynamically
             });
         }
 
@@ -883,6 +896,16 @@
         // Helper function to get rooms by status
         function getRoomsByStatus(status) {
             if (!roomsCacheLoaded) return [];
+            
+            // Get currently booked room IDs for dynamic calculation
+            const bookedRoomIds = new Set();
+            if (bookingsCacheLoaded) {
+                bookingsCache.filter(booking => booking.bookingstatus === 1)
+                    .forEach(booking => {
+                        if (booking.roomid) bookedRoomIds.add(booking.roomid);
+                    });
+            }
+            
             return roomsCache.filter(room => {
                 switch (status) {
                     case 'active':
@@ -890,7 +913,9 @@
                     case 'inactive':
                         return room.isactive === 0;
                     case 'available':
-                        return room.isactive === 1 && room.bookingstatus === 'Available';
+                        return room.isactive === 1 && !bookedRoomIds.has(room.id);
+                    case 'booked':
+                        return room.isactive === 1 && bookedRoomIds.has(room.id);
                     case 'maintenance':
                         return room.isactive === 0;
                     default:
