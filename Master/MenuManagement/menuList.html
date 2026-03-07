@@ -78,7 +78,9 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title">Add Menu Item</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
                 </div>
 
 
@@ -87,6 +89,11 @@
                     <form id="menuForm">
 
                         <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label>User</label>
+                                <input id="menu_user" type="text" class="form-control" />
+                            </div>
 
                             <div class="col-md-6">
                                 <label>Name</label>
@@ -110,11 +117,6 @@
                                 <label>Link</label>
                                 <input type="text" id="menu_link" class="form-control">
                             </div>
-<!-- 
-                            <div class="col-md-6">
-                                <label>Menu Icon</label>
-                                <input type="text" id="menu_icon" class="form-control">
-                            </div> -->
 
                             <div class="col-md-6">
                                 <label>Sort Order</label>
@@ -161,6 +163,8 @@
 
         let entitiesData = [];
 
+        let userDropdown;
+        let usersData = [];
 
         async function initMenuGrid() {
 
@@ -281,11 +285,23 @@
 
             await loadMenus();
             await loadEntities();
-
+            await loadUsers();
         }
 
 
 
+        async function loadUsers() {
+
+            usersData = await DBHandler.fetchEntityRecords(
+                'users',
+                'id,username',
+                'username',
+                'asc',
+                'isdeleted = 0',
+                true,
+                0
+            ) || [];
+        }
         async function loadMenus() {
 
             const joinCondition =
@@ -305,8 +321,6 @@
             menuGrid.dataSource = data || [];
 
         }
-
-
 
         async function loadEntities() {
 
@@ -329,9 +343,28 @@
 
             if (parentDropdown) parentDropdown.destroy();
             if (entityDropdown) entityDropdown.destroy();
+            if (userDropdown) userDropdown.destroy();
 
             const modal = new bootstrap.Modal(menuModal, { focus: false });
             modal.show();
+
+            ej.base.enableRipple(true);
+
+            userDropdown = new ej.dropdowns.DropDownList({
+
+                dataSource: usersData,
+
+                fields: { text: 'username', value: 'id' },
+
+                placeholder: 'Select User',
+
+                allowFiltering: true,
+
+                filterBarPlaceholder: 'Search User...',
+
+            });
+
+            userDropdown.appendTo('#menu_user');
 
             parentDropdown = new ej.dropdowns.DropDownList({
 
@@ -341,7 +374,9 @@
 
                 placeholder: 'Select Parent Menu',
 
-                allowFiltering: true
+                allowFiltering: true,
+
+                filterBarPlaceholder: 'Search Parentmenu...',
 
             });
 
@@ -356,12 +391,15 @@
 
                 placeholder: 'Select Entity',
 
-                allowFiltering: true
+                allowFiltering: true,
+
+                filterBarPlaceholder: 'Search Entity...',
 
             });
 
             entityDropdown.appendTo('#menu_entity');
 
+            document.querySelector('#menuModal .modal-title').innerText = "Add Menu Item";
         }
 
 
@@ -373,6 +411,8 @@
             if (selected.length !== 1)
                 return alert("Select one menu to edit");
 
+            document.querySelector('#menuModal .modal-title').innerText = "Edit Menu Item";
+
             openMenuModal();
 
             const record = selected[0];
@@ -381,10 +421,10 @@
 
             document.getElementById('menu_name').value = record.name || '';
             document.getElementById('menu_link').value = record.link || '';
-            document.getElementById('menu_icon').value = record.menuicon || '';
             document.getElementById('menu_sort').value = record.sortorder || '';
             document.getElementById('menu_type').value = record.type || '';
 
+            userDropdown.value = record.userid || null;
             parentDropdown.value = record.parentmenuid || null;
             entityDropdown.value = record.entityid || null;
 
@@ -397,18 +437,18 @@
             const name = document.getElementById('menu_name').value;
 
             if (!name)
-                return alert("Menu name required");
+                return alert("Name is required");
 
 
-            await DBHandler.submitRecordData('menu', {
+            await DBHandler.submitRecordData('menuitem', {
 
                 name: name,
+
+                userid: userDropdown.value,
 
                 parentmenuid: parentDropdown.value,
 
                 link: document.getElementById('menu_link').value,
-
-                menuicon: document.getElementById('menu_icon').value,
 
                 sortorder: document.getElementById('menu_sort').value,
 
@@ -443,7 +483,7 @@
 
             const ids = selected.map(r => r.id);
 
-            await deleteRecordData('menu', ids, true, true);
+            await deleteRecordData('menuitem', ids, true, true);
 
             loadMenus();
 
@@ -464,6 +504,12 @@
         });
 
     </script>
+
+    <style>
+        label {
+            font-weight: bold;
+        }
+    </style>
 </body>
 
 </html>
