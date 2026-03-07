@@ -126,6 +126,7 @@
 
                 <div class="modal-footer">
                     <button class="btn btn-primary" onclick="saveMenu()">Save</button>
+                    <button class="btn btn-success" onclick="saveAndNew()">Save and New</button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
 
@@ -532,6 +533,50 @@
 
             bootstrap.Modal.getInstance(menuModal).hide();
 
+            loadMenus();
+
+        }
+
+        async function saveAndNew() {
+
+            const name = document.getElementById('menu_name').value;
+
+            if (!name)
+                return alert("Name is required");
+
+            await DBHandler.submitRecordData('menuitem', {
+
+                name: name,
+                userid: userDropdown.value,
+                parentmenuid: parentDropdown.value,
+                link: document.getElementById('menu_link').value,
+                sortorder: document.getElementById('menu_sort').value,
+                type: 1
+
+            }, editingMenuId, false);
+
+            // Update cache with the new sort order
+            const sortOrder = parseInt(document.getElementById('menu_sort').value);
+            updateSortOrderCache(userDropdown.value, parentDropdown.value, sortOrder);
+
+            // Preserve user and parent menu selections
+            const selectedUserId = userDropdown.value;
+            const selectedParentId = parentDropdown.value;
+
+            // Clear only specific fields for new entry
+            document.getElementById('menu_name').value = '';
+            document.getElementById('menu_link').value = '';
+            if (webResourceDropdown) webResourceDropdown.value = null;
+
+            // Generate next sort order automatically
+            const nextSortOrder = getNextSortOrder(selectedUserId, selectedParentId);
+            document.getElementById('menu_sort').value = nextSortOrder;
+
+            // Reset editing mode
+            editingMenuId = null;
+            document.querySelector('#menuModal .modal-title').innerText = "Add Menu Item";
+
+            // Refresh grid data
             loadMenus();
 
         }
