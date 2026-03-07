@@ -242,7 +242,7 @@
     </div>
     <!-- Check-Out Modal -->
     <div class="modal fade" id="checkOutModal" tabindex="-1">
-        <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
 
                 <div class="modal-header bg-danger text-white">
@@ -252,24 +252,52 @@
 
                 <div class="modal-body">
 
+                    <!-- Booking Selection -->
                     <div class="mb-3">
-                        <label class="form-label">Select Room</label>
-                        <select id="checkOutRoom" class="form-select">
-                            <option value="">Select Room</option>
-                        </select>
+                        <label class="form-label">Select Bookings to Check-Out <span class="text-danger">*</span></label>
+                        <input type="text" id="checkOutBookings" />
+                        <small class="text-muted">Select active bookings to check out</small>
                     </div>
 
+                    <!-- Check-Out Date -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Check-Out Date & Time</label>
+                            <input type="datetime-local" id="checkOutDateTime" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Feedback Rating</label>
+                            <select id="feedbackRating" class="form-select">
+                                <option value="">Select Rating</option>
+                                <option value="1">Bad</option>
+                                <option value="2">Good</option>
+                                <option value="3">Very Good</option>
+                                <option value="4">Excellent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Comments -->
+                    <div class="mb-3 mt-3">
+                        <label class="form-label">Feedback Comments</label>
+                        <textarea id="feedbackComments" class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+                    </div>
+
+                    <!-- Donation Amount -->
                     <div class="mb-3">
-                        <label class="form-label">Check-Out Date</label>
-                        <input type="date" id="checkOutDate" class="form-control">
+                        <label class="form-label">Donation Amount (Optional)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" id="donationAmount" class="form-control" min="0" step="0.01" placeholder="0.00">
+                        </div>
                     </div>
 
                 </div>
 
                 <div class="modal-footer">
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-danger" id="saveCheckOut" onclick="submitCheckOut()">Confirm
-                        Check-Out</button>
+                    <button class="btn btn-danger" id="saveCheckOut" onclick="submitCheckOut()">Confirm Check-Out</button>
                 </div>
 
             </div>
@@ -307,6 +335,7 @@
         let bookingsCacheLoaded = false;
 
         let checkInRoomDropdown;
+        let checkOutBookingsDropdown;
 
 
 
@@ -335,10 +364,88 @@
         }
 
         function openCheckOutModal() {
+            // Set current check-out time
+            setCurrentCheckOutTime();
+            
+            // Clear form fields
+            document.getElementById("feedbackRating").value = "";
+            document.getElementById("feedbackComments").value = "";
+            document.getElementById("donationAmount").value = "";
+            
             const modal = new bootstrap.Modal(document.getElementById('checkOutModal'), {
                 focus: false
             });
             modal.show();
+
+            // Load active bookings for checkout
+            loadActiveBookings();
+        }
+
+        function setCurrentCheckOutTime() {
+            const now = new Date();
+            const formattedDate =
+                now.getFullYear() + '-' +
+                String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                String(now.getDate()).padStart(2, '0') + 'T' +
+                String(now.getHours()).padStart(2, '0') + ':' +
+                String(now.getMinutes()).padStart(2, '0');
+
+            document.getElementById("checkOutDateTime").value = formattedDate;
+        }
+
+        function loadActiveBookings() {
+            if (bookingsCacheLoaded && bookingsCache.length > 0) {
+                // Filter active bookings with room information
+                const activeBookings = bookingsCache
+                    .filter(booking => booking.bookingstatus === 1)
+                    .map(booking => ({
+                        id: booking.id,
+                        text: `${booking.displayname} -- Room ${booking.roomnumber || 'N/A'}`,
+                        displayname: booking.displayname,
+                        roomnumber: booking.roomnumber,
+                        mobilenumber: booking.mobilenumber,
+                        checkindatetime: booking.checkindatetime
+                    }));
+
+                if (checkOutBookingsDropdown) {
+                    checkOutBookingsDropdown.dataSource = activeBookings;
+                    checkOutBookingsDropdown.dataBind();
+                }
+                console.log("Active bookings loaded:", activeBookings.length);
+            } else {
+                // Fallback: Load directly from database
+                DBHandler.fetchEntityRecords(
+                    'roombooking rb',
+                    'rb.id, rb.displayname, rb.mobilenumber, rb.checkindatetime, rm.roomnumber',
+                    'rb.checkindatetime',
+                    'desc',
+                    'rb.bookingstatus = 1',
+                    false,
+                    0,
+                    'LEFT JOIN bookingroom br ON br.bookingid = rb.id LEFT JOIN roommaster rm ON rm.id = br.roomid'
+                ).then(function (bookings) {
+                    const formattedBookings = (bookings || []).map(booking => ({
+                        id: booking.id,
+                        text: `${booking.displayname} -- Room ${booking.roomnumber || 'N/A'}`,
+                        displayname: booking.displayname,
+                        roomnumber: booking.roomnumber,
+                        mobilenumber: booking.mobilenumber,
+                        checkindatetime: booking.checkindatetime
+                    }));
+
+                    if (checkOutBookingsDropdown) {
+                        checkOutBookingsDropdown.dataSource = formattedBookings;
+                        checkOutBookingsDropdown.dataBind();
+                    }
+                    console.log("Active bookings loaded from database:", formattedBookings.length);
+                }).catch(function (error) {
+                    console.error("Error loading active bookings:", error);
+                    if (checkOutBookingsDropdown) {
+                        checkOutBookingsDropdown.dataSource = [];
+                        checkOutBookingsDropdown.dataBind();
+                    }
+                });
+            }
         }
 
         async function submitCheckIn() {
@@ -407,16 +514,71 @@
         }
 
         async function submitCheckOut() {
-            const roomId = document.getElementById("checkOutRoom").value;
+            // Get form values
+            const selectedBookings = checkOutBookingsDropdown.value || [];
+            const checkOutDateTime = document.getElementById("checkOutDateTime").value;
+            const feedbackRating = parseInt(document.getElementById("feedbackRating").value) || 0;
+            const feedbackComments = document.getElementById("feedbackComments").value.trim();
+            const donationAmount = parseFloat(document.getElementById("donationAmount").value) || 0;
 
-            await DBHandler.submitRecordData('bookingroom', {
-                roomstatus: 0
-            }, roomId, true);
+            // Validation
+            if (selectedBookings.length === 0) {
+                alert("Please select at least one booking to check out");
+                return;
+            }
 
-            bootstrap.Modal.getInstance(
-                document.getElementById('checkOutModal')).hide();
+            if (!checkOutDateTime) {
+                alert("Please select check-out date and time");
+                return;
+            }
 
-            refreshBookingsCache(); // Refresh booking data after check-out
+            try {
+                // Format check-out date for database
+                const formattedCheckOutDate = checkOutDateTime ? 
+                    new Date(checkOutDateTime).toISOString().slice(0, 19).replace('T', ' ') : null;
+
+                // Process each selected booking
+                for (const bookingId of selectedBookings) {
+                    // Update the main booking record with checkout details
+                    await DBHandler.submitRecordData('roombooking', {
+                        checkoutdatetime: formattedCheckOutDate,
+                        bookingstatus: 0, // Mark as checked out
+                        feedbackrating: feedbackRating,
+                        feedbackremarks: feedbackComments,
+                        donationamount: donationAmount
+                    }, bookingId, true);
+
+                    // Update all associated room bookings to checked out
+                    const roomBookings = await DBHandler.fetchEntityRecords(
+                        'bookingroom',
+                        'id',
+                        'id',
+                        'desc',
+                        `bookingid = ${bookingId} AND roomstatus = 1`
+                    );
+
+                    for (const roomBooking of (roomBookings || [])) {
+                        await DBHandler.submitRecordData('bookingroom', {
+                            roomstatus: 0 // Mark room as available
+                        }, roomBooking.id, true);
+                    }
+                }
+
+                // Close modal
+                bootstrap.Modal.getInstance(
+                    document.getElementById('checkOutModal')
+                ).hide();
+
+                // Refresh data
+                refreshBookingsCache();
+                
+                // Show success message
+                alert(`Successfully checked out ${selectedBookings.length} booking(s)!`);
+
+            } catch (error) {
+                console.error("Error during checkout:", error);
+                alert("Error occurred during checkout. Please try again.");
+            }
         }
 
         async function loadDashboard() {
@@ -749,7 +911,7 @@
                 placeholder: "Select Check-Out Time"
             }).appendTo('#checkOutDateTime');
 
-            // Initialize Room DropDownList with multiselect
+            // Initialize Room DropDownList with multiselect for Check-In
             checkInRoomDropdown = new ej.dropdowns.MultiSelect({
                 placeholder: "Select Rooms",
                 mode: 'CheckBox',
@@ -760,6 +922,22 @@
                 dataSource: []
             });
             checkInRoomDropdown.appendTo('#checkInRoom');
+
+            // Initialize Bookings DropDownList with multiselect for Check-Out
+            checkOutBookingsDropdown = new ej.dropdowns.MultiSelect({
+                placeholder: "Select Bookings to Check-Out",
+                mode: 'CheckBox',
+                showSelectAll: true,
+                filterBarPlaceholder: 'Search bookings...',
+                allowFiltering: true,
+                fields: { text: 'text', value: 'id' },
+                dataSource: [],
+                itemTemplate: '<div class="booking-item">' +
+                    '<div class="booking-name">${displayname}</div>' +
+                    '<div class="booking-details">Room: ${roomnumber} | Mobile: ${mobilenumber}</div>' +
+                    '</div>'
+            });
+            checkOutBookingsDropdown.appendTo('#checkOutBookings');
 
             // Load initial data
             loadRoomsCache();
@@ -792,6 +970,46 @@
 
         #checkOutDateTime:focus::-webkit-datetime-edit {
             color: inherit;
+        }
+
+        /* Booking item styling in checkout dropdown */
+        .booking-item {
+            padding: 5px 0;
+        }
+
+        .booking-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .booking-details {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* Feedback rating styling */
+        #feedbackRating option[value="1"] {
+            color: #dc3545;
+        }
+
+        #feedbackRating option[value="2"] {
+            color: #ffc107;
+        }
+
+        #feedbackRating option[value="3"] {
+            color: #28a745;
+        }
+
+        #feedbackRating option[value="4"] {
+            color: #007bff;
+        }
+
+        /* Donation input styling */
+        .input-group-text {
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
         }
     </style>
 </body>
