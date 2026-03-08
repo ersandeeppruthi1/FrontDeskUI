@@ -21,7 +21,6 @@ These guidelines help AI generate code and suggestions that improve development 
 ## Performance
 - Avoid unnecessary loops or repeated database calls.
 - Prefer efficient queries and optimized logic.
-- Minimize DOM manipulation in JavaScript.
 - Cache values when possible.
 
 ## Productivity Practices
