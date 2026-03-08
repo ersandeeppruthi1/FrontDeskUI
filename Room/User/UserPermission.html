@@ -137,6 +137,7 @@
 
     <script>
         $(document).ready(function () {
+            // Load users for owner dropdown
             DBHandler.fetchEntityRecords(
                 'users',
                 'users.id, users.username',
@@ -146,14 +147,238 @@
                 0,
                 ''
             ).then(owners => {
-
                 var listObj = new ej.dropdowns.DropDownList({
                     dataSource: owners,
                     fields: { text: 'username', value: 'id' },
                 });
                 listObj.appendTo('#ownerId');
             });
+
+            // Load entities for permission configuration
+            loadEntitiesForPermissions();
         });
+
+        let entityPermissions = [];
+        let availableEntities = [];
+
+        async function loadEntitiesForPermissions() {
+            try {
+                // Fetch available entities from the system
+                const entities = await DBHandler.fetchEntityRecords(
+                    'entity',
+                    'entity.id, entity.displayname, entity.tablename',
+                    'entity.displayname',
+                    'asc',
+                    '', true,
+                    0,
+                    ''
+                );
+
+                availableEntities = entities || [];
+                populateEntitySelector();
+            } catch (error) {
+                console.error('Failed to load entities:', error);
+                // Fallback to common entities if database fetch fails
+                availableEntities = [
+                    { id: 'users', displayname: 'Users', tablename: 'users' },
+                    { id: 'patients', displayname: 'Patients', tablename: 'patients' },
+                    { id: 'rooms', displayname: 'Rooms', tablename: 'rooms' },
+                    { id: 'appointments', displayname: 'Appointments', tablename: 'appointments' },
+                    { id: 'medicines', displayname: 'Medicines', tablename: 'medicines' },
+                    { id: 'reports', displayname: 'Reports', tablename: 'reports' }
+                ];
+                populateEntitySelector();
+            }
+        }
+
+        function populateEntitySelector() {
+            const selector = document.getElementById('entitySelector');
+            selector.innerHTML = '<option value="">Choose an entity...</option>';
+            
+            availableEntities.forEach(entity => {
+                // Only show entities that haven't been added yet
+                if (!entityPermissions.find(ep => ep.entityId === entity.id)) {
+                    const option = document.createElement('option');
+                    option.value = entity.id;
+                    option.textContent = entity.displayname;
+                    option.dataset.tablename = entity.tablename;
+                    selector.appendChild(option);
+                }
+            });
+        }
+
+        function addEntityPermission() {
+            const selector = document.getElementById('entitySelector');
+            const selectedOption = selector.options[selector.selectedIndex];
+            
+            if (!selectedOption.value) {
+                alert('Please select an entity first');
+                return;
+            }
+
+            const entityId = selectedOption.value;
+            const entityName = selectedOption.textContent;
+            const tableName = selectedOption.dataset.tablename;
+
+            // Check if entity is already added
+            if (entityPermissions.find(ep => ep.entityId === entityId)) {
+                alert('This entity is already added');
+                return;
+            }
+
+            // Add to entity permissions array
+            const newPermission = {
+                entityId: entityId,
+                entityName: entityName,
+                tableName: tableName,
+                permissions: {
+                    create: false,
+                    read: false,
+                    update: false,
+                    delete: false
+                }
+            };
+
+            entityPermissions.push(newPermission);
+            renderEntityPermissions();
+            populateEntitySelector(); // Refresh selector to remove added entity
+            updatePermissionJSON();
+        }
+
+        function renderEntityPermissions() {
+            const container = document.getElementById('entityPermissionsContainer');
+            const noEntitiesMessage = document.getElementById('noEntitiesMessage');
+
+            if (entityPermissions.length === 0) {
+                noEntitiesMessage.style.display = 'block';
+                container.innerHTML = '<div class="alert alert-info text-center" id="noEntitiesMessage"><i class="fa fa-info-circle"></i> No entities selected yet. Add entities to configure permissions.</div>';
+                return;
+            }
+
+            noEntitiesMessage.style.display = 'none';
+            
+            let html = '';
+            entityPermissions.forEach((entityPerm, index) => {
+                html += `
+                    <div class="card mb-3" id="entity-${index}">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fa fa-database text-primary"></i> ${entityPerm.entityName}
+                                <small class="text-muted">(${entityPerm.tableName})</small>
+                            </h6>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeEntityPermission(${index})">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="create-${index}" 
+                                               ${entityPerm.permissions.create ? 'checked' : ''}
+                                               onchange="updateEntityPermission(${index}, 'create', this.checked)">
+                                        <label class="form-check-label" for="create-${index}">
+                                            <i class="fa fa-plus text-success"></i> Create
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="read-${index}"
+                                               ${entityPerm.permissions.read ? 'checked' : ''}
+                                               onchange="updateEntityPermission(${index}, 'read', this.checked)">
+                                        <label class="form-check-label" for="read-${index}">
+                                            <i class="fa fa-eye text-info"></i> Read
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="update-${index}"
+                                               ${entityPerm.permissions.update ? 'checked' : ''}
+                                               onchange="updateEntityPermission(${index}, 'update', this.checked)">
+                                        <label class="form-check-label" for="update-${index}">
+                                            <i class="fa fa-edit text-warning"></i> Update
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="delete-${index}"
+                                               ${entityPerm.permissions.delete ? 'checked' : ''}
+                                               onchange="updateEntityPermission(${index}, 'delete', this.checked)">
+                                        <label class="form-check-label" for="delete-${index}">
+                                            <i class="fa fa-trash text-danger"></i> Delete
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updateEntityPermission(index, permission, value) {
+            if (entityPermissions[index]) {
+                entityPermissions[index].permissions[permission] = value;
+                updatePermissionJSON();
+            }
+        }
+
+        function removeEntityPermission(index) {
+            if (confirm('Are you sure you want to remove this entity permission?')) {
+                entityPermissions.splice(index, 1);
+                renderEntityPermissions();
+                populateEntitySelector();
+                updatePermissionJSON();
+            }
+        }
+
+        function updatePermissionJSON() {
+            const permissionData = {
+                entities: entityPermissions.map(ep => ({
+                    entityId: ep.entityId,
+                    entityName: ep.entityName,
+                    tableName: ep.tableName,
+                    permissions: ep.permissions
+                })),
+                globalPermissions: [],
+                createdDate: new Date().toISOString(),
+                version: "1.0"
+            };
+
+            document.getElementById('permissionJSON').value = JSON.stringify(permissionData, null, 2);
+        }
+
+        function loadPermissionFromJSON(jsonString) {
+            try {
+                const permissionData = JSON.parse(jsonString);
+                entityPermissions = [];
+
+                if (permissionData.entities && Array.isArray(permissionData.entities)) {
+                    entityPermissions = permissionData.entities.map(entity => ({
+                        entityId: entity.entityId,
+                        entityName: entity.entityName,
+                        tableName: entity.tableName,
+                        permissions: entity.permissions || {
+                            create: false,
+                            read: false,
+                            update: false,
+                            delete: false
+                        }
+                    }));
+                }
+
+                renderEntityPermissions();
+                populateEntitySelector();
+                updatePermissionJSON();
+            } catch (error) {
+                console.error('Failed to load permission from JSON:', error);
+            }
+        }
     </script>
 
     <script>
@@ -301,7 +526,6 @@
         let editingId = null;
 
         function editPermission() {
-
             const selectedRecords = grid.getSelectedRecords();
             if (selectedRecords.length !== 1) {
                 return alert("Please select one permission to edit");
@@ -310,11 +534,20 @@
             editingId = record.id;
 
             document.getElementById('permissionName').value = record.name;
-            document.getElementById('permissionJSON').value = record.permissionjson;
             document.getElementById('ownerId').value = record.ownerid;
 
-            document.querySelector('#permissionModal .modal-title').innerText = "Edit Master Permission";
+            // Load the permission JSON into the dynamic UI
+            if (record.permissionjson) {
+                loadPermissionFromJSON(record.permissionjson);
+            } else {
+                // Clear the UI for new permission
+                entityPermissions = [];
+                renderEntityPermissions();
+                populateEntitySelector();
+                updatePermissionJSON();
+            }
 
+            document.querySelector('#permissionModal .modal-title').innerText = "Edit Master Permission";
             openPermissionModal();
         }
 
