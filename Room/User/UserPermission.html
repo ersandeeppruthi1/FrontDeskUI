@@ -353,15 +353,11 @@
 
         function renderEntityPermissions() {
             const container = document.getElementById('entityPermissionsContainer');
-            const noEntitiesMessage = document.getElementById('noEntitiesMessage');
 
             if (entityPermissions.length === 0) {
-                noEntitiesMessage.style.display = 'block';
                 container.innerHTML = '<div class="alert alert-info text-center" id="noEntitiesMessage"><i class="fa fa-info-circle"></i> No entities selected yet. Add entities to configure permissions.</div>';
                 return;
             }
-
-            noEntitiesMessage.style.display = 'none';
 
             let html = `
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -734,9 +730,9 @@
             { type: 'checkbox', width: 50 },
             { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
             { field: 'name', headerText: 'Permission Name', width: 250 },
+            { field: 'modifiedon', headerText: 'Modified On', width: 160, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' } },
             { field: 'id', headerText: 'id', width: 130, visible: false },
             { field: 'createdon', headerText: 'Created On', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
-            { field: 'modifiedon', headerText: 'Modified On', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
             { field: 'ownerid', headerText: 'Owner Id', width: 130, visible: false },
         ];
 
@@ -970,7 +966,7 @@
                 const permissions = await DBHandler.fetchEntityRecords(
                     'masterpermission',
                     'id,name,createdon,modifiedon,ownerid',
-                    'masterpermission.createdon',
+                    'masterpermission.modifiedon',
                     'desc',
                     filter, true,
                     0,
