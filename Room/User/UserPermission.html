@@ -917,24 +917,14 @@
         }
 
         async function deletePermission() {
-            const selectedRecords = grid.getSelectedRecords();
-            if (!selectedRecords.length) {
-                return alert("Select record(s) to delete");
-            }
+            const selected = grid.getSelectedRecords();
+            if (!selected.length) return alert("Select record(s)");
 
-            if (!confirm(`Delete ${selectedRecords.length} permission(s)?`)) {
-                return;
-            }
+            if (!confirm(`Delete ${selected.length} permission(s)?`)) return;
 
-            try {
-                for (const record of selectedRecords) {
-                    await deleteRecordData('masterpermission', record.id, false, true);
-                }
-                loadPermissionGrid();
-            } catch (error) {
-                console.error('Failed to delete permission(s):', error);
-                alert('Failed to delete permission(s)');
-            }
+            const ids = selected.map(r => r.id);
+            await deleteRecordData('masterpermission', ids, true, true);
+            loadPermissionGrid();
         }
 
         function openPermissionModal() {
