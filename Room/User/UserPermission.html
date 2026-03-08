@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div id="permissionGrid"></div>
+
+    <div class="modal fade" id="permissionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Master Permission</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="permissionForm" class="row g-5">
+                        <div class="col-md-6">
+                            <label>Permission Name<span style="color: red;">*</span>:</label>
+                            <input class="form-control" id="permissionName" dbcolumnname="name" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Owner<span style="color: red;">*</span>:</label>
+                            <input id="ownerId" class="form-control" datatype="dropdown" dbcolumnname="ownerid" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>Entity Permissions<span style="color: red;">*</span>:</label>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Select Entities and Configure Permissions</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-8">
+                                            <label for="entitySelector">Select Entity:</label>
+                                            <select id="entitySelector" class="form-control">
+                                                <option value="">Choose an entity...</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 d-flex align-items-end">
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="addEntityPermission()">
+                                                <i class="fa fa-plus"></i> Add Entity
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="entityPermissionsContainer">
+                                        <div class="alert alert-info text-center" id="noEntitiesMessage">
+                                            <i class="fa fa-info-circle"></i> No entities selected yet. Add entities to configure permissions.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <label>Generated Permission JSON<span style="color: red;">*</span>:</label>
+                                <textarea class="form-control" id="permissionJSON" dbcolumnname="permissionjson" rows="8" readonly
+                                    placeholder='{"entities": [], "globalPermissions": []}'></textarea>
+                                <small class="text-muted">This JSON is automatically generated based on your entity selections above</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-info" onclick="viewPermissionJSON()">View JSON</button>
+                    <button type="button" class="btn btn-primary" onclick="savePermission()">Save Permission</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            DBHandler.fetchEntityRecords(
+                'users',
+                'users.id, users.username',
+                'users.username',
+                'asc',
+                '', true,
+                0,
+                ''
+            ).then(owners => {
+
+                var listObj = new ej.dropdowns.DropDownList({
+                    dataSource: owners,
+                    fields: { text: 'username', value: 'id' },
+                });
+                listObj.appendTo('#ownerId');
+            });
+        });
+    </script>
+
+    <script>
+
+        let grid;
+        let permissionsMain = [];
+        var columns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+            { field: 'name', headerText: 'Permission Name', width: 250 },
+            {
+                field: 'permissionjson', headerText: 'Permission JSON', width: 400,
+                template: '<div class="text-truncate" style="max-width: 380px;" title="${permissionjson}">${permissionjson}</div>'
+            },
+            { field: 'id', headerText: 'id', width: 130, visible: false },
+            { field: 'createdon', headerText: 'Created On', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
+            { field: 'modifiedon', headerText: 'Modified On', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
+            { field: 'ownerid', headerText: 'Owner Id', width: 130, visible: false },
+        ];
+
+        function initGrid(columns, permissionGrid) {
+            ej.grids.Grid.Inject(
+                ej.grids.Filter,
+                ej.grids.Group,
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            grid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                pageSettings: { pageSize: 10 },
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                showColumnChooser: true,
+                toolbar: ['ColumnChooser',
+                    'Search',
+                    {
+                        prefixIcon: 'e-icons e-excelexport',
+                        tooltipText: 'Export Excel',
+                        id: 'excelExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-pdfexport',
+                        tooltipText: 'Export PDF',
+                        id: 'pdfExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-refresh',
+                        tooltipText: 'Refresh Grid',
+                        id: 'refreshGrid'
+                    },
+                    {
+                        text: 'New Permission',
+                        tooltipText: 'New Permission',
+                        prefixIcon: 'e-icons e-plus',
+                        id: 'newPermission'
+                    },
+                    {
+                        text: 'Edit Permission',
+                        tooltipText: 'Edit Permission',
+                        prefixIcon: 'e-icons e-edit',
+                        id: 'editPermission',
+                    },
+                    {
+                        text: 'Delete',
+                        tooltipText: 'Delete',
+                        prefixIcon: 'e-icons e-delete',
+                        id: 'deletePermission'
+                    },],
+
+                columns: columns,
+                allowExcelExport: true,
+                allowPdfExport: true,
+
+                toolbarClick: function (args) {
+                    if (args.item.id === permissionGrid + '_excelexport') {
+                        grid.excelExport({
+                            fileName: `MasterPermissions_${formatDate(new Date())}.xlsx`,
+                            exportType: 'AllPages',
+                        });
+                    }
+
+                    if (args.item.id === 'deletePermission') {
+                        deletePermission();
+                    }
+                    if (args.item.id === permissionGrid + '_pdfexport') {
+                        grid.pdfExport({
+                            fileName: `MasterPermissions_${formatDate(new Date())}.pdf`,
+                            exportType: 'CurrentPage',
+                            theme: { header: { fontColor: '#000000' } },
+                            pageOrientation: 'Landscape',
+                            pageSize: 'LETTER',
+                            header: {
+                                fromTop: 0,
+                                height: 120,
+                                contents: [
+                                    {
+                                        type: 'Text',
+                                        value: 'Master Permission Management',
+                                        position: { x: 280, y: 0 },
+                                        style: {
+                                            textBrushColor: '#C25050',
+                                            fontSize: 25
+                                        },
+                                    }
+                                ]
+                            },
+                            footer: {
+                                fromBottom: 160,
+                                height: 150,
+                                contents: [
+                                    {
+                                        type: 'PageNumber',
+                                        pageNumberType: 'Arabic',
+                                        format: 'Page {$current} of {$total}',
+                                        position: { x: 520, y: 10 },
+                                        style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' }
+                                    }
+                                ]
+                            }
+                        });
+                    }
+
+                    if (args.item.id === 'refreshGrid') {
+                        loadPermissionGrid();
+                    }
+                    if (args.item.id === 'newPermission') {
+                        openPermissionModal();
+                    }
+
+                    if (args.item.id === 'editPermission') {
+                        editPermission();
+                    }
+                }
+            });
+            grid.appendTo('#' + permissionGrid);
+        }
+
+        let editingId = null;
+
+        function editPermission() {
+
+            const selectedRecords = grid.getSelectedRecords();
+            if (selectedRecords.length !== 1) {
+                return alert("Please select one permission to edit");
+            }
+            const record = selectedRecords[0];
+            editingId = record.id;
+
+            document.getElementById('permissionName').value = record.name;
+            document.getElementById('permissionJSON').value = record.permissionjson;
+            document.getElementById('ownerId').value = record.ownerid;
+
+            document.querySelector('#permissionModal .modal-title').innerText = "Edit Master Permission";
+
+            openPermissionModal();
+        }
+
+        async function deletePermission() {
+            const selectedRecords = grid.getSelectedRecords();
+            if (!selectedRecords.length) {
+                return alert("Please select Permission(s) to delete");
+            }
+
+            if (!confirm(`Delete ${selectedRecords.length} permission(s)?`)) {
+                return;
+            }
+            for (const record of selectedRecords) {
+                await deleteRecordData('masterpermission', record.id, false, true);
+            }
+            loadPermissionGrid();
+        }
+
+        function openPermissionModal() {
+            const modal = new bootstrap.Modal(
+                document.getElementById('permissionModal'),
+                { backdrop: 'static', keyboard: false }
+            );
+            modal.show();
+        }
+
+        async function loadPermissionGrid() {
+
+            const filter = '';
+            const joinCondition = "";
+            try {
+
+                const permissions = await DBHandler.fetchEntityRecords(
+                    'masterpermission',
+                    'masterpermission.*',
+                    'masterpermission.createdon',
+                    'desc',
+                    filter, true,
+                    0,
+                    joinCondition
+                );
+
+                permissionsMain = permissions || [];
+
+                let serialNumber = 1;
+
+                const rows = permissionsMain.map(a => ({
+                    id: a.id,
+                    srno: serialNumber++,
+                    name: a.name,
+                    permissionjson: a.permissionjson,
+                    createdon: normalizeDate(a.createdon),
+                    modifiedon: normalizeDate(a.modifiedon),
+                    ownerid: a.ownerid,
+                }));
+
+                grid.dataSource = rows;
+                grid.refresh();
+
+            } catch (err) {
+                console.error('Failed to load permissions:', err);
+            }
+        }
+
+        function normalizeDate(val) {
+            if (!val) return null;
+            const d = val instanceof Date ? val : new Date(val);
+            return isNaN(d) ? null : d;
+        }
+
+        $(document).ready(async () => {
+            initGrid(columns, 'permissionGrid');
+            loadPermissionGrid();
+        });
+
+
+        async function savePermission() {
+
+            const
+                permissionName = document.getElementById('permissionName').value.trim(),
+                permissionJSON = document.getElementById('permissionJSON').value.trim(),
+                ownerId = document.getElementById('ownerId').value,
+                btn = event.target;
+
+            if (!permissionName) return alert("Please enter permission name");
+            if (!permissionJSON) return alert("Please enter permission JSON");
+            if (!ownerId) return alert("Please select Owner");
+
+            // Validate JSON format
+            try {
+                JSON.parse(permissionJSON);
+            } catch (error) {
+                return alert("Invalid JSON format in permission data. Please check the syntax.");
+            }
+
+            try {
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerText = "Saving...";
+                }
+
+                await DBHandler.submitRecordData('masterpermission', {
+                    name: permissionName,
+                    permissionjson: permissionJSON,
+                    ownerid: ownerId,
+                }, editingId, false);
+
+                await loadPermissionGrid();
+
+                bootstrap.Modal.getInstance(
+                    document.getElementById('permissionModal')
+                ).hide();
+
+                editingId = null;
+
+                document.getElementById('permissionName').value = '';
+                document.getElementById('permissionJSON').value = '';
+                document.getElementById('ownerId').value = '';
+
+            } catch (err) {
+                console.error(err);
+                alert("Failed to save Permission");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = "Save Permission";
+                }
+            }
+        }
+
+    </script>
+
+    <style>
+        #permissionGrid_toolbarItems {
+            height: 10px !important;
+        }
+
+        .text-truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+
+
+</body>
+
+</html>
