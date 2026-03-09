@@ -72,14 +72,6 @@
         <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0">Booking Management</h2>
-            <div>
-                <button class="btn btn-primary me-2" onclick="refreshBookings()">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
-                <button class="btn btn-success" onclick="exportToExcel()">
-                    <i class="fas fa-file-excel"></i> Export
-                </button>
-            </div>
         </div>
 
         <!-- Booking Grid -->
@@ -278,32 +270,39 @@
                 filterSettings: { type: 'Excel' },
                 pageSettings: { pageSize: 15 },
                 allowExcelExport: true,
+                allowPdfExport: true,
 
                 toolbar: [
                     'Search',
                     { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
                     { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' },
                     { text: 'Export Excel', prefixIcon: 'e-icons e-exporting', id: 'excelexport' },
+                    { text: 'Export PDF', prefixIcon: 'e-icons e-pdf-export', id: 'pdfexport' },
                     { text: 'Refresh', prefixIcon: 'e-icons e-refresh', id: 'refresh' }
                 ],
 
                 columns: bookingColumns,
 
                 toolbarClick: function (args) {
+                    const itemId = (args.item.id || '').toLowerCase();
 
-                    if (args.item.id === 'edit') {
+                    if (itemId.endsWith('edit')) {
                         editBooking();
                     }
 
-                    if (args.item.id === 'delete') {
+                    if (itemId.endsWith('delete')) {
                         deleteBooking();
                     }
 
-                    if (args.item.id === 'excelexport') {
+                    if (itemId.endsWith('excelexport')) {
                         exportToExcel();
                     }
 
-                    if (args.item.id === 'refresh') {
+                    if (itemId.endsWith('pdfexport')) {
+                        exportToPdf();
+                    }
+
+                    if (itemId.endsWith('refresh')) {
                         refreshBookings();
                     }
                 }
@@ -449,6 +448,13 @@
         function exportToExcel() {
             if (bookingGrid) {
                 bookingGrid.excelExport();
+            }
+        }
+
+        // Export to PDF
+        function exportToPdf() {
+            if (bookingGrid) {
+                bookingGrid.pdfExport();
             }
         }
 
