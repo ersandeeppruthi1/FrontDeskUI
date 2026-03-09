@@ -276,33 +276,32 @@
                     'Search',
                     { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
                     { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' },
-                    { text: 'Export Excel', prefixIcon: 'e-icons e-exporting', id: 'excelexport' },
-                    { text: 'Export PDF', prefixIcon: 'e-icons e-pdf-export', id: 'pdfexport' },
-                    { text: 'Refresh', prefixIcon: 'e-icons e-refresh', id: 'refresh' }
+                    { text: '', prefixIcon: 'e-excelexport e-icons', id: 'excelexport', tooltipText: 'Export Excel' },
+                    { text: '', prefixIcon: 'e-pdfexport e-icons', id: 'pdfexport', tooltipText: 'Export PDF' },
+                    { text: '', prefixIcon: 'e-refresh e-icons', id: 'refresh', tooltipText: 'Refresh' }
                 ],
 
                 columns: bookingColumns,
 
                 toolbarClick: function (args) {
-                    const itemId = (args.item.id || '').toLowerCase();
 
-                    if (itemId.endsWith('edit')) {
+                    if (args.item.id === 'edit') {
                         editBooking();
                     }
 
-                    if (itemId.endsWith('delete')) {
+                    if (args.item.id === 'delete') {
                         deleteBooking();
                     }
 
-                    if (itemId.endsWith('excelexport')) {
+                    if (args.item.id === 'excelexport') {
                         exportToExcel();
                     }
 
-                    if (itemId.endsWith('pdfexport')) {
+                    if (args.item.id === 'pdfexport') {
                         exportToPdf();
                     }
 
-                    if (itemId.endsWith('refresh')) {
+                    if (args.item.id === 'refresh') {
                         refreshBookings();
                     }
                 }
