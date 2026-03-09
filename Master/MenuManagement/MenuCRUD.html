@@ -92,15 +92,17 @@
                                 <label>Sort Order</label>
                                 <input type="number" id="menu_sort" class="form-control" value="1" />
                             </div>
-                            
+
                             <div class="col-md-12 mb-3">
                                 <h6>Menu Items Configuration</h6>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <div>
-                                        <select id="menuItemSelector" class="form-control" style="width: 300px; display: inline-block;">
+                                        <select id="menuItemSelector" class="form-control"
+                                            style="width: 300px; display: inline-block;">
                                             <option value="">Select Menu Items...</option>
                                         </select>
-                                        <button type="button" class="btn btn-primary btn-sm ms-2" onclick="addSelectedMenuItems()">
+                                        <button type="button" class="btn btn-primary btn-sm ms-2"
+                                            onclick="addSelectedMenuItems()">
                                             <i class="fa fa-plus"></i> Add
                                         </button>
                                     </div>
@@ -110,18 +112,21 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div id="menuItemsContainer" class="border p-3 mb-3" style="min-height: 200px; background-color: #f8f9fa;">
+                                <div id="menuItemsContainer" class="border p-3 mb-3"
+                                    style="min-height: 200px; background-color: #f8f9fa;">
                                     <div class="alert alert-info text-center" id="noMenuItemsMessage">
-                                        <i class="fa fa-info-circle"></i> No menu items selected yet. Select menu items to configure.
+                                        <i class="fa fa-info-circle"></i> No menu items selected yet. Select menu items
+                                        to configure.
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-12 mb-3">
                                 <label>Generated Menu JSON</label>
-                                <textarea id="menu_json" class="form-control json-editor" rows="15" placeholder='[]'></textarea>
+                                <textarea id="menu_json" class="form-control json-editor" rows="15"
+                                    placeholder='[]'></textarea>
                             </div>
-                            
+
                             <div class="col-md-12 mb-3">
                                 <div class="d-flex justify-content-between">
                                     <button type="button" class="btn btn-info btn-sm" onclick="formatJSON()">
@@ -177,7 +182,7 @@
                 allowFiltering: true,
                 filterSettings: { type: 'Excel' },
                 showColumnChooser: true,
-                
+
                 toolbar: [
                     'Search',
                     'ColumnChooser',
@@ -201,10 +206,10 @@
                         prefixIcon: 'e-icons e-plus',
                         id: 'newMenu'
                     },
-                    { 
-                        text: 'Edit', 
-                        prefixIcon: 'e-icons e-edit', 
-                        id: 'edit' 
+                    {
+                        text: 'Edit',
+                        prefixIcon: 'e-icons e-edit',
+                        id: 'edit'
                     },
                     {
                         text: 'Delete',
@@ -386,13 +391,13 @@
         }
 
         async function loadMenuGrid() {
-            const joinCondition = "LEFT JOIN mastermenu parent ON parent.id = mastermenu.parentmenuid";
-            
+            const joinCondition = "";
+
             const data = await DBHandler.fetchEntityRecords(
                 'mastermenu',
-                'mastermenu.*, parent.name as parentname',
-                'mastermenu.sortorder, mastermenu.modifiedon',
-                'asc, desc',
+                'mastermenu.*',
+                'mastermenu.modifiedon',
+                'desc',
                 '',
                 true,
                 0,
@@ -431,7 +436,7 @@
                         const selectedResource = webResourcesData.find(wr => wr.id == args.value);
                         if (selectedResource) {
                             document.getElementById('menu_name').value = selectedResource.name;
-                            
+
                             let typeStr = 'html';
                             switch (parseInt(selectedResource.resourcetype)) {
                                 case 1: typeStr = 'javascript'; break;
@@ -440,7 +445,7 @@
                                 case 4: typeStr = 'json'; break;
                                 default: typeStr = 'html';
                             }
-                            
+
                             document.getElementById('menu_link').value = `/main.html?type=${typeStr}&webresourceid=${selectedResource.id}`;
                         }
                     }
@@ -583,17 +588,57 @@
         }
 
         function generateMenuJSON() {
-            // Generate JSON in the required format
-            const menuJSON = selectedMenuItems
-                .sort((a, b) => (a.sortorder || 0) - (b.sortorder || 0))
-                .map(item => ({
-                    "Name": item.name,
-                    "Link": item.link || "",
-                    "Id": item.id,
-                    "MenuIcon": ""
-                }));
 
-            document.getElementById('menu_json').value = JSON.stringify(menuJSON, null, 2);
+            if (!selectedMenuItems || selectedMenuItems.length === 0) {
+                document.getElementById('menu_json').value = "[]";
+                return;
+            }
+
+            // Sort items
+            const items = [...selectedMenuItems].sort((a, b) => (a.sortorder || 0) - (b.sortorder || 0));
+
+            const menuMap = {};
+            const rootMenus = [];
+
+            // Create map
+            items.forEach(item => {
+                menuMap[item.id] = {
+                    Name: item.name,
+                    Link: item.link || "",
+                    MenuIcon: "",
+                    Children: []
+                };
+            });
+
+            // Build hierarchy
+            items.forEach(item => {
+
+                const menuObj = menuMap[item.id];
+
+                if (item.parentmenuid && menuMap[item.parentmenuid]) {
+                    menuMap[item.parentmenuid].Children.push(menuObj);
+                }
+                else {
+                    rootMenus.push(menuObj);
+                }
+
+            });
+
+            // Remove empty Children arrays if not needed
+            function cleanChildren(nodes) {
+                nodes.forEach(n => {
+                    if (!n.Children || n.Children.length === 0) {
+                        delete n.Children;
+                    } else {
+                        cleanChildren(n.Children);
+                    }
+                });
+            }
+
+            cleanChildren(rootMenus);
+
+            document.getElementById('menu_json').value =
+                JSON.stringify(rootMenus, null, 2);
         }
 
         function generateMenuHTML() {
@@ -628,7 +673,7 @@
                         const selectedResource = webResourcesData.find(wr => wr.id == args.value);
                         if (selectedResource) {
                             document.getElementById('menu_name').value = selectedResource.name;
-                            
+
                             let typeStr = 'html';
                             switch (parseInt(selectedResource.resourcetype)) {
                                 case 1: typeStr = 'javascript'; break;
@@ -637,7 +682,7 @@
                                 case 4: typeStr = 'json'; break;
                                 default: typeStr = 'html';
                             }
-                            
+
                             document.getElementById('menu_link').value = `/main.html?type=${typeStr}&webresourceid=${selectedResource.id}`;
                         }
                     }
@@ -684,7 +729,7 @@
 
             if (fullRecord && fullRecord.length) {
                 const data = fullRecord[0];
-                
+
                 setTimeout(() => {
                     document.getElementById('menu_name').value = data.name || '';
                     document.getElementById('menu_link').value = data.link || '';
