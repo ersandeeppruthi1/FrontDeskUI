@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+  <head runat="server">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <script>
+      let classMap = [];
+      var apiURL = "https://dbsit.vsservices.in/";
+      //var apiURL = "";
+    </script>
+
+    <link
+      href="https://apisit.vsservices.in/css/Default/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link
+      href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css"
+      rel="stylesheet"
+    />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link
+      href="https://apisit.vsservices.in/css/app.css?id=081220258"
+      rel="stylesheet"
+    />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script
+      src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258"
+      type="module"
+    ></script>
+    <script
+      src="https://apisit.vsservices.in/JS/controls.js?id=081220258"
+      type="module"
+    ></script>
+    <script
+      src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258"
+      type="module"
+    ></script>
+    <script
+      src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258"
+      type="module"
+    ></script>
+    <script
+      src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258"
+      type="module"
+    ></script>
+    <script
+      src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258"
+      type="module"
+    ></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link
+      href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css"
+      rel="stylesheet"
+    />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link
+      href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css"
+      rel="stylesheet"
+    />
+    <script
+      src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js"
+      type="text/javascript"
+    ></script>
+    <script
+      src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js"
+      type="text/javascript"
+    ></script>
+  </head>
+
+  <body>
+    <div class="container2 mt-4">
+      <div id="menuGrid"></div>
+    </div>
+
+    <!-- MENU MODAL -->
+
+    <div class="modal fade" id="menuModal" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Menu</h5>
+            <button type="button" class="close" data-bs-dismiss="modal">
+              <span>&times;</span>
+            </button>
+          </div>
+
+          <div class="modal-body">
+            <form>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label>Menu Name *</label>
+                  <input id="menuName" class="form-control" />
+                </div>
+
+                <div class="col-md-6">
+                  <label>Link</label>
+                  <input id="menuLink" class="form-control" />
+                </div>
+
+                <div class="col-md-6">
+                  <label>Parent Menu</label>
+                  <select id="parentMenu" class="form-control"></select>
+                </div>
+
+                <div class="col-md-6">
+                  <label>Sort Order</label>
+                  <input id="sortOrder" type="number" class="form-control" />
+                </div>
+
+                <div class="col-md-12">
+                  <label>Menu JSON</label>
+                  <textarea
+                    id="menuJSON"
+                    rows="6"
+                    class="form-control"
+                    readonly
+                  ></textarea>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-primary" onclick="saveMenu()">Save</button>
+
+            <button class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let menuGrid;
+      let menuData = [];
+      let editingId = null;
+
+      async function initMenuGrid() {
+        ej.grids.Grid.Inject(
+          ej.grids.Page,
+          ej.grids.Sort,
+          ej.grids.Filter,
+          ej.grids.Toolbar,
+          ej.grids.ExcelExport,
+          ej.grids.PdfExport,
+          ej.grids.ColumnChooser,
+        );
+
+        menuGrid = new ej.grids.Grid({
+          dataSource: menuData,
+          allowPaging: true,
+          allowSorting: true,
+          allowFiltering: true,
+          allowExcelExport: true,
+          allowPdfExport: true,
+          filterSettings: { type: "Excel" },
+          pageSettings: { pageSize: 10 },
+          showColumnChooser: true,
+
+          toolbar: [
+            "Search",
+            "ColumnChooser",
+            {
+              prefixIcon: "e-icons e-excelexport",
+              tooltipText: "Export Excel",
+              id: "excelExport",
+            },
+            {
+              prefixIcon: "e-icons e-pdfexport",
+              tooltipText: "Export PDF",
+              id: "pdfExport",
+            },
+            {
+              prefixIcon: "e-icons e-refresh",
+              tooltipText: "Refresh Grid",
+              id: "refreshGrid",
+            },
+
+            {
+              text: "New",
+              prefixIcon: "e-icons e-plus",
+              id: "newMenu",
+            },
+
+            {
+              text: "Edit",
+              prefixIcon: "e-icons e-edit",
+              id: "editMenu",
+            },
+
+            {
+              text: "Delete",
+              prefixIcon: "e-icons e-delete",
+              id: "deleteMenu",
+            },
+          ],
+
+          columns: [
+            { type: "checkbox", width: 50 },
+            { field: "name", headerText: "Menu Name", width: 200 },
+            { field: "link", headerText: "Link", width: 200 },
+            { field: "parent", headerText: "Parent Menu", width: 180 },
+            { field: "order", headerText: "Sort Order", width: 120 },
+            { field: "id", visible: false },
+          ],
+
+          toolbarClick: toolbarClick,
+        });
+
+        menuGrid.appendTo("#menuGrid");
+
+        loadParentMenus();
+      }
+
+      function toolbarClick(args) {
+        // Excel Export
+        if (
+          args.item.id === "menuGrid_excelexport" ||
+          args.item.text === "ExcelExport"
+        ) {
+          menuGrid.excelExport({
+            fileName: "MenuList.xlsx",
+          });
+        }
+
+        // PDF Export
+        if (
+          args.item.id === "menuGrid_pdfexport" ||
+          args.item.text === "PDFExport"
+        ) {
+          menuGrid.pdfExport({
+            fileName: "MenuList.pdf",
+          });
+        }
+
+        // Refresh Grid with Spinner
+        if (args.item.id === "refreshGrid") {
+          loadMenus();
+        }
+
+        if (args.item.id === "newMenu") {
+          openModal();
+        }
+
+        if (args.item.id === "editMenu") {
+          editMenu();
+        }
+
+        if (args.item.id === "deleteMenu") {
+          deleteMenu();
+        }
+      }
+
+      function refreshGridWithLoader() {
+        const gridElement = document.getElementById("menuGrid");
+
+        // fade effect
+        gridElement.style.opacity = "0.4";
+
+        // show spinner
+        menuGrid.showSpinner();
+
+        setTimeout(() => {
+          menuGrid.refresh();
+
+          menuGrid.hideSpinner();
+
+          gridElement.style.opacity = "1";
+        }, 800);
+      }
+
+      function openModal() {
+        editingId = null;
+
+        menuName.value = "";
+        menuLink.value = "";
+        parentMenu.value = "";
+        sortOrder.value = "";
+        menuJSON.value = "";
+
+        new bootstrap.Modal(document.getElementById("menuModal")).show();
+      }
+
+      async function loadParentMenus() {
+        const menus = await DBHandler.fetchEntityRecords(
+          "mastermenu",
+          "id,name",
+          "name",
+          "asc",
+          "",
+          true,
+        );
+
+        (menus || []).forEach((m) => {
+          const opt = document.createElement("option");
+
+          opt.value = m.name;
+          opt.textContent = m.name;
+
+          parentMenu.appendChild(opt);
+        });
+      }
+
+      function generateJSON() {
+        const name = menuName.value.trim();
+        const link = menuLink.value;
+        const parent = parentMenu.value;
+        const order = sortOrder.value;
+
+        const json = {
+          name: name,
+          link: link,
+          parent: parent,
+          sortorder: order,
+        };
+
+        menuJSON.value = JSON.stringify(json, null, 2);
+      }
+
+      async function loadMenus() {
+        const menus = await DBHandler.fetchEntityRecords(
+          "mastermenu",
+          "id,name,menujson",
+          "name",
+          "asc",
+          "",
+          true,
+        );
+
+        menuData = (menus || []).map((m) => {
+          let json = {};
+
+          try {
+            json = JSON.parse(m.menujson || "{}");
+          } catch (e) {}
+
+          return {
+            id: m.id,
+            name: m.name,
+            link: json.link || "",
+            parent: json.parent || "",
+            order: json.sortorder || "",
+          };
+        });
+
+        menuGrid.dataSource = menuData;
+        menuGrid.refresh();
+      }
+
+      async function saveMenu() {
+        const name = menuName.value.trim();
+
+        if (!name) return alert("Enter Menu Name");
+
+        generateJSON();
+
+        const link = menuLink.value;
+
+        const menuHTML = `<li>
+            <a href="${link}">
+                ${name}
+            </a>
+        </li>`;
+
+        const data = {
+          id1: crypto.randomUUID(),
+          name: name,
+          menujson: menuJSON.value,
+          menuhtml: menuHTML,
+        };
+
+        await DBHandler.submitRecordData("mastermenu", data, editingId, false);
+
+        bootstrap.Modal.getInstance(
+          document.getElementById("menuModal"),
+        ).hide();
+
+        await loadMenus(); // reload grid
+      }
+
+      function editMenu() {
+        const selected = menuGrid.getSelectedRecords();
+
+        if (selected.length !== 1) return alert("Select one record");
+
+        const r = selected[0];
+
+        editingId = r.id;
+
+        let json = {};
+
+        try {
+          json = JSON.parse(r.menujson || "{}");
+        } catch (e) {}
+
+        menuName.value = r.name || "";
+        menuLink.value = json.link || "";
+        parentMenu.value = json.parent || "";
+        sortOrder.value = json.sortorder || "";
+
+        generateJSON();
+
+        new bootstrap.Modal(document.getElementById("menuModal")).show();
+      }
+
+      function deleteMenu() {
+        const selected = menuGrid.getSelectedRecords();
+
+        if (!selected.length) return alert("Select record");
+
+        const ids = selected.map((x) => x.id);
+
+        menuData = menuData.filter((m) => !ids.includes(m.id));
+
+        menuGrid.dataSource = menuData;
+        menuGrid.refresh();
+      }
+
+      document
+        .getElementById("menuName")
+        .addEventListener("input", generateJSON);
+      document
+        .getElementById("menuLink")
+        .addEventListener("input", generateJSON);
+      document
+        .getElementById("parentMenu")
+        .addEventListener("change", generateJSON);
+      document
+        .getElementById("sortOrder")
+        .addEventListener("input", generateJSON);
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        await initMenuGrid();
+
+        await loadMenus();
+      });
+    </script>
+  </body>
+</html>
