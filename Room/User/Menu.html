@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="container2 mt-4">
+        <div id="menuGrid"></div>
+    </div>
+
+    <div class="modal fade" id="menuModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Master Menu</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="menuForm" class="row g-5">
+                        <div class="col-md-6">
+                            <label>Menu Name<span style="color: red;">*</span>:</label>
+                            <input class="form-control" id="menuName" dbcolumnname="name" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Owner<span style="color: red;">*</span>:</label>
+                            <input id="ownerId" class="form-control" datatype="dropdown" dbcolumnname="ownerid" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>Menu Configuration<span style="color: red;">*</span>:</label>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Configure Menu Items</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-3">
+                                            <label for="menuItemName">Menu Item Name:</label>
+                                            <input id="menuItemName" type="text" class="form-control"
+                                                placeholder="Enter menu item name" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="menuUrl">URL/Route:</label>
+                                            <input id="menuUrl" type="text" class="form-control"
+                                                placeholder="Enter URL or route" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="menuIcon">Icon:</label>
+                                            <input id="menuIcon" type="text" class="form-control"
+                                                placeholder="fa-home" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="parentMenuSelector">Parent Menu:</label>
+                                            <select id="parentMenuSelector" class="form-select">
+                                                <option value="">Root Menu</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label for="sortOrder">Sort Order:</label>
+                                            <input id="sortOrder" type="number" class="form-control" placeholder="1"
+                                                min="1" max="999" />
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <button type="button" class="btn btn-primary btn-sm me-2"
+                                                onclick="addMenuItem()">
+                                                <i class="fa fa-plus"></i> Add Menu Item
+                                            </button>
+                                            <button type="button" class="btn btn-outline-info btn-sm"
+                                                onclick="previewMenuStructure()" title="Preview menu hierarchy">
+                                                <i class="fa fa-eye"></i> Preview
+                                            </button>
+                                        </div>
+                                        <div class="col-md-6 d-flex align-items-end justify-content-end">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                onclick="sortMenuItems()" title="Auto-sort menu items">
+                                                <i class="fa fa-sort"></i> Auto Sort
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div id="menuItemsContainer">
+                                        <div class="alert alert-info text-center" id="noMenuItemsMessage">
+                                            <i class="fa fa-info-circle"></i> No menu items added yet. Add menu items to
+                                            configure the menu structure.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <label>Generated Menu JSON<span style="color: red;">*</span>:</label>
+                                <textarea class="form-control" id="menuJSON" dbcolumnname="menujson" rows="8" readonly
+                                    placeholder='{"menus": []}'></textarea>
+                                <small class="text-muted">This JSON is automatically generated based on your menu
+                                    configuration above</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-info" onclick="viewMenuJSON()">
+                        <i class="fa fa-eye"></i> View JSON
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearAllMenuItems()">
+                        <i class="fa fa-refresh"></i> Clear All
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveMenu()">
+                        <i class="fa fa-save"></i> Save Menu
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Preview Modal -->
+    <div class="modal fade" id="menuPreviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Menu Structure Preview</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="menuPreviewContent">
+                        <!-- Menu preview will be rendered here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            // Load users for owner dropdown
+            DBHandler.fetchEntityRecords(
+                'users',
+                'users.id, users.username',
+                'users.username',
+                'asc',
+                '', true,
+                0,
+                ''
+            ).then(owners => {
+                var listObj = new ej.dropdowns.DropDownList({
+                    dataSource: owners,
+                    fields: { text: 'username', value: 'id' },
+                });
+                listObj.appendTo('#ownerId');
+            });
+        });
+
+        let menuItems = [];
+        let menuItemCounter = 1;
+
+        function addMenuItem() {
+            const menuItemName = document.getElementById('menuItemName').value.trim();
+            const menuUrl = document.getElementById('menuUrl').value.trim();
+            const menuIcon = document.getElementById('menuIcon').value.trim();
+            const parentMenuId = document.getElementById('parentMenuSelector').value;
+            const sortOrder = document.getElementById('sortOrder').value || menuItems.length + 1;
+
+            if (!menuItemName) {
+                alert('Please enter menu item name');
+                return;
+            }
+
+            const newMenuItem = {
+                id: `menu_${menuItemCounter++}`,
+                name: menuItemName,
+                url: menuUrl || '#',
+                icon: menuIcon || 'fa-circle',
+                parentId: parentMenuId || null,
+                sortOrder: parseInt(sortOrder),
+                children: []
+            };
+
+            menuItems.push(newMenuItem);
+
+            // Clear input fields
+            document.getElementById('menuItemName').value = '';
+            document.getElementById('menuUrl').value = '';
+            document.getElementById('menuIcon').value = '';
+            document.getElementById('parentMenuSelector').value = '';
+            document.getElementById('sortOrder').value = '';
+
+            renderMenuItems();
+            updateParentMenuSelector();
+            updateMenuJSON();
+        }
+
+        function renderMenuItems() {
+            const container = document.getElementById('menuItemsContainer');
+
+            if (menuItems.length === 0) {
+                container.innerHTML = '<div class="alert alert-info text-center" id="noMenuItemsMessage"><i class="fa fa-info-circle"></i> No menu items added yet. Add menu items to configure the menu structure.</div>';
+                return;
+            }
+
+            // Sort menu items by sort order
+            const sortedMenus = [...menuItems].sort((a, b) => a.sortOrder - b.sortOrder);
+
+            let html = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">
+                        Menu Items 
+                        <span class="menu-count-badge">${menuItems.length}</span>
+                    </h6>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="reorderMenuItems()" title="Reorder menu items">
+                            <i class="fa fa-arrows-alt-v"></i> Reorder
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearAllMenuItems()" title="Clear all menu items">
+                            <i class="fa fa-trash"></i> Clear All
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            sortedMenus.forEach((menuItem, index) => {
+                const parentName = menuItem.parentId ?
+                    (menuItems.find(m => m.id === menuItem.parentId)?.name || 'Unknown Parent') :
+                    'Root Menu';
+
+                html += `
+                    <div class="card mb-2 menu-item-card" id="menuItem-${menuItem.id}">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="menu-icon-preview me-3">
+                                        <i class="fa ${menuItem.icon} text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">${menuItem.name}</h6>
+                                        <div class="text-muted small">
+                                            <span class="me-3"><i class="fa fa-link"></i> ${menuItem.url}</span>
+                                            <span class="me-3"><i class="fa fa-sitemap"></i> ${parentName}</span>
+                                            <span><i class="fa fa-sort-numeric-up"></i> Sort: ${menuItem.sortOrder}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="editMenuItem('${menuItem.id}')" title="Edit Menu Item">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeMenuItem('${menuItem.id}')" title="Remove Menu Item">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function removeMenuItem(menuId) {
+            if (confirm('Are you sure you want to remove this menu item?')) {
+                // Check if this menu item has children
+                const hasChildren = menuItems.some(item => item.parentId === menuId);
+                if (hasChildren && !confirm('This menu item has children. Removing it will also remove all its children. Continue?')) {
+                    return;
+                }
+
+                // Remove the menu item and its children
+                function removeMenuAndChildren(id) {
+                    menuItems = menuItems.filter(item => {
+                        if (item.parentId === id) {
+                            removeMenuAndChildren(item.id);
+                            return false;
+                        }
+                        return item.id !== id;
+                    });
+                }
+
+                removeMenuAndChildren(menuId);
+                renderMenuItems();
+                updateParentMenuSelector();
+                updateMenuJSON();
+            }
+        }
+
+        function editMenuItem(menuId) {
+            const menuItem = menuItems.find(item => item.id === menuId);
+            if (!menuItem) return;
+
+            document.getElementById('menuItemName').value = menuItem.name;
+            document.getElementById('menuUrl').value = menuItem.url;
+            document.getElementById('menuIcon').value = menuItem.icon;
+            document.getElementById('parentMenuSelector').value = menuItem.parentId || '';
+            document.getElementById('sortOrder').value = menuItem.sortOrder;
+
+            // Remove the item so it can be re-added with changes
+            removeMenuItem(menuId);
+        }
+
+        function updateParentMenuSelector() {
+            const selector = document.getElementById('parentMenuSelector');
+            const currentValue = selector.value;
+
+            // Clear existing options except root
+            selector.innerHTML = '<option value="">Root Menu</option>';
+
+            // Add menu items as parent options
+            menuItems.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.name;
+                selector.appendChild(option);
+            });
+
+            // Restore selection if it still exists
+            if (currentValue && menuItems.find(item => item.id === currentValue)) {
+                selector.value = currentValue;
+            }
+        }
+
+        function updateMenuJSON() {
+            // Create hierarchical structure
+            const hierarchicalMenus = buildMenuHierarchy();
+            document.getElementById('menuJSON').value = JSON.stringify(hierarchicalMenus, null, 2);
+        }
+
+        function buildMenuHierarchy() {
+            // Sort all items by sort order first
+            const sortedItems = [...menuItems].sort((a, b) => a.sortOrder - b.sortOrder);
+
+            // Create a map for quick lookup
+            const itemMap = {};
+            sortedItems.forEach(item => {
+                itemMap[item.id] = { ...item, children: [] };
+            });
+
+            // Build hierarchy
+            const rootItems = [];
+            sortedItems.forEach(item => {
+                const itemCopy = itemMap[item.id];
+                if (item.parentId && itemMap[item.parentId]) {
+                    itemMap[item.parentId].children.push(itemCopy);
+                } else {
+                    rootItems.push(itemCopy);
+                }
+            });
+
+            return rootItems;
+        }
+
+        function sortMenuItems() {
+            if (menuItems.length === 0) {
+                alert('No menu items to sort');
+                return;
+            }
+
+            // Auto-assign sort order based on current order
+            menuItems.sort((a, b) => a.name.localeCompare(b.name));
+            menuItems.forEach((item, index) => {
+                item.sortOrder = (index + 1) * 10;
+            });
+
+            renderMenuItems();
+            updateMenuJSON();
+            alert('Menu items have been auto-sorted alphabetically');
+        }
+
+        function previewMenuStructure() {
+            if (menuItems.length === 0) {
+                alert('No menu items to preview');
+                return;
+            }
+
+            const hierarchicalMenus = buildMenuHierarchy();
+            const previewContent = document.getElementById('menuPreviewContent');
+
+            let html = '<div class="menu-preview">';
+            html += renderMenuPreview(hierarchicalMenus, 0);
+            html += '</div>';
+
+            previewContent.innerHTML = html;
+
+            const modal = new bootstrap.Modal(document.getElementById('menuPreviewModal'));
+            modal.show();
+        }
+
+        function renderMenuPreview(menuItems, depth) {
+            let html = '';
+            const indent = '&nbsp;'.repeat(depth * 4);
+
+            menuItems.forEach(item => {
+                html += `
+                    <div class="menu-preview-item" style="margin-left: ${depth * 20}px;">
+                        <i class="fa ${item.icon}"></i>
+                        <span>${item.name}</span>
+                        <small class="text-muted">(${item.url})</small>
+                        <span class="badge bg-secondary ms-2">${item.sortOrder}</span>
+                    </div>
+                `;
+
+                if (item.children && item.children.length > 0) {
+                    html += renderMenuPreview(item.children, depth + 1);
+                }
+            });
+
+            return html;
+        }
+
+        function loadMenuFromJSON(jsonString) {
+            try {
+                const menuData = JSON.parse(jsonString);
+                menuItems = [];
+                menuItemCounter = 1;
+
+                function flattenMenuItems(items, parentId = null) {
+                    items.forEach(item => {
+                        const flatItem = {
+                            id: item.id || `menu_${menuItemCounter++}`,
+                            name: item.name,
+                            url: item.url || '#',
+                            icon: item.icon || 'fa-circle',
+                            parentId: parentId,
+                            sortOrder: item.sortOrder || menuItems.length + 1,
+                            children: []
+                        };
+
+                        menuItems.push(flatItem);
+
+                        if (item.children && item.children.length > 0) {
+                            flattenMenuItems(item.children, flatItem.id);
+                        }
+                    });
+                }
+
+                if (Array.isArray(menuData)) {
+                    flattenMenuItems(menuData);
+                }
+
+                renderMenuItems();
+                updateParentMenuSelector();
+                updateMenuJSON();
+            } catch (error) {
+                console.error('Failed to load menu from JSON:', error);
+                alert('Invalid JSON format. Please check the menu data.');
+            }
+        }
+
+        function viewMenuJSON() {
+            const jsonTextarea = document.getElementById('menuJSON');
+            if (!jsonTextarea.value.trim()) {
+                alert('No menu data available to view');
+                return;
+            }
+
+            try {
+                const parsedJson = JSON.parse(jsonTextarea.value);
+                const formattedJson = JSON.stringify(parsedJson, null, 4);
+
+                // Create a modal to display the formatted JSON
+                const jsonModal = `
+                    <div class="modal fade" id="jsonViewModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Menu JSON Preview</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <pre class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;"><code>${formattedJson}</code></pre>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-secondary" onclick="copyJsonToClipboard()">
+                                        <i class="fa fa-copy"></i> Copy to Clipboard
+                                    </button>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Remove existing modal if any
+                const existingModal = document.getElementById('jsonViewModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+
+                // Add the modal to body
+                document.body.insertAdjacentHTML('beforeend', jsonModal);
+
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('jsonViewModal'));
+                modal.show();
+
+            } catch (error) {
+                alert('Invalid JSON format');
+            }
+        }
+
+        function copyJsonToClipboard() {
+            const jsonTextarea = document.getElementById('menuJSON');
+            navigator.clipboard.writeText(jsonTextarea.value).then(() => {
+                alert('JSON copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy JSON to clipboard');
+            });
+        }
+
+        function clearAllMenuItems() {
+            if (confirm('Are you sure you want to clear all menu items? This action cannot be undone.')) {
+                menuItems = [];
+                menuItemCounter = 1;
+                renderMenuItems();
+                updateParentMenuSelector();
+                updateMenuJSON();
+            }
+        }
+
+    </script>
+
+    <script>
+        let grid;
+        let menusMain = [];
+        var columns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+            { field: 'name', headerText: 'Menu Name', width: 250 },
+            { field: 'modifiedon', headerText: 'Modified On', width: 160, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' } },
+            { field: 'id', headerText: 'id', width: 130, visible: false },
+            { field: 'createdon', headerText: 'Created On', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
+            { field: 'ownerid', headerText: 'Owner Id', width: 130, visible: false },
+        ];
+
+        function initGrid(columns, menuGrid) {
+            ej.grids.Grid.Inject(
+                ej.grids.Filter,
+                ej.grids.Group,
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            grid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                pageSettings: { pageSize: 10 },
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                showColumnChooser: true,
+                toolbar: ['ColumnChooser',
+                    'Search',
+                    {
+                        prefixIcon: 'e-icons e-excelexport',
+                        tooltipText: 'Export Excel',
+                        id: 'excelExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-pdfexport',
+                        tooltipText: 'Export PDF',
+                        id: 'pdfExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-refresh',
+                        tooltipText: 'Refresh Grid',
+                        id: 'refreshGrid'
+                    },
+                    {
+                        text: 'New Menu',
+                        tooltipText: 'New Menu',
+                        prefixIcon: 'e-icons e-plus',
+                        id: 'newMenu'
+                    },
+                    {
+                        text: 'Edit',
+                        tooltipText: 'Edit Menu',
+                        prefixIcon: 'e-icons e-edit',
+                        id: 'editMenu',
+                    },
+                    {
+                        text: 'Delete',
+                        tooltipText: 'Delete',
+                        prefixIcon: 'e-icons e-delete',
+                        id: 'deleteMenu'
+                    },],
+
+                columns: columns,
+                allowExcelExport: true,
+                allowPdfExport: true,
+
+                toolbarClick: function (args) {
+                    if (args.item.id === menuGrid + '_excelexport') {
+                        grid.excelExport({
+                            fileName: `MasterMenus_${formatDate(new Date())}.xlsx`,
+                            exportType: 'AllPages',
+                        });
+                    }
+
+                    if (args.item.id === 'deleteMenu') {
+                        deleteMenu();
+                    }
+                    if (args.item.id === menuGrid + '_pdfexport') {
+                        grid.pdfExport({
+                            fileName: `MasterMenus_${formatDate(new Date())}.pdf`,
+                            exportType: 'CurrentPage',
+                            theme: { header: { fontColor: '#000000' } },
+                            pageOrientation: 'Landscape',
+                            pageSize: 'LETTER',
+                            header: {
+                                fromTop: 0,
+                                height: 120,
+                                contents: [
+                                    {
+                                        type: 'Text',
+                                        value: 'Master Menu Management',
+                                        position: { x: 280, y: 0 },
+                                        style: {
+                                            textBrushColor: '#C25050',
+                                            fontSize: 25
+                                        },
+                                    }
+                                ]
+                            },
+                            footer: {
+                                fromBottom: 160,
+                                height: 150,
+                                contents: [
+                                    {
+                                        type: 'PageNumber',
+                                        pageNumberType: 'Arabic',
+                                        format: 'Page {$current} of {$total}',
+                                        position: { x: 520, y: 10 },
+                                        style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' }
+                                    }
+                                ]
+                            }
+                        });
+                    }
+
+                    if (args.item.id === 'refreshGrid') {
+                        loadMenuGrid();
+                    }
+                    if (args.item.id === 'newMenu') {
+                        openMenuModal();
+                    }
+
+                    if (args.item.id === 'editMenu') {
+                        editMenu();
+                    }
+                }
+            });
+            grid.appendTo('#' + menuGrid);
+        }
+
+        let editingId = null;
+
+        async function editMenu() {
+            const selectedRecords = grid.getSelectedRecords();
+            if (selectedRecords.length !== 1) {
+                return alert("Select one record to edit");
+            }
+
+            const record = selectedRecords[0];
+            editingId = record.id;
+
+            document.getElementById('menuName').value = record.name;
+            document.getElementById('ownerId').value = record.ownerid;
+
+            // Clear the UI first and show loading state
+            menuItems = [];
+            renderMenuItems();
+            updateParentMenuSelector();
+            document.getElementById('menuJSON').value = 'Loading...';
+
+            document.querySelector('#menuModal .modal-title').innerText = "Edit Master Menu";
+            openMenuModal();
+
+            try {
+                // Fetch full record including menu JSON
+                const fullRecord = await DBHandler.fetchEntityRecords(
+                    'mastermenu',
+                    'id,name,ownerid,menujson',
+                    'id',
+                    'desc',
+                    `id='${editingId}'`,
+                    false,
+                    1
+                );
+
+                if (!fullRecord || !fullRecord.length) {
+                    document.getElementById('menuJSON').value = '';
+                    return alert("Unable to load full menu record.");
+                }
+
+                const data = fullRecord[0];
+
+                // Load the menu JSON into the dynamic UI
+                if (data.menujson) {
+                    loadMenuFromJSON(data.menujson);
+                } else {
+                    updateMenuJSON();
+                }
+
+            } catch (err) {
+                console.error('Error fetching menu JSON:', err);
+                document.getElementById('menuJSON').value = '';
+                alert("Error fetching menu data.");
+            }
+        }
+
+        async function deleteMenu() {
+            const selected = grid.getSelectedRecords();
+            if (!selected.length) return alert("Select record(s)");
+
+            if (!confirm(`Delete ${selected.length} menu(s)?`)) return;
+
+            const ids = selected.map(r => r.id);
+            await deleteRecordData('mastermenu', ids, true, true);
+            loadMenuGrid();
+        }
+
+        function openMenuModal() {
+            // Reset form if it's a new menu (not editing)
+            if (!editingId) {
+                document.getElementById('menuName').value = '';
+                document.getElementById('ownerId').value = '';
+                menuItems = [];
+                menuItemCounter = 1;
+                renderMenuItems();
+                updateParentMenuSelector();
+                updateMenuJSON();
+                document.querySelector('#menuModal .modal-title').innerText = "Add Master Menu";
+            }
+
+            const modal = new bootstrap.Modal(
+                document.getElementById('menuModal'),
+                { backdrop: 'static', keyboard: false, focus: false }
+            );
+            modal.show();
+
+            // Enable ripple effect
+            ej.base.enableRipple(true);
+        }
+
+        async function loadMenuGrid() {
+            const filter = '';
+            const joinCondition = "";
+            try {
+                const menus = await DBHandler.fetchEntityRecords(
+                    'mastermenu',
+                    'id,name,createdon,modifiedon,ownerid',
+                    'mastermenu.modifiedon',
+                    'desc',
+                    filter, true,
+                    0,
+                    joinCondition
+                );
+
+                menusMain = menus || [];
+                let serialNumber = 1;
+
+                const rows = menusMain.map(a => ({
+                    id: a.id,
+                    srno: serialNumber++,
+                    name: a.name,
+                    createdon: normalizeDate(a.createdon),
+                    modifiedon: normalizeDate(a.modifiedon),
+                    ownerid: a.ownerid,
+                }));
+
+                grid.dataSource = rows;
+                grid.refresh();
+            } catch (err) {
+                console.error('Failed to load menus:', err);
+            }
+        }
+
+        function normalizeDate(val) {
+            if (!val) return null;
+            const d = val instanceof Date ? val : new Date(val);
+            return isNaN(d) ? null : d;
+        }
+
+        $(document).ready(async () => {
+            initGrid(columns, 'menuGrid');
+            loadMenuGrid();
+
+            // Handle modal focus issue
+            $('#menuModal').on('shown.bs.modal', function () {
+                $(document).off('focusin.modal');
+            });
+        });
+
+        async function saveMenu() {
+            const btn = event.target;
+            const menuName = document.getElementById('menuName').value.trim();
+            const menuJSON = document.getElementById('menuJSON').value.trim();
+            const ownerId = document.getElementById('ownerId').value;
+
+            // Validation
+            if (!menuName) return alert("Please enter menu name");
+            if (!ownerId) return alert("Please select Owner");
+
+            // Check if at least one menu item is configured
+            if (menuItems.length === 0) {
+                return alert("Please add at least one menu item");
+            }
+
+            // Validate JSON format
+            try {
+                JSON.parse(menuJSON);
+            } catch (error) {
+                return alert("Invalid JSON format in menu data. Please check the syntax.");
+            }
+
+            try {
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+                }
+
+                await DBHandler.submitRecordData('mastermenu', {
+                    name: menuName,
+                    menujson: menuJSON,
+                    ownerid: ownerId,
+                    menuhtml: '12',
+                }, editingId, false);
+
+                await loadMenuGrid();
+
+                bootstrap.Modal.getInstance(
+                    document.getElementById('menuModal')
+                ).hide();
+
+                editingId = null;
+
+                // Reset form
+                document.getElementById('menuName').value = '';
+                document.getElementById('ownerId').value = '';
+                menuItems = [];
+                menuItemCounter = 1;
+                renderMenuItems();
+                updateParentMenuSelector();
+                updateMenuJSON();
+
+            } catch (err) {
+                console.error('Failed to save menu:', err);
+                alert("Failed to save Menu");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa fa-save"></i> Save Menu';
+                }
+            }
+        }
+
+    </script>
+
+    <style>
+        #menuGrid_toolbarItems {
+            height: 10px !important;
+        }
+
+        .text-truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .menu-item-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #007bff;
+        }
+
+        .menu-item-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-icon-preview {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: 50%;
+            font-size: 18px;
+        }
+
+        .menu-count-badge {
+            background-color: #6c757d;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            margin-left: 0.5rem;
+        }
+
+        .menu-preview-item {
+            padding: 0.5rem;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 0.9rem;
+        }
+
+        .menu-preview-item i {
+            width: 20px;
+            text-align: center;
+            margin-right: 0.5rem;
+        }
+
+        .menu-preview {
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+
+</body>
+
+</html>
