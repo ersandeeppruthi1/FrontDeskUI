@@ -144,12 +144,10 @@
                 width: 140 
             },
             { 
-                field: 'donationamount', 
+                field: 'donationamountformatted', 
                 headerText: 'Donation Amount', 
                 width: 150, 
-                format: 'C2', 
-                textAlign: 'Right',
-                footerTemplate: '<div style="font-weight: bold; color: #28a745;">Total: ₹${sum}</div>'
+                textAlign: 'Right'
             },
             { field: 'referencedetail', headerText: 'Reference', width: 150 },
             { 
@@ -247,7 +245,8 @@
                     checkindatetime: donation.checkindatetime ? new Date(donation.checkindatetime) : null,
                     checkoutdatetime: donation.checkoutdatetime ? new Date(donation.checkoutdatetime) : null,
                     createdon: donation.createdon ? new Date(donation.createdon) : null,
-                    donationamount: donation.donationamount || 0
+                    donationamount: donation.donationamount || 0,
+                    donationamountformatted: `₹${(donation.donationamount || 0).toFixed(2)}`
                 }));
 
                 donationGrid.dataSource = allDonations;
@@ -296,7 +295,8 @@
             // Update serial numbers
             filteredData = filteredData.map((donation, index) => ({
                 ...donation,
-                srno: index + 1
+                srno: index + 1,
+                donationamountformatted: `₹${(donation.donationamount || 0).toFixed(2)}`
             }));
 
             donationGrid.dataSource = filteredData;
