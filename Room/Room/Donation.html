@@ -120,7 +120,6 @@
     <script>
 
         let donationGrid;
-        let allDonations = [];
         let totalDonationAmount = 0;
 
         // Grid columns configuration
@@ -239,7 +238,7 @@
                     ''
                 );
 
-                allDonations = (donations || []).map((donation, index) => ({
+                const formattedDonations = (donations || []).map((donation, index) => ({
                     ...donation,
                     srno: index + 1,
                     checkindatetime: donation.checkindatetime ? new Date(donation.checkindatetime) : null,
@@ -249,71 +248,74 @@
                     donationamountformatted: `₹${(donation.donationamount || 0).toFixed(2)}`
                 }));
 
-                donationGrid.dataSource = allDonations;
+                donationGrid.dataSource = formattedDonations;
                 donationGrid.refresh();
 
                 updateTotalAmount();
 
-                console.log("Donations loaded:", allDonations.length);
+                console.log("Donations loaded:", formattedDonations.length);
             } catch (error) {
                 console.error("Error loading donations:", error);
                 alert("Error loading donations. Please try again.");
             }
         }
 
-        // Filter donations by date range
-        function filterDonations() {
+        // Filter donations by date range - fetch from server
+        async function filterDonations() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
 
-            if (!startDate && !endDate) {
-                donationGrid.dataSource = allDonations;
+            try {
+                let whereClause = 'rb.donationamount > 0';
+                
+                if (startDate) {
+                    whereClause += ` AND DATE(rb.createdon) >= '${startDate}'`;
+                }
+                
+                if (endDate) {
+                    whereClause += ` AND DATE(rb.createdon) <= '${endDate}'`;
+                }
+
+                const donations = await DBHandler.fetchEntityRecords(
+                    'roombooking rb',
+                    'rb.*, rb.donationamount',
+                    'rb.createdon',
+                    'desc',
+                    whereClause,
+                    false,
+                    0,
+                    ''
+                );
+
+                const filteredData = (donations || []).map((donation, index) => ({
+                    ...donation,
+                    srno: index + 1,
+                    checkindatetime: donation.checkindatetime ? new Date(donation.checkindatetime) : null,
+                    checkoutdatetime: donation.checkoutdatetime ? new Date(donation.checkoutdatetime) : null,
+                    createdon: donation.createdon ? new Date(donation.createdon) : null,
+                    donationamount: donation.donationamount || 0,
+                    donationamountformatted: `₹${(donation.donationamount || 0).toFixed(2)}`
+                }));
+
+                donationGrid.dataSource = filteredData;
                 donationGrid.refresh();
+
                 updateTotalAmount();
-                return;
+
+                console.log("Filtered donations loaded:", filteredData.length);
+            } catch (error) {
+                console.error("Error filtering donations:", error);
+                alert("Error filtering donations. Please try again.");
             }
-
-            let filteredData = [...allDonations];
-
-            if (startDate) {
-                const start = new Date(startDate);
-                filteredData = filteredData.filter(donation => {
-                    const createdDate = new Date(donation.createdon);
-                    return createdDate >= start;
-                });
-            }
-
-            if (endDate) {
-                const end = new Date(endDate);
-                end.setHours(23, 59, 59, 999); // Include the entire end date
-                filteredData = filteredData.filter(donation => {
-                    const createdDate = new Date(donation.createdon);
-                    return createdDate <= end;
-                });
-            }
-
-            // Update serial numbers
-            filteredData = filteredData.map((donation, index) => ({
-                ...donation,
-                srno: index + 1,
-                donationamountformatted: `₹${(donation.donationamount || 0).toFixed(2)}`
-            }));
-
-            donationGrid.dataSource = filteredData;
-            donationGrid.refresh();
-
-            updateTotalAmount();
         }
 
         // Clear filters
-        function clearFilters() {
+        async function clearFilters() {
             document.getElementById('startDate').value = '';
             document.getElementById('endDate').value = '';
             
-            donationGrid.dataSource = allDonations;
-            donationGrid.refresh();
-            
-            updateTotalAmount();
+            // Reload all donations from server
+            await loadDonations();
         }
 
         // Update total amount display
