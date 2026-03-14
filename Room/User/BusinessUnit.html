@@ -249,7 +249,7 @@
 
         async function loadUsersData() {
             usersData = await DBHandler.fetchEntityRecords(
-                'masteruser',
+                'users',
                 'id,displayname,username',
                 'displayname',
                 'asc',
