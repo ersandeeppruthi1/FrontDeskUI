@@ -65,50 +65,33 @@
 </head>
 
 <body>
-
-    <div class="container-fluid mt-4">
-        
-        <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="mb-0">Business Unit Management</h2>
-        </div>
-
-        <!-- Business Unit Grid -->
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <div id="businessUnitGrid"></div>
-            </div>
-        </div>
-
+    <div class="container2 mt-4">
+        <div id="businessUnitGrid"></div>
     </div>
 
-    <!-- Business Unit Modal -->
-    <div class="modal fade" id="businessUnitModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal fade" id="businessUnitModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
-                
-                <div class="modal-header bg-primary text-white">
+
+                <div class="modal-header">
                     <h5 class="modal-title">Add Business Unit</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
                 </div>
 
                 <div class="modal-body">
                     <form id="businessUnitForm">
-                        
-                        <div class="row g-3">
-                            
-                            <div class="col-md-12">
-                                <label class="form-label">Business Unit Name <span class="text-danger">*</span></label>
-                                <input type="text" id="bu_name" class="form-control" required placeholder="Enter business unit name">
-                            </div>
 
-                            <div class="col-md-12">
-                                <label class="form-label">Owner <span class="text-danger">*</span></label>
-                                <select id="bu_ownerid" class="form-control" required>
-                                    <option value="">Select Owner</option>
-                                </select>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Business Unit Name <span class="text-danger">*</span></label>
+                                <input type="text" id="bu_name" class="form-control" required />
                             </div>
-
+                            <div class="col-md-6">
+                                <label>Owner <span class="text-danger">*</span></label>
+                                <input type="text" id="bu_ownerid" class="form-control" required />
+                            </div>
                         </div>
 
                     </form>
@@ -116,7 +99,7 @@
 
                 <div class="modal-footer">
                     <button class="btn btn-primary" onclick="saveBusinessUnit()">Save</button>
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
 
             </div>
@@ -127,308 +110,237 @@
 
         let businessUnitGrid;
         let editingBusinessUnitId = null;
-        let businessUnitModal;
         let ownerDropdown;
+        let ownersData = [];
 
-        // Grid columns configuration
-        var businessUnitColumns = [
-            { type: 'checkbox', width: 50 },
-            { field: 'srno', headerText: 'S.No', width: 70, textAlign: 'Right' },
-            { field: 'name', headerText: 'Business Unit Name', width: 300 },
-            { field: 'ownername', headerText: 'Owner', width: 200 },
-            { field: 'id', visible: false },
-            { field: 'ownerid', visible: false }
-        ];
-
-        // Initialize Grid
-        function initBusinessUnitGrid() {
-
+        async function initBusinessUnitGrid() {
             ej.grids.Grid.Inject(
                 ej.grids.Page,
                 ej.grids.Sort,
                 ej.grids.Filter,
                 ej.grids.Toolbar,
                 ej.grids.ExcelExport,
-                ej.grids.PdfExport
+                ej.grids.PdfExport,
+                ej.grids.ColumnChooser
             );
 
             businessUnitGrid = new ej.grids.Grid({
-
                 dataSource: [],
                 allowPaging: true,
                 allowSorting: true,
                 allowFiltering: true,
                 filterSettings: { type: 'Excel' },
-                pageSettings: { pageSize: 15 },
-                allowExcelExport: true,
-                allowPdfExport: true,
+                showColumnChooser: true,
 
                 toolbar: [
                     'Search',
-                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
+                    'ColumnChooser',
+                    {
+                        prefixIcon: 'e-icons e-excelexport',
+                        tooltipText: 'Export Excel',
+                        id: 'excelExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-pdfexport',
+                        tooltipText: 'Export PDF',
+                        id: 'pdfExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-refresh',
+                        tooltipText: 'Refresh',
+                        id: 'refreshGrid'
+                    },
+                    {
+                        text: 'New Business Unit',
+                        prefixIcon: 'e-icons e-plus',
+                        id: 'newBusinessUnit',
+                        disabled: true
+                    },
                     { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
-                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' },
-                    { text: '', prefixIcon: 'e-excelexport e-icons', id: 'excelexport', tooltipText: 'Export Excel' },
-                    { text: '', prefixIcon: 'e-pdfexport e-icons', id: 'pdfexport', tooltipText: 'Export PDF' },
-                    { text: '', prefixIcon: 'e-refresh e-icons', id: 'refresh', tooltipText: 'Refresh' }
+                    {
+                        text: 'Delete',
+                        prefixIcon: 'e-icons e-delete',
+                        id: 'deleteBusinessUnit'
+                    }
                 ],
 
-                columns: businessUnitColumns,
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
+                    { field: 'name', headerText: 'Business Unit Name', width: 300 },
+                    { field: 'ownername', headerText: 'Owner', width: 200 },
+                    { field: 'id', visible: false },
+                    { field: 'ownerid', visible: false }
+                ],
 
-                toolbarClick: function (args) {
+                toolbarClick: async function (args) {
 
-                    if (args.item.id === 'new') {
-                        clearBusinessUnitForm();
-                        editingBusinessUnitId = null;
-                        document.querySelector('#businessUnitModal .modal-title').innerText = "Add Business Unit";
-                        openBusinessUnitModal();
+                    if (args.item.id === 'excelExport') {
+                        businessUnitGrid.excelExport({
+                            fileName: `BusinessUnits_${new Date().getTime()}.xlsx`,
+                            exportType: 'AllPages'
+                        });
+                    }
+
+                    if (args.item.id === 'pdfExport') {
+                        businessUnitGrid.pdfExport({
+                            fileName: `BusinessUnits_${new Date().getTime()}.pdf`,
+                            pageOrientation: 'Landscape'
+                        });
+                    }
+
+                    if (args.item.id === 'refreshGrid') {
+                        loadBusinessUnits();
                     }
 
                     if (args.item.id === 'edit') {
                         editBusinessUnit();
                     }
 
-                    if (args.item.id === 'delete') {
-                        deleteBusinessUnit();
+                    if (args.item.id === 'newBusinessUnit') {
+                        editingBusinessUnitId = null;
+                        document.getElementById('businessUnitForm').reset();
+
+                        // Destroy if already exists
+                        if (ownerDropdown) ownerDropdown.destroy();
+
+                        const modal = new bootstrap.Modal(businessUnitModal, {
+                            focus: false
+                        });
+                        modal.show();
+
+                        ej.base.enableRipple(true);
+
+                        ownerDropdown = new ej.dropdowns.DropDownList({
+                            dataSource: ownersData,
+                            fields: { text: 'displayname', value: 'id' },
+                            placeholder: 'Select Owner',
+                            allowFiltering: true,
+                            filterBarPlaceholder: 'Search owners...',
+                            allowClear: true
+                        });
+                        ownerDropdown.appendTo('#bu_ownerid');
+
+                        document.querySelector('#businessUnitModal .modal-title')
+                            .innerText = "Add Business Unit";
                     }
 
-                    if (args.item.id === 'excelexport') {
-                        exportToExcel();
-                    }
+                    if (args.item.id === 'deleteBusinessUnit') {
+                        const selected = businessUnitGrid.getSelectedRecords();
+                        if (!selected.length) return alert("Select record(s)");
 
-                    if (args.item.id === 'pdfexport') {
-                        exportToPdf();
-                    }
+                        if (!confirm(`Delete ${selected.length} business unit(s)?`)) return;
 
-                    if (args.item.id === 'refresh') {
+                        const ids = selected.map(r => r.id);
+                        await deleteRecordData('businessunit', ids, true, true);
                         loadBusinessUnits();
                     }
                 }
             });
 
             businessUnitGrid.appendTo('#businessUnitGrid');
+
+            await loadBusinessUnits();
+            await loadOwnersData();
+            businessUnitGrid.enableToolbarItems(['newBusinessUnit'], true);
         }
 
-        // Load business unit data
+        async function loadOwnersData() {
+            ownersData = await DBHandler.fetchEntityRecords(
+                'masteruser',
+                'id, displayname',
+                'displayname',
+                'asc'
+            ) || [];
+        }
+
         async function loadBusinessUnits() {
-            try {
-                const businessUnits = await DBHandler.fetchEntityRecords(
-                    'businessunit bu',
-                    'bu.*, u.displayname as ownername',
-                    'bu.name',
-                    'asc',
-                    '',
-                    false,
-                    0,
-                    'LEFT JOIN masteruser u ON u.id = bu.ownerid'
-                );
+            const joinCondition = "LEFT JOIN masteruser ON masteruser.id = businessunit.ownerid";
 
-                let sr = 1;
-                const formattedData = (businessUnits || []).map(unit => ({
-                    ...unit,
-                    srno: sr++,
-                    ownername: unit.ownername || 'No Owner Assigned'
-                }));
+            const data = await DBHandler.fetchEntityRecords(
+                'businessunit',
+                'businessunit.*, masteruser.displayname as ownername',
+                'businessunit.name',
+                'asc',
+                '',
+                true,
+                0,
+                joinCondition
+            );
 
-                businessUnitGrid.dataSource = formattedData;
-                businessUnitGrid.refresh();
+            let sr = 1;
+            const formattedData = (data || []).map(unit => ({
+                ...unit,
+                srno: sr++,
+                ownername: unit.ownername || 'No Owner Assigned'
+            }));
 
-                console.log("Business units loaded:", formattedData.length);
-            } catch (error) {
-                console.error("Error loading business units:", error);
-                alert("Error loading business units. Please try again.");
-            }
+            businessUnitGrid.dataSource = formattedData;
         }
 
-        // Initialize owner dropdown
-        async function initializeOwnerDropdown() {
-            try {
-                const owners = await DBHandler.fetchEntityRecords(
-                    'masteruser',
-                    'id, displayname',
-                    'displayname',
-                    'asc',
-                    '',
-                    false,
-                    0,
-                    ''
-                );
+        async function editBusinessUnit() {
+            const selected = businessUnitGrid.getSelectedRecords();
+            if (selected.length !== 1)
+                return alert("Select one record to edit");
 
-                ownerDropdown = new ej.dropdowns.DropDownList({
-                    dataSource: owners || [],
-                    fields: { text: 'displayname', value: 'id' },
-                    placeholder: 'Select Owner',
-                    allowClear: true
-                });
-                ownerDropdown.appendTo('#bu_ownerid');
+            if (ownerDropdown) ownerDropdown.destroy();
 
-            } catch (error) {
-                console.error("Error loading owners:", error);
-            }
+            const modal = new bootstrap.Modal(businessUnitModal, {
+                focus: false
+            });
+            modal.show();
+
+            ej.base.enableRipple(true);
+
+            ownerDropdown = new ej.dropdowns.DropDownList({
+                dataSource: ownersData,
+                fields: { text: 'displayname', value: 'id' },
+                placeholder: 'Select Owner',
+                allowFiltering: true,
+                filterBarPlaceholder: 'Search owners...',
+                allowClear: true
+            });
+            ownerDropdown.appendTo('#bu_ownerid');
+
+            const record = selected[0];
+            editingBusinessUnitId = record.id;
+
+            ownerDropdown.value = record.ownerid;
+            document.getElementById('bu_name').value = record.name || '';
+
+            document.querySelector('#businessUnitModal .modal-title')
+                .innerText = "Edit Business Unit";
         }
 
-        // Open modal
-        function openBusinessUnitModal() {
-            if (!businessUnitModal) {
-                businessUnitModal = new bootstrap.Modal(document.getElementById('businessUnitModal'));
-            }
-            businessUnitModal.show();
-        }
-
-        // Clear form
-        function clearBusinessUnitForm() {
-            document.getElementById('businessUnitForm').reset();
-            if (ownerDropdown) {
-                ownerDropdown.value = null;
-            }
-        }
-
-        // Edit business unit
-        function editBusinessUnit() {
-            const selectedRecords = businessUnitGrid.getSelectedRecords();
-            if (selectedRecords.length !== 1) {
-                alert("Please select exactly one business unit to edit");
-                return;
-            }
-
-            const unit = selectedRecords[0];
-            editingBusinessUnitId = unit.id;
-
-            // Populate form fields
-            document.getElementById('bu_name').value = unit.name || '';
-            if (ownerDropdown) {
-                ownerDropdown.value = unit.ownerid || null;
-            }
-
-            document.querySelector('#businessUnitModal .modal-title').innerText = "Edit Business Unit";
-            openBusinessUnitModal();
-        }
-
-        // Save business unit
         async function saveBusinessUnit() {
-            try {
-                const name = document.getElementById('bu_name').value.trim();
-                const ownerid = ownerDropdown ? ownerDropdown.value : null;
+            if (!document.getElementById('bu_name').value.trim())
+                return alert("Business Unit name is required");
 
-                if (!name) {
-                    alert("Business Unit Name is required");
-                    return;
-                }
+            if (!ownerDropdown.value)
+                return alert("Please select an owner");
 
-                if (!ownerid) {
-                    alert("Please select an owner");
-                    return;
-                }
+            await DBHandler.submitRecordData('businessunit', {
+                name: document.getElementById('bu_name').value.trim(),
+                ownerid: ownerDropdown.value
+            }, editingBusinessUnitId, false);
 
-                await DBHandler.submitRecordData('businessunit', {
-                    name: name,
-                    ownerid: ownerid
-                }, editingBusinessUnitId, false);
-
-                businessUnitModal.hide();
-                editingBusinessUnitId = null;
-                loadBusinessUnits();
-                
-                alert("Business unit saved successfully!");
-
-            } catch (error) {
-                console.error("Error saving business unit:", error);
-                alert("Error saving business unit. Please try again.");
-            }
-        }
-
-        // Delete business unit
-        async function deleteBusinessUnit() {
-            const selectedRecords = businessUnitGrid.getSelectedRecords();
-            if (!selectedRecords.length) {
-                alert("Please select business unit(s) to delete");
-                return;
-            }
-
-            if (!confirm(`Delete selected ${selectedRecords.length} business unit(s)?`)) {
-                return;
-            }
-
-            try {
-                const ids = selectedRecords.map(unit => unit.id);
-                await deleteRecordData('businessunit', ids, true, true);
-                loadBusinessUnits();
-                alert("Business unit(s) deleted successfully!");
-            } catch (error) {
-                console.error("Error deleting business units:", error);
-                alert("Error deleting business units. Please try again.");
-            }
-        }
-
-        // Export to Excel
-        function exportToExcel() {
-            if (businessUnitGrid) {
-                businessUnitGrid.excelExport({
-                    fileName: `BusinessUnits_${new Date().toISOString().split('T')[0]}.xlsx`
-                });
-            }
-        }
-
-        // Export to PDF
-        function exportToPdf() {
-            if (businessUnitGrid) {
-                businessUnitGrid.pdfExport({
-                    fileName: `BusinessUnits_${new Date().toISOString().split('T')[0]}.pdf`,
-                    header: {
-                        fromTop: 0,
-                        height: 120,
-                        contents: [{
-                            type: 'Text',
-                            value: 'Business Unit Management',
-                            position: { x: 200, y: 50 },
-                            style: {
-                                textBrushColor: '#C25050',
-                                fontSize: 25
-                            }
-                        }]
-                    }
-                });
-            }
-        }
-
-        // Initialize on page load
-        $(document).ready(function () {
-            initBusinessUnitGrid();
-            initializeOwnerDropdown();
+            bootstrap.Modal.getInstance(businessUnitModal).hide();
             loadBusinessUnits();
+        }
+
+        $(document).ready(() => {
+            initBusinessUnitGrid();
+
+            $('#businessUnitModal').on('shown.bs.modal', function () {
+                $(document).off('focusin.modal');
+            });
         });
 
     </script>
 
     <style>
-        .card {
-            border: none;
-            border-radius: 10px;
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-        }
-        
-        .modal-header.bg-primary {
-            background-color: #007bff !important;
-        }
-        
-        .form-label {
-            font-weight: 600;
-            color: #495057;
-        }
-        
         #businessUnitGrid_toolbarItems {
-            height: auto !important;
-        }
-        
-        .e-toolbar .e-toolbar-item {
-            margin: 2px;
-        }
-
-        .text-danger {
-            color: #dc3545 !important;
+            height: 10px !important;
         }
     </style>
 
