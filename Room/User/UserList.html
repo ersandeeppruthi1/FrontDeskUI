@@ -102,6 +102,14 @@
                                     dbcolumnname="webresourceid" />
                             </div>
                         </div>
+
+                        <div class="col-md-6 col-12">
+                            <label>Business Unit</label>
+                            <div class="input-group-append">
+                                <input id="businessunitid" class="form-control" datatype="dropdown"
+                                    dbcolumnname="businessunitid" />
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -126,7 +134,8 @@
             const AppState = {
                 permissions: [],
                 menus: [],
-                webresources: []
+                webresources: [],
+                businessunits: []
             };
 
             /**********************************************************************
@@ -141,7 +150,8 @@
                 { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 150 },
                 { field: 'permissionid', visible: false },
                 { field: 'menuid', visible: false },
-                { field: 'webresourceid', visible: false }
+                { field: 'webresourceid', visible: false },
+                { field: 'businessunitid', visible: false }
             ];
 
             /**********************************************************************
@@ -247,7 +257,7 @@
 
                 try {
 
-                    const [permissions, menus, resources] = await Promise.all([
+                    const [permissions, menus, resources, businessunits] = await Promise.all([
 
                         DBHandler.fetchEntityRecords(
                             'masterpermission',
@@ -272,6 +282,15 @@
                             'asc',
                             'isactive = 1',
                             true, 0, ''
+                        ),
+
+                        DBHandler.fetchEntityRecords(
+                            'businessunit',
+                            'id,name',
+                            'name',
+                            'asc',
+                            'isactive = 1',
+                            true, 0, ''
                         )
 
                     ]);
@@ -279,6 +298,7 @@
                     AppState.permissions = permissions || [];
                     AppState.menus = menus || [];
                     AppState.webresources = resources || [];
+                    AppState.businessunits = businessunits || [];
 
                 }
                 catch (err) {
@@ -294,9 +314,11 @@
                 destroyDropdown('#permissionid');
                 destroyDropdown('#menuid');
                 destroyDropdown('#webresourceid');
+                destroyDropdown('#businessunitid');
                 createDropdown('#permissionid', AppState.permissions, true);
                 createDropdown('#menuid', AppState.menus, true);
                 createDropdown('#webresourceid', AppState.webresources, true);
+                createDropdown('#businessunitid', AppState.businessunits, true);
             }
 
             function destroyDropdown(selector) {
@@ -357,7 +379,8 @@
                         createdon: normalizeDate(u.createdon),
                         permissionid: u.permissionid,
                         menuid: u.menuid,
-                        webresourceid: u.webresourceid
+                        webresourceid: u.webresourceid,
+                        businessunitid: u.businessunitid
                     }));
 
                 }
@@ -390,6 +413,7 @@
                 setDropdownValue('permissionid', user.permissionid);
                 setDropdownValue('menuid', user.menuid);
                 setDropdownValue('webresourceid', user.webresourceid);
+                setDropdownValue('businessunitid', user.businessunitid);
 
             }
 
@@ -462,6 +486,7 @@
                 const permissionId = getDropdownValue('permissionid');
                 const menuId = getDropdownValue('menuid');
                 const webResourceId = getDropdownValue('webresourceid');
+                const businessUnitId = getDropdownValue('businessunitid');
 
                 if (!displayName || !userName || !permissionId || !menuId)
                     return alert("Fill required fields");
@@ -489,6 +514,7 @@
                         permissionid: permissionId,
                         menuid: menuId,
                         webresourceid: webResourceId,
+                        businessunitid: businessUnitId,
                         permissionjson: permission?.[0]?.permissionjson || "{}",
                         menujson: menu?.[0]?.menujson || "{}",
                         token: crypto.randomUUID(),
@@ -586,6 +612,7 @@
                 setDropdownValue('permissionid', null);
                 setDropdownValue('menuid', null);
                 setDropdownValue('webresourceid', null);
+                setDropdownValue('businessunitid', null);
 
             }
 
