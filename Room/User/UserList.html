@@ -427,16 +427,13 @@
             async function deleteUser() {
 
                 const selected = grid.getSelectedRecords();
+                if (!selected.length) return alert("Select user(s) to delete");
 
-                if (!selected.length)
-                    return alert("Select user(s) to delete");
+                if (!confirm(`Delete ${selected.length} user(s)?`)) return;
 
-                if (!confirm(`Delete ${selected.length} users?`))
-                    return;
+                const ids = selected.map(r => r.id);
 
-                for (const record of selected) {
-                    await deleteRecordData('users', record.id, false, true);
-                }
+                await deleteRecordData('users', ids, true, true);
 
                 loadUserGrid();
 
