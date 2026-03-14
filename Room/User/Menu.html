@@ -97,28 +97,32 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row mb-3">
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
+                                            <label for="menuWebResource">Web Resource (Optional):</label>
+                                            <input id="menuWebResource" />
+                                        </div>
+                                        <div class="col-md-4">
                                             <label for="menuItemName">Menu Item Name:</label>
                                             <input id="menuItemName" type="text" class="form-control"
                                                 placeholder="Enter menu item name" />
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <label for="menuUrl">URL/Route:</label>
                                             <input id="menuUrl" type="text" class="form-control"
                                                 placeholder="Enter URL or route" />
                                         </div>
-                                        <div class="col-md-2">
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
                                             <label for="menuIcon">Icon:</label>
                                             <input id="menuIcon" type="text" class="form-control"
                                                 placeholder="fa-home" />
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-4">
                                             <label for="parentMenuSelector">Parent Menu:</label>
-                                            <select id="parentMenuSelector" class="form-select">
-                                                <option value="">Root Menu</option>
-                                            </select>
+                                            <input id="parentMenuSelector" />
                                         </div>
-                                        <div class="col-md-2">
+                                        <div class="col-md-4">
                                             <label for="sortOrder">Sort Order:</label>
                                             <input id="sortOrder" type="number" class="form-control" placeholder="1"
                                                 min="1" max="999" />
@@ -205,6 +209,42 @@
     </div>
 
     <script>
+        let parentMenuDropdown = new ej.dropdowns.DropDownList({
+            dataSource: [{ id: '', name: 'Root Menu' }],
+            fields: { text: 'name', value: 'id' },
+            placeholder: 'Root Menu',
+            value: ''
+        });
+        parentMenuDropdown.appendTo('#parentMenuSelector');
+
+        let webResourcesData = [];
+        let webResourceDropdown = new ej.dropdowns.DropDownList({
+            dataSource: [],
+            fields: { text: 'name', value: 'id' },
+            placeholder: 'Select Web Resource',
+            allowFiltering: true,
+            filterBarPlaceholder: 'Search...',
+            filterType: 'Contains',
+            ignoreCase: true,
+            change: function (args) {
+                if (args.value) {
+                    const res = webResourcesData.find(r => r.id == args.value);
+                    if (res) {
+                        document.getElementById('menuItemName').value = res.name;
+                        let typeStr = 'html';
+                        switch (parseInt(res.resourcetype)) {
+                            case 1: typeStr = 'javascript'; break;
+                            case 2: typeStr = 'html'; break;
+                            case 3: typeStr = 'css'; break;
+                            case 4: typeStr = 'json'; break;
+                        }
+                        document.getElementById('menuUrl').value = `/main.html?type=${typeStr}&webresourceid=${res.id}`;
+                    }
+                }
+            }
+        });
+        webResourceDropdown.appendTo('#menuWebResource');
+
         $(document).ready(function () {
             // Load users for owner dropdown
             DBHandler.fetchEntityRecords(
@@ -222,6 +262,21 @@
                 });
                 listObj.appendTo('#ownerId');
             });
+
+            // Load web resources
+            DBHandler.fetchEntityRecords(
+                'webresource',
+                'id,name,resourcetype',
+                'name',
+                'asc',
+                'isactive = 1',
+                false,
+                0
+            ).then(resources => {
+                webResourcesData = resources || [];
+                webResourceDropdown.dataSource = webResourcesData;
+                webResourceDropdown.dataBind();
+            });
         });
 
         let menuItems = [];
@@ -231,7 +286,7 @@
             const menuItemName = document.getElementById('menuItemName').value.trim();
             const menuUrl = document.getElementById('menuUrl').value.trim();
             const menuIcon = document.getElementById('menuIcon').value.trim();
-            const parentMenuId = document.getElementById('parentMenuSelector').value;
+            const parentMenuId = parentMenuDropdown.value;
             const sortOrder = document.getElementById('sortOrder').value || menuItems.length + 1;
 
             if (!menuItemName) {
@@ -252,10 +307,11 @@
             menuItems.push(newMenuItem);
 
             // Clear input fields
+            webResourceDropdown.value = null;
             document.getElementById('menuItemName').value = '';
             document.getElementById('menuUrl').value = '';
             document.getElementById('menuIcon').value = '';
-            document.getElementById('parentMenuSelector').value = '';
+            parentMenuDropdown.value = '';
             document.getElementById('sortOrder').value = '';
 
             renderMenuItems();
@@ -363,7 +419,7 @@
             document.getElementById('menuItemName').value = menuItem.name;
             document.getElementById('menuUrl').value = menuItem.url;
             document.getElementById('menuIcon').value = menuItem.icon;
-            document.getElementById('parentMenuSelector').value = menuItem.parentId || '';
+            parentMenuDropdown.value = menuItem.parentId || '';
             document.getElementById('sortOrder').value = menuItem.sortOrder;
 
             // Remove the item so it can be re-added with changes
@@ -371,23 +427,19 @@
         }
 
         function updateParentMenuSelector() {
-            const selector = document.getElementById('parentMenuSelector');
-            const currentValue = selector.value;
+            const currentValue = parentMenuDropdown.value;
 
-            // Clear existing options except root
-            selector.innerHTML = '<option value="">Root Menu</option>';
-
-            // Add menu items as parent options
-            menuItems.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.id;
-                option.textContent = item.name;
-                selector.appendChild(option);
-            });
+            const dataSource = [{ id: '', name: 'Root Menu' }].concat(
+                menuItems.map(item => ({ id: item.id, name: item.name }))
+            );
+            parentMenuDropdown.dataSource = dataSource;
+            parentMenuDropdown.dataBind();
 
             // Restore selection if it still exists
             if (currentValue && menuItems.find(item => item.id === currentValue)) {
-                selector.value = currentValue;
+                parentMenuDropdown.value = currentValue;
+            } else {
+                parentMenuDropdown.value = '';
             }
         }
 
