@@ -257,6 +257,7 @@
                 ej.grids.Sort,
                 ej.grids.Filter,
                 ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
                 ej.grids.ExcelExport,
                 ej.grids.PdfExport
             );
@@ -267,6 +268,7 @@
                 allowPaging: true,
                 allowSorting: true,
                 allowFiltering: true,
+                showColumnChooser: true,
                 filterSettings: { type: 'Excel' },
                 pageSettings: { pageSize: 15 },
                 allowExcelExport: true,
@@ -274,6 +276,7 @@
 
                 toolbar: [
                     'Search',
+                    'ColumnChooser',
                     { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
                     { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' },
                     { text: '', prefixIcon: 'e-excelexport e-icons', id: 'excelexport', tooltipText: 'Export Excel' },

@@ -115,32 +115,56 @@
             </div>
         </div>
 
+        <!-- Edit Donation Modal -->
+        <div class="modal fade" id="editDonationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Donation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="editDonationAmount" class="form-label">Donation Amount</label>
+                            <input type="number" id="editDonationAmount" class="form-control" min="0" step="0.01">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDonationReference" class="form-label">Reference</label>
+                            <input type="text" id="editDonationReference" class="form-control" maxlength="250">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="saveDonationEdit()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
 
         let donationGrid;
+        let editDonationModal;
+        let editingDonationId = null;
         let totalDonationAmount = 0;
 
         // Grid columns configuration
         var donationColumns = [
+            { type: 'checkbox', width: 50 },
             { field: 'srno', headerText: 'S.No', width: 70, textAlign: 'Right' },
-            { field: 'bookingnumber', headerText: 'Booking #', width: 150 },
+            { field: 'bookingnumber', headerText: 'Booking #', width: 150,visible: false},
             { field: 'displayname', headerText: 'Guest Name', width: 180 },
             { field: 'mobilenumber', headerText: 'Mobile', width: 130 },
-            { 
-                field: 'checkindatetime', 
-                headerText: 'Check-In Date', 
-                type: 'date',
-                format: { type: 'dateTime', format: 'dd/MMM/yyyy' },
-                width: 140 
-            },
+            { field: 'checkindatetime',headerText: 'Check-In Date', type: 'date',format: { type: 'dateTime', format: 'dd/MMM/yyyy' },width: 140 ,visible: false },
             { 
                 field: 'checkoutdatetime', 
                 headerText: 'Check-Out Date', 
                 type: 'date',
                 format: { type: 'dateTime', format: 'dd/MMM/yyyy' },
-                width: 140 
+                width: 140 ,
+                visible: false
             },
             { 
                 field: 'donationamountformatted', 
@@ -148,16 +172,17 @@
                 width: 150, 
                 textAlign: 'Right'
             },
-            { field: 'referencedetail', headerText: 'Reference', width: 150 },
+            { field: 'referencedetail', headerText: 'Reference', width: 150 ,visible: false },
             { 
                 field: 'createdon', 
                 headerText: 'Created On', 
                 type: 'date',
                 format: { type: 'dateTime', format: 'dd/MMM/yyyy' },
-                width: 130 
+                width: 130 ,
+                visible: false
             },
-            { field: 'id', visible: false },
-            { field: 'address', visible: false }
+            { field: 'id', visible: false,visible: false },
+            { field: 'address', visible: false,visible: false }
         ];
 
         // Initialize Grid
@@ -168,6 +193,7 @@
                 ej.grids.Sort,
                 ej.grids.Filter,
                 ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
                 ej.grids.ExcelExport,
                 ej.grids.PdfExport,
                 ej.grids.Aggregate
@@ -179,6 +205,7 @@
                 allowPaging: true,
                 allowSorting: true,
                 allowFiltering: true,
+                showColumnChooser: true,
                 filterSettings: { type: 'Excel' },
                 pageSettings: { pageSize: 20 },
                 allowExcelExport: true,
@@ -186,6 +213,9 @@
 
                 toolbar: [
                     'Search',
+                    'ColumnChooser',
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' },
                     { text: '', prefixIcon: 'e-excelexport e-icons', id: 'excelexport', tooltipText: 'Export Excel' },
                     { text: '', prefixIcon: 'e-pdfexport e-icons', id: 'pdfexport', tooltipText: 'Export PDF' },
                     { text: '', prefixIcon: 'e-refresh e-icons', id: 'refresh', tooltipText: 'Refresh' }
@@ -202,6 +232,14 @@
                 }],
 
                 toolbarClick: function (args) {
+
+                    if (args.item.id === 'edit') {
+                        editDonation();
+                    }
+
+                    if (args.item.id === 'delete') {
+                        deleteDonation();
+                    }
 
                     if (args.item.id === 'excelexport') {
                         exportToExcel();
@@ -222,6 +260,76 @@
             });
 
             donationGrid.appendTo('#donationGrid');
+        }
+
+        // Edit selected donation
+        function editDonation() {
+            const selectedRecords = donationGrid.getSelectedRecords();
+            if (selectedRecords.length !== 1) {
+                alert("Please select exactly one record to edit");
+                return;
+            }
+
+            const record = selectedRecords[0];
+            editingDonationId = record.id;
+
+            document.getElementById('editDonationAmount').value = record.donationamount || 0;
+            document.getElementById('editDonationReference').value = record.referencedetail || '';
+
+            if (!editDonationModal) {
+                editDonationModal = new bootstrap.Modal(document.getElementById('editDonationModal'));
+            }
+
+            editDonationModal.show();
+        }
+
+        // Save donation edit
+        async function saveDonationEdit() {
+            if (!editingDonationId) return;
+
+            try {
+                const donationAmount = parseFloat(document.getElementById('editDonationAmount').value) || 0;
+                const referenceDetail = document.getElementById('editDonationReference').value.trim();
+
+                await DBHandler.submitRecordData('roombooking', {
+                    donationamount: donationAmount,
+                    referencedetail: referenceDetail
+                }, editingDonationId, true);
+
+                editDonationModal.hide();
+                editingDonationId = null;
+                await loadDonations();
+
+                alert("Donation updated successfully!");
+            } catch (error) {
+                console.error("Error updating donation:", error);
+                alert("Error updating donation. Please try again.");
+            }
+        }
+
+        // Delete selected donations (clear donation amount)
+        async function deleteDonation() {
+            const selectedRecords = donationGrid.getSelectedRecords();
+            if (!selectedRecords.length) {
+                alert("Please select record(s) to delete");
+                return;
+            }
+
+            if (!confirm(`Delete selected ${selectedRecords.length} donation record(s)?`)) return;
+
+            try {
+                for (const record of selectedRecords) {
+                    await DBHandler.submitRecordData('roombooking', {
+                        donationamount: 0
+                    }, record.id, true);
+                }
+
+                await loadDonations();
+                alert("Selected donation record(s) deleted successfully!");
+            } catch (error) {
+                console.error("Error deleting donations:", error);
+                alert("Error deleting donations. Please try again.");
+            }
         }
 
         // Load donation data
