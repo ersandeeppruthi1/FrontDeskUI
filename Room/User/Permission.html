@@ -1011,6 +1011,54 @@
         });
 
 
+        async function updateUserPermissionJSON(permissionId, newPermissionJSON) {
+            try {
+                if (!permissionId) {
+                    // For new permission, get the ID from the recently created permission
+                    const newPermissions = await DBHandler.fetchEntityRecords(
+                        'masterpermission',
+                        'id',
+                        'createdon',
+                        'desc',
+                        '',
+                        false,
+                        1,
+                        ''
+                    );
+
+                    if (newPermissions && newPermissions.length > 0) {
+                        permissionId = newPermissions[0].id;
+                    }
+                }
+
+                if (permissionId) {
+                    // Get all users that use this permission
+                    const usersWithPermission = await DBHandler.fetchEntityRecords(
+                        'users',
+                        'id',
+                        'id',
+                        'desc',
+                        `permissionid = '${permissionId}'`,
+                        false,
+                        0,
+                        ''
+                    );
+
+                    // Update permissionjson for each user
+                    for (const user of usersWithPermission) {
+                        await DBHandler.submitRecordData('users', {
+                            permissionjson: newPermissionJSON
+                        }, user.id, false);
+                    }
+
+                    console.log(`Updated permissionjson for ${usersWithPermission.length} users`);
+                }
+            } catch (error) {
+                console.error('Error updating user permissionjson:', error);
+                // Don't show alert to user as this is a background operation
+            }
+        }
+
         async function savePermission() {
             const btn = event.target;
             const permissionName = document.getElementById('permissionName').value.trim();
@@ -1055,6 +1103,9 @@
                     permissionjson: permissionJSON,
                     businessunitid: businessUnitId,
                 }, editingId, false);
+
+                // Update permissionjson in all user records that use this permission
+                await updateUserPermissionJSON(editingId, permissionJSON);
 
                 await loadPermissionGrid();
 
