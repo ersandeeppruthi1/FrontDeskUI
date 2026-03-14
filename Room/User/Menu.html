@@ -956,9 +956,9 @@
                     const usersWithMenu = await DBHandler.fetchEntityRecords(
                         'users',
                         'id',
-                        '',
-                        '',
-                        `menuid = ${menuId}`,
+                        'id',
+                        'desc',
+                        `menuid = '${menuId}'`,
                         false,
                         0,
                         ''
