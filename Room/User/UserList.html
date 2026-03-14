@@ -493,7 +493,7 @@
                         permissionjson: permission?.[0]?.permissionjson || "{}",
                         menujson: menu?.[0]?.menujson || "{}",
                         token: crypto.randomUUID(),
-                        defaultpage: "user",
+                        defaultpage: webResourceId ? `/main.html?type=html&webresourceid=${webResourceId}` : "/main.html",
                         disableduser: 0
                     };
 

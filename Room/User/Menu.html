@@ -86,7 +86,8 @@
                         </div>
                         <div class="col-md-6">
                             <label>Business Unit<span style="color: red;">*</span>:</label>
-                            <input id="businessUnitId" class="form-control" datatype="dropdown" dbcolumnname="businessunitid" />
+                            <input id="businessUnitId" class="form-control" datatype="dropdown"
+                                dbcolumnname="businessunitid" />
                         </div>
 
                         <div class="col-md-12">
@@ -945,7 +946,7 @@
                         1,
                         ''
                     );
-                    
+
                     if (newMenus && newMenus.length > 0) {
                         menuId = newMenus[0].id;
                     }
@@ -1049,6 +1050,27 @@
                     btn.innerHTML = '<i class="fa fa-save"></i> Save Menu';
                 }
             }
+        }
+
+        function editMenuItem(menuId) {
+            const index = menuItems.findIndex(item => item.id === menuId);
+            if (index === -1) return;
+
+            const menuItem = menuItems[index];
+
+            // Fill form fields
+            document.getElementById('menuItemName').value = menuItem.name;
+            document.getElementById('menuUrl').value = menuItem.url;
+            document.getElementById('menuIcon').value = menuItem.icon;
+            parentMenuDropdown.value = menuItem.parentId || '';
+            document.getElementById('sortOrder').value = menuItem.sortOrder;
+
+            // Remove item WITHOUT confirmation
+            menuItems.splice(index, 1);
+
+            renderMenuItems();
+            updateParentMenuSelector();
+            updateMenuJSON();
         }
 
     </script>
