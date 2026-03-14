@@ -414,7 +414,7 @@
                     return;
                 }
                 for (const record of selectedRecords) {
-                    await deleteRecordData('masteruser', record.id, false, true);
+                    await deleteRecordData('users', record.id, false, true);
                 }
                 loadUserGrid();
             }
@@ -445,9 +445,9 @@
                 try {
 
                     const users = await DBHandler.fetchEntityRecords(
-                        'masteruser',
-                        'masteruser.*, masteruser.displayname as DisplayName',
-                        'masteruser.createdon',
+                        'users',
+                        'users.*, users.displayname as DisplayName',
+                        'users.createdon',
                         'desc',
                         filter, true,
                         0,
@@ -539,7 +539,7 @@
                         btn.innerText = "Saving...";
                     }
 
-                    await DBHandler.submitRecordData('masteruser', {
+                    await DBHandler.submitRecordData('users', {
                         username: userName,
                         displayname: displayName,
                         password: password,
