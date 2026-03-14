@@ -931,6 +931,54 @@
             });
         });
 
+        async function updateUserMenuJSON(menuId, newMenuJSON) {
+            try {
+                if (!menuId) {
+                    // For new menu, get the ID from the recently created menu
+                    const newMenus = await DBHandler.fetchEntityRecords(
+                        'mastermenu',
+                        'id',
+                        'createdon',
+                        'desc',
+                        '',
+                        false,
+                        1,
+                        ''
+                    );
+                    
+                    if (newMenus && newMenus.length > 0) {
+                        menuId = newMenus[0].id;
+                    }
+                }
+
+                if (menuId) {
+                    // Get all users that use this menu
+                    const usersWithMenu = await DBHandler.fetchEntityRecords(
+                        'users',
+                        'id',
+                        '',
+                        '',
+                        `menuid = ${menuId}`,
+                        false,
+                        0,
+                        ''
+                    );
+
+                    // Update menujson for each user
+                    for (const user of usersWithMenu) {
+                        await DBHandler.submitRecordData('users', {
+                            menujson: newMenuJSON
+                        }, user.id, false);
+                    }
+
+                    console.log(`Updated menujson for ${usersWithMenu.length} users`);
+                }
+            } catch (error) {
+                console.error('Error updating user menujson:', error);
+                // Don't show alert to user as this is a background operation
+            }
+        }
+
         async function saveMenu() {
             const btn = event.target;
             const menuName = document.getElementById('menuName').value.trim();
@@ -967,6 +1015,9 @@
                     businessunitid: businessUnitId,
                     menuhtml: '12',
                 }, editingId, false);
+
+                // Update menujson in all user records that use this menu
+                await updateUserMenuJSON(editingId, menuJSON);
 
                 await loadMenuGrid();
 
