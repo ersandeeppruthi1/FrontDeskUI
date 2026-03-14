@@ -84,13 +84,9 @@
                     <form id="businessUnitForm">
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label>Business Unit Name <span class="text-danger">*</span></label>
                                 <input type="text" id="bu_name" class="form-control" required />
-                            </div>
-                            <div class="col-md-6">
-                                <label>Owner <span class="text-danger">*</span></label>
-                                <input type="text" id="bu_ownerid" class="form-control" required />
                             </div>
                         </div>
 
@@ -110,8 +106,6 @@
 
         let businessUnitGrid;
         let editingBusinessUnitId = null;
-        let ownerDropdown;
-        let ownersData = [];
 
         async function initBusinessUnitGrid() {
             ej.grids.Grid.Inject(
@@ -167,10 +161,8 @@
                 columns: [
                     { type: 'checkbox', width: 50 },
                     { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
-                    { field: 'name', headerText: 'Business Unit Name', width: 300 },
-                    { field: 'ownername', headerText: 'Owner', width: 200 },
-                    { field: 'id', visible: false },
-                    { field: 'ownerid', visible: false }
+                    { field: 'name', headerText: 'Business Unit Name', width: 400 },
+                    { field: 'id', visible: false }
                 ],
 
                 toolbarClick: async function (args) {
@@ -201,27 +193,10 @@
                         editingBusinessUnitId = null;
                         document.getElementById('businessUnitForm').reset();
 
-                        // Destroy if already exists
-                        if (ownerDropdown) ownerDropdown.destroy();
-
                         const modal = new bootstrap.Modal(businessUnitModal, {
                             focus: false
                         });
                         modal.show();
-
-                        ej.base.enableRipple(true);
-
-                        ownerDropdown = new ej.dropdowns.DropDownList({
-                            dataSource: ownersData,
-                            fields: { text: 'displayname', value: 'id' },
-                            placeholder: 'Select Owner',
-                            allowFiltering: true,
-                            filterBarPlaceholder: 'Search owners...',
-                            allowClear: true,
-                            ignoreCase: true,
-                            filterType: 'Contains'
-                        });
-                        ownerDropdown.appendTo('#bu_ownerid');
 
                         document.querySelector('#businessUnitModal .modal-title')
                             .innerText = "Add Business Unit";
@@ -243,38 +218,25 @@
             businessUnitGrid.appendTo('#businessUnitGrid');
 
             await loadBusinessUnits();
-            await loadOwnersData();
             businessUnitGrid.enableToolbarItems(['newBusinessUnit'], true);
         }
 
-        async function loadOwnersData() {
-            ownersData = await DBHandler.fetchEntityRecords(
-                'masteruser',
-                'id, displayname',
-                'displayname',
-                'asc'
-            ) || [];
-        }
-
         async function loadBusinessUnits() {
-            const joinCondition = "LEFT JOIN masteruser ON masteruser.id = businessunit.ownerid";
-
             const data = await DBHandler.fetchEntityRecords(
                 'businessunit',
-                'businessunit.*, masteruser.displayname as ownername',
+                'businessunit.*',
                 'businessunit.name',
                 'asc',
                 '',
                 true,
                 0,
-                joinCondition
+                ''
             );
 
             let sr = 1;
             const formattedData = (data || []).map(unit => ({
                 ...unit,
-                srno: sr++,
-                ownername: unit.ownername || 'No Owner Assigned'
+                srno: sr++
             }));
 
             businessUnitGrid.dataSource = formattedData;
@@ -285,31 +247,14 @@
             if (selected.length !== 1)
                 return alert("Select one record to edit");
 
-            if (ownerDropdown) ownerDropdown.destroy();
-
             const modal = new bootstrap.Modal(businessUnitModal, {
                 focus: false
             });
             modal.show();
 
-            ej.base.enableRipple(true);
-
-            ownerDropdown = new ej.dropdowns.DropDownList({
-                dataSource: ownersData,
-                fields: { text: 'displayname', value: 'id' },
-                placeholder: 'Select Owner',
-                allowFiltering: true,
-                filterBarPlaceholder: 'Search owners...',
-                allowClear: true,
-                ignoreCase: true,
-                filterType: 'Contains'
-            });
-            ownerDropdown.appendTo('#bu_ownerid');
-
             const record = selected[0];
             editingBusinessUnitId = record.id;
 
-            ownerDropdown.value = record.ownerid;
             document.getElementById('bu_name').value = record.name || '';
 
             document.querySelector('#businessUnitModal .modal-title')
@@ -320,12 +265,8 @@
             if (!document.getElementById('bu_name').value.trim())
                 return alert("Business Unit name is required");
 
-            if (!ownerDropdown.value)
-                return alert("Please select an owner");
-
             await DBHandler.submitRecordData('businessunit', {
-                name: document.getElementById('bu_name').value.trim(),
-                ownerid: ownerDropdown.value
+                name: document.getElementById('bu_name').value.trim()
             }, editingBusinessUnitId, false);
 
             bootstrap.Modal.getInstance(businessUnitModal).hide();
