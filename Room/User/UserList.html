@@ -562,8 +562,12 @@
                 const permissionId = document.getElementById('permissionid').ej2_instances[0].value;
                 const menuId = document.getElementById('menuid').ej2_instances[0].value;
 
-                if (!displayName || !userName || !password || !permissionId || !menuId)
+                // For new users, password is required. For editing, it's optional
+                if (!displayName || !userName || !permissionId || !menuId)
                     return alert("Please fill all required fields");
+                
+                if (!editingId && !password) // New user without password
+                    return alert("Password is required for new users");
 
                 try {
 
@@ -579,23 +583,25 @@
                         "id='" + menuId + "'"
                     );
 
-                    await DBHandler.submitRecordData('users', {
-
+                    // Prepare user data object
+                    const userData = {
                         username: userName,
                         displayname: displayName,
-                        password: password,
-
                         permissionid: permissionId,
                         menuid: menuId,
-
                         permissionjson: permission?.[0]?.permissionjson || "{}",
                         menujson: menu?.[0]?.menujson || "{}",
-
                         token: crypto.randomUUID(),
                         defaultpage: "user",
                         disableduser: 0
+                    };
 
-                    }, editingId, false);
+                    // Only include password if it's provided
+                    if (password) {
+                        userData.password = password;
+                    }
+
+                    await DBHandler.submitRecordData('users', userData, editingId, false);
 
                     await loadUserGrid();
                     bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
