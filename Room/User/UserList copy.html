@@ -82,9 +82,14 @@
                         <div class="col-md-6">
                             <label>User Name<span style="color: red;">*</span>:</label>
                             <div class="input-group">
-                                <input class="form-control" id="userName" dbcolumnname="userName" onfocusout="validateUsername()" />
+                                <input class="form-control" id="userName" dbcolumnname="userName" />
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-primary" id="go-button"
+                                        onclick="fetchUserByUsername(document.getElementById('userName').value)">
+                                        <i class="fas fa-arrow-right"></i> <!-- Go icon -->
+                                    </button>
+                                </div>
                             </div>
-                            <div id="usernameMessage" class="mt-1" style="font-size: 12px;"></div>
                         </div>
                         <div class="col-md-6">
                             <label>Display Name<span style="color: red;">*</span>:</label>
@@ -93,6 +98,14 @@
                         <div class="col-md-6">
                             <label>Password<span style="color: red;">*</span>:</label>
                             <input type="password" class="form-control" id="password" dbcolumnname="password" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Is System Administrator</label>
+                            <select id="isSystemAdministrator" class="form-control">
+                                <option value="">Select Type</option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
                         </div>
 
                         <div class="col-md-6 col-12">
@@ -178,7 +191,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="saveUserBtn" onclick="saveUser()" disabled>Save User</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">Save User</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -195,6 +208,7 @@
                 { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
                 { field: 'username', headerText: 'User Name', width: 130 },
                 { field: 'displayname', headerText: 'Display Name', width: 220 },
+                { field: 'issystemadministrator', headerText: 'Is System Administrator', width: 220 },
                 { field: 'id', headerText: 'id', width: 130, visible: false },
                 { field: 'createdon', headerText: 'Createdon', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
                 { field: 'modifiedon', headerText: 'Modifiedon', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
@@ -348,31 +362,25 @@
                 const record = selectedRecords[0];
                 editingId = record.id;
 
+                document.getElementById('isSystemAdministrator').value = record.issystemadministrator;
+                document.getElementById('displayName').value = record.displayname;
+                document.getElementById('password').value = record.password;
+                document.getElementById('permissionid').ej2_instances[0].value = record.permissionid;
+                document.getElementById('menuid').ej2_instances[0].value = record.menuid;
+
+
+                document.getElementById('userName').value = record.username;
+                if (record.username && record.username != "") {
+                    fetchUserByUsername(record.username);
+                }
+
+                // document.getElementById('appointmentDate').ej2_instances[0].value = record.treatmentdate;
+                // document.getElementById('nextAppointment').ej2_instances[0].value = record.nextappointment;
+
                 // ✅ Update modal title
                 document.querySelector('#userModal .modal-title').innerText = "Edit User";
 
-                // Enable save button for editing existing user
-                document.getElementById('saveUserBtn').disabled = false;
-                document.getElementById('usernameMessage').innerHTML = '';
-
-                // First open modal to initialize dropdowns
-                openUserModal(true);
-
-                // Set basic field values immediately
-                document.getElementById('userName').value = record.username || '';
-                document.getElementById('displayName').value = record.displayname || '';
-                document.getElementById('password').value = record.password || '';
-
-                // Set dropdown values after a small delay to ensure they're initialized
-                setTimeout(() => {
-                    if (document.getElementById('permissionid').ej2_instances && document.getElementById('permissionid').ej2_instances[0]) {
-                        document.getElementById('permissionid').ej2_instances[0].value = record.permissionid;
-                    }
-                    if (document.getElementById('menuid').ej2_instances && document.getElementById('menuid').ej2_instances[0]) {
-                        document.getElementById('menuid').ej2_instances[0].value = record.menuid;
-                    }
-                }, 100);
-
+                openUserModal();
             }
 
             function toggleEditButton() {
@@ -399,73 +407,12 @@
             }
 
 
-            function openUserModal(isEdit = false) {
+            function openUserModal() {
                 const modal = new bootstrap.Modal(
                     document.getElementById('userModal'),
                     { backdrop: 'static', keyboard: false }
                 );
-                
-                // Only reset form and state for new user
-                if (!isEdit) {
-                    editingId = null;
-                    document.querySelector('#userModal .modal-title').innerText = "Add New User";
-                    
-                    // Clear form fields
-                    document.getElementById('userName').value = '';
-                    document.getElementById('displayName').value = '';
-                    document.getElementById('password').value = '';
-                    if (document.getElementById('permissionid').ej2_instances && document.getElementById('permissionid').ej2_instances[0]) {
-                        document.getElementById('permissionid').ej2_instances[0].value = null;
-                    }
-                    if (document.getElementById('menuid').ej2_instances && document.getElementById('menuid').ej2_instances[0]) {
-                        document.getElementById('menuid').ej2_instances[0].value = null;
-                    }
-                    
-                    // Reset save button state
-                    document.getElementById('saveUserBtn').disabled = true;
-                    document.getElementById('usernameMessage').innerHTML = '';
-                }
-                
                 modal.show();
-            }
-
-            async function validateUsername() {
-                const userName = document.getElementById('userName').value.trim();
-                const messageDiv = document.getElementById('usernameMessage');
-                const saveBtn = document.getElementById('saveUserBtn');
-                
-                if (!userName) {
-                    messageDiv.innerHTML = '';
-                    saveBtn.disabled = true;
-                    return;
-                }
-                
-                try {
-                    // Check if username already exists in database
-                    const existingUser = await DBHandler.fetchEntityRecord(
-                        "users",
-                        "id,username",
-                        `username='${userName}'`
-                    );
-                    
-                    if (existingUser && existingUser.length > 0) {
-                        // If editing and the existing user is the same as current user, allow it
-                        if (editingId && existingUser[0].id == editingId) {
-                            messageDiv.innerHTML = '<span style="color: blue;">Current user</span>';
-                            saveBtn.disabled = false;
-                        } else {
-                            messageDiv.innerHTML = '<span style="color: red;">Username already exists in database</span>';
-                            saveBtn.disabled = true;
-                        }
-                    } else {
-                        messageDiv.innerHTML = '<span style="color: green;">Username is available</span>';
-                        saveBtn.disabled = false;
-                    }
-                } catch (error) {
-                    console.error('Error validating username:', error);
-                    messageDiv.innerHTML = '<span style="color: orange;">Error checking username</span>';
-                    saveBtn.disabled = true;
-                }
             }
 
             function actionTemplate() {
@@ -505,6 +452,7 @@
                         username: a.username,
                         createdon: normalizeDate(a.createdon),
                         modifiedon: normalizeDate(a.modifiedon),
+                        issystemadministrator: a.issystemadministrator == 1 ? "Yes" : "No",
                         permissionid: a.permissionid,
                         menuid: a.menuid,
                     }));
@@ -559,6 +507,7 @@
                 const displayName = document.getElementById('displayName').value.trim();
                 const userName = document.getElementById('userName').value.trim();
                 const password = document.getElementById('password').value.trim();
+                const isSystemAdministrator = document.getElementById('isSystemAdministrator').value;
                 const permissionId = document.getElementById('permissionid').ej2_instances[0].value;
                 const menuId = document.getElementById('menuid').ej2_instances[0].value;
 
@@ -584,6 +533,7 @@
                         username: userName,
                         displayname: displayName,
                         password: password,
+                        issystemadministrator: isSystemAdministrator,
 
                         permissionid: permissionId,
                         menuid: menuId,
@@ -618,8 +568,8 @@
 
                     // Fetch records from masteruser entity
                     let data = await DBHandler.fetchEntityRecord(
-                        "users",                          // entity/table name
-                        "id,username,displayname,permissionid,menuid", // columns you want
+                        "masteruser",                          // entity/table name
+                        "id,username,displayname,issystemadministrator,permissionid,menuid", // columns you want
                         filter                                 // filter condition
                     );
 
@@ -628,6 +578,7 @@
                         const userRecord = data[0]
                         console.log(userRecord)
                         document.getElementById("displayName").value = userRecord.displayname;
+                        document.getElementById("isSystemAdministrator").value = userRecord.issystemadministrator;
                         document.getElementById("password").value = userRecord.password;
                         document.getElementById("permissionid").value = userRecord.permissionid;
                         document.getElementById("menuid").value = userRecord.menuid;
