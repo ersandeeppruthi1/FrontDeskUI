@@ -94,6 +94,11 @@
                                 </select>
                             </div>
 
+                            <div class="col-md-6">
+                                <label>Lookup Entity</label>
+                                <input type="text" id="wr_lookupentityid" class="form-control" />
+                            </div>
+
                             <div class="col-md-12">
                                 <label>Resource Text</label>
                                 <textarea id="wr_resourcetext" class="form-control" rows="12"
@@ -116,6 +121,8 @@
 
         let grid;
         let editingId = null;
+        let entitiesData = [];
+        let lookupEntityDropdown;
 
         var columns = [
             { type: 'checkbox', width: 50 },
@@ -232,6 +239,7 @@
                         editingId = null;
                         document.querySelector('#webResourceModal .modal-title').innerText = "Add Web Resource";
                         openModal();
+                        initLookupEntityDropdown(null);
                     }
 
                     // Edit
@@ -320,6 +328,35 @@
         function clearForm() {
             document.getElementById('webResourceForm').reset();
             document.getElementById('wr_resourcetext').value = '';
+            if (lookupEntityDropdown) {
+                lookupEntityDropdown.value = null;
+            }
+        }
+
+        async function loadEntitiesData() {
+            entitiesData = await DBHandler.fetchEntityRecords(
+                'entities',
+                'id,name',
+                'name',
+                'asc'
+            ) || [];
+        }
+
+        function initLookupEntityDropdown(selectedValue) {
+            if (lookupEntityDropdown) {
+                lookupEntityDropdown.destroy();
+            }
+
+            lookupEntityDropdown = new ej.dropdowns.DropDownList({
+                dataSource: entitiesData,
+                fields: { text: 'name', value: 'id' },
+                placeholder: 'Select Lookup Entity',
+                allowFiltering: true,
+                popupHeight: '250px',
+                value: selectedValue || null
+            });
+
+            lookupEntityDropdown.appendTo('#wr_lookupentityid');
         }
 
 
@@ -347,12 +384,13 @@
             document.getElementById('wr_resourcetext').value = 'Loading...'; // placeholder while fetching
             document.querySelector('#webResourceModal .modal-title').innerText = "Edit Web Resource";
             openModal();
+            initLookupEntityDropdown(null);
 
             try {
                 // 2️⃣ Fetch full record including resourcetext
                 const fullRecord = await DBHandler.fetchEntityRecords(
                     'webresource',
-                    'id,name,title,pagetitle,resourcetype,resourcetext',
+                    '*',
                     'id',
                     'desc',
                     `id='${editingId}'`,
@@ -369,6 +407,9 @@
 
                 // 3️⃣ Update textarea with resourcetext
                 document.getElementById('wr_resourcetext').value = data.resourcetext || '';
+                if (lookupEntityDropdown) {
+                    lookupEntityDropdown.value = data.lookupentityid || null;
+                }
 
             } catch (err) {
                 console.error(err);
@@ -389,6 +430,7 @@
                 pagetitle: document.getElementById('wr_pagetitle').value,
                 resourcetype: document.getElementById('wr_resourcetype').value || null,
                 resourcetext: document.getElementById('wr_resourcetext').value,
+                lookupentityid: lookupEntityDropdown ? (lookupEntityDropdown.value || null) : null,
 
             }, editingId, false);
 
@@ -432,6 +474,7 @@
         $(document).ready(function () {
             initGrid();
             loadWebResources();
+            loadEntitiesData();
         });
 
     </script>
