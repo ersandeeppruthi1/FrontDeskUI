@@ -166,6 +166,39 @@
                                 });
                             });
                         </script>
+
+                        <div class="col-md-6 col-12">
+                            <label>Web Resource</label>
+                            <div class="input-group-append">
+                                <input id="webresourceid" class="form-control" datatype="dropdown" dbcolumnname="webresourceid" />
+                            </div>
+                        </div>
+                        <script>
+                            $(document).ready(function () {
+                                DBHandler.fetchEntityRecords(
+                                    'webresource',
+                                    'webresource.id,webresource.name',
+                                    'webresource.name',
+                                    'asc',
+                                    'isactive = 1',
+                                    true,
+                                    0,
+                                    ''
+                                ).then(resources => {
+
+                                    var listObj = new ej.dropdowns.DropDownList({
+                                        dataSource: resources || [],
+                                        fields: { text: 'name', value: 'id' },
+                                        allowFiltering: true,
+                                        filterBarPlaceholder: 'Search web resource...',
+                                        filterType: 'Contains',
+                                        ignoreCase: true,
+                                        popupHeight: '250px'
+                                    });
+                                    listObj.appendTo('#webresourceid');
+                                });
+                            });
+                        </script>
                         <!-- <div class="col-md-6 col-12">
                                 <label>Default Page <span class="text-danger">*</span></label>
                                 <div class="input-group">
@@ -202,6 +235,7 @@
                 { field: 'modifiedby', headerText: 'Modofiedon', width: 130, visible: false },
                 { field: 'permissionid', headerText: 'Permisson Id', width: 130, visible: false },
                 { field: 'menuid', headerText: 'Menu Id', width: 130, visible: false },
+                { field: 'webresourceid', headerText: 'Web Resource Id', width: 130, visible: false },
                 { field: 'permissonjson', headerText: 'Permisson Json', width: 130, visible: false },
                 { field: 'menujson', headerText: 'Menu Json', width: 130, visible: false },
             ];
@@ -371,6 +405,9 @@
                     if (document.getElementById('menuid').ej2_instances && document.getElementById('menuid').ej2_instances[0]) {
                         document.getElementById('menuid').ej2_instances[0].value = record.menuid;
                     }
+                    if (document.getElementById('webresourceid').ej2_instances && document.getElementById('webresourceid').ej2_instances[0]) {
+                        document.getElementById('webresourceid').ej2_instances[0].value = record.webresourceid || null;
+                    }
                 }, 100);
 
             }
@@ -419,6 +456,9 @@
                     }
                     if (document.getElementById('menuid').ej2_instances && document.getElementById('menuid').ej2_instances[0]) {
                         document.getElementById('menuid').ej2_instances[0].value = null;
+                    }
+                    if (document.getElementById('webresourceid').ej2_instances && document.getElementById('webresourceid').ej2_instances[0]) {
+                        document.getElementById('webresourceid').ej2_instances[0].value = null;
                     }
                     
                     // Reset save button state
@@ -507,6 +547,7 @@
                         modifiedon: normalizeDate(a.modifiedon),
                         permissionid: a.permissionid,
                         menuid: a.menuid,
+                        webresourceid: a.webresourceid,
                     }));
 
                     grid.dataSource = rows;
@@ -528,6 +569,11 @@
                 // applyDatePicker('nextAppointment');
                 initGrid(columns, 'userGrid');
                 loadUserGrid();
+
+                // Keep Syncfusion filter input usable inside Bootstrap modal.
+                $('#userModal').on('shown.bs.modal', function () {
+                    $(document).off('focusin.modal');
+                });
             });
 
             function applyDatePicker(ids, value) {
@@ -561,6 +607,7 @@
                 const password = document.getElementById('password').value.trim();
                 const permissionId = document.getElementById('permissionid').ej2_instances[0].value;
                 const menuId = document.getElementById('menuid').ej2_instances[0].value;
+                const webResourceId = document.getElementById('webresourceid').ej2_instances[0].value;
 
                 // For new users, password is required. For editing, it's optional
                 if (!displayName || !userName || !permissionId || !menuId)
@@ -589,6 +636,7 @@
                         displayname: displayName,
                         permissionid: permissionId,
                         menuid: menuId,
+                        webresourceid: webResourceId || null,
                         permissionjson: permission?.[0]?.permissionjson || "{}",
                         menujson: menu?.[0]?.menujson || "{}",
                         token: crypto.randomUUID(),
