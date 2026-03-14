@@ -392,7 +392,7 @@
                 ignoreCase: true,
                 filterType: 'Contains',
                 popupHeight: '250px',
-                value: r.lookupentityid || null
+                value: r.entityid || null
             });
             lookupEntityDropdown.appendTo('#wr_lookupentityid');
 
@@ -431,7 +431,7 @@
                 // 3️⃣ Update textarea with resourcetext
                 document.getElementById('wr_resourcetext').value = data.resourcetext || '';
                 if (lookupEntityDropdown) {
-                    lookupEntityDropdown.value = data.lookupentityid || null;
+                    lookupEntityDropdown.value = data.entityid || null;
                 }
 
             } catch (err) {
@@ -453,7 +453,7 @@
                 pagetitle: document.getElementById('wr_pagetitle').value,
                 resourcetype: document.getElementById('wr_resourcetype').value || null,
                 resourcetext: document.getElementById('wr_resourcetext').value,
-                lookupentityid: lookupEntityDropdown ? (lookupEntityDropdown.value || null) : null,
+                entityid: lookupEntityDropdown ? (lookupEntityDropdown.value || null) : null,
 
             }, editingId, false);
 
