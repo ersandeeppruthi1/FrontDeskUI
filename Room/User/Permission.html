@@ -85,8 +85,8 @@
                             <input class="form-control" id="permissionName" dbcolumnname="name" />
                         </div>
                         <div class="col-md-6">
-                            <label>Owner<span style="color: red;">*</span>:</label>
-                            <input id="ownerId" class="form-control" datatype="dropdown" dbcolumnname="ownerid" />
+                            <label>Business Unit<span style="color: red;">*</span>:</label>
+                            <input id="businessUnitId" class="form-control" datatype="dropdown" dbcolumnname="businessunitid" />
                         </div>
 
                         <div class="col-md-12">
@@ -232,22 +232,26 @@
     </div>
 
     <script>
+        let businessUnitDropdown = null;
+
         $(document).ready(function () {
-            // Load users for owner dropdown
+            // Load business units for dropdown
             DBHandler.fetchEntityRecords(
-                'users',
-                'users.id, users.username',
-                'users.username',
+                'businessunit',
+                'businessunit.id, businessunit.name',
+                'businessunit.name',
                 'asc',
                 '', true,
                 0,
                 ''
-            ).then(owners => {
-                var listObj = new ej.dropdowns.DropDownList({
-                    dataSource: owners,
-                    fields: { text: 'username', value: 'id' },
+            ).then(units => {
+                businessUnitDropdown = new ej.dropdowns.DropDownList({
+                    dataSource: units || [],
+                    fields: { text: 'name', value: 'id' },
+                    allowFiltering: true,
+                    filterBarPlaceholder: 'Search business unit...'
                 });
-                listObj.appendTo('#ownerId');
+                businessUnitDropdown.appendTo('#businessUnitId');
             });
 
             // Load entities for permission configuration
@@ -733,7 +737,7 @@
             { field: 'modifiedon', headerText: 'Modified On', width: 160, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' } },
             { field: 'id', headerText: 'id', width: 130, visible: false },
             { field: 'createdon', headerText: 'Created On', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
-            { field: 'ownerid', headerText: 'Owner Id', width: 130, visible: false },
+            { field: 'businessunitid', headerText: 'Business Unit Id', width: 130, visible: false },
         ];
 
         function initGrid(columns, permissionGrid) {
@@ -872,7 +876,11 @@
             editingId = record.id;
 
             document.getElementById('permissionName').value = record.name;
-            document.getElementById('ownerId').value = record.ownerid;
+            if (businessUnitDropdown) {
+                businessUnitDropdown.value = record.businessunitid || null;
+            } else {
+                document.getElementById('businessUnitId').value = record.businessunitid || '';
+            }
 
             // Clear the UI first and show loading state
             entityPermissions = [];
@@ -887,7 +895,7 @@
                 // Fetch full record including permission JSON
                 const fullRecord = await DBHandler.fetchEntityRecords(
                     'masterpermission',
-                    'id,name,ownerid,permissionjson',
+                    'id,name,businessunitid,permissionjson',
                     'id',
                     'desc',
                     `id='${editingId}'`,
@@ -931,7 +939,11 @@
             // Reset form if it's a new permission (not editing)
             if (!editingId) {
                 document.getElementById('permissionName').value = '';
-                document.getElementById('ownerId').value = '';
+                if (businessUnitDropdown) {
+                    businessUnitDropdown.value = null;
+                } else {
+                    document.getElementById('businessUnitId').value = '';
+                }
                 entityPermissions = [];
                 renderEntityPermissions();
                 populateEntitySelector();
@@ -955,7 +967,7 @@
             try {
                 const permissions = await DBHandler.fetchEntityRecords(
                     'masterpermission',
-                    'id,name,createdon,modifiedon,ownerid',
+                    'id,name,createdon,modifiedon,businessunitid',
                     'masterpermission.modifiedon',
                     'desc',
                     filter, true,
@@ -972,7 +984,7 @@
                     name: a.name,
                     createdon: normalizeDate(a.createdon),
                     modifiedon: normalizeDate(a.modifiedon),
-                    ownerid: a.ownerid,
+                    businessunitid: a.businessunitid,
                 }));
 
                 grid.dataSource = rows;
@@ -1003,11 +1015,13 @@
             const btn = event.target;
             const permissionName = document.getElementById('permissionName').value.trim();
             const permissionJSON = document.getElementById('permissionJSON').value.trim();
-            const ownerId = document.getElementById('ownerId').value;
+            const businessUnitId = businessUnitDropdown
+                ? businessUnitDropdown.value
+                : document.getElementById('businessUnitId').value;
 
             // Validation
             if (!permissionName) return alert("Please enter permission name");
-            if (!ownerId) return alert("Please select Owner");
+            if (!businessUnitId) return alert("Please select Business Unit");
 
             // Check if at least one entity is configured
             if (entityPermissions.length === 0) {
@@ -1039,7 +1053,7 @@
                 await DBHandler.submitRecordData('masterpermission', {
                     name: permissionName,
                     permissionjson: permissionJSON,
-                    ownerid: ownerId,
+                    businessunitid: businessUnitId,
                 }, editingId, false);
 
                 await loadPermissionGrid();
@@ -1052,7 +1066,11 @@
 
                 // Reset form
                 document.getElementById('permissionName').value = '';
-                document.getElementById('ownerId').value = '';
+                if (businessUnitDropdown) {
+                    businessUnitDropdown.value = null;
+                } else {
+                    document.getElementById('businessUnitId').value = '';
+                }
                 entityPermissions = [];
                 renderEntityPermissions();
                 populateEntitySelector();

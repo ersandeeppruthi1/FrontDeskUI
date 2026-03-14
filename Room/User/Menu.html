@@ -85,8 +85,8 @@
                             <input class="form-control" id="menuName" dbcolumnname="name" />
                         </div>
                         <div class="col-md-6">
-                            <label>Owner<span style="color: red;">*</span>:</label>
-                            <input id="ownerId" class="form-control" datatype="dropdown" dbcolumnname="ownerid" />
+                            <label>Business Unit<span style="color: red;">*</span>:</label>
+                            <input id="businessUnitId" class="form-control" datatype="dropdown" dbcolumnname="businessunitid" />
                         </div>
 
                         <div class="col-md-12">
@@ -218,6 +218,7 @@
         parentMenuDropdown.appendTo('#parentMenuSelector');
 
         let webResourcesData = [];
+        let businessUnitDropdown = null;
         let webResourceDropdown = new ej.dropdowns.DropDownList({
             dataSource: [],
             fields: { text: 'name', value: 'id' },
@@ -246,21 +247,23 @@
         webResourceDropdown.appendTo('#menuWebResource');
 
         $(document).ready(function () {
-            // Load users for owner dropdown
+            // Load business units for dropdown
             DBHandler.fetchEntityRecords(
-                'users',
-                'users.id, users.username',
-                'users.username',
+                'businessunit',
+                'businessunit.id, businessunit.name',
+                'businessunit.name',
                 'asc',
                 '', true,
                 0,
                 ''
-            ).then(owners => {
-                var listObj = new ej.dropdowns.DropDownList({
-                    dataSource: owners,
-                    fields: { text: 'username', value: 'id' },
+            ).then(units => {
+                businessUnitDropdown = new ej.dropdowns.DropDownList({
+                    dataSource: units || [],
+                    fields: { text: 'name', value: 'id' },
+                    allowFiltering: true,
+                    filterBarPlaceholder: 'Search business unit...'
                 });
-                listObj.appendTo('#ownerId');
+                businessUnitDropdown.appendTo('#businessUnitId');
             });
 
             // Load web resources
@@ -654,7 +657,7 @@
             { field: 'modifiedon', headerText: 'Modified On', width: 160, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' } },
             { field: 'id', headerText: 'id', width: 130, visible: false },
             { field: 'createdon', headerText: 'Created On', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
-            { field: 'ownerid', headerText: 'Owner Id', width: 130, visible: false },
+            { field: 'businessunitid', headerText: 'Business Unit Id', width: 130, visible: false },
         ];
 
         function initGrid(columns, menuGrid) {
@@ -793,7 +796,11 @@
             editingId = record.id;
 
             document.getElementById('menuName').value = record.name;
-            document.getElementById('ownerId').value = record.ownerid;
+            if (businessUnitDropdown) {
+                businessUnitDropdown.value = record.businessunitid || null;
+            } else {
+                document.getElementById('businessUnitId').value = record.businessunitid || '';
+            }
 
             // Clear the UI first and show loading state
             menuItems = [];
@@ -808,7 +815,7 @@
                 // Fetch full record including menu JSON
                 const fullRecord = await DBHandler.fetchEntityRecords(
                     'mastermenu',
-                    'id,name,ownerid,menujson',
+                    'id,name,businessunitid,menujson',
                     'id',
                     'desc',
                     `id='${editingId}'`,
@@ -852,7 +859,11 @@
             // Reset form if it's a new menu (not editing)
             if (!editingId) {
                 document.getElementById('menuName').value = '';
-                document.getElementById('ownerId').value = '';
+                if (businessUnitDropdown) {
+                    businessUnitDropdown.value = null;
+                } else {
+                    document.getElementById('businessUnitId').value = '';
+                }
                 menuItems = [];
                 menuItemCounter = 1;
                 renderMenuItems();
@@ -877,7 +888,7 @@
             try {
                 const menus = await DBHandler.fetchEntityRecords(
                     'mastermenu',
-                    'id,name,createdon,modifiedon,ownerid',
+                    'id,name,createdon,modifiedon,businessunitid',
                     'mastermenu.modifiedon',
                     'desc',
                     filter, true,
@@ -894,7 +905,7 @@
                     name: a.name,
                     createdon: normalizeDate(a.createdon),
                     modifiedon: normalizeDate(a.modifiedon),
-                    ownerid: a.ownerid,
+                    businessunitid: a.businessunitid,
                 }));
 
                 grid.dataSource = rows;
@@ -924,11 +935,13 @@
             const btn = event.target;
             const menuName = document.getElementById('menuName').value.trim();
             const menuJSON = document.getElementById('menuJSON').value.trim();
-            const ownerId = document.getElementById('ownerId').value;
+            const businessUnitId = businessUnitDropdown
+                ? businessUnitDropdown.value
+                : document.getElementById('businessUnitId').value;
 
             // Validation
             if (!menuName) return alert("Please enter menu name");
-            if (!ownerId) return alert("Please select Owner");
+            if (!businessUnitId) return alert("Please select Business Unit");
 
             // Check if at least one menu item is configured
             if (menuItems.length === 0) {
@@ -951,7 +964,7 @@
                 await DBHandler.submitRecordData('mastermenu', {
                     name: menuName,
                     menujson: menuJSON,
-                    ownerid: ownerId,
+                    businessunitid: businessUnitId,
                     menuhtml: '12',
                 }, editingId, false);
 
@@ -965,7 +978,11 @@
 
                 // Reset form
                 document.getElementById('menuName').value = '';
-                document.getElementById('ownerId').value = '';
+                if (businessUnitDropdown) {
+                    businessUnitDropdown.value = null;
+                } else {
+                    document.getElementById('businessUnitId').value = '';
+                }
                 menuItems = [];
                 menuItemCounter = 1;
                 renderMenuItems();
