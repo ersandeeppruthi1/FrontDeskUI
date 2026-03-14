@@ -217,7 +217,9 @@
                             placeholder: 'Select Owner',
                             allowFiltering: true,
                             filterBarPlaceholder: 'Search owners...',
-                            allowClear: true
+                            allowClear: true,
+                            ignoreCase: true,
+                            filterType: 'Contains'
                         });
                         ownerDropdown.appendTo('#bu_ownerid');
 
@@ -298,7 +300,9 @@
                 placeholder: 'Select Owner',
                 allowFiltering: true,
                 filterBarPlaceholder: 'Search owners...',
-                allowClear: true
+                allowClear: true,
+                ignoreCase: true,
+                filterType: 'Contains'
             });
             ownerDropdown.appendTo('#bu_ownerid');
 
