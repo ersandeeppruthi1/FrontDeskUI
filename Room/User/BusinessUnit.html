@@ -90,7 +90,7 @@
                             </div>
 
                             <div class="col-md-12 mt-3">
-                                <label>Users</label>
+                                <label>Owner</label>
                                 <input type="text" id="bu_users" class="form-control" />
                             </div>
                         </div>
@@ -270,14 +270,17 @@
                 userDropdown.destroy();
             }
 
+            // Use cookie userid as default if no selectedValue is provided
+            const defaultUserId = selectedValue || getCookie('userid');
+
             userDropdown = new ej.dropdowns.DropDownList({
                 dataSource: usersData,
                 fields: { text: 'displaytext', value: 'id' },
-                placeholder: 'Select User',
+                placeholder: 'Select Owner',
                 allowFiltering: true,
                 filterBarPlaceholder: 'Search users...',
                 popupHeight: '250px',
-                value: selectedValue || null
+                value: defaultUserId || null
             });
 
             userDropdown.appendTo('#bu_users');
@@ -333,11 +336,18 @@
 
             await DBHandler.submitRecordData('businessunit', {
                 name: document.getElementById('bu_name').value.trim(),
-                users: userDropdown ? (userDropdown.value || null) : null
+                ownerid: userDropdown ? (userDropdown.value || null) : null
             }, editingBusinessUnitId, false);
 
             bootstrap.Modal.getInstance(businessUnitModal).hide();
             loadBusinessUnits();
+        }
+
+        function setDefaultUserFromCookie() {
+            const userid = getCookie('userid');
+            if (userid && userDropdown) {
+                userDropdown.value = userid;
+            }
         }
 
         $(document).ready(() => {
@@ -345,6 +355,9 @@
 
             $('#businessUnitModal').on('shown.bs.modal', function () {
                 $(document).off('focusin.modal');
+                
+                // Set default user from cookie when modal is shown
+                setDefaultUserFromCookie();
             });
         });
 
