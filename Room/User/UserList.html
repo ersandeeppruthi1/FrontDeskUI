@@ -348,20 +348,6 @@
                 const record = selectedRecords[0];
                 editingId = record.id;
 
-                document.getElementById('displayName').value = record.displayname;
-                document.getElementById('password').value = record.password;
-                document.getElementById('permissionid').ej2_instances[0].value = record.permissionid;
-                document.getElementById('menuid').ej2_instances[0].value = record.menuid;
-
-
-                document.getElementById('userName').value = record.username;
-                if (record.username && record.username != "") {
-                    fetchUserByUsername(record.username);
-                }
-
-                // document.getElementById('appointmentDate').ej2_instances[0].value = record.treatmentdate;
-                // document.getElementById('nextAppointment').ej2_instances[0].value = record.nextappointment;
-
                 // ✅ Update modal title
                 document.querySelector('#userModal .modal-title').innerText = "Edit User";
 
@@ -369,7 +355,24 @@
                 document.getElementById('saveUserBtn').disabled = false;
                 document.getElementById('usernameMessage').innerHTML = '';
 
-                openUserModal();
+                // First open modal to initialize dropdowns
+                openUserModal(true);
+
+                // Set basic field values immediately
+                document.getElementById('userName').value = record.username || '';
+                document.getElementById('displayName').value = record.displayname || '';
+                document.getElementById('password').value = record.password || '';
+
+                // Set dropdown values after a small delay to ensure they're initialized
+                setTimeout(() => {
+                    if (document.getElementById('permissionid').ej2_instances && document.getElementById('permissionid').ej2_instances[0]) {
+                        document.getElementById('permissionid').ej2_instances[0].value = record.permissionid;
+                    }
+                    if (document.getElementById('menuid').ej2_instances && document.getElementById('menuid').ej2_instances[0]) {
+                        document.getElementById('menuid').ej2_instances[0].value = record.menuid;
+                    }
+                }, 100);
+
             }
 
             function toggleEditButton() {
@@ -396,32 +399,34 @@
             }
 
 
-            function openUserModal() {
+            function openUserModal(isEdit = false) {
                 const modal = new bootstrap.Modal(
                     document.getElementById('userModal'),
                     { backdrop: 'static', keyboard: false }
                 );
                 
-                // Reset form and state for new user
-                editingId = null;
-                document.querySelector('#userModal .modal-title').innerText = "Add New User";
-                
-                // Clear form fields
-                document.getElementById('userName').value = '';
-                document.getElementById('displayName').value = '';
-                document.getElementById('password').value = '';
-                if (document.getElementById('permissionid').ej2_instances && document.getElementById('permissionid').ej2_instances[0]) {
-                    document.getElementById('permissionid').ej2_instances[0].value = null;
-                }
-                if (document.getElementById('menuid').ej2_instances && document.getElementById('menuid').ej2_instances[0]) {
-                    document.getElementById('menuid').ej2_instances[0].value = null;
+                // Only reset form and state for new user
+                if (!isEdit) {
+                    editingId = null;
+                    document.querySelector('#userModal .modal-title').innerText = "Add New User";
+                    
+                    // Clear form fields
+                    document.getElementById('userName').value = '';
+                    document.getElementById('displayName').value = '';
+                    document.getElementById('password').value = '';
+                    if (document.getElementById('permissionid').ej2_instances && document.getElementById('permissionid').ej2_instances[0]) {
+                        document.getElementById('permissionid').ej2_instances[0].value = null;
+                    }
+                    if (document.getElementById('menuid').ej2_instances && document.getElementById('menuid').ej2_instances[0]) {
+                        document.getElementById('menuid').ej2_instances[0].value = null;
+                    }
+                    
+                    // Reset save button state
+                    document.getElementById('saveUserBtn').disabled = true;
+                    document.getElementById('usernameMessage').innerHTML = '';
                 }
                 
                 modal.show();
-                
-                // Reset save button state
-                document.getElementById('saveUserBtn').disabled = true;
-                document.getElementById('usernameMessage').innerHTML = '';
             }
 
             async function validateUsername() {
