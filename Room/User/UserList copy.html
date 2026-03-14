@@ -99,6 +99,14 @@
                             <label>Password<span style="color: red;">*</span>:</label>
                             <input type="password" class="form-control" id="password" dbcolumnname="password" />
                         </div>
+                        <div class="col-md-6">
+                            <label>Is System Administrator</label>
+                            <select id="isSystemAdministrator" class="form-control">
+                                <option value="">Select Type</option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
 
                         <div class="col-md-6 col-12">
                             <label>Permission or Role <span class="text-danger">*</span></label>
@@ -200,6 +208,7 @@
                 { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
                 { field: 'username', headerText: 'User Name', width: 130 },
                 { field: 'displayname', headerText: 'Display Name', width: 220 },
+                { field: 'issystemadministrator', headerText: 'Is System Administrator', width: 220 },
                 { field: 'id', headerText: 'id', width: 130, visible: false },
                 { field: 'createdon', headerText: 'Createdon', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
                 { field: 'modifiedon', headerText: 'Modifiedon', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
@@ -353,6 +362,7 @@
                 const record = selectedRecords[0];
                 editingId = record.id;
 
+                document.getElementById('isSystemAdministrator').value = record.issystemadministrator;
                 document.getElementById('displayName').value = record.displayname;
                 document.getElementById('password').value = record.password;
                 document.getElementById('permissionid').ej2_instances[0].value = record.permissionid;
@@ -442,6 +452,7 @@
                         username: a.username,
                         createdon: normalizeDate(a.createdon),
                         modifiedon: normalizeDate(a.modifiedon),
+                        issystemadministrator: a.issystemadministrator == 1 ? "Yes" : "No",
                         permissionid: a.permissionid,
                         menuid: a.menuid,
                     }));
@@ -496,6 +507,7 @@
                 const displayName = document.getElementById('displayName').value.trim();
                 const userName = document.getElementById('userName').value.trim();
                 const password = document.getElementById('password').value.trim();
+                const isSystemAdministrator = document.getElementById('isSystemAdministrator').value;
                 const permissionId = document.getElementById('permissionid').ej2_instances[0].value;
                 const menuId = document.getElementById('menuid').ej2_instances[0].value;
 
@@ -521,6 +533,7 @@
                         username: userName,
                         displayname: displayName,
                         password: password,
+                        issystemadministrator: isSystemAdministrator,
 
                         permissionid: permissionId,
                         menuid: menuId,
@@ -556,7 +569,7 @@
                     // Fetch records from masteruser entity
                     let data = await DBHandler.fetchEntityRecord(
                         "masteruser",                          // entity/table name
-                        "id,username,displayname,permissionid,menuid", // columns you want
+                        "id,username,displayname,issystemadministrator,permissionid,menuid", // columns you want
                         filter                                 // filter condition
                     );
 
@@ -565,6 +578,7 @@
                         const userRecord = data[0]
                         console.log(userRecord)
                         document.getElementById("displayName").value = userRecord.displayname;
+                        document.getElementById("isSystemAdministrator").value = userRecord.issystemadministrator;
                         document.getElementById("password").value = userRecord.password;
                         document.getElementById("permissionid").value = userRecord.permissionid;
                         document.getElementById("menuid").value = userRecord.menuid;
