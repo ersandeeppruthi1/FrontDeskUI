@@ -430,10 +430,9 @@
                 modal.show();
 
                 ej.base.enableRipple(true);
+                initDropdowns();
 
                 modalEl.addEventListener('shown.bs.modal', function initOnce() {
-
-                    initDropdowns();
 
                     // Remove listener so it doesn't run again unnecessarily
                     modalEl.removeEventListener('shown.bs.modal', initOnce);
