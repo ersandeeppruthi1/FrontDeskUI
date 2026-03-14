@@ -221,7 +221,7 @@
                         });
                         modal.show();
 
-                        initUserDropdown(null);
+                        initUserDropdown(); // Don't pass null, let it default to current user
 
                         document.querySelector('#businessUnitModal .modal-title')
                             .innerText = "Add Business Unit";
@@ -263,6 +263,22 @@
                 ...user,
                 displaytext: user.displayname || user.username || ''
             }));
+
+            // Check if current user exists in the list
+            const currentUserId = getCookie('userid');
+            const currentUserDisplayName = getCookie('displayName');
+            const currentUserName = getCookie('userName');
+
+            if (currentUserId && !usersData.find(user => user.id == currentUserId)) {
+                // Add current user to the list if not exists
+                const currentUser = {
+                    id: currentUserId,
+                    displayname: currentUserDisplayName || currentUserName || 'Current User',
+                    username: currentUserName || '',
+                    displaytext: currentUserDisplayName || currentUserName || 'Current User'
+                };
+                usersData.unshift(currentUser); // Add at the beginning
+            }
         }
 
         function initUserDropdown(selectedValue) {
@@ -270,8 +286,13 @@
                 userDropdown.destroy();
             }
 
-            // Use cookie userid as default if no selectedValue is provided
-            const defaultUserId = selectedValue || getCookie('userid');
+            // Use provided selectedValue first, then fall back to cookie userid
+            const currentUserId = getCookie('userid');
+            let defaultUserId = selectedValue !== undefined ? selectedValue : currentUserId;
+            // Ensure the default user exists in the dropdown data
+            if (defaultUserId && !usersData.find(user => user.id == defaultUserId)) {
+                defaultUserId = null;
+            }
 
             userDropdown = new ej.dropdowns.DropDownList({
                 dataSource: usersData,
@@ -346,7 +367,11 @@
         function setDefaultUserFromCookie() {
             const userid = getCookie('userid');
             if (userid && userDropdown) {
-                userDropdown.value = userid;
+                // Check if user exists in dropdown data before setting
+                const userExists = usersData.find(user => user.id == userid);
+                if (userExists) {
+                    userDropdown.value = userid;
+                }
             }
         }
 
