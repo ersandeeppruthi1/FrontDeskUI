@@ -88,6 +88,11 @@
                                 <label>Business Unit Name <span class="text-danger">*</span></label>
                                 <input type="text" id="bu_name" class="form-control" required />
                             </div>
+
+                            <div class="col-md-12 mt-3">
+                                <label>Users</label>
+                                <input type="text" id="bu_users" class="form-control" />
+                            </div>
                         </div>
 
                     </form>
@@ -106,6 +111,8 @@
 
         let businessUnitGrid;
         let editingBusinessUnitId = null;
+        let usersData = [];
+        let userDropdown;
 
         async function initBusinessUnitGrid() {
             ej.grids.Grid.Inject(
@@ -162,6 +169,21 @@
                     { type: 'checkbox', width: 50 },
                     { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
                     { field: 'name', headerText: 'Business Unit Name', width: 400 },
+                    {
+                        field: 'createdon',
+                        headerText: 'Created On',
+                        type: 'date',
+                        format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' },
+                        width: 180,
+                        visible: false 
+                    },
+                    {
+                        field: 'modifiedon',
+                        headerText: 'Modified On',
+                        type: 'date',
+                        format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' },
+                        width: 180
+                    },
                     { field: 'id', visible: false }
                 ],
 
@@ -192,11 +214,14 @@
                     if (args.item.id === 'newBusinessUnit') {
                         editingBusinessUnitId = null;
                         document.getElementById('businessUnitForm').reset();
+                        await loadUsersData();
 
                         const modal = new bootstrap.Modal(businessUnitModal, {
                             focus: false
                         });
                         modal.show();
+
+                        initUserDropdown(null);
 
                         document.querySelector('#businessUnitModal .modal-title')
                             .innerText = "Add Business Unit";
@@ -218,7 +243,44 @@
             businessUnitGrid.appendTo('#businessUnitGrid');
 
             await loadBusinessUnits();
+            await loadUsersData();
             businessUnitGrid.enableToolbarItems(['newBusinessUnit'], true);
+        }
+
+        async function loadUsersData() {
+            usersData = await DBHandler.fetchEntityRecords(
+                'masteruser',
+                'id,displayname,username',
+                'displayname',
+                'asc',
+                '',
+                true,
+                0,
+                ''
+            ) || [];
+
+            usersData = usersData.map(user => ({
+                ...user,
+                displaytext: user.displayname || user.username || ''
+            }));
+        }
+
+        function initUserDropdown(selectedValue) {
+            if (userDropdown) {
+                userDropdown.destroy();
+            }
+
+            userDropdown = new ej.dropdowns.DropDownList({
+                dataSource: usersData,
+                fields: { text: 'displaytext', value: 'id' },
+                placeholder: 'Select User',
+                allowFiltering: true,
+                filterBarPlaceholder: 'Search users...',
+                popupHeight: '250px',
+                value: selectedValue || null
+            });
+
+            userDropdown.appendTo('#bu_users');
         }
 
         async function loadBusinessUnits() {
@@ -247,12 +309,16 @@
             if (selected.length !== 1)
                 return alert("Select one record to edit");
 
+            const record = selected[0];
+
             const modal = new bootstrap.Modal(businessUnitModal, {
                 focus: false
             });
             modal.show();
 
-            const record = selected[0];
+            await loadUsersData();
+            initUserDropdown(record.users || null);
+
             editingBusinessUnitId = record.id;
 
             document.getElementById('bu_name').value = record.name || '';
@@ -266,7 +332,8 @@
                 return alert("Business Unit name is required");
 
             await DBHandler.submitRecordData('businessunit', {
-                name: document.getElementById('bu_name').value.trim()
+                name: document.getElementById('bu_name').value.trim(),
+                users: userDropdown ? (userDropdown.value || null) : null
             }, editingBusinessUnitId, false);
 
             bootstrap.Modal.getInstance(businessUnitModal).hide();
