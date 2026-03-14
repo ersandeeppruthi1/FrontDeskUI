@@ -11,7 +11,6 @@
         //var apiURL = "";
     </script>
 
-    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
     <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
@@ -19,7 +18,7 @@
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
     <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220259"></script>
     <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
@@ -30,17 +29,7 @@
 
     <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
-    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
-    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
-    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
-
-    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
-    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
-
-    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -48,20 +37,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
-    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
-    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+    <script src="https://apisit.vsservices.in/JS/ej2.min.vk02bdl5ad.js"></script>
+
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://free-crm.csharpasp.net/lib/syncfusion/css/bootstrap5.dvnzgvxkcq.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.css">
+    <link href="https://apisit.vsservices.in/css/app.css" rel="stylesheet">
+
 </head>
 
 <body>
@@ -82,7 +65,8 @@
                         <div class="col-md-6">
                             <label>User Name<span style="color: red;">*</span>:</label>
                             <div class="input-group">
-                                <input class="form-control" id="userName" dbcolumnname="userName" onfocusout="validateUsername()" />
+                                <input class="form-control" id="userName" dbcolumnname="userName"
+                                    onfocusout="validateUsername()" />
                             </div>
                             <div id="usernameMessage" class="mt-1" style="font-size: 12px;"></div>
                         </div>
@@ -103,35 +87,6 @@
                             </div>
                         </div>
 
-                        <script>
-                            $(document).ready(function () {
-                                DBHandler.fetchEntityRecords(
-                                    'masterpermission',
-                                    'masterpermission.id, masterpermission.name',
-                                    'masterpermission.name',
-                                    'asc',
-                                    '', true,
-                                    0,
-                                    ''
-                                ).then(permissions => {
-
-                                    var listObj = new ej.dropdowns.DropDownList({
-                                        dataSource: permissions,
-                                        fields: { text: 'name', value: 'id' },
-                                        change: function (args) {
-
-                                            if (args.value) {
-                                                $("#editPermissionBtn").show();
-                                            } else {
-                                                $("#editPermissionBtn").hide();
-                                            }
-                                        }
-                                    });
-                                    listObj.appendTo('#permissionid');
-                                });
-                            });
-                        </script>
-
                         <!-- Menu -->
                         <div class="col-md-6 col-12">
                             <label>Menu/Items <span class="text-danger">*</span></label>
@@ -139,79 +94,19 @@
                                 <input id="menuid" class="form-control" datatype="dropdown" dbcolumnname="menuid" />
                             </div>
                         </div>
-                        <script>
-                            $(document).ready(function () {
-                                DBHandler.fetchEntityRecords(
-                                    'mastermenu',
-                                    'mastermenu.id,mastermenu.name',
-                                    'mastermenu.name',
-                                    'asc',
-                                    '', true,
-                                    0,
-                                    ''
-                                ).then(permissions => {
-
-                                    var listObj = new ej.dropdowns.DropDownList({
-                                        dataSource: permissions,
-                                        fields: { text: 'name', value: 'id' },
-                                        change: function (args) {
-                                            if (args.value) {
-                                                $("#editMenuBtn").show();
-                                            } else {
-                                                $("#editMenuBtn").hide();
-                                            }
-                                        }
-                                    });
-                                    listObj.appendTo('#menuid');
-                                });
-                            });
-                        </script>
 
                         <div class="col-md-6 col-12">
                             <label>Web Resource</label>
                             <div class="input-group-append">
-                                <input id="webresourceid" class="form-control" datatype="dropdown" dbcolumnname="webresourceid" />
+                                <input id="webresourceid" class="form-control" datatype="dropdown"
+                                    dbcolumnname="webresourceid" />
                             </div>
                         </div>
-                        <script>
-                            $(document).ready(function () {
-                                DBHandler.fetchEntityRecords(
-                                    'webresource',
-                                    'webresource.id,webresource.name',
-                                    'webresource.name',
-                                    'asc',
-                                    'isactive = 1',
-                                    true,
-                                    0,
-                                    ''
-                                ).then(resources => {
-
-                                    var listObj = new ej.dropdowns.DropDownList({
-                                        dataSource: resources || [],
-                                        fields: { text: 'name', value: 'id' },
-                                        allowFiltering: true,
-                                        filterBarPlaceholder: 'Search web resource...',
-                                        filterType: 'Contains',
-                                        ignoreCase: true,
-                                        popupHeight: '250px'
-                                    });
-                                    listObj.appendTo('#webresourceid');
-                                });
-                            });
-                        </script>
-                        <!-- <div class="col-md-6 col-12">
-                                <label>Default Page <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <input id="defaultpageid"
-                                        class="form-control"
-                                        datatype="dropdown"
-                                        dbcolumnname="defaultpageid" />
-                                </div>
-                            </div> -->
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="saveUserBtn" onclick="saveUser()" disabled>Save User</button>
+                    <button type="button" class="btn btn-primary" id="saveUserBtn" onclick="saveUser()" disabled>Save
+                        User</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -221,35 +116,64 @@
 
         <script>
 
+            /**********************************************************************
+             GLOBAL STATE
+            **********************************************************************/
             let grid;
             let usersMain = [];
-            var columns = [
+            let editingId = null;
+
+            const AppState = {
+                permissions: [],
+                menus: [],
+                webresources: []
+            };
+
+            /**********************************************************************
+             GRID COLUMNS
+            **********************************************************************/
+            const columns = [
                 { type: 'checkbox', width: 50 },
                 { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
-                { field: 'username', headerText: 'User Name', width: 130 },
-                { field: 'displayname', headerText: 'Display Name', width: 220 },
-                { field: 'id', headerText: 'id', width: 130, visible: false },
-                { field: 'createdon', headerText: 'Createdon', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
-                { field: 'modifiedon', headerText: 'Modifiedon', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
-                { field: 'createdby', headerText: 'CreatedBy', width: 130, visible: false },
-                { field: 'modifiedby', headerText: 'Modofiedon', width: 130, visible: false },
-                { field: 'permissionid', headerText: 'Permisson Id', width: 130, visible: false },
-                { field: 'menuid', headerText: 'Menu Id', width: 130, visible: false },
-                { field: 'webresourceid', headerText: 'Web Resource Id', width: 130, visible: false },
-                { field: 'permissonjson', headerText: 'Permisson Json', width: 130, visible: false },
-                { field: 'menujson', headerText: 'Menu Json', width: 130, visible: false },
+                { field: 'username', headerText: 'User Name', width: 150 },
+                { field: 'displayname', headerText: 'Display Name', width: 200 },
+                { field: 'id', visible: false },
+                { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 150 },
+                { field: 'permissionid', visible: false },
+                { field: 'menuid', visible: false },
+                { field: 'webresourceid', visible: false }
             ];
 
-            function initGrid(columns, patientGrid) {
+            /**********************************************************************
+             INITIALIZATION
+            **********************************************************************/
+            $(document).ready(async function () {
+
+                initGrid();
+
+                await loadMasterData();
+
+                await loadUserGrid();
+
+                $('#userModal').on('shown.bs.modal', function () {
+                    $(document).off('focusin.modal');
+                });
+
+            });
+
+            /**********************************************************************
+             GRID INITIALIZATION
+            **********************************************************************/
+            function initGrid() {
+
                 ej.grids.Grid.Inject(
                     ej.grids.Filter,
-                    ej.grids.Group,
                     ej.grids.Page,
                     ej.grids.Sort,
                     ej.grids.Toolbar,
-                    ej.grids.ColumnChooser,
                     ej.grids.ExcelExport,
-                    ej.grids.PdfExport
+                    ej.grids.PdfExport,
+                    ej.grids.ColumnChooser
                 );
 
                 grid = new ej.grids.Grid({
@@ -260,383 +184,311 @@
                     allowFiltering: true,
                     filterSettings: { type: 'Excel' },
                     showColumnChooser: true,
-                    //enablePersistence: true,
-                    toolbar: ['ColumnChooser',
+
+                    toolbar: [
+                        'ColumnChooser',
                         'Search',
-                        {
-                            prefixIcon: 'e-icons e-excelexport',
-                            tooltipText: 'Export Excel',
-                            id: 'excelExport'
-                        },
-                        {
-                            prefixIcon: 'e-icons e-pdfexport',
-                            tooltipText: 'Export PDF',
-                            id: 'pdfExport'
-                        },
-                        {
-                            prefixIcon: 'e-icons e-refresh',
-                            tooltipText: 'Refresh Grid',
-                            id: 'refreshGrid'
-                        },
-                        {
-                            text: 'New User',
-                            tooltipText: 'New User',
-                            prefixIcon: 'e-icons e-plus',
-                            id: 'newUser'
-                        },
-                        {
-                            text: 'Edit User',
-                            tooltipText: 'Edit User',
-                            prefixIcon: 'e-icons e-edit',
-                            id: 'editUser',
-                        },
-                        {
-                            text: 'Delete',
-                            tooltipText: 'Delete',
-                            prefixIcon: 'e-icons e-delete',
-                            id: 'deleteUser'
-                        },],
+                        { prefixIcon: 'e-icons e-excelexport', tooltipText: 'Export Excel', id: 'excelExport' },
+                        { prefixIcon: 'e-icons e-pdfexport', tooltipText: 'Export PDF', id: 'pdfExport' },
+                        { prefixIcon: 'e-icons e-refresh', tooltipText: 'Refresh Grid', id: 'refreshGrid' },
+                        { text: 'New User', prefixIcon: 'e-icons e-plus', id: 'newUser' },
+                        { text: 'Edit User', prefixIcon: 'e-icons e-edit', id: 'editUser' },
+                        { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteUser' }
+                    ],
 
-
-                    //height: 480,
                     columns: columns,
-                    allowExcelExport: true,
-                    allowPdfExport: true,
 
+                    toolbarClick: handleToolbarClick
 
-                    // ✅ Handle toolbar clicks
-                    toolbarClick: function (args) {
-                        if (args.item.id === patientGrid + '_excelexport') {
-                            grid.excelExport({
-                                fileName: `Appointments_${formatDate(new Date())}.xlsx`,
-                                // Export current view records (respects filtering/sorting/paging)
-                                exportType: 'AllPages', // or 'AllPages'
-                            });
-                        }
-
-                        if (args.item.id === 'deleteUser') {
-                            deleteUser();
-                        }
-                        if (args.item.id === patientGrid + '_pdfexport') {
-                            grid.pdfExport({
-                                fileName: `Appointments_${formatDate(new Date())}.pdf`,
-                                exportType: 'CurrentPage', // or 'AllPages'
-                                theme: { header: { fontColor: '#000000' } },
-                                // Optional: page setup
-                                pageOrientation: 'Landscape', // 'Portrait' | 'Landscape'
-                                pageSize: 'LETTER',          // e.g., 'A4', 'LETTER'
-                                header: {
-                                    fromTop: 0,
-                                    height: 120,
-                                    contents: [
-                                        {
-                                            type: 'Text',
-                                            value: 'User Management',
-                                            position: { x: 280, y: 0 },
-                                            style: {
-                                                textBrushColor: '#C25050',
-                                                fontSize: 25
-                                            },
-                                        }
-                                    ]
-                                },
-                                footer: {
-                                    fromBottom: 160,
-                                    height: 150,
-                                    contents: [
-                                        {
-                                            type: 'PageNumber',
-                                            pageNumberType: 'Arabic',
-                                            format: 'Page {$current} of {$total}',
-                                            position: { x: 520, y: 10 },
-                                            style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' }
-                                        }
-                                    ]
-                                }
-                            });
-                        }
-
-                        if (args.item.id === 'refreshGrid') {
-                            loadUserGrid();
-                        }
-                        if (args.item.id === 'newUser') {
-                            openUserModal(); // your function
-                        }
-
-                        if (args.item.id === 'editUser') {
-                            editUser();
-                        }
-                    }
                 });
-                grid.appendTo('#' + patientGrid);
-            }
 
-            let editingId = null;
-
-            function editUser() {
-
-                const selectedRecords = grid.getSelectedRecords();
-                if (selectedRecords.length !== 1) {
-                    return alert("Please select one user to edit");
-                }
-                const record = selectedRecords[0];
-                editingId = record.id;
-
-                // ✅ Update modal title
-                document.querySelector('#userModal .modal-title').innerText = "Edit User";
-
-                // Enable save button for editing existing user
-                document.getElementById('saveUserBtn').disabled = false;
-                document.getElementById('usernameMessage').innerHTML = '';
-
-                // First open modal to initialize dropdowns
-                openUserModal(true);
-
-                // Set basic field values immediately
-                document.getElementById('userName').value = record.username || '';
-                document.getElementById('displayName').value = record.displayname || '';
-                document.getElementById('password').value = record.password || '';
-
-                // Set dropdown values after a small delay to ensure they're initialized
-                setTimeout(() => {
-                    if (document.getElementById('permissionid').ej2_instances && document.getElementById('permissionid').ej2_instances[0]) {
-                        document.getElementById('permissionid').ej2_instances[0].value = record.permissionid;
-                    }
-                    if (document.getElementById('menuid').ej2_instances && document.getElementById('menuid').ej2_instances[0]) {
-                        document.getElementById('menuid').ej2_instances[0].value = record.menuid;
-                    }
-                    if (document.getElementById('webresourceid').ej2_instances && document.getElementById('webresourceid').ej2_instances[0]) {
-                        document.getElementById('webresourceid').ej2_instances[0].value = record.webresourceid || null;
-                    }
-                }, 100);
+                grid.appendTo('#userGrid');
 
             }
 
-            function toggleEditButton() {
-                const selected = grid.getSelectedRecords();
-                const editBtn = grid.toolbarModule.toolbar.items
-                    .find(item => item.id === "editUser");
-                if (!editBtn) return;
-                editBtn.disabled = selected.length !== 1;  // ✅ only one row
+            /**********************************************************************
+             TOOLBAR EVENTS
+            **********************************************************************/
+            function handleToolbarClick(args) {
+
+                switch (args.item.id) {
+
+                    case "excelExport":
+                        grid.excelExport();
+                        break;
+
+                    case "pdfExport":
+                        grid.pdfExport();
+                        break;
+
+                    case "refreshGrid":
+                        loadUserGrid();
+                        break;
+
+                    case "newUser":
+                        openUserModal();
+                        break;
+
+                    case "editUser":
+                        editUser();
+                        break;
+
+                    case "deleteUser":
+                        deleteUser();
+                        break;
+                }
+
             }
 
-            async function deleteUser() {
-                const selectedRecords = grid.getSelectedRecords();
-                if (!selectedRecords.length) {
-                    return alert("Please select User(s)) to delete");
-                }
+            /**********************************************************************
+             MASTER DATA LOAD (LOAD ONCE)
+            **********************************************************************/
+            async function loadMasterData() {
 
-                if (!confirm(`Delete ${selectedRecords.length} appointment(s)?`)) {
-                    return;
-                }
-                for (const record of selectedRecords) {
-                    await deleteRecordData('users', record.id, false, true);
-                }
-                loadUserGrid();
-            }
-
-
-            function openUserModal(isEdit = false) {
-                const modal = new bootstrap.Modal(
-                    document.getElementById('userModal'),
-                    { backdrop: 'static', keyboard: false }
-                );
-                
-                // Only reset form and state for new user
-                if (!isEdit) {
-                    editingId = null;
-                    document.querySelector('#userModal .modal-title').innerText = "Add New User";
-                    
-                    // Clear form fields
-                    document.getElementById('userName').value = '';
-                    document.getElementById('displayName').value = '';
-                    document.getElementById('password').value = '';
-                    if (document.getElementById('permissionid').ej2_instances && document.getElementById('permissionid').ej2_instances[0]) {
-                        document.getElementById('permissionid').ej2_instances[0].value = null;
-                    }
-                    if (document.getElementById('menuid').ej2_instances && document.getElementById('menuid').ej2_instances[0]) {
-                        document.getElementById('menuid').ej2_instances[0].value = null;
-                    }
-                    if (document.getElementById('webresourceid').ej2_instances && document.getElementById('webresourceid').ej2_instances[0]) {
-                        document.getElementById('webresourceid').ej2_instances[0].value = null;
-                    }
-                    
-                    // Reset save button state
-                    document.getElementById('saveUserBtn').disabled = true;
-                    document.getElementById('usernameMessage').innerHTML = '';
-                }
-                
-                modal.show();
-            }
-
-            async function validateUsername() {
-                const userName = document.getElementById('userName').value.trim();
-                const messageDiv = document.getElementById('usernameMessage');
-                const saveBtn = document.getElementById('saveUserBtn');
-                
-                if (!userName) {
-                    messageDiv.innerHTML = '';
-                    saveBtn.disabled = true;
-                    return;
-                }
-                
                 try {
-                    // Check if username already exists in database
-                    const existingUser = await DBHandler.fetchEntityRecord(
-                        "users",
-                        "id,username",
-                        `username='${userName}'`
-                    );
-                    
-                    if (existingUser && existingUser.length > 0) {
-                        // If editing and the existing user is the same as current user, allow it
-                        if (editingId && existingUser[0].id == editingId) {
-                            messageDiv.innerHTML = '<span style="color: blue;">Current user</span>';
-                            saveBtn.disabled = false;
-                        } else {
-                            messageDiv.innerHTML = '<span style="color: red;">Username already exists in database</span>';
-                            saveBtn.disabled = true;
-                        }
-                    } else {
-                        messageDiv.innerHTML = '<span style="color: green;">Username is available</span>';
-                        saveBtn.disabled = false;
-                    }
-                } catch (error) {
-                    console.error('Error validating username:', error);
-                    messageDiv.innerHTML = '<span style="color: orange;">Error checking username</span>';
-                    saveBtn.disabled = true;
+
+                    const [permissions, menus, resources] = await Promise.all([
+
+                        DBHandler.fetchEntityRecords(
+                            'masterpermission',
+                            'id,name',
+                            'name',
+                            'asc',
+                            '', true, 0, ''
+                        ),
+
+                        DBHandler.fetchEntityRecords(
+                            'mastermenu',
+                            'id,name',
+                            'name',
+                            'asc',
+                            '', true, 0, ''
+                        ),
+
+                        DBHandler.fetchEntityRecords(
+                            'webresource',
+                            'id,name',
+                            'name',
+                            'asc',
+                            'isactive = 1',
+                            true, 0, ''
+                        )
+
+                    ]);
+
+                    AppState.permissions = permissions || [];
+                    AppState.menus = menus || [];
+                    AppState.webresources = resources || [];
+
                 }
+                catch (err) {
+                    console.error("Master data load error", err);
+                }
+
             }
 
-            function actionTemplate() {
-                return (
-                    '<div class="d-grid gap-2 d-md-flex justify-content-md-center">' +
-                    '<button class="btn btn-sm btn-warning" onclick="onEditAppointment(this)">Edit</button>' +
-                    '<button class="btn btn-sm btn-danger ms-2" onclick="onDeleteAppointment(this)">Delete</button>' +
-                    '</div>'
-                );
+            /**********************************************************************
+             DROPDOWN INITIALIZATION
+            **********************************************************************/
+            function initDropdowns() {
+                destroyDropdown('#permissionid');
+                destroyDropdown('#menuid');
+                destroyDropdown('#webresourceid');
+                createDropdown('#permissionid', AppState.permissions, true);
+                createDropdown('#menuid', AppState.menus, true);
+                createDropdown('#webresourceid', AppState.webresources, true);
             }
 
+            function destroyDropdown(selector) {
+
+                const el = document.querySelector(selector);
+
+                if (el && el.ej2_instances && el.ej2_instances.length > 0) {
+                    el.ej2_instances[0].destroy();
+                    el.innerHTML = '';
+                }
+
+            }
+
+            function createDropdown(selector, data, searchable = false) {
+                const config = {
+                    dataSource: data || [],
+                    fields: { text: 'name', value: 'id' },
+                    placeholder: "Select",
+                    popupHeight: "250px"
+                };
+
+                if (searchable) {
+                    config.allowFiltering = true;
+                    config.filterType = "Contains";
+                    config.ignoreCase = true;
+                    config.filterBarPlaceholder = "Search...";
+                }
+                new ej.dropdowns.DropDownList(config).appendTo(selector);
+            }
+
+            /**********************************************************************
+             USER GRID DATA
+            **********************************************************************/
             async function loadUserGrid() {
 
-                const filter = '';
-
-                const joinCondition = "";
                 try {
 
                     const users = await DBHandler.fetchEntityRecords(
                         'users',
-                        'users.*, users.displayname as DisplayName',
+                        'users.*',
                         'users.createdon',
                         'desc',
-                        filter, true,
+                        '',
+                        true,
                         0,
-                        joinCondition
+                        ''
                     );
 
                     usersMain = users || [];
 
-                    let serialNumber = 1;
+                    let sr = 1;
 
-                    const rows = usersMain.map(a => ({
-                        id: a.id,
-                        srno: serialNumber++,
-                        displayname: a.displayname,
-                        username: a.username,
-                        createdon: normalizeDate(a.createdon),
-                        modifiedon: normalizeDate(a.modifiedon),
-                        permissionid: a.permissionid,
-                        menuid: a.menuid,
-                        webresourceid: a.webresourceid,
+                    grid.dataSource = usersMain.map(u => ({
+                        id: u.id,
+                        srno: sr++,
+                        username: u.username,
+                        displayname: u.displayname,
+                        createdon: normalizeDate(u.createdon),
+                        permissionid: u.permissionid,
+                        menuid: u.menuid,
+                        webresourceid: u.webresourceid
                     }));
 
-                    grid.dataSource = rows;
-                    grid.refresh();
+                }
+                catch (err) {
+                    console.error("Load users error", err);
+                }
 
-                } catch (err) {
-                    console.error('Failed to load appointments:', err);
+            }
+
+            /**********************************************************************
+             EDIT USER
+            **********************************************************************/
+            function editUser() {
+
+                const selected = grid.getSelectedRecords();
+
+                if (selected.length !== 1) {
+                    return alert("Select one user to edit");
+                }
+
+                const user = selected[0];
+
+                editingId = user.id;
+
+                openUserModal(true);
+
+                setFieldValue('userName', user.username);
+                setFieldValue('displayName', user.displayname);
+
+                setDropdownValue('permissionid', user.permissionid);
+                setDropdownValue('menuid', user.menuid);
+                setDropdownValue('webresourceid', user.webresourceid);
+
+            }
+
+            /**********************************************************************
+             DELETE USER
+            **********************************************************************/
+            async function deleteUser() {
+
+                const selected = grid.getSelectedRecords();
+
+                if (!selected.length)
+                    return alert("Select user(s) to delete");
+
+                if (!confirm(`Delete ${selected.length} users?`))
+                    return;
+
+                for (const record of selected) {
+                    await deleteRecordData('users', record.id, false, true);
+                }
+
+                loadUserGrid();
+
+            }
+
+            /**********************************************************************
+             MODAL
+            **********************************************************************/
+            function openUserModal(isEdit = false) {
+
+                const modalEl = document.getElementById('userModal');
+
+                const modal = new bootstrap.Modal(modalEl, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+
+                modal.show();
+
+                ej.base.enableRipple(true);
+
+                modalEl.addEventListener('shown.bs.modal', function initOnce() {
+
+                    initDropdowns();
+
+                    // Remove listener so it doesn't run again unnecessarily
+                    modalEl.removeEventListener('shown.bs.modal', initOnce);
+
+                });
+
+                if (!isEdit) {
+
+                    editingId = null;
+
+                    clearForm();
+
+                    $('#userModal .modal-title').text("Add New User");
+
                 }
             }
 
-            function normalizeDate(val) {
-                if (!val) return null;
-                const d = val instanceof Date ? val : new Date(val);
-                return isNaN(d) ? null : d;
-            }
-
-            $(document).ready(async () => {
-                // applyDatePicker('startDate,endDate,appointmentDate', new Date());
-                // applyDatePicker('nextAppointment');
-                initGrid(columns, 'userGrid');
-                loadUserGrid();
-
-                // Keep Syncfusion filter input usable inside Bootstrap modal.
-                $('#userModal').on('shown.bs.modal', function () {
-                    $(document).off('focusin.modal');
-                });
-            });
-
-            function applyDatePicker(ids, value) {
-                ids.split(',').forEach(id => {
-                    id = id.trim();
-                    if (id && document.getElementById(id)) {
-                        new ej.calendars.DatePicker({
-                            placeholder: "Select a date",
-                            format: "dd-MMM-yyyy",
-                            value: value || null
-                        }).appendTo('#' + id);
-                    }
-                });
-            }
-
-            function getDatePickerValue(id) {
-                const picker = document.getElementById(id)?.ej2_instances?.[0];
-                if (!picker?.value) return null;
-
-                const intl = new ej.base.Internationalization();
-
-                return intl.formatDate(picker.value, {
-                    format: "yyyy-MM-dd"
-                });
-            }
-
+            /**********************************************************************
+             SAVE USER
+            **********************************************************************/
             async function saveUser() {
 
-                const displayName = document.getElementById('displayName').value.trim();
-                const userName = document.getElementById('userName').value.trim();
-                const password = document.getElementById('password').value.trim();
-                const permissionId = document.getElementById('permissionid').ej2_instances[0].value;
-                const menuId = document.getElementById('menuid').ej2_instances[0].value;
-                const webResourceId = document.getElementById('webresourceid').ej2_instances[0].value;
+                const displayName = getValue('displayName');
+                const userName = getValue('userName');
+                const password = getValue('password');
 
-                // For new users, password is required. For editing, it's optional
+                const permissionId = getDropdownValue('permissionid');
+                const menuId = getDropdownValue('menuid');
+                const webResourceId = getDropdownValue('webresourceid');
+
                 if (!displayName || !userName || !permissionId || !menuId)
-                    return alert("Please fill all required fields");
-                
-                if (!editingId && !password) // New user without password
-                    return alert("Password is required for new users");
+                    return alert("Fill required fields");
+
+                if (!editingId && !password)
+                    return alert("Password required");
 
                 try {
 
                     const permission = await DBHandler.fetchEntityRecord(
                         "masterpermission",
                         "permissionjson",
-                        "id='" + permissionId + "'"
+                        `id='${permissionId}'`
                     );
 
                     const menu = await DBHandler.fetchEntityRecord(
                         "mastermenu",
                         "menujson",
-                        "id='" + menuId + "'"
+                        `id='${menuId}'`
                     );
 
-                    // Prepare user data object
                     const userData = {
                         username: userName,
                         displayname: displayName,
                         permissionid: permissionId,
                         menuid: menuId,
-                        webresourceid: webResourceId || null,
+                        webresourceid: webResourceId,
                         permissionjson: permission?.[0]?.permissionjson || "{}",
                         menujson: menu?.[0]?.menujson || "{}",
                         token: crypto.randomUUID(),
@@ -644,62 +496,102 @@
                         disableduser: 0
                     };
 
-                    // Only include password if it's provided
-                    if (password) {
+                    if (password)
                         userData.password = password;
-                    }
 
                     await DBHandler.submitRecordData('users', userData, editingId, false);
 
                     await loadUserGrid();
-                    bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
 
-                } catch (err) {
+                    bootstrap.Modal.getInstance(
+                        document.getElementById('userModal')
+                    ).hide();
+
+                }
+                catch (err) {
+
                     console.error(err);
-                    alert("Failed to save user");
+
+                    alert("Save failed");
+
                 }
 
             }
 
+            /**********************************************************************
+             USERNAME VALIDATION
+            **********************************************************************/
+            async function validateUsername() {
 
-            async function fetchUserByUsername(username) {
-                try {
-                    // ✅ Show loader while fetching
-                    showLoader();
+                const userName = getValue('userName');
 
-                    // Build filter string for DB query
-                    const filter = "username='" + username + "'";
+                const msg = $('#usernameMessage');
 
-                    // Fetch records from masteruser entity
-                    let data = await DBHandler.fetchEntityRecord(
-                        "users",                          // entity/table name
-                        "id,username,displayname,permissionid,menuid", // columns you want
-                        filter                                 // filter condition
-                    );
-
-                    // If data found
-                    if (data && data.length > 0) {
-                        const userRecord = data[0]
-                        console.log(userRecord)
-                        document.getElementById("displayName").value = userRecord.displayname;
-                        document.getElementById("password").value = userRecord.password;
-                        document.getElementById("permissionid").value = userRecord.permissionid;
-                        document.getElementById("menuid").value = userRecord.menuid;
-                    } else {
-                        alert("No user found with the provided username.");
-                        return null;
-                    }
-                } catch (err) {
-                    console.error("Error fetching user:", err);
-                    alert("Error fetching user details");
-                    return null;
-                } finally {
-                    // ✅ Always hide loader
-                    hideLoader();
+                if (!userName) {
+                    msg.html('');
+                    return;
                 }
+
+                const user = await DBHandler.fetchEntityRecord(
+                    "users",
+                    "id",
+                    `username='${userName}'`
+                );
+
+                if (user?.length && user[0].id !== editingId) {
+
+                    msg.html('<span style="color:red">Username exists</span>');
+                    $('#saveUserBtn').prop('disabled', true);
+
+                } else {
+
+                    msg.html('<span style="color:green">Username available</span>');
+                    $('#saveUserBtn').prop('disabled', false);
+
+                }
+
+            }
+
+            /**********************************************************************
+             HELPERS
+            **********************************************************************/
+            function normalizeDate(val) {
+                const d = new Date(val);
+                return isNaN(d) ? null : d;
+            }
+
+            function getValue(id) {
+                return document.getElementById(id).value.trim();
+            }
+
+            function setFieldValue(id, value) {
+                document.getElementById(id).value = value || '';
+            }
+
+            function getDropdownValue(id) {
+                return document.getElementById(id)?.ej2_instances?.[0]?.value;
+            }
+
+            function setDropdownValue(id, value) {
+                const obj = document.getElementById(id)?.ej2_instances?.[0];
+                if (obj) obj.value = value || null;
+            }
+
+            function clearForm() {
+
+                setFieldValue('userName', '');
+                setFieldValue('displayName', '');
+                setFieldValue('password', '');
+
+                setDropdownValue('permissionid', null);
+                setDropdownValue('menuid', null);
+                setDropdownValue('webresourceid', null);
+
             }
 
         </script>
+
+
 
         <style>
             #userGrid_toolbarItems {
