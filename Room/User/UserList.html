@@ -82,14 +82,9 @@
                         <div class="col-md-6">
                             <label>User Name<span style="color: red;">*</span>:</label>
                             <div class="input-group">
-                                <input class="form-control" id="userName" dbcolumnname="userName" />
-                                <div class="input-group-append">
-                                    <button type="button" class="btn btn-primary" id="go-button"
-                                        onclick="fetchUserByUsername(document.getElementById('userName').value)">
-                                        <i class="fas fa-arrow-right"></i> <!-- Go icon -->
-                                    </button>
-                                </div>
+                                <input class="form-control" id="userName" dbcolumnname="userName" onfocusout="validateUsername()" />
                             </div>
+                            <div id="usernameMessage" class="mt-1" style="font-size: 12px;"></div>
                         </div>
                         <div class="col-md-6">
                             <label>Display Name<span style="color: red;">*</span>:</label>
@@ -183,7 +178,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="saveUser()">Save User</button>
+                    <button type="button" class="btn btn-primary" id="saveUserBtn" onclick="saveUser()" disabled>Save User</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -370,6 +365,10 @@
                 // ✅ Update modal title
                 document.querySelector('#userModal .modal-title').innerText = "Edit User";
 
+                // Enable save button for editing existing user
+                document.getElementById('saveUserBtn').disabled = false;
+                document.getElementById('usernameMessage').innerHTML = '';
+
                 openUserModal();
             }
 
@@ -402,7 +401,66 @@
                     document.getElementById('userModal'),
                     { backdrop: 'static', keyboard: false }
                 );
+                
+                // Reset form and state for new user
+                editingId = null;
+                document.querySelector('#userModal .modal-title').innerText = "Add New User";
+                
+                // Clear form fields
+                document.getElementById('userName').value = '';
+                document.getElementById('displayName').value = '';
+                document.getElementById('password').value = '';
+                if (document.getElementById('permissionid').ej2_instances && document.getElementById('permissionid').ej2_instances[0]) {
+                    document.getElementById('permissionid').ej2_instances[0].value = null;
+                }
+                if (document.getElementById('menuid').ej2_instances && document.getElementById('menuid').ej2_instances[0]) {
+                    document.getElementById('menuid').ej2_instances[0].value = null;
+                }
+                
                 modal.show();
+                
+                // Reset save button state
+                document.getElementById('saveUserBtn').disabled = true;
+                document.getElementById('usernameMessage').innerHTML = '';
+            }
+
+            async function validateUsername() {
+                const userName = document.getElementById('userName').value.trim();
+                const messageDiv = document.getElementById('usernameMessage');
+                const saveBtn = document.getElementById('saveUserBtn');
+                
+                if (!userName) {
+                    messageDiv.innerHTML = '';
+                    saveBtn.disabled = true;
+                    return;
+                }
+                
+                try {
+                    // Check if username already exists in database
+                    const existingUser = await DBHandler.fetchEntityRecord(
+                        "users",
+                        "id,username",
+                        `username='${userName}'`
+                    );
+                    
+                    if (existingUser && existingUser.length > 0) {
+                        // If editing and the existing user is the same as current user, allow it
+                        if (editingId && existingUser[0].id == editingId) {
+                            messageDiv.innerHTML = '<span style="color: blue;">Current user</span>';
+                            saveBtn.disabled = false;
+                        } else {
+                            messageDiv.innerHTML = '<span style="color: red;">Username already exists in database</span>';
+                            saveBtn.disabled = true;
+                        }
+                    } else {
+                        messageDiv.innerHTML = '<span style="color: green;">Username is available</span>';
+                        saveBtn.disabled = false;
+                    }
+                } catch (error) {
+                    console.error('Error validating username:', error);
+                    messageDiv.innerHTML = '<span style="color: orange;">Error checking username</span>';
+                    saveBtn.disabled = true;
+                }
             }
 
             function actionTemplate() {
@@ -555,7 +613,7 @@
 
                     // Fetch records from masteruser entity
                     let data = await DBHandler.fetchEntityRecord(
-                        "masteruser",                          // entity/table name
+                        "users",                          // entity/table name
                         "id,username,displayname,permissionid,menuid", // columns you want
                         filter                                 // filter condition
                     );
