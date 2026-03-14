@@ -307,8 +307,8 @@
 
             const data = await DBHandler.fetchEntityRecords(
                 'webresource',
-                'id,name,title,pagetitle,resourcetype,isactive,createdon',
-                'createdon',
+                'id,name,title,pagetitle,resourcetype,isactive,createdon,modifiedon',
+                'modifiedon',
                 'desc',
                 '',
                 true,
@@ -333,8 +333,8 @@
         function formatResourceType(type) {
 
             switch (type) {
-                case 1: return "HTML";
-                case 2: return "JavaScript";
+                case 1: return "JavaScript";
+                case 2: return "HTML";
                 case 3: return "CSS";
                 case 4: return "JSON";
                 default: return "";
