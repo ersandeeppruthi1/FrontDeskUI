@@ -237,9 +237,31 @@
                     if (args.item.id === 'new') {
                         clearForm();
                         editingId = null;
+                        
+                        // Destroy if already exists
+                        if (lookupEntityDropdown) lookupEntityDropdown.destroy();
+                        
+                        const modal = new bootstrap.Modal(webResourceModal, {
+                            focus: false
+                        });
+                        modal.show();
+                        
+                        ej.base.enableRipple(true);
+                        
+                        // Initialize dropdown after modal is shown
+                        lookupEntityDropdown = new ej.dropdowns.DropDownList({
+                            dataSource: entitiesData,
+                            fields: { text: 'name', value: 'id' },
+                            placeholder: 'Select Lookup Entity',
+                            allowFiltering: true,
+                            filterBarPlaceholder: 'Search entities...',
+                            ignoreCase: true,
+                            filterType: 'Contains',
+                            popupHeight: '250px'
+                        });
+                        lookupEntityDropdown.appendTo('#wr_lookupentityid');
+                        
                         document.querySelector('#webResourceModal .modal-title').innerText = "Add Web Resource";
-                        openModal();
-                        initLookupEntityDropdown(null);
                     }
 
                     // Edit
@@ -321,10 +343,6 @@
 
 
         // ---------- MODAL ----------
-        function openModal() {
-            new bootstrap.Modal(document.getElementById('webResourceModal')).show();
-        }
-
         function clearForm() {
             document.getElementById('webResourceForm').reset();
             document.getElementById('wr_resourcetext').value = '';
@@ -342,23 +360,6 @@
             ) || [];
         }
 
-        function initLookupEntityDropdown(selectedValue) {
-            if (lookupEntityDropdown) {
-                lookupEntityDropdown.destroy();
-            }
-
-            lookupEntityDropdown = new ej.dropdowns.DropDownList({
-                dataSource: entitiesData,
-                fields: { text: 'name', value: 'id' },
-                placeholder: 'Select Lookup Entity',
-                allowFiltering: true,
-                popupHeight: '250px',
-                value: selectedValue || null
-            });
-
-            lookupEntityDropdown.appendTo('#wr_lookupentityid');
-        }
-
 
         // ---------- EDIT ----------
         async function editWebResource() {
@@ -370,7 +371,31 @@
             const r = selected[0];
             editingId = r.id;
 
+            // Destroy if already exists
+            if (lookupEntityDropdown) lookupEntityDropdown.destroy();
+
             // 1️⃣ Open modal immediately with basic info
+            const modal = new bootstrap.Modal(webResourceModal, {
+                focus: false
+            });
+            modal.show();
+
+            ej.base.enableRipple(true);
+
+            // Initialize dropdown after modal is shown
+            lookupEntityDropdown = new ej.dropdowns.DropDownList({
+                dataSource: entitiesData,
+                fields: { text: 'name', value: 'id' },
+                placeholder: 'Select Lookup Entity',
+                allowFiltering: true,
+                filterBarPlaceholder: 'Search entities...',
+                ignoreCase: true,
+                filterType: 'Contains',
+                popupHeight: '250px',
+                value: r.lookupentityid || null
+            });
+            lookupEntityDropdown.appendTo('#wr_lookupentityid');
+
             document.getElementById('wr_name').value = r.name;
             document.getElementById('wr_title').value = r.title;
             document.getElementById('wr_pagetitle').value = r.pagetitle;
@@ -383,8 +408,6 @@
             document.getElementById('wr_resourcetype').value = typeValue;
             document.getElementById('wr_resourcetext').value = 'Loading...'; // placeholder while fetching
             document.querySelector('#webResourceModal .modal-title').innerText = "Edit Web Resource";
-            openModal();
-            initLookupEntityDropdown(null);
 
             try {
                 // 2️⃣ Fetch full record including resourcetext
