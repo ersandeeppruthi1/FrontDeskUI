@@ -146,6 +146,7 @@
                 { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
                 { field: 'username', headerText: 'User Name', width: 150 },
                 { field: 'displayname', headerText: 'Display Name', width: 200 },
+                { field: 'businessunitname', headerText: 'Business Unit', width: 180 },
                 { field: 'id', visible: false },
                 { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 150 },
                 { field: 'permissionid', visible: false },
@@ -357,8 +358,8 @@
                 try {
 
                     const users = await DBHandler.fetchEntityRecords(
-                        'users',
-                        'users.*',
+                        'users LEFT JOIN businessunit ON users.businessunitid = businessunit.id',
+                        'users.*, businessunit.name as businessunitname',
                         'users.createdon',
                         'desc',
                         '',
@@ -376,6 +377,7 @@
                         srno: sr++,
                         username: u.username,
                         displayname: u.displayname,
+                        businessunitname: u.businessunitname || 'No Business Unit',
                         createdon: normalizeDate(u.createdon),
                         permissionid: u.permissionid,
                         menuid: u.menuid,
