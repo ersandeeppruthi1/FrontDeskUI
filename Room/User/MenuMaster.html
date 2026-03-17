@@ -284,7 +284,6 @@
         });
 
         let menuItems = [];
-        let menuItemCounter = 1;
 
         function addMenuItem() {
             const menuItemName = document.getElementById('menuItemName').value.trim();
@@ -298,19 +297,36 @@
                 return;
             }
 
-            const newMenuItem = {
-                id: `menu_${menuItemCounter++}`,
-                name: menuItemName,
-                url: menuUrl || '#',
-                icon: menuIcon || 'fa-circle',
-                parentId: parentMenuId || null,
-                sortOrder: parseInt(sortOrder),
-                children: []
-            };
+            // 🔥 EDIT MODE
+            if (editingMenuItemId) {
+                const item = menuItems.find(m => m.id === editingMenuItemId);
 
-            menuItems.push(newMenuItem);
+                if (item) {
+                    item.name = menuItemName;
+                    item.url = menuUrl || '#';
+                    item.icon = menuIcon || 'fa-circle';
+                    item.parentId = parentMenuId || null;
+                    item.sortOrder = parseInt(sortOrder);
+                }
 
-            // Clear input fields
+                editingMenuItemId = null; // reset
+            }
+            else {
+                // ➕ ADD NEW
+                const newMenuItem = {
+                    id: 'menu_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    name: menuItemName,
+                    url: menuUrl || '#',
+                    icon: menuIcon || 'fa-circle',
+                    parentId: parentMenuId || null,
+                    sortOrder: parseInt(sortOrder),
+                    children: []
+                };
+
+                menuItems.push(newMenuItem);
+            }
+
+            // Clear form
             webResourceDropdown.value = null;
             document.getElementById('menuItemName').value = '';
             document.getElementById('menuUrl').value = '';
@@ -322,7 +338,6 @@
             updateParentMenuSelector();
             updateMenuJSON();
         }
-
         function renderMenuItems() {
             const container = document.getElementById('menuItemsContainer');
 
@@ -384,12 +399,9 @@
                                     </div>
                                 </div>
                                 <div class="btn-group" role="group">
-                                    <button type="button" 
-    class="btn btn-outline-primary btn-sm" 
-    id="editBtn-${menuItem.id}"
-    onclick="toggleEditSort('${menuItem.id}')">
-    <i class="fa fa-edit"></i>
-</button>
+                                   <button type="button" class="btn btn-outline-primary btn-sm" onclick="editMenuItem('${menuItem.id}')"title="Edit Menu Item">
+                                    <i class="fa fa-edit"></i></button>
+
                                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeMenuItem('${menuItem.id}')" title="Remove Menu Item">
                                         <i class="fa fa-trash"></i>
                                     </button>
@@ -429,18 +441,27 @@
             }
         }
 
+        let editingMenuItemId = null;
+
         function editMenuItem(menuId) {
             const menuItem = menuItems.find(item => item.id === menuId);
             if (!menuItem) return;
 
+            // ✅ Populate Configure Menu Items fields
             document.getElementById('menuItemName').value = menuItem.name;
             document.getElementById('menuUrl').value = menuItem.url;
             document.getElementById('menuIcon').value = menuItem.icon;
             parentMenuDropdown.value = menuItem.parentId || '';
             document.getElementById('sortOrder').value = menuItem.sortOrder;
 
-            // Remove the item so it can be re-added with changes
-            removeMenuItem(menuId);
+            // Optional: set web resource if needed
+            webResourceDropdown.value = null;
+
+            // ✅ Set edit mode
+            editingMenuItemId = menuId;
+
+            // Optional UX
+            document.getElementById('menuItemName').focus();
         }
 
         function updateParentMenuSelector() {
@@ -552,12 +573,11 @@
             try {
                 const menuData = JSON.parse(jsonString);
                 menuItems = [];
-                menuItemCounter = 1;
 
                 function flattenMenuItems(items, parentId = null) {
                     items.forEach(item => {
                         const flatItem = {
-                            id: item.id || `menu_${menuItemCounter++}`,
+                            id: item.id || ('menu_' + Date.now() + '_' + Math.floor(Math.random() * 1000)),
                             name: item.name,
                             url: item.url || '#',
                             icon: item.icon || 'fa-circle',
@@ -652,7 +672,6 @@
         function clearAllMenuItems() {
             if (confirm('Are you sure you want to clear all menu items? This action cannot be undone.')) {
                 menuItems = [];
-                menuItemCounter = 1;
                 renderMenuItems();
                 updateParentMenuSelector();
                 updateMenuJSON();
@@ -870,19 +889,23 @@
         }
 
         function openMenuModal() {
-            // Reset form if it's a new menu (not editing)
+
+            // 🔴 ALWAYS RESET when opening modal
             if (!editingId) {
+                menuItems = [];
+
                 document.getElementById('menuName').value = '';
+
                 if (businessUnitDropdown) {
                     businessUnitDropdown.value = null;
                 } else {
                     document.getElementById('businessUnitId').value = '';
                 }
-                menuItems = [];
-                menuItemCounter = 1;
+
                 renderMenuItems();
                 updateParentMenuSelector();
                 updateMenuJSON();
+
                 document.querySelector('#menuModal .modal-title').innerText = "Add Master Menu";
             }
 
@@ -890,12 +913,9 @@
                 document.getElementById('menuModal'),
                 { backdrop: 'static', keyboard: false, focus: false }
             );
+
             modal.show();
-
-            // Enable ripple effect
-            ej.base.enableRipple(true);
         }
-
         async function loadMenuGrid() {
             const filter = '';
             const joinCondition = "";
@@ -943,6 +963,18 @@
             $('#menuModal').on('shown.bs.modal', function () {
                 $(document).off('focusin.modal');
             });
+        });
+
+        $('#menuModal').on('hidden.bs.modal', function () {
+            menuItems = [];
+
+            document.getElementById('menuName').value = '';
+            document.getElementById('menuJSON').value = '';
+
+            renderMenuItems();
+            updateParentMenuSelector();
+
+            editingId = null;
         });
 
         async function updateUserMenuJSON(menuId, newMenuJSON) {
@@ -1049,7 +1081,6 @@
                     document.getElementById('businessUnitId').value = '';
                 }
                 menuItems = [];
-                menuItemCounter = 1;
                 renderMenuItems();
                 updateParentMenuSelector();
                 updateMenuJSON();
@@ -1087,41 +1118,41 @@
         }
 
         function toggleEditSort(menuId) {
-    const input = document.getElementById(`sortInput-${menuId}`);
-    const text = document.getElementById(`sortText-${menuId}`);
-    const btn = document.getElementById(`editBtn-${menuId}`);
+            const input = document.getElementById(`sortInput-${menuId}`);
+            const text = document.getElementById(`sortText-${menuId}`);
+            const btn = document.getElementById(`editBtn-${menuId}`);
 
-    if (input.classList.contains('d-none')) {
-        // Switch to edit mode
-        input.classList.remove('d-none');
-        text.classList.add('d-none');
-        btn.innerHTML = '<i class="fa fa-save"></i>';
-    } else {
-        // Save mode
-        const newValue = parseInt(input.value);
+            if (input.classList.contains('d-none')) {
+                // Switch to edit mode
+                input.classList.remove('d-none');
+                text.classList.add('d-none');
+                btn.innerHTML = '<i class="fa fa-save"></i>';
+            } else {
+                // Save mode
+                const newValue = parseInt(input.value);
 
-        if (!newValue || newValue < 1) {
-            alert("Invalid sort order");
-            return;
+                if (!newValue || newValue < 1) {
+                    alert("Invalid sort order");
+                    return;
+                }
+
+                // Update data
+                const item = menuItems.find(m => m.id === menuId);
+                if (item) {
+                    item.sortOrder = newValue;
+                }
+
+                // Switch back to view
+                text.innerText = newValue;
+                input.classList.add('d-none');
+                text.classList.remove('d-none');
+                btn.innerHTML = '<i class="fa fa-edit"></i>';
+
+                // Refresh JSON & UI
+                updateMenuJSON();
+                renderMenuItems();
+            }
         }
-
-        // Update data
-        const item = menuItems.find(m => m.id === menuId);
-        if (item) {
-            item.sortOrder = newValue;
-        }
-
-        // Switch back to view
-        text.innerText = newValue;
-        input.classList.add('d-none');
-        text.classList.remove('d-none');
-        btn.innerHTML = '<i class="fa fa-edit"></i>';
-
-        // Refresh JSON & UI
-        updateMenuJSON();
-        renderMenuItems();
-    }
-}
     </script>
 
     <style>
