@@ -263,8 +263,8 @@
         let entitySelectorDropdown = null;
 
         async function loadEntitiesForPermissions() {
-            const entities = await DBHandler.fetchEntityRecords('entities', 'id, name', 'name', 'asc', '', true, 0, '');
-            availableEntities = (entities || []).map(entity => ({ ...entity, tablename: entity.tablename || entity.name.toLowerCase().replace(/\s+/g, '') }));
+            const entities = await DBHandler.fetchEntityRecords('entities', 'id, name,physicalname', 'name', 'asc', '', true, 0, '');
+            availableEntities = (entities || []).map(entity => ({ ...entity, tablename: entity.physicalname || entity.name.toLowerCase().replace(/\s+/g, '') }));
             populateEntitySelector();
         }
 
