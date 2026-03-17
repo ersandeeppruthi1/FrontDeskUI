@@ -369,14 +369,27 @@
                                         <div class="text-muted small">
                                             <span class="me-3"><i class="fa fa-link"></i> ${menuItem.url}</span>
                                             <span class="me-3"><i class="fa fa-sitemap"></i> ${parentName}</span>
-                                            <span><i class="fa fa-sort-numeric-up"></i> Sort: ${menuItem.sortOrder}</span>
+                                           <span>
+    <i class="fa fa-sort-numeric-up"></i> 
+    Sort: 
+    <span id="sortText-${menuItem.id}">${menuItem.sortOrder}</span>
+
+    <input type="number" 
+        id="sortInput-${menuItem.id}" 
+        value="${menuItem.sortOrder}" 
+        class="form-control form-control-sm d-none mt-1"
+        style="width:80px; display:inline-block;" />
+</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="editMenuItem('${menuItem.id}')" title="Edit Menu Item">
-                                        <i class="fa fa-edit"></i>
-                                    </button>
+                                    <button type="button" 
+    class="btn btn-outline-primary btn-sm" 
+    id="editBtn-${menuItem.id}"
+    onclick="toggleEditSort('${menuItem.id}')">
+    <i class="fa fa-edit"></i>
+</button>
                                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeMenuItem('${menuItem.id}')" title="Remove Menu Item">
                                         <i class="fa fa-trash"></i>
                                     </button>
@@ -1073,6 +1086,42 @@
             updateMenuJSON();
         }
 
+        function toggleEditSort(menuId) {
+    const input = document.getElementById(`sortInput-${menuId}`);
+    const text = document.getElementById(`sortText-${menuId}`);
+    const btn = document.getElementById(`editBtn-${menuId}`);
+
+    if (input.classList.contains('d-none')) {
+        // Switch to edit mode
+        input.classList.remove('d-none');
+        text.classList.add('d-none');
+        btn.innerHTML = '<i class="fa fa-save"></i>';
+    } else {
+        // Save mode
+        const newValue = parseInt(input.value);
+
+        if (!newValue || newValue < 1) {
+            alert("Invalid sort order");
+            return;
+        }
+
+        // Update data
+        const item = menuItems.find(m => m.id === menuId);
+        if (item) {
+            item.sortOrder = newValue;
+        }
+
+        // Switch back to view
+        text.innerText = newValue;
+        input.classList.add('d-none');
+        text.classList.remove('d-none');
+        btn.innerHTML = '<i class="fa fa-edit"></i>';
+
+        // Refresh JSON & UI
+        updateMenuJSON();
+        renderMenuItems();
+    }
+}
     </script>
 
     <style>
