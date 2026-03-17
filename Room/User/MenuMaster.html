@@ -213,9 +213,17 @@
         let parentMenuDropdown = new ej.dropdowns.DropDownList({
             dataSource: [{ id: '', name: 'Root Menu' }],
             fields: { text: 'name', value: 'id' },
-            placeholder: 'Root Menu',
+            placeholder: 'Select Parent Menu',
+
+            // 🔥 Enable search
+            allowFiltering: true,
+            filterType: 'Contains',
+            ignoreCase: true,
+            filterBarPlaceholder: 'Search parent menu...',
+
             value: ''
         });
+
         parentMenuDropdown.appendTo('#parentMenuSelector');
 
         let webResourcesData = [];
@@ -385,15 +393,15 @@
                                             <span class="me-3"><i class="fa fa-link"></i> ${menuItem.url}</span>
                                             <span class="me-3"><i class="fa fa-sitemap"></i> ${parentName}</span>
                                            <span>
-    <i class="fa fa-sort-numeric-up"></i> 
-    Sort: 
-    <span id="sortText-${menuItem.id}">${menuItem.sortOrder}</span>
+                                                    <i class="fa fa-sort-numeric-up"></i> 
+                                                        Sort: 
+                                                        <span id="sortText-${menuItem.id}">${menuItem.sortOrder}</span>
 
-    <input type="number" 
-        id="sortInput-${menuItem.id}" 
-        value="${menuItem.sortOrder}" 
-        class="form-control form-control-sm d-none mt-1"
-        style="width:80px; display:inline-block;" />
+<input type="number" 
+id="sortInput-${menuItem.id}" 
+value="${menuItem.sortOrder}" 
+class="form-control form-control-sm d-none mt-1"
+style="width:80px; display:inline-block;" />
 </span>
                                         </div>
                                     </div>
@@ -467,13 +475,13 @@
         function updateParentMenuSelector() {
             const currentValue = parentMenuDropdown.value;
 
-            const dataSource = [{ id: '', name: 'Root Menu' }].concat(
-                menuItems.map(item => ({ id: item.id, name: item.name }))
-            );
+            const dataSource = [{ id: '', name: 'Root Menu' }]
+                .concat(menuItems.map(item => ({ id: item.id, name: item.name })))
+                .sort((a, b) => a.name.localeCompare(b.name)); // 🔥 sort
+
             parentMenuDropdown.dataSource = dataSource;
             parentMenuDropdown.dataBind();
 
-            // Restore selection if it still exists
             if (currentValue && menuItems.find(item => item.id === currentValue)) {
                 parentMenuDropdown.value = currentValue;
             } else {
@@ -1096,26 +1104,26 @@
             }
         }
 
-        function editMenuItem(menuId) {
-            const index = menuItems.findIndex(item => item.id === menuId);
-            if (index === -1) return;
+        // function editMenuItem(menuId) {
+        //     const index = menuItems.findIndex(item => item.id === menuId);
+        //     if (index === -1) return;
 
-            const menuItem = menuItems[index];
+        //     const menuItem = menuItems[index];
 
-            // Fill form fields
-            document.getElementById('menuItemName').value = menuItem.name;
-            document.getElementById('menuUrl').value = menuItem.url;
-            document.getElementById('menuIcon').value = menuItem.icon;
-            parentMenuDropdown.value = menuItem.parentId || '';
-            document.getElementById('sortOrder').value = menuItem.sortOrder;
+        //     // Fill form fields
+        //     document.getElementById('menuItemName').value = menuItem.name;
+        //     document.getElementById('menuUrl').value = menuItem.url;
+        //     document.getElementById('menuIcon').value = menuItem.icon;
+        //     parentMenuDropdown.value = menuItem.parentId || '';
+        //     document.getElementById('sortOrder').value = menuItem.sortOrder;
 
-            // Remove item WITHOUT confirmation
-            menuItems.splice(index, 1);
+        //     // Remove item WITHOUT confirmation
+        //     menuItems.splice(index, 1);
 
-            renderMenuItems();
-            updateParentMenuSelector();
-            updateMenuJSON();
-        }
+        //     renderMenuItems();
+        //     updateParentMenuSelector();
+        //     updateMenuJSON();
+        // }
 
         function toggleEditSort(menuId) {
             const input = document.getElementById(`sortInput-${menuId}`);
