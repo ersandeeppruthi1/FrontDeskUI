@@ -465,6 +465,11 @@
 
                     $('#userModal .modal-title').text("Add New User");
 
+                } else {
+
+                    $('#userModal .modal-title').text("Edit User");
+                    $('#saveUserBtn').prop('disabled', false);
+
                 }
             }
 
@@ -594,7 +599,6 @@
                 setFieldValue('displayName', '');
                 setFieldValue('password', '');
 
-                setDropdownValue('permissionid', null);
                 setDropdownValue('menuid', null);
                 setDropdownValue('webresourceid', null);
                 setDropdownValue('issystemadministrator', 1); // Default to "Yes" for admin
