@@ -297,25 +297,36 @@
                 return;
             }
 
-            if (!Array.isArray(menuItems)) {
-                menuItems = [];
+            // 🔥 EDIT MODE
+            if (editingMenuItemId) {
+                const item = menuItems.find(m => m.id === editingMenuItemId);
+
+                if (item) {
+                    item.name = menuItemName;
+                    item.url = menuUrl || '#';
+                    item.icon = menuIcon || 'fa-circle';
+                    item.parentId = parentMenuId || null;
+                    item.sortOrder = parseInt(sortOrder);
+                }
+
+                editingMenuItemId = null; // reset
             }
+            else {
+                // ➕ ADD NEW
+                const newMenuItem = {
+                    id: 'menu_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    name: menuItemName,
+                    url: menuUrl || '#',
+                    icon: menuIcon || 'fa-circle',
+                    parentId: parentMenuId || null,
+                    sortOrder: parseInt(sortOrder),
+                    children: []
+                };
 
-            const newMenuItem = {
-                id: 'menu_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-                name: menuItemName,
-                url: menuUrl || '#',
-                icon: menuIcon || 'fa-circle',
-                parentId: parentMenuId || null,
-                sortOrder: parseInt(sortOrder),
-                children: []
-            };
-
-            if (!menuItems.find(m => m.id === newMenuItem.id)) {
                 menuItems.push(newMenuItem);
             }
 
-            // Clear input fields
+            // Clear form
             webResourceDropdown.value = null;
             document.getElementById('menuItemName').value = '';
             document.getElementById('menuUrl').value = '';
@@ -327,7 +338,6 @@
             updateParentMenuSelector();
             updateMenuJSON();
         }
-
         function renderMenuItems() {
             const container = document.getElementById('menuItemsContainer');
 
@@ -389,12 +399,9 @@
                                     </div>
                                 </div>
                                 <div class="btn-group" role="group">
-                                    <button type="button" 
-    class="btn btn-outline-primary btn-sm" 
-    id="editBtn-${menuItem.id}"
-    onclick="toggleEditSort('${menuItem.id}')">
-    <i class="fa fa-edit"></i>
-</button>
+                                   <button type="button" class="btn btn-outline-primary btn-sm" onclick="editMenuItem('${menuItem.id}')"title="Edit Menu Item">
+                                    <i class="fa fa-edit"></i></button>
+
                                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeMenuItem('${menuItem.id}')" title="Remove Menu Item">
                                         <i class="fa fa-trash"></i>
                                     </button>
@@ -434,18 +441,27 @@
             }
         }
 
+        let editingMenuItemId = null;
+
         function editMenuItem(menuId) {
             const menuItem = menuItems.find(item => item.id === menuId);
             if (!menuItem) return;
 
+            // ✅ Populate Configure Menu Items fields
             document.getElementById('menuItemName').value = menuItem.name;
             document.getElementById('menuUrl').value = menuItem.url;
             document.getElementById('menuIcon').value = menuItem.icon;
             parentMenuDropdown.value = menuItem.parentId || '';
             document.getElementById('sortOrder').value = menuItem.sortOrder;
 
-            // Remove the item so it can be re-added with changes
-            removeMenuItem(menuId);
+            // Optional: set web resource if needed
+            webResourceDropdown.value = null;
+
+            // ✅ Set edit mode
+            editingMenuItemId = menuId;
+
+            // Optional UX
+            document.getElementById('menuItemName').focus();
         }
 
         function updateParentMenuSelector() {
