@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="container2 mt-4">
+        <div id="entityColumnGrid"> </div>
+    </div>
+
+    <div class="modal fade" id="entityColumnModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title"> Add Entity Column </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"> </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="entityColumnForm">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Entity </label>
+                                <input type="text" id="column_entity" class="form-control" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Name </label>
+                                <input type="text" id="column_name" class="form-control" required
+                                    oninput="bindEntityNameField()" />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Physical Name </label>
+                                <input type="text" id="column_physicalname" class="form-control" required disabled />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Column Type </label>
+                                <select id="column_type" class="form-control">
+                                    <option value="VARCHAR(255)">VARCHAR</option>
+                                    <option value="INT">INT</option>
+                                    <option value="DATE">DATE</option>
+                                    <option value="DATETIME">DATETIME</option>
+                                    <option value="decimal">decimal</option>
+                                    <option value="text">TEXT</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Lookup Entity </label>
+                                <input id="column_lookup" type="text" class="form-control" />
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveEntityColumn()"> Save </button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal"> Close </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        let entityColumnGrid;
+        let editingColumnId = null;
+        let entityDropdown;
+        let lookupDropdown;
+        let entitiesData = [];
+
+        async function initEntityColumnGrid() {
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport,
+                ej.grids.ColumnChooser
+            );
+
+            entityColumnGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                showColumnChooser: true,
+
+                toolbar: [
+                    'Search',
+                    'ColumnChooser',
+                    {
+                        prefixIcon: 'e-icons e-excelexport',
+                        tooltipText: 'Export Excel',
+                        id: 'excelExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-pdfexport',
+                        tooltipText: 'Export PDF',
+                        id: 'pdfExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-refresh',
+                        tooltipText: 'Refresh',
+                        id: 'refreshGrid'
+                    },
+                    {
+                        text: 'New Column',
+                        prefixIcon: 'e-icons e-plus',
+                        id: 'newColumn',
+                        disabled: true
+                    },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
+                    {
+                        text: 'Delete',
+                        prefixIcon: 'e-icons e-delete',
+                        id: 'deleteColumn'
+                    },
+                    {
+                        text: 'Copy Schema',
+                        prefixIcon: 'e-icons e-copy',
+                        id: 'copySchema'
+                    }
+                ],
+
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'entityname', headerText: 'Entity', width: 200 },
+                    { field: 'name', headerText: 'Name', width: 200 },
+                    { field: 'physicalname', headerText: 'Physical Name', width: 200 },
+                    { field: 'columntype', headerText: 'Type', width: 150 },
+                    { field: 'order', headerText: 'Order', width: 100 }
+                ],
+
+                toolbarClick: async function (args) {
+
+                    if (args.item.id === 'excelExport') {
+                        entityColumnGrid.excelExport({
+                            fileName: `EntityColumns_${new Date().getTime()}.xlsx`,
+                            exportType: 'AllPages'
+                        });
+                    }
+
+                    if (args.item.id === 'pdfExport') {
+                        entityColumnGrid.pdfExport({
+                            fileName: `EntityColumns_${new Date().getTime()}.pdf`,
+                            pageOrientation: 'Landscape'
+                        });
+                    }
+
+                    if (args.item.id === 'refreshGrid') {
+                        loadEntityColumns();
+                    }
+
+                    if (args.item.id === 'edit') {
+                        editEntityColumns();
+                    }
+
+                    if (args.item.id === 'newColumn') {
+                        editingColumnId = null;
+                        document.getElementById('entityColumnForm').reset();
+
+                        // 🔥 Destroy if already exists
+                        if (entityDropdown) entityDropdown.destroy();
+                        if (lookupDropdown) lookupDropdown.destroy();
+
+                        const modal = new bootstrap.Modal(entityColumnModal, {
+                            focus: false
+                        });
+                        modal.show();
+
+                        ej.base.enableRipple(true);
+
+                        entityDropdown = new ej.dropdowns.DropDownList({
+                            dataSource: entitiesData,
+                            fields: { text: 'name', value: 'id' },
+                            placeholder: 'Select Entity',
+                            allowFiltering: true,
+                            filterBarPlaceholder: 'Search lookup...',
+                            allowFiltering: true
+                        });
+                        entityDropdown.appendTo('#column_entity');
+
+                        lookupDropdown = new ej.dropdowns.DropDownList({
+                            dataSource: entitiesData,
+                            fields: { text: 'name', value: 'id' },
+                            placeholder: 'Select Lookup Entity',
+                            allowFiltering: true,
+                            filterBarPlaceholder: 'Search lookup...',
+                            popupHeight: '250px'
+                        });
+                        lookupDropdown.appendTo('#column_lookup');
+
+                        document.querySelector('#entityColumnModal .modal-title')
+                            .innerText = "Add Entity Column";
+
+                    }
+
+                    if (args.item.id === 'deleteColumn') {
+                        const selected = entityColumnGrid.getSelectedRecords();
+                        if (!selected.length) return alert("Select record(s)");
+
+                        if (!confirm(`Delete ${selected.length} column(s)?`)) return;
+
+                        const ids = selected.map(r => r.id);
+                        await deleteRecordData('entitycolumn', ids, true, true);
+                        loadEntityColumns();
+                    }
+
+                    if (args.item.id === 'copySchema') {
+                        copySchemaToClipboard();
+                    }
+                }
+            });
+
+            entityColumnGrid.appendTo('#entityColumnGrid');
+
+            await loadEntityColumns();
+
+            await loadEntitiesData();
+            entityColumnGrid.enableToolbarItems(['newColumn'], true);
+        }
+
+        async function loadEntitiesData() {
+            entitiesData = await DBHandler.fetchEntityRecords(
+                'entities',
+                'id,name',
+                'name',
+                'asc'
+            ) || [];
+        }
+        async function loadEntityColumns() {
+
+            const joinCondition =
+                "LEFT JOIN entities ON entities.id = entitycolumn.entityid";
+
+            const data = await DBHandler.fetchEntityRecords(
+                'entitycolumn',
+                'entitycolumn.*, entities.name as entityname',
+                'entitycolumn.createdon',
+                'desc',
+                '',
+                true,
+                0,
+                joinCondition
+            );
+
+            entityColumnGrid.dataSource = data || [];
+        }
+
+        async function editEntityColumns() {
+
+            const selected = entityColumnGrid.getSelectedRecords();
+            if (selected.length !== 1)
+                return alert("Select one record to edit");
+
+            if (entityDropdown) entityDropdown.destroy();
+            if (lookupDropdown) lookupDropdown.destroy();
+
+            const modal = new bootstrap.Modal(entityColumnModal, {
+                focus: false
+            });
+            modal.show();
+
+            ej.base.enableRipple(true);
+
+            entityDropdown = new ej.dropdowns.DropDownList({
+                dataSource: entitiesData,
+                fields: { text: 'name', value: 'id' },
+                placeholder: 'Select Entity',
+                allowFiltering: true,
+                filterBarPlaceholder: 'Search lookup...',
+                allowFiltering: true
+            });
+            entityDropdown.appendTo('#column_entity');
+
+            lookupDropdown = new ej.dropdowns.DropDownList({
+                dataSource: entitiesData,
+                fields: { text: 'name', value: 'id' },
+                placeholder: 'Select Lookup Entity',
+                allowFiltering: true,
+                filterBarPlaceholder: 'Search lookup...',
+                popupHeight: '250px'
+            });
+            lookupDropdown.appendTo('#column_lookup');
+
+            const record = selected[0];
+            editingColumnId = record.id;
+
+            entityDropdown.value = record.entityid;
+            lookupDropdown.value = record.lookupentityid || null;
+
+            document.getElementById('column_name').value = record.name || '';
+            document.getElementById('column_physicalname').value = record.physicalname || '';
+            document.getElementById('column_type').value = record.columntype || '';
+
+            document.querySelector('#entityColumnModal .modal-title')
+                .innerText = "Edit Entity Column";
+        }
+
+        async function saveEntityColumn() {
+
+            if (!entityDropdown.value)
+                return alert("Please select entity");
+
+            if (!document.getElementById('column_name').value)
+                return alert("Column name required");
+
+            await DBHandler.submitRecordData('entitycolumn', {
+                entityid: entityDropdown.value,
+                name: document.getElementById('column_name').value,
+                physicalname: document.getElementById('column_physicalname').value,
+                columntype: document.getElementById('column_type').value,
+                lookupentityid: lookupDropdown.value,
+            }, editingColumnId, false);
+
+            bootstrap.Modal.getInstance(entityColumnModal).hide();
+            loadEntityColumns();
+        }
+
+        async function copySchemaToClipboard() {
+            const selected = entityColumnGrid.getSelectedRecords();
+            if (!selected.length) {
+                alert("Select at least one column");
+                return;
+            }
+
+            const uniqueEntityIds = [...new Set(selected.map(r => r.entityid))];
+            if (uniqueEntityIds.length !== 1) {
+                alert("Please select columns from one entity only");
+                return;
+            }
+
+            const tableName = formatSqlName(selected[0].entityname || selected[0].entityid || 'entity_table');
+            const lines = [];
+            lines.push(`CREATE TABLE ${tableName} (`);
+
+            selected.forEach((row, index) => {
+                const columnName = formatSqlName(row.physicalname || row.name || `column_${index + 1}`);
+                const dataType = (row.columntype || 'VARCHAR(255)').toUpperCase();
+                const suffix = index === selected.length - 1 ? '' : ',';
+                lines.push(`  ${columnName} ${dataType}${suffix}`);
+            });
+
+            lines.push(');');
+            const schema = lines.join('\n');
+
+            try {
+                await navigator.clipboard.writeText(schema);
+            } catch (error) {
+                const helper = document.createElement('textarea');
+                helper.value = schema;
+                helper.style.position = 'fixed';
+                helper.style.opacity = '0';
+                document.body.appendChild(helper);
+                helper.focus();
+                helper.select();
+                document.execCommand('copy');
+                document.body.removeChild(helper);
+            }
+
+            alert('Schema copied to clipboard');
+        }
+
+        function formatSqlName(value) {
+            return String(value)
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '_')
+                .replace(/[^a-z0-9_]/g, '') || 'entity_table';
+        }
+
+        function bindEntityNameField() {
+            const entityNameField = document.getElementById('column_name');
+            const physicalNameField = document.getElementById('column_physicalname');
+
+            if (!entityNameField || !physicalNameField) {
+                console.error("Entity name or physical name field not found.");
+                return;
+            }
+            const entityName = entityNameField.value;
+            if (entityName) {
+                // Convert to lowercase and remove spaces
+                const physicalName = entityName.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+                physicalNameField.value = physicalName;
+            }
+        }
+
+        $(document).ready(() => {
+            initEntityColumnGrid();
+
+            $('#entityColumnModal').on('shown.bs.modal', function () {
+                $(document).off('focusin.modal');
+            });
+
+        });
+
+    </script>
+
+
+    <style>
+        #entityColumnGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
+
+</body>
+
+</html>
