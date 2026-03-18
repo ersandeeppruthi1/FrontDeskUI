@@ -86,7 +86,8 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <label>Business Unit Name <span class="text-danger">*</span></label>
-                                <input type="text" id="bu_name" class="form-control" required />
+                                <input type="text" id="bu_name" class="form-control" required onfocusout="validateBusinessUnitName()" />
+                                <div id="buNameMessage" class="mt-1" style="font-size: 12px;"></div>
                             </div>
 
                             <div class="col-md-12 mt-3">
@@ -104,7 +105,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-primary" onclick="saveBusinessUnit()">Save</button>
+                    <button id="saveBusinessUnitBtn" class="btn btn-primary" onclick="saveBusinessUnit()" disabled>Save</button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
 
@@ -220,6 +221,8 @@
                     if (args.item.id === 'newBusinessUnit') {
                         editingBusinessUnitId = null;
                         document.getElementById('businessUnitForm').reset();
+                        document.getElementById('buNameMessage').innerText = '';
+                        document.getElementById('saveBusinessUnitBtn').disabled = true;
                         await loadUsersData();
 
                         const modal = new bootstrap.Modal(businessUnitModal, {
@@ -356,20 +359,61 @@
 
             document.querySelector('#businessUnitModal .modal-title')
                 .innerText = "Edit Business Unit";
+
+            validateBusinessUnitName();
         }
 
         async function saveBusinessUnit() {
-            if (!document.getElementById('bu_name').value.trim())
+            const name = document.getElementById('bu_name').value.trim();
+            if (!name)
                 return alert("Business Unit name is required");
 
+            // Prevent duplicate Business Unit names
+            const safeName = name.replace(/'/g, "''");
+            const existing = await DBHandler.fetchEntityRecord(
+                'businessunit',
+                'id,name',
+                `LOWER(name)='${safeName.toLowerCase()}'`
+            );
+
+            if (existing?.length && existing[0].id !== editingBusinessUnitId)
+                return alert('Business Unit name already exists');
+
             await DBHandler.submitRecordData('businessunit', {
-                name: document.getElementById('bu_name').value.trim(),
+                name,
                 ownerid: userDropdown ? (userDropdown.value || null) : null,
                 description: document.getElementById('bu_description').value.trim()
             }, editingBusinessUnitId, false);
 
             bootstrap.Modal.getInstance(businessUnitModal).hide();
             loadBusinessUnits();
+        }
+
+        async function validateBusinessUnitName() {
+            const name = document.getElementById('bu_name').value.trim();
+            const msgEl = document.getElementById('buNameMessage');
+            const saveBtn = document.getElementById('saveBusinessUnitBtn');
+
+            if (!name) {
+                msgEl.innerText = '';
+                saveBtn.disabled = true;
+                return;
+            }
+
+            const safeName = name.replace(/'/g, "''");
+            const existing = await DBHandler.fetchEntityRecord(
+                'businessunit',
+                'id',
+                `LOWER(name)='${safeName.toLowerCase()}'`
+            );
+
+            if (existing?.length && existing[0].id !== editingBusinessUnitId) {
+                msgEl.innerHTML = '<span style="color:red">Business Unit name already exists</span>';
+                saveBtn.disabled = true;
+            } else {
+                msgEl.innerHTML = '<span style="color:green">Business Unit name available</span>';
+                saveBtn.disabled = false;
+            }
         }
 
         function setDefaultUserFromCookie() {
