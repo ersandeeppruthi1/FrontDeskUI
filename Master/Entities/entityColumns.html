@@ -75,9 +75,7 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title"> Add Entity Column </h5>
-                   <button type="button" class="close" data-bs-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"> </button>
                 </div>
 
                 <div class="modal-body">
@@ -182,6 +180,11 @@
                         text: 'Delete',
                         prefixIcon: 'e-icons e-delete',
                         id: 'deleteColumn'
+                    },
+                    {
+                        text: 'Copy Schema',
+                        prefixIcon: 'e-icons e-copy',
+                        id: 'copySchema'
                     }
                 ],
 
@@ -267,6 +270,10 @@
                         const ids = selected.map(r => r.id);
                         await deleteRecordData('entitycolumn', ids, true, true);
                         loadEntityColumns();
+                    }
+
+                    if (args.item.id === 'copySchema') {
+                        copySchemaToClipboard();
                     }
                 }
             });
@@ -376,6 +383,58 @@
             loadEntityColumns();
         }
 
+        async function copySchemaToClipboard() {
+            const selected = entityColumnGrid.getSelectedRecords();
+            if (!selected.length) {
+                alert("Select at least one column");
+                return;
+            }
+
+            const uniqueEntityIds = [...new Set(selected.map(r => r.entityid))];
+            if (uniqueEntityIds.length !== 1) {
+                alert("Please select columns from one entity only");
+                return;
+            }
+
+            const tableName = formatSqlName(selected[0].entityname || selected[0].entityid || 'entity_table');
+            const lines = [];
+            lines.push(`CREATE TABLE ${tableName} (`);
+
+            selected.forEach((row, index) => {
+                const columnName = formatSqlName(row.physicalname || row.name || `column_${index + 1}`);
+                const dataType = (row.columntype || 'VARCHAR(255)').toUpperCase();
+                const suffix = index === selected.length - 1 ? '' : ',';
+                lines.push(`  ${columnName} ${dataType}${suffix}`);
+            });
+
+            lines.push(');');
+            const schema = lines.join('\n');
+
+            try {
+                await navigator.clipboard.writeText(schema);
+            } catch (error) {
+                const helper = document.createElement('textarea');
+                helper.value = schema;
+                helper.style.position = 'fixed';
+                helper.style.opacity = '0';
+                document.body.appendChild(helper);
+                helper.focus();
+                helper.select();
+                document.execCommand('copy');
+                document.body.removeChild(helper);
+            }
+
+            alert('Schema copied to clipboard');
+        }
+
+        function formatSqlName(value) {
+            return String(value)
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '_')
+                .replace(/[^a-z0-9_]/g, '') || 'entity_table';
+        }
+
         function bindEntityNameField() {
             const entityNameField = document.getElementById('column_name');
             const physicalNameField = document.getElementById('column_physicalname');
@@ -409,6 +468,7 @@
             height: 10px !important;
         }
     </style>
+
 </body>
 
 </html>

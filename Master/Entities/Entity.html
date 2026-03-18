@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head runat="server">
@@ -7,56 +7,41 @@
 
     <script>
         let classMap = [];
-        //var apiURL = "https://localhost:44309";
-        var apiURL = "";
+        var apiURL = "https://dbsit.vsservices.in/";
+        //var apiURL = "";
     </script>
 
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-    <title></title>
-    <!-- Bootstrap CSS -->
-    <link href="/css/Default/bootstrap.min.css" rel="stylesheet" />
-    <link href="/css/Default/select2.min.css" rel="stylesheet" />
-    <script src="/css/Default/jquery.min.js"></script>
-    <script src="/css/Default/moment.min.js"></script>
-    <script src="/css/Default/select2.min.js"></script>
-    <link href="/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-    <script src="/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
 
-    <link href="/css/app.css?id=081220258" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
-    <!--<script src="css/Default/bootstrap-select.min.js"></script>-->
-    <!--<script src="JS/webpack-demo/dist/bundle.js?id=2024251342"></script>-->
-    <script src="/JS/utility.js?id=081220258"></script>
-    <script src="/JS/entityPage.js?id=081220258" type="module"></script>
-    <script src="/JS/controls.js?id=081220258" type="module"></script>
-    <script src="/JS/listcontrols.js?id=081220258" type="module"></script>
-    <script src="/JS/formHandler.js?id=081220258" type="module"></script>
-    <script src="/JS/pageLoader.js?id=081220258" type="module"></script>
-    <script src="/JS/Master/DBHandler.js?id=081220258" type="module"></script>
-    <script src="/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
 
-    <script src="/css/Default/jspdf.umd.min.js"></script>
-    <script src="/css/Default/jspdf.plugin.autotable.min.js"></script>
-
-    <script src="/css/Default/popper.min.js"></script>
-    <script src="/css/Default/bootstrap.min.js"></script>
-    <link href="/css/Default/simple-line-icons.min.css" rel="stylesheet" />
-
-    <script src="/css/Default/dayjs.js"></script>
-    <script src="/css/Default/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
-    <script src="/css/Default/jspdf.plugin.autotable.min.js"></script>
-    <link href="/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-    <script src="/css/Default/pdfmake.min.js"></script>
-    <script src="/css/Default/vfs_fonts.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
 
-    <script src="/css/Default/xlsx.full.min.js"></script>
-    <script src="/css/Default/moment.min.js"></script>
-
-    <script src="../../JS/system/html2canvas.min.js"></script>
-    <script src="../../JS/system/JsBarcode.all.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
@@ -84,7 +69,6 @@
         <div id="entitiesGrid"></div>
     </div>
 
-    <!-- Entities Modal -->
     <div class="modal fade" id="entityModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -146,6 +130,7 @@
                     { text: 'New Entity', prefixIcon: 'e-icons e-plus', id: 'newEntity' },
                     { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editEntity' },
                     { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteEntity' },
+                    { text: 'Copy Schema', prefixIcon: 'e-icons e-copy', id: 'copySchema' },
                     'ExcelExport',
                     'PdfExport'
                 ],
@@ -184,6 +169,10 @@
                         await deleteRecordData('entities', ids, true, true);
                         loadEntities();
                     }
+
+                    if (args.item.id === 'copySchema') {
+                        copySchemaToClipboard();
+                    }
                 }
             });
 
@@ -216,6 +205,75 @@
 
             bootstrap.Modal.getInstance(entityModal).hide();
             loadEntities();
+        }
+
+        async function copySchemaToClipboard() {
+            const selected = entityGrid.getSelectedRecords();
+            if (selected.length !== 1) {
+                alert("Select one entity to copy schema");
+                return;
+            }
+
+            const entity = selected[0];
+            const entityId = entity.id;
+            const tableName = formatSqlName(entity.physicalname || entity.name || 'entity_table');
+
+            const columns = await DBHandler.fetchEntityRecords(
+                'entitycolumn',
+                '*',
+                'createdon',
+                'asc',
+                `entityid = '${entityId}'`
+            ) || [];
+
+            if (!columns.length) {
+                alert('No columns found for selected entity');
+                return;
+            }
+
+            const lines = [];
+            lines.push(`CREATE TABLE ${tableName} (`);
+
+            columns.forEach((column, index) => {
+                const columnName = formatSqlName(column.physicalname || column.name || `column_${index + 1}`);
+                const dataType = normalizeColumnType(column.columntype);
+                const suffix = index === columns.length - 1 ? '' : ',';
+                lines.push(`  ${columnName} ${dataType}${suffix}`);
+            });
+
+            lines.push(');');
+            const schema = lines.join('\n');
+
+            try {
+                await navigator.clipboard.writeText(schema);
+            } catch (error) {
+                const helper = document.createElement('textarea');
+                helper.value = schema;
+                helper.style.position = 'fixed';
+                helper.style.opacity = '0';
+                document.body.appendChild(helper);
+                helper.focus();
+                helper.select();
+                document.execCommand('copy');
+                document.body.removeChild(helper);
+            }
+
+            alert('Schema copied to clipboard');
+        }
+
+        function formatSqlName(value) {
+            return String(value)
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '_')
+                .replace(/[^a-z0-9_]/g, '') || 'entity_table';
+        }
+
+        function normalizeColumnType(value) {
+            const type = String(value || 'VARCHAR(255)').trim().toUpperCase();
+            if (type === 'DECIMAL') return 'DECIMAL(18,2)';
+            if (type === 'TEXT') return 'TEXT';
+            return type;
         }
 
         function bindEntityNameField() {
@@ -253,7 +311,7 @@
             height: 10px !important;
         }
     </style>
-    
+
 </body>
 
 </html>
