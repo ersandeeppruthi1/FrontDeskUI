@@ -69,6 +69,7 @@
         <div id="habitsGrid"></div>
     </div>
 
+    <!-- MODAL -->
     <div class="modal fade" id="habitModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -80,11 +81,13 @@
 
                 <div class="modal-body">
                     <form id="habitForm">
+
                         <div class="row">
                             <div class="col-md-6">
                                 <label>Habit Name</label>
                                 <input type="text" id="habitname" class="form-control" required />
                             </div>
+
                             <div class="col-md-6">
                                 <label>Habit Type</label>
                                 <select id="habittype" class="form-control" required onchange="toggleOptionsField()">
@@ -94,49 +97,55 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="row mt-3" id="optionsRow" style="display: none;">
+
+                        <div class="row mt-3" id="optionsRow" style="display:none;">
                             <div class="col-md-12">
                                 <label>Options (comma-separated)</label>
-                                <input type="text" id="habitoptions" class="form-control" placeholder="e.g., Yes,No,Maybe" />
+                                <input type="text" id="habitoptions" class="form-control" />
                             </div>
                         </div>
+
                         <div class="row mt-3">
                             <div class="col-md-6">
                                 <label>Code</label>
                                 <input type="text" id="habitcode" class="form-control" />
                             </div>
+
                             <div class="col-md-6">
                                 <label>Order</label>
                                 <input type="number" id="habitorder" class="form-control" />
                             </div>
                         </div>
+
                         <div class="row mt-3">
                             <div class="col-md-6">
                                 <label>Frequency</label>
                                 <select id="habitfrequency" class="form-control" onchange="updateFrequencyNumber()">
                                     <option value="">Select Frequency</option>
-                                     <option value="Weekly">Weekly</option>
+                                    <option value="Weekly">Weekly</option>
                                     <option value="Monthly">Monthly</option>
                                     <option value="Quarterly">Quarterly</option>
                                     <option value="Annually">Annually</option>
                                 </select>
                             </div>
-                        </div>                        <div class="row mt-3" id="freqRow" style="display: none;">
+                        </div>
+
+                        <!-- Frequency Row -->
+                        <div class="row mt-3" id="freqRow" style="display:none;">
                             <div class="col-md-6">
-                                <label id="freqLabel">Frequency Number</label>
+                                <label id="freqLabel">Frequency Value</label>
+
+                                <!-- NUMBER INPUT -->
                                 <input type="number" id="habitfrequencynumber" class="form-control" />
-                                <select id="habitfrequencynumberselect" class="form-control" style="display: none;">
-                                    <option value="">Select Day</option>
-                                    <option value="Monday">Monday</option>
-                                    <option value="Tuesday">Tuesday</option>
-                                    <option value="Wednesday">Wednesday</option>
-                                    <option value="Thursday">Thursday</option>
-                                    <option value="Friday">Friday</option>
-                                    <option value="Saturday">Saturday</option>
-                                    <option value="Sunday">Sunday</option>
-                                </select>
+
+                                <!-- MULTISELECT -->
+                                <div id="multiWrapper">
+                                    <input type="text" id="habitfrequencynumberselect" />
+                                </div>
                             </div>
-                        </div>                    </form>
+                        </div>
+
+                    </form>
                 </div>
 
                 <div class="modal-footer">
@@ -149,10 +158,11 @@
     </div>
 
     <script>
-
         let habitGrid;
         let editingHabitId = null;
+        let frequencyMultiSelect;
 
+        // ✅ GRID INIT
         function initHabitGrid() {
 
             ej.grids.Grid.Inject(
@@ -170,6 +180,7 @@
                 allowSorting: true,
                 allowFiltering: true,
                 filterSettings: { type: 'Excel' },
+
                 toolbar: [
                     'Search',
                     { text: 'New Habit', prefixIcon: 'e-icons e-plus', id: 'newHabit' },
@@ -178,6 +189,7 @@
                     'ExcelExport',
                     'PdfExport'
                 ],
+
                 columns: [
                     { type: 'checkbox', width: 50 },
                     { field: 'habitname', headerText: 'Habit Name', width: 200 },
@@ -186,23 +198,35 @@
                     { field: 'code', headerText: 'Code', width: 150 },
                     { field: 'order', headerText: 'Order', width: 100 },
                     { field: 'frequency', headerText: 'Frequency', width: 120 },
-                    { field: 'frequencynumber', headerText: 'Frequency Number', width: 140 },
-                    { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 180 }
+                    { field: 'frequencynumber', headerText: 'Frequency Value', width: 180 }
                 ],
-                toolbarClick: async function (args) {
+
+                toolbarClick: function (args) {
 
                     if (args.item.id === 'newHabit') {
                         editingHabitId = null;
                         document.getElementById('habitForm').reset();
+
                         toggleOptionsField();
                         updateFrequencyNumber();
+
                         document.querySelector('#habitModal .modal-title').innerText = "Add Habit";
-                        new bootstrap.Modal(habitModal).show();
+
+                        const modal = new bootstrap.Modal(habitModal);
+                        modal.show();
+
+                        setTimeout(() => {
+                            if (frequencyMultiSelect) {
+                                frequencyMultiSelect.value = [];
+                                frequencyMultiSelect.refresh();
+                            }
+                        }, 200);
                     }
 
                     if (args.item.id === 'editHabit') {
                         const selected = habitGrid.getSelectedRecords();
                         if (selected.length !== 1) return alert("Select one record");
+
                         editingHabitId = selected[0].id;
 
                         document.getElementById('habitname').value = selected[0].habitname;
@@ -211,20 +235,23 @@
                         document.getElementById('habitcode').value = selected[0].code || '';
                         document.getElementById('habitorder').value = selected[0].order || '';
                         document.getElementById('habitfrequency').value = selected[0].frequency || '';
-                        document.getElementById('habitfrequencynumber').value = selected[0].frequencynumber || '';
+
                         toggleOptionsField();
                         updateFrequencyNumber();
+
+                        // Set frequency value after updateFrequencyNumber creates the multiselect
+                        setTimeout(() => {
+                            if (frequencyMultiSelect) {
+                                frequencyMultiSelect.value = selected[0].frequencynumber
+                                    ? selected[0].frequencynumber.split(',')
+                                    : [];
+                                frequencyMultiSelect.refresh();
+                            }
+                        }, 100);
+
                         document.querySelector('#habitModal .modal-title').innerText = "Edit Habit";
-                        new bootstrap.Modal(habitModal).show();
-                    }
-
-                    if (args.item.id === 'deleteHabit') {
-                        const selected = habitGrid.getSelectedRecords();
-                        if (!selected.length) return alert("Select record(s)");
-
-                        const ids = selected.map(r => r.id);
-                        await deleteRecordData('habitmaster', ids, true, true);
-                        loadHabits();
+                        const modal = new bootstrap.Modal(habitModal);
+                        modal.show();
                     }
                 }
             });
@@ -232,38 +259,22 @@
             habitGrid.appendTo('#habitsGrid');
         }
 
-        async function loadHabits() {
-
-            const data = await DBHandler.fetchEntityRecords(
-                'habitmaster',
-                '*',
-                'createdon',
-                'desc'
-            );
-
-            habitGrid.dataSource = data || [];
-        }
-
+        // ✅ SAVE
         async function saveHabit() {
 
             const habitname = document.getElementById('habitname').value.trim();
             const habittype = document.getElementById('habittype').value;
             const options = document.getElementById('habitoptions').value.trim();
-            const code = document.getElementById('habitcode').value.trim();
-            const order = parseInt(document.getElementById('habitorder').value) || 0;
             const frequency = document.getElementById('habitfrequency').value;
-            const frequencynumber = parseInt(document.getElementById('habitfrequencynumber').value) || 0;
 
-            if (!habitname || !habittype) return alert("All fields required");
+            let frequencynumber = frequency ? frequencyMultiSelect.value.join(',') : '';
 
-            if (habittype === 'Option' && !options) return alert("Options are required for Option type");
+            if (!habitname || !habittype) return alert("Required fields missing");
 
             await DBHandler.submitRecordData('habitmaster', {
                 habitname,
                 habittype,
-                options: habittype === 'Option' ? options : '',
-                code,
-                order,
+                options,
                 frequency,
                 frequencynumber
             }, editingHabitId, false);
@@ -272,54 +283,108 @@
             loadHabits();
         }
 
+        // ✅ UI LOGIC
         function toggleOptionsField() {
             const type = document.getElementById('habittype').value;
-            const optionsRow = document.getElementById('optionsRow');
-            if (type === 'Option') {
-                optionsRow.style.display = 'block';
-            } else {
-                optionsRow.style.display = 'none';
-                document.getElementById('habitoptions').value = '';
-            }
+            document.getElementById('optionsRow').style.display =
+                type === 'Option' ? 'block' : 'none';
         }
 
         function updateFrequencyNumber() {
             const freq = document.getElementById('habitfrequency').value;
-            const label = document.getElementById('freqLabel');
+
             const input = document.getElementById('habitfrequencynumber');
-            const select = document.getElementById('habitfrequencynumberselect');
+            const multiWrapper = document.getElementById('multiWrapper');
             const row = document.getElementById('freqRow');
+
             if (freq) {
                 row.style.display = 'block';
+                input.style.display = 'none';
+                multiWrapper.style.display = 'block';
+
+                let dataSource = [];
+                let placeholder = 'Select Values';
+
                 if (freq === 'Weekly') {
-                    label.textContent = 'Days';
-                    input.style.display = 'none';
-                    select.style.display = 'block';
-                } else {
-                    input.style.display = 'block';
-                    select.style.display = 'none';
-                    if (freq === 'Monthly') label.textContent = 'Months';
-                    else if (freq === 'Quarterly') label.textContent = 'Quarter';
-                    else if (freq === 'Annually') label.textContent = 'Annual';
+                    dataSource = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                    placeholder = 'Select Days';
+                } else if (freq === 'Monthly') {
+                    dataSource = Array.from({length: 12}, (_, i) => (i + 1).toString());
+                    placeholder = 'Select Months';
+                } else if (freq === 'Quarterly') {
+                    dataSource = ['1', '2', '3', '4'];
+                    placeholder = 'Select Quarters';
+                } else if (freq === 'Annually') {
+                    dataSource = Array.from({length: 12}, (_, i) => (i + 1).toString());
+                    placeholder = 'Select Years';
                 }
+
+                // Destroy existing
+                if (frequencyMultiSelect) {
+                    frequencyMultiSelect.destroy();
+                }
+
+                // Create new
+                frequencyMultiSelect = new ej.dropdowns.MultiSelect({
+                    dataSource: dataSource,
+                    mode: 'CheckBox',
+                    showDropDownIcon: true,
+                    placeholder: placeholder
+                });
+
+                frequencyMultiSelect.appendTo('#habitfrequencynumberselect');
+
+                // 🔥 Important: refresh to avoid blink
+                setTimeout(() => {
+                    frequencyMultiSelect.refresh();
+                }, 50);
+
             } else {
                 row.style.display = 'none';
-                input.value = '';
-                select.value = '';
+                if (frequencyMultiSelect) {
+                    frequencyMultiSelect.destroy();
+                    frequencyMultiSelect = null;
+                }
             }
         }
 
+        // ✅ LOAD DATA
+        async function loadHabits() {
+            const data = await DBHandler.fetchEntityRecords(
+                'habitmaster', '*', 'createdon', 'desc'
+            );
+            habitGrid.dataSource = data || [];
+        }
+
+
+        let frequencyMultiSelect;
+
+        function createMultiSelect() {
+
+            if (frequencyMultiSelect) {
+                frequencyMultiSelect.destroy();
+            }
+
+            frequencyMultiSelect = new ej.dropdowns.MultiSelect({
+                dataSource: [
+                    'Monday', 'Tuesday', 'Wednesday',
+                    'Thursday', 'Friday', 'Saturday', 'Sunday'
+                ],
+                mode: 'CheckBox',
+                showDropDownIcon: true,
+                placeholder: 'Select Days',
+                width: '100%'
+            });
+
+            frequencyMultiSelect.appendTo('#habitfrequencynumberselect');
+        }
+
+        // INIT
         $(document).ready(() => {
             initHabitGrid();
             loadHabits();
         });
     </script>
-
-    <style>
-        #habitsGrid_toolbarItems {
-            height: 10px !important;
-        }
-    </style>
 
 </body>
 
