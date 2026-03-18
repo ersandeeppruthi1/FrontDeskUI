@@ -247,7 +247,8 @@
                         if (lookupEntityDropdown) lookupEntityDropdown.destroy();
 
                         const modal = new bootstrap.Modal(webResourceModal, {
-                            focus: false
+                            focus: false,
+                            keyboard: true
                         });
                         modal.show();
 
@@ -381,7 +382,8 @@
 
             // 1️⃣ Open modal immediately with basic info
             const modal = new bootstrap.Modal(webResourceModal, {
-                focus: false
+                focus: false,
+                keyboard: true
             });
             modal.show();
 
