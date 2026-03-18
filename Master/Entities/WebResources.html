@@ -138,6 +138,35 @@
         let lookupEntityDropdown;
         let businessunitDropdown;
 
+        async function setIconFromEntityId(entityId) {
+            if (!entityId) return;
+
+            // Try from already loaded list first
+            const existing = entitiesData.find(e => e.id == entityId);
+            if (existing) {
+                document.getElementById('wr_icon').value = existing.icon || '';
+                return;
+            }
+
+            // Fallback: fetch just this entity (if not already loaded)
+            try {
+                const result = await DBHandler.fetchEntityRecords(
+                    'entities',
+                    'id,icon',
+                    'name',
+                    'asc',
+                    `id='${entityId}'`,
+                    false,
+                    1
+                );
+                if (result && result.length) {
+                    document.getElementById('wr_icon').value = result[0].icon || '';
+                }
+            } catch (err) {
+                console.error('Failed to load entity icon', err);
+            }
+        }
+
         var columns = [
             { type: 'checkbox', width: 50 },
             { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
@@ -278,7 +307,10 @@
                             filterBarPlaceholder: 'Search entities...',
                             ignoreCase: true,
                             filterType: 'Contains',
-                            popupHeight: '250px'
+                            popupHeight: '250px',
+                            change: function (args) {
+                                setIconFromEntityId(args.value);
+                            }
                         });
                         lookupEntityDropdown.appendTo('#wr_lookupentityid');
 
@@ -391,7 +423,7 @@
         async function loadEntitiesData() {
             entitiesData = await DBHandler.fetchEntityRecords(
                 'entities',
-                'id,name',
+                'id,name,icon',
                 'name',
                 'asc'
             ) || [];
@@ -440,7 +472,10 @@
                 ignoreCase: true,
                 filterType: 'Contains',
                 popupHeight: '250px',
-                value: r.entityid || null
+                value: r.entityid || null,
+                change: function (args) {
+                    setIconFromEntityId(args.value);
+                }
             });
             lookupEntityDropdown.appendTo('#wr_lookupentityid');
 
