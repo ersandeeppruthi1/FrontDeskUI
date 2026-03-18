@@ -171,10 +171,13 @@
             { type: 'checkbox', width: 50 },
             { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
             { field: 'name', headerText: 'Name', width: 180 },
-            { field: 'title', headerText: 'Title', width: 180 },
-            { field: 'pagetitle', headerText: 'Page Title', width: 180 },
-            { field: 'resourcetype', headerText: 'Type', width: 120 },
-            { field: 'isactive', headerText: 'Active', width: 100 },
+            { field: 'lookupEntityName', headerText: 'Lookup Entity', width: 180 },
+            { field: 'businessUnitName', headerText: 'Business Unit', width: 180 },
+            { field: 'title', headerText: 'Title', width: 180, visible: false },
+            { field: 'pagetitle', headerText: 'Page Title', width: 180, visible: false },
+            { field: 'resourcetype', headerText: 'Type', width: 120, visible: false },
+            { field: 'isactive', headerText: 'Active', width: 100, visible: false },
+            { field: 'icon', headerText: 'Icon', width: 120, visible: false },
             {
                 field: 'createdon', headerText: 'Created On', type: 'date',
                 format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 160, visible: false
@@ -215,8 +218,8 @@
                 pageSettings: { pageSize: 10 },
 
                 toolbar: [
-                    'ColumnChooser',
                     'Search',
+                     'ColumnChooser',
                     {
                         prefixIcon: 'e-icons e-excelexport',
                         tooltipText: 'Export Excel',
@@ -372,7 +375,7 @@
 
             const data = await DBHandler.fetchEntityRecords(
                 'webresource',
-                'id,name,title,pagetitle,resourcetype,isactive,createdon,modifiedon',
+                'id,name,title,pagetitle,resourcetype,isactive,createdon,modifiedon,entityid,businessunitid,icon',
                 'modifiedon',
                 'desc',
                 '',
@@ -387,7 +390,10 @@
                 ...r,
                 srno: sr++,
                 isactive: r.isactive == 1 ? "Yes" : "No",
-                resourcetype: formatResourceType(r.resourcetype)
+                resourcetype: formatResourceType(r.resourcetype),
+                lookupEntityName: entitiesData.find(e => e.id == r.entityid)?.name || '',
+                businessUnitName: businessunitData.find(b => b.id == r.businessunitid)?.name || '',
+                icon: r.icon
             }));
 
             grid.refresh();
@@ -633,11 +639,11 @@
 
 
         // ---------- DOCUMENT READY ----------
-        $(document).ready(function () {
+        $(document).ready(async function () {
+            await loadEntitiesData();
+            await loadBusinessunitData();
             initGrid();
             loadWebResources();
-            loadEntitiesData();
-            loadBusinessunitData();
         });
 
     </script>
