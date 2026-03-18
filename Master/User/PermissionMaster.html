@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="container2 mt-4">
+        <div id="permissionGrid"></div>
+    </div>
+
+    <div class="modal fade" id="permissionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Master Permission</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="permissionForm" class="row g-5">
+                        <div class="col-md-6">
+                            <label>Permission Name<span style="color: red;">*</span>:</label>
+                            <input class="form-control" id="permissionName" dbcolumnname="name" />
+                        </div>
+                        <div class="col-md-6">
+                            <label>Business Unit<span style="color: red;">*</span>:</label>
+                            <input id="businessUnitId" class="form-control" datatype="dropdown" dbcolumnname="businessunitid" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label>Entity Permissions<span style="color: red;">*</span>:</label>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Select Entities and Configure Permissions</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="entitySelector">Select Entities:</label>
+                                            <input id="entitySelector" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row">
+                                                <div class="col-md-6 d-flex align-items-end">
+                                                    <button type="button" class="btn btn-primary btn-sm me-2"
+                                                        onclick="addEntityPermission()">
+                                                        <i class="fa fa-plus"></i> Add Selected
+                                                    </button>
+                                                </div>
+                                                <div class="col-md-3 d-flex align-items-end">
+                                                    <button type="button" class="btn btn-outline-info btn-sm me-1"
+                                                        onclick="selectAllAvailableEntities()"
+                                                        title="Select all available entities">
+                                                        <i class="fa fa-check-double"></i> All
+                                                    </button>
+                                                </div>
+                                                <div class="col-md-3 d-flex align-items-end">
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                        onclick="showBulkPermissionModal()"
+                                                        title="Set bulk permissions for selected entities">
+                                                        <i class="fa fa-cogs"></i> Bulk
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="entityPermissionsContainer">
+                                        <div class="alert alert-info text-center" id="noEntitiesMessage">
+                                            <i class="fa fa-info-circle"></i> No entities selected yet. Add entities to
+                                            configure permissions.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-3">
+                                <label>Generated Permission JSON<span style="color: red;">*</span>:</label>
+                                <textarea class="form-control" id="permissionJSON" dbcolumnname="permissionjson"
+                                    rows="8" readonly
+                                    placeholder='{"entities": [], "globalPermissions": []}'></textarea>
+                                <small class="text-muted">This JSON is automatically generated based on your entity
+                                    selections above</small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-info" onclick="viewPermissionJSON()">
+                        <i class="fa fa-eye"></i> View JSON
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearAllPermissions()">
+                        <i class="fa fa-refresh"></i> Clear All
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="savePermission()">
+                        <i class="fa fa-save"></i> Save Permission
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Permission Modal -->
+    <div class="modal fade" id="bulkPermissionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Set Bulk Permissions</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Select permission levels to apply to the selected entities:</p>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="fa fa-eye text-info me-1"></i> Read Permission:</label>
+                            <select class="form-select" id="bulk_read">
+                                <option value="0">No Permission</option>
+                                <option value="1">User Level</option>
+                                <option value="2">BU Level</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="fa fa-edit text-warning me-1"></i> Write
+                                Permission:</label>
+                            <select class="form-select" id="bulk_write">
+                                <option value="0">No Permission</option>
+                                <option value="1">User Level</option>
+                                <option value="2">BU Level</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="fa fa-trash text-danger me-1"></i> Delete
+                                Permission:</label>
+                            <select class="form-select" id="bulk_delete">
+                                <option value="0">No Permission</option>
+                                <option value="1">User Level</option>
+                                <option value="2">BU Level</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-info btn-sm w-100" onclick="setBulkPermissionLevel(1)">
+                                <i class="fa fa-user"></i> Set All to User Level
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-success btn-sm w-100" onclick="setBulkPermissionLevel(2)">
+                                <i class="fa fa-building"></i> Set All to BU Level
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="applyBulkPermissions()">
+                        <i class="fa fa-check"></i> Apply to Selected Entities
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let businessUnitDropdown = null;
+
+        $(document).ready(function () {
+            // Load business units for dropdown
+            DBHandler.fetchEntityRecords(
+                'businessunit',
+                'businessunit.id, businessunit.name',
+                'businessunit.name',
+                'asc',
+                '', true,
+                0,
+                ''
+            ).then(units => {
+                businessUnitDropdown = new ej.dropdowns.DropDownList({
+                    dataSource: units || [],
+                    fields: { text: 'name', value: 'id' },
+                    allowFiltering: true,
+                    filterBarPlaceholder: 'Search business unit...'
+                });
+                businessUnitDropdown.appendTo('#businessUnitId');
+            });
+
+            // Load entities for permission configuration
+            loadEntitiesForPermissions();
+        });
+
+        let entityPermissions = [];
+        let availableEntities = [];
+        let entitySelectorDropdown = null;
+
+        async function loadEntitiesForPermissions() {
+            const entities = await DBHandler.fetchEntityRecords('entities', 'id, name,physicalname', 'name', 'asc', '', true, 0, '');
+            availableEntities = (entities || []).map(entity => ({ ...entity, tablename: entity.physicalname || entity.name.toLowerCase().replace(/\s+/g, '') }));
+            populateEntitySelector();
+        }
+
+        function populateEntitySelector() {
+            // Destroy existing dropdown if it exists
+            if (entitySelectorDropdown) {
+                entitySelectorDropdown.destroy();
+            }
+
+            // Filter out already added entities
+            const filteredEntities = availableEntities.filter(entity =>
+                !entityPermissions.find(ep => ep.entityId === entity.id)
+            );
+
+            // Create new Syncfusion MultiSelect dropdown for multiple selection
+            entitySelectorDropdown = new ej.dropdowns.MultiSelect({
+                dataSource: filteredEntities,
+                fields: { text: 'name', value: 'id' },
+                placeholder: 'Select Entities...',
+                allowFiltering: true,
+                filterBarPlaceholder: 'Search entities...',
+                popupHeight: '250px',
+                width: '100%',
+                mode: 'CheckBox',
+                selectAllText: 'Select All',
+                unSelectAllText: 'Unselect All',
+                enableSelectionOrder: false,
+                showSelectAll: true,
+                showDropDownIcon: true
+            });
+            entitySelectorDropdown.appendTo('#entitySelector');
+        }
+
+        function addEntityPermission() {
+            if (!entitySelectorDropdown || !entitySelectorDropdown.value || entitySelectorDropdown.value.length === 0) {
+                alert('Please select at least one entity first');
+                return;
+            }
+
+            const selectedEntityIds = entitySelectorDropdown.value;
+            let addedCount = 0;
+            let skippedCount = 0;
+
+            selectedEntityIds.forEach(entityId => {
+                const selectedEntity = availableEntities.find(e => e.id === entityId);
+
+                if (!selectedEntity) {
+                    console.warn(`Entity with ID ${entityId} not found`);
+                    return;
+                }
+
+                // Check if entity is already added
+                if (entityPermissions.find(ep => ep.entityId === entityId)) {
+                    skippedCount++;
+                    return;
+                }
+
+                const entityName = selectedEntity.name;
+                const tableName = selectedEntity.tablename || selectedEntity.name.toLowerCase().replace(/\s+/g, '');
+
+                // Add to entity permissions array
+                const newPermission = {
+                    entityId: entityId,
+                    entityName: entityName,
+                    tableName: tableName,
+                    permissions: {
+                        read: 0,
+                        write: 0,
+                        delete: 0
+                    }
+                };
+
+                entityPermissions.push(newPermission);
+                addedCount++;
+            });
+
+            // Show result message
+            if (addedCount > 0) {
+                const message = `Successfully added ${addedCount} entit${addedCount === 1 ? 'y' : 'ies'}`;
+                const skippedMessage = skippedCount > 0 ? ` (${skippedCount} already existed)` : '';
+                alert(message + skippedMessage);
+
+                renderEntityPermissions();
+                populateEntitySelector(); // Refresh selector to remove added entities
+                updatePermissionJSON();
+            } else if (skippedCount > 0) {
+                alert(`All selected entities are already added`);
+            }
+        }
+
+        function renderEntityPermissions() {
+            const container = document.getElementById('entityPermissionsContainer');
+
+            if (entityPermissions.length === 0) {
+                container.innerHTML = '<div class="alert alert-info text-center" id="noEntitiesMessage"><i class="fa fa-info-circle"></i> No entities selected yet. Add entities to configure permissions.</div>';
+                return;
+            }
+
+            let html = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">
+                        Configured Entities 
+                        <span class="entity-count-badge">${entityPermissions.length}</span>
+                    </h6>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-info btn-sm" onclick="applyPermissionToAll('read')" title="Apply Read permission to all entities">
+                            <i class="fa fa-eye"></i> Set Read
+                        </button>
+                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="applyPermissionToAll('write')" title="Apply Write permission to all entities">
+                            <i class="fa fa-edit"></i> Set Write
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAllEntityPermissions()" title="Clear all entity permissions">
+                            <i class="fa fa-eraser"></i> Clear All
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            entityPermissions.forEach((entityPerm, index) => {
+                const activePermissions = Object.entries(entityPerm.permissions)
+                    .filter(([key, value]) => value > 0)
+                    .map(([key]) => key); html += `
+                    <div class="card mb-3 entity-permission-card" id="entity-${index}">
+                        <div class="card-header entity-header d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">
+                                    <i class="fa fa-database text-primary"></i> ${entityPerm.entityName}
+                                    <small class="text-muted">(${entityPerm.tableName})</small>
+                                </h6>
+                                <div class="permission-summary">
+                                    <span class="permission-chip ${entityPerm.permissions.read > 0 ? 'active' : ''}" title="Read Level: ${getPermissionLevelText(entityPerm.permissions.read)}">
+                                        Read (${entityPerm.permissions.read})
+                                    </span>
+                                    <span class="permission-chip ${entityPerm.permissions.write > 0 ? 'active' : ''}" title="Write Level: ${getPermissionLevelText(entityPerm.permissions.write)}">
+                                        Write (${entityPerm.permissions.write})
+                                    </span>
+                                    <span class="permission-chip ${entityPerm.permissions.delete > 0 ? 'active' : ''}" title="Delete Level: ${getPermissionLevelText(entityPerm.permissions.delete)}">
+                                        Delete (${entityPerm.permissions.delete})
+                                    </span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeEntityPermission(${index})" title="Remove Entity">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="card-body permission-container">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="permission-label" for="read-${index}">
+                                            <i class="fa fa-eye text-info me-1"></i> Read Permission
+                                        </label>
+                                        <select class="form-select form-select-sm" id="read-${index}" 
+                                               onchange="updateEntityPermission(${index}, 'read', parseInt(this.value))">
+                                            <option value="0" ${entityPerm.permissions.read === 0 ? 'selected' : ''}>No Permission</option>
+                                            <option value="1" ${entityPerm.permissions.read === 1 ? 'selected' : ''}>User Level</option>
+                                            <option value="2" ${entityPerm.permissions.read === 2 ? 'selected' : ''}>BU Level</option>
+                                        </select>
+                                        <small class="text-muted">View existing records</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="permission-label" for="write-${index}">
+                                            <i class="fa fa-edit text-warning me-1"></i> Write Permission
+                                        </label>
+                                        <select class="form-select form-select-sm" id="write-${index}" 
+                                               onchange="updateEntityPermission(${index}, 'write', parseInt(this.value))">
+                                            <option value="0" ${entityPerm.permissions.write === 0 ? 'selected' : ''}>No Permission</option>
+                                            <option value="1" ${entityPerm.permissions.write === 1 ? 'selected' : ''}>User Level</option>
+                                            <option value="2" ${entityPerm.permissions.write === 2 ? 'selected' : ''}>BU Level</option>
+                                        </select>
+                                        <small class="text-muted">Create & modify records</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="permission-label" for="delete-${index}">
+                                            <i class="fa fa-trash text-danger me-1"></i> Delete Permission
+                                        </label>
+                                        <select class="form-select form-select-sm" id="delete-${index}" 
+                                               onchange="updateEntityPermission(${index}, 'delete', parseInt(this.value))">
+                                            <option value="0" ${entityPerm.permissions.delete === 0 ? 'selected' : ''}>No Permission</option>
+                                            <option value="1" ${entityPerm.permissions.delete === 1 ? 'selected' : ''}>User Level</option>
+                                            <option value="2" ${entityPerm.permissions.delete === 2 ? 'selected' : ''}>BU Level</option>
+                                        </select>
+                                        <small class="text-muted">Remove records</small>
+                                    </div>
+                                </div>
+                            </div>
+                            ${Object.values(entityPerm.permissions).every(p => p === 0) ?
+                            '<div class="alert alert-warning alert-sm mt-2 mb-0"><small><i class="fa fa-exclamation-triangle"></i> No permissions set for this entity</small></div>'
+                            : ''
+                        }
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function updateEntityPermission(index, permission, value) {
+            if (entityPermissions[index]) {
+                entityPermissions[index].permissions[permission] = value;
+                updatePermissionJSON();
+            }
+        }
+
+        function removeEntityPermission(index) {
+            if (confirm('Are you sure you want to remove this entity permission?')) {
+                entityPermissions.splice(index, 1);
+                renderEntityPermissions();
+                populateEntitySelector();
+                updatePermissionJSON();
+            }
+        }
+
+        function updatePermissionJSON() {
+            // Generate the simplified JSON format as requested
+            const permissionData = entityPermissions.map(ep => ({
+                entityId: ep.entityId,
+                entityName: ep.tableName,
+                read: ep.permissions.read,
+                write: ep.permissions.write,
+                delete: ep.permissions.delete
+            }));
+
+            document.getElementById('permissionJSON').value = JSON.stringify(permissionData, null, 2);
+        }
+
+        function loadPermissionFromJSON(jsonString) {
+            try {
+                const permissionData = JSON.parse(jsonString);
+                entityPermissions = [];
+
+                // Handle new simplified format (array of entities)
+                if (Array.isArray(permissionData)) {
+                    entityPermissions = permissionData.map(entity => ({
+                        entityId: entity.entityId,
+                        entityName: entity.entityName,
+                        tableName: entity.entityName.toLowerCase().replace(/\s+/g, ''),
+                        permissions: {
+                            read: entity.read || 0,
+                            write: entity.write || 0,
+                            delete: entity.delete || 0
+                        }
+                    }));
+                }
+                // Handle old format for backward compatibility
+                else if (permissionData.entities && Array.isArray(permissionData.entities)) {
+                    entityPermissions = permissionData.entities.map(entity => ({
+                        entityId: entity.entityId,
+                        entityName: entity.entityName,
+                        tableName: entity.tableName,
+                        permissions: {
+                            read: entity.permissions.read || 0,
+                            write: entity.permissions.write || entity.permissions.create || 0,
+                            delete: entity.permissions.delete || 0
+                        }
+                    }));
+                }
+
+                renderEntityPermissions();
+                populateEntitySelector();
+                updatePermissionJSON();
+            } catch (error) {
+                console.error('Failed to load permission from JSON:', error);
+                alert('Invalid JSON format. Please check the permission data.');
+            }
+        }
+
+        function viewPermissionJSON() {
+            const jsonTextarea = document.getElementById('permissionJSON');
+            if (!jsonTextarea.value.trim()) {
+                alert('No permission data available to view');
+                return;
+            }
+
+            try {
+                const parsedJson = JSON.parse(jsonTextarea.value);
+                const formattedJson = JSON.stringify(parsedJson, null, 4);
+
+                // Create a modal to display the formatted JSON
+                const jsonModal = `
+                    <div class="modal fade" id="jsonViewModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Permission JSON Preview</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <pre class="bg-light p-3 rounded" style="max-height: 400px; overflow-y: auto;"><code>${formattedJson}</code></pre>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-secondary" onclick="copyJsonToClipboard()">
+                                        <i class="fa fa-copy"></i> Copy to Clipboard
+                                    </button>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Remove existing modal if any
+                const existingModal = document.getElementById('jsonViewModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+
+                // Add the modal to body
+                document.body.insertAdjacentHTML('beforeend', jsonModal);
+
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('jsonViewModal'));
+                modal.show();
+
+            } catch (error) {
+                alert('Invalid JSON format');
+            }
+        }
+
+        function copyJsonToClipboard() {
+            const jsonTextarea = document.getElementById('permissionJSON');
+            navigator.clipboard.writeText(jsonTextarea.value).then(() => {
+                alert('JSON copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy JSON to clipboard');
+            });
+        }
+
+        function clearAllPermissions() {
+            if (confirm('Are you sure you want to clear all entity permissions? This action cannot be undone.')) {
+                entityPermissions = [];
+                renderEntityPermissions();
+                populateEntitySelector();
+                updatePermissionJSON();
+            }
+        }
+
+        function showBulkPermissionModal() {
+            if (!entitySelectorDropdown || !entitySelectorDropdown.value || entitySelectorDropdown.value.length === 0) {
+                alert('Please select entities first to apply bulk permissions');
+                return;
+            }
+
+            // Reset bulk permission selects
+            document.getElementById('bulk_read').value = "0";
+            document.getElementById('bulk_write').value = "0";
+            document.getElementById('bulk_delete').value = "0";
+
+            const modal = new bootstrap.Modal(document.getElementById('bulkPermissionModal'));
+            modal.show();
+        }
+
+        function setBulkPermissionLevel(level) {
+            document.getElementById('bulk_read').value = level.toString();
+            document.getElementById('bulk_write').value = level.toString();
+            document.getElementById('bulk_delete').value = level.toString();
+        }
+
+        function applyBulkPermissions() {
+            const selectedEntityIds = entitySelectorDropdown.value;
+            const bulkPermissions = {
+                read: parseInt(document.getElementById('bulk_read').value),
+                write: parseInt(document.getElementById('bulk_write').value),
+                delete: parseInt(document.getElementById('bulk_delete').value)
+            };
+
+            // Check if at least one permission level is set above 0
+            const hasPermissions = Object.values(bulkPermissions).some(p => p > 0);
+            if (!hasPermissions) {
+                alert('Please set at least one permission level above "No Permission"');
+                return;
+            }
+
+            let addedCount = 0;
+            let skippedCount = 0;
+
+            selectedEntityIds.forEach(entityId => {
+                const selectedEntity = availableEntities.find(e => e.id === entityId);
+
+                if (!selectedEntity) {
+                    console.warn(`Entity with ID ${entityId} not found`);
+                    return;
+                }
+
+                // Check if entity is already added
+                if (entityPermissions.find(ep => ep.entityId === entityId)) {
+                    skippedCount++;
+                    return;
+                }
+
+                const entityName = selectedEntity.name;
+                const tableName = selectedEntity.tablename || selectedEntity.name.toLowerCase().replace(/\s+/g, '');
+
+                // Add to entity permissions array with bulk permissions
+                const newPermission = {
+                    entityId: entityId,
+                    entityName: entityName,
+                    tableName: tableName,
+                    permissions: { ...bulkPermissions }
+                };
+
+                entityPermissions.push(newPermission);
+                addedCount++;
+            });
+
+            // Close bulk modal
+            bootstrap.Modal.getInstance(document.getElementById('bulkPermissionModal')).hide();
+
+            // Show result message
+            if (addedCount > 0) {
+                const message = `Successfully added ${addedCount} entit${addedCount === 1 ? 'y' : 'ies'} with bulk permissions`;
+                const skippedMessage = skippedCount > 0 ? ` (${skippedCount} already existed)` : '';
+                alert(message + skippedMessage);
+
+                renderEntityPermissions();
+                populateEntitySelector();
+                updatePermissionJSON();
+            } else if (skippedCount > 0) {
+                alert(`All selected entities are already added`);
+            }
+        }
+
+        function selectAllAvailableEntities() {
+            if (!entitySelectorDropdown) {
+                alert('Entity selector not initialized');
+                return;
+            }
+
+            // Get all available entity IDs that are not already added
+            const availableEntityIds = availableEntities
+                .filter(entity => !entityPermissions.find(ep => ep.entityId === entity.id))
+                .map(entity => entity.id);
+
+            if (availableEntityIds.length === 0) {
+                alert('No more entities available to select');
+                return;
+            }
+
+            // Set all available entities as selected in the MultiSelect
+            entitySelectorDropdown.value = availableEntityIds;
+
+            alert(`Selected ${availableEntityIds.length} available entit${availableEntityIds.length === 1 ? 'y' : 'ies'}`);
+        }
+
+        function getPermissionLevelText(level) {
+            switch (level) {
+                case 0: return "No Permission";
+                case 1: return "User Level Permission";
+                case 2: return "BU Level Permission";
+                default: return "Unknown Permission Level";
+            }
+        }
+
+    </script>
+
+    <script>
+
+        let grid;
+        let permissionsMain = [];
+        var columns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+            { field: 'name', headerText: 'Permission Name', width: 250 },
+            { field: 'modifiedon', headerText: 'Modified On', width: 160, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' } },
+            { field: 'id', headerText: 'id', width: 130, visible: false },
+            { field: 'createdon', headerText: 'Created On', width: 130, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
+            { field: 'businessunitid', headerText: 'Business Unit Id', width: 130, visible: false },
+        ];
+
+        function initGrid(columns, permissionGrid) {
+            ej.grids.Grid.Inject(
+                ej.grids.Filter,
+                ej.grids.Group,
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            grid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                pageSettings: { pageSize: 10 },
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                showColumnChooser: true,
+                toolbar: ['ColumnChooser',
+                    'Search',
+                    {
+                        prefixIcon: 'e-icons e-excelexport',
+                        tooltipText: 'Export Excel',
+                        id: 'excelExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-pdfexport',
+                        tooltipText: 'Export PDF',
+                        id: 'pdfExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-refresh',
+                        tooltipText: 'Refresh Grid',
+                        id: 'refreshGrid'
+                    },
+                    {
+                        text: 'New Permission',
+                        tooltipText: 'New Permission',
+                        prefixIcon: 'e-icons e-plus',
+                        id: 'newPermission'
+                    },
+                    {
+                        text: 'Edit',
+                        tooltipText: 'Edit Permission',
+                        prefixIcon: 'e-icons e-edit',
+                        id: 'editPermission',
+                    },
+                    {
+                        text: 'Delete',
+                        tooltipText: 'Delete',
+                        prefixIcon: 'e-icons e-delete',
+                        id: 'deletePermission'
+                    },],
+
+                columns: columns,
+                allowExcelExport: true,
+                allowPdfExport: true,
+
+                toolbarClick: function (args) {
+                    if (args.item.id === permissionGrid + '_excelexport') {
+                        grid.excelExport({
+                            fileName: `MasterPermissions_${formatDate(new Date())}.xlsx`,
+                            exportType: 'AllPages',
+                        });
+                    }
+
+                    if (args.item.id === 'deletePermission') {
+                        deletePermission();
+                    }
+                    if (args.item.id === permissionGrid + '_pdfexport') {
+                        grid.pdfExport({
+                            fileName: `MasterPermissions_${formatDate(new Date())}.pdf`,
+                            exportType: 'CurrentPage',
+                            theme: { header: { fontColor: '#000000' } },
+                            pageOrientation: 'Landscape',
+                            pageSize: 'LETTER',
+                            header: {
+                                fromTop: 0,
+                                height: 120,
+                                contents: [
+                                    {
+                                        type: 'Text',
+                                        value: 'Master Permission Management',
+                                        position: { x: 280, y: 0 },
+                                        style: {
+                                            textBrushColor: '#C25050',
+                                            fontSize: 25
+                                        },
+                                    }
+                                ]
+                            },
+                            footer: {
+                                fromBottom: 160,
+                                height: 150,
+                                contents: [
+                                    {
+                                        type: 'PageNumber',
+                                        pageNumberType: 'Arabic',
+                                        format: 'Page {$current} of {$total}',
+                                        position: { x: 520, y: 10 },
+                                        style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' }
+                                    }
+                                ]
+                            }
+                        });
+                    }
+
+                    if (args.item.id === 'refreshGrid') {
+                        loadPermissionGrid();
+                    }
+                    if (args.item.id === 'newPermission') {
+                        openPermissionModal();
+                    }
+
+                    if (args.item.id === 'editPermission') {
+                        editPermission();
+                    }
+                }
+            });
+            grid.appendTo('#' + permissionGrid);
+        }
+
+        let editingId = null;
+
+        async function editPermission() {
+            const selectedRecords = grid.getSelectedRecords();
+            if (selectedRecords.length !== 1) {
+                return alert("Select one record to edit");
+            }
+
+            const record = selectedRecords[0];
+            editingId = record.id;
+
+            document.getElementById('permissionName').value = record.name;
+            if (businessUnitDropdown) {
+                businessUnitDropdown.value = record.businessunitid || null;
+            } else {
+                document.getElementById('businessUnitId').value = record.businessunitid || '';
+            }
+
+            // Clear the UI first and show loading state
+            entityPermissions = [];
+            renderEntityPermissions();
+            populateEntitySelector();
+            document.getElementById('permissionJSON').value = 'Loading...';
+
+            document.querySelector('#permissionModal .modal-title').innerText = "Edit Master Permission";
+            openPermissionModal();
+
+            try {
+                // Fetch full record including permission JSON
+                const fullRecord = await DBHandler.fetchEntityRecords(
+                    'masterpermission',
+                    'id,name,businessunitid,permissionjson',
+                    'id',
+                    'desc',
+                    `id='${editingId}'`,
+                    false,
+                    1
+                );
+
+                if (!fullRecord || !fullRecord.length) {
+                    document.getElementById('permissionJSON').value = '';
+                    return alert("Unable to load full permission record.");
+                }
+
+                const data = fullRecord[0];
+
+                // Load the permission JSON into the dynamic UI
+                if (data.permissionjson) {
+                    loadPermissionFromJSON(data.permissionjson);
+                } else {
+                    updatePermissionJSON();
+                }
+
+            } catch (err) {
+                console.error('Error fetching permission JSON:', err);
+                document.getElementById('permissionJSON').value = '';
+                alert("Error fetching permission data.");
+            }
+        }
+
+        async function deletePermission() {
+            const selected = grid.getSelectedRecords();
+            if (!selected.length) return alert("Select record(s)");
+
+            if (!confirm(`Delete ${selected.length} permission(s)?`)) return;
+
+            const ids = selected.map(r => r.id);
+            await deleteRecordData('masterpermission', ids, true, true);
+            loadPermissionGrid();
+        }
+
+        function openPermissionModal() {
+            // Reset form if it's a new permission (not editing)
+            if (!editingId) {
+                document.getElementById('permissionName').value = '';
+                if (businessUnitDropdown) {
+                    businessUnitDropdown.value = null;
+                } else {
+                    document.getElementById('businessUnitId').value = '';
+                }
+                entityPermissions = [];
+                renderEntityPermissions();
+                populateEntitySelector();
+                updatePermissionJSON();
+                document.querySelector('#permissionModal .modal-title').innerText = "Add Master Permission";
+            }
+
+            const modal = new bootstrap.Modal(
+                document.getElementById('permissionModal'),
+                { backdrop: 'static', keyboard: false, focus: false }
+            );
+            modal.show();
+
+            // Enable ripple effect like in entityColumns
+            ej.base.enableRipple(true);
+        }
+
+        async function loadPermissionGrid() {
+            const filter = '';
+            const joinCondition = "";
+            try {
+                const permissions = await DBHandler.fetchEntityRecords(
+                    'masterpermission',
+                    'id,name,createdon,modifiedon,businessunitid',
+                    'masterpermission.modifiedon',
+                    'desc',
+                    filter, true,
+                    0,
+                    joinCondition
+                );
+
+                permissionsMain = permissions || [];
+                let serialNumber = 1;
+
+                const rows = permissionsMain.map(a => ({
+                    id: a.id,
+                    srno: serialNumber++,
+                    name: a.name,
+                    createdon: normalizeDate(a.createdon),
+                    modifiedon: normalizeDate(a.modifiedon),
+                    businessunitid: a.businessunitid,
+                }));
+
+                grid.dataSource = rows;
+                grid.refresh();
+            } catch (err) {
+                console.error('Failed to load permissions:', err);
+            }
+        }
+
+        function normalizeDate(val) {
+            if (!val) return null;
+            const d = val instanceof Date ? val : new Date(val);
+            return isNaN(d) ? null : d;
+        }
+
+        $(document).ready(async () => {
+            initGrid(columns, 'permissionGrid');
+            loadPermissionGrid();
+
+            // Handle modal focus issue like in entityColumns
+            $('#permissionModal').on('shown.bs.modal', function () {
+                $(document).off('focusin.modal');
+            });
+        });
+
+
+        async function updateUserPermissionJSON(permissionId, newPermissionJSON) {
+            try {
+                if (!permissionId) {
+                    // For new permission, get the ID from the recently created permission
+                    const newPermissions = await DBHandler.fetchEntityRecords(
+                        'masterpermission',
+                        'id',
+                        'createdon',
+                        'desc',
+                        '',
+                        false,
+                        1,
+                        ''
+                    );
+
+                    if (newPermissions && newPermissions.length > 0) {
+                        permissionId = newPermissions[0].id;
+                    }
+                }
+
+                if (permissionId) {
+                    // Get all users that use this permission
+                    const usersWithPermission = await DBHandler.fetchEntityRecords(
+                        'users',
+                        'id',
+                        'id',
+                        'desc',
+                        `permissionid = '${permissionId}'`,
+                        false,
+                        0,
+                        ''
+                    );
+
+                    // Update permissionjson for each user
+                    for (const user of usersWithPermission) {
+                        await DBHandler.submitRecordData('users', {
+                            permissionjson: newPermissionJSON
+                        }, user.id, false);
+                    }
+
+                    console.log(`Updated permissionjson for ${usersWithPermission.length} users`);
+                }
+            } catch (error) {
+                console.error('Error updating user permissionjson:', error);
+                // Don't show alert to user as this is a background operation
+            }
+        }
+
+        async function savePermission() {
+            const btn = event.target;
+            const permissionName = document.getElementById('permissionName').value.trim();
+            const permissionJSON = document.getElementById('permissionJSON').value.trim();
+            const businessUnitId = businessUnitDropdown
+                ? businessUnitDropdown.value
+                : document.getElementById('businessUnitId').value;
+
+            // Validation
+            if (!permissionName) return alert("Please enter permission name");
+            if (!businessUnitId) return alert("Please select Business Unit");
+
+            // Check if at least one entity is configured
+            if (entityPermissions.length === 0) {
+                return alert("Please add at least one entity with permissions");
+            }
+
+            // Check if at least one permission level is set above 0 for each entity
+            const hasValidPermissions = entityPermissions.some(ep =>
+                ep.permissions.read > 0 || ep.permissions.write > 0 || ep.permissions.delete > 0
+            );
+
+            if (!hasValidPermissions) {
+                return alert("Please set at least one permission level above 'No Permission' for the added entities");
+            }
+
+            // Validate JSON format
+            try {
+                JSON.parse(permissionJSON);
+            } catch (error) {
+                return alert("Invalid JSON format in permission data. Please check the syntax.");
+            }
+
+            try {
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...';
+                }
+
+                await DBHandler.submitRecordData('masterpermission', {
+                    name: permissionName,
+                    permissionjson: permissionJSON,
+                    businessunitid: businessUnitId,
+                }, editingId, false);
+
+                // Update permissionjson in all user records that use this permission
+                await updateUserPermissionJSON(editingId, permissionJSON);
+
+                await loadPermissionGrid();
+
+                bootstrap.Modal.getInstance(
+                    document.getElementById('permissionModal')
+                ).hide();
+
+                editingId = null;
+
+                // Reset form
+                document.getElementById('permissionName').value = '';
+                if (businessUnitDropdown) {
+                    businessUnitDropdown.value = null;
+                } else {
+                    document.getElementById('businessUnitId').value = '';
+                }
+                entityPermissions = [];
+                renderEntityPermissions();
+                populateEntitySelector();
+                updatePermissionJSON();
+
+            } catch (err) {
+                console.error('Failed to save permission:', err);
+                alert("Failed to save Permission");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa fa-save"></i> Save Permission';
+                }
+            }
+        }
+
+        function applyPermissionToAll(permissionType) {
+            if (entityPermissions.length === 0) {
+                alert('No entities configured to apply permissions to');
+                return;
+            }
+
+            const permissionNames = {
+                'read': 'Read',
+                'write': 'Write',
+                'delete': 'Delete'
+            };
+
+            // Ask for permission level
+            const level = prompt(`Enter permission level for ${permissionNames[permissionType]}:\n0 = No Permission\n1 = User Level\n2 = BU Level`, '2');
+
+            if (level === null) return; // User cancelled
+
+            const permissionLevel = parseInt(level);
+            if (![0, 1, 2].includes(permissionLevel)) {
+                alert('Please enter a valid permission level (0, 1, or 2)');
+                return;
+            }
+
+            if (confirm(`Apply ${permissionNames[permissionType]} permission level ${permissionLevel} to all ${entityPermissions.length} configured entities?`)) {
+                entityPermissions.forEach(entity => {
+                    entity.permissions[permissionType] = permissionLevel;
+                });
+
+                renderEntityPermissions();
+                updatePermissionJSON();
+                alert(`${permissionNames[permissionType]} permission level ${permissionLevel} applied to all entities`);
+            }
+        }
+
+        function clearAllEntityPermissions() {
+            if (entityPermissions.length === 0) {
+                alert('No entities configured to clear');
+                return;
+            }
+
+            if (confirm(`Clear permissions for all ${entityPermissions.length} entities? This will remove all permissions but keep the entities.`)) {
+                entityPermissions.forEach(entity => {
+                    entity.permissions = {
+                        read: 0,
+                        write: 0,
+                        delete: 0
+                    };
+                });
+
+                renderEntityPermissions();
+                updatePermissionJSON();
+                alert('All entity permissions cleared');
+            }
+        }
+
+    </script>
+
+    <style>
+        #permissionGrid_toolbarItems {
+            height: 10px !important;
+        }
+
+        .text-truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .entity-permission-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #007bff;
+        }
+
+        .entity-permission-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-check-input:checked {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .permission-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .entity-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .permission-container {
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .permission-label {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .json-preview {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+        }
+
+        .entity-count-badge {
+            background-color: #6c757d;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            margin-left: 0.5rem;
+        }
+
+        .permission-summary {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .permission-chip {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 0.125rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .permission-chip.active {
+            background-color: #28a745;
+            color: white;
+        }
+    </style>
+
+
+</body>
+
+</html>

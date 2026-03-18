@@ -1,0 +1,189 @@
+﻿<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        //var apiURL = "https://localhost:44309";
+        var apiURL = "";
+    </script>
+
+
+    <title></title>
+    <!-- Bootstrap CSS -->
+    <script src="/css/Default/jquery.min.js"></script>
+    <script src="/css/Default/moment.min.js"></script>
+    <script src="/css/Default/select2.min.js"></script>
+
+    <script src="/css/Default/bootstrap.bundle.min.js"></script>
+
+
+    <script src="/JS/utility.js?id=081220258"></script>
+    <script src="/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="/JS/controls.js?id=081220258" type="module"></script>
+    <script src="/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="/css/Default/jspdf.umd.min.js"></script>
+    <script src="/css/Default/jspdf.plugin.autotable.min.js"></script>
+
+    <script src="/css/Default/popper.min.js"></script>
+    <script src="/css/Default/bootstrap.min.js"></script>
+
+    <script src="/css/Default/dayjs.js"></script>
+    <script src="/css/Default/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+
+    <script src="/css/Default/pdfmake.min.js"></script>
+    <script src="/css/Default/vfs_fonts.js"></script>
+
+    <script src="/css/Default/xlsx.full.min.js"></script>
+    <script src="/css/Default/moment.min.js"></script>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+
+    <script src="/JS/ej2.min.vk02bdl5ad.js"></script>
+    <script src="https://free-crm.csharpasp.net/adminlte/js/adminlte.min.9v1wmpbcea.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <link href="https://localhost:44309/css/Default/bootstrap.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/select2.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/font-awesome-all.min.css" rel="stylesheet">
+    <link href="https://localhost:44309/css/Default/simple-line-icons.min.css" rel="stylesheet">
+
+    <link href="/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://free-crm.csharpasp.net/lib/syncfusion/css/bootstrap5.dvnzgvxkcq.css" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.css">
+    <link href="https://localhost:44309/css/app.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div class="wrapper">
+
+        <!-- Navbar -->
+        <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+
+            <!-- Mobile Menu Toggle -->
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="pushmenu" href="#">
+                        <i class="fas fa-bars"></i>
+                    </a>
+                </li>
+            </ul>
+            <span class="navbar-brand ml-2">Demo App</span>
+        </nav>
+
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a class="brand-link d-flex justify-content-center align-items-center" href="/Dashboards/DefaultDashboard">
+                <span class="brand-text font-weight-light">CRM</span>
+            </a>
+            <div id="sidebar">
+                <div id="mainMenu"></div>
+            </div>
+        </aside>
+
+        <div class="content-wrapper p-3">
+            <div id="mainContent" class="container2">
+                <div class="container">
+                    <h2>Impersonate User</h2>
+                    <form id="impersonateForm" autocomplete="off">
+                        <div class="input-group">
+                            <label for="userList">Select User</label>
+                            <select id="userList" required>
+                                <option value="">-- Select a User --</option>
+                            </select>
+                        </div>
+                        <br />
+                        <button type="submit" id="impersonateButton" onclick="showImpersonateForm();">Impersonate</button>
+                        <div id="error-message" class="error-message" style="display:none;">Failed to impersonate user. Please try again.</div>
+                    </form>
+                </div>
+
+                <script>
+                    async function loadDataonLoad() {
+                        try {
+                            await DropDownHelper.loadDropdown(
+                                'userList',
+                                'id',
+                                'name,username',
+                                'users',
+                                'id,name,username',
+                                'name',
+                                'asc'
+                            );
+                            $('#userList').select2();
+                        } catch (error) {
+                            console.error('Failed to initialize dropdown:', error);
+                        }
+                    }
+
+                    async function showImpersonateForm() {
+                        const impersonateButton = document.getElementById('impersonateButton');
+                        const errorMessage = document.getElementById('error-message');
+                        const userId = document.getElementById('userList').value;
+
+                        impersonateButton.disabled = true;
+                        errorMessage.style.display = 'none';
+
+                        try {
+                            const userDetails = await DBHandler.fetchEntityRecord(
+                                'users',
+                                'token,id,name,defaultpage',
+                                `id='${userId}'`,
+                                true
+                            );
+
+                            if (!userDetails || !userDetails[0]?.token) {
+                                throw new Error('User details not found or invalid.');
+                            }
+
+                            const { token, id, name, defaultpage } = userDetails[0];
+
+                            // Set cookies for impersonation
+                            const cookieOptions = 'max-age=2592000; path=/; SameSite=None; Secure';
+                            document.cookie = `AuthToken=${token}; ${cookieOptions}`;
+                            document.cookie = `DataToken=${token}; ${cookieOptions}`;
+                            document.cookie = `userid=${id}; ${cookieOptions}`;
+                            document.cookie = `displayName=${name}; ${cookieOptions}`;
+
+                            // Redirect to the user's default page
+                            window.location.href = defaultpage;
+                        } catch (error) {
+                            errorMessage.textContent = `Error: ${error.message}`;
+                            errorMessage.style.display = 'block';
+                        } finally {
+                            impersonateButton.disabled = false;
+                        }
+                    }
+
+                    $(document).ready(() => {
+                        loadDataonLoad();
+                    });
+                </script>
+
+            </div>
+            <!-- Dynamic form will be rendered here -->
+            <div id="formContainer" class="mt-4"></div>
+        </div>
+
+        <form id="form1" runat="server">
+        </form>
+    </div>
+</body>
+</html>
