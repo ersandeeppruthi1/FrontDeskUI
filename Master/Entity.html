@@ -1,5 +1,6 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head runat="server">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -60,7 +61,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
@@ -80,219 +81,179 @@
 
 <body>
     <div class="container2">
-        <div id="entityGrid"></div>
+        <div id="entitiesGrid"></div>
     </div>
 
-    <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Add Entity</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="appointmentForm">
-                            <div class="row">
-                                <div class="col-md-6 mb-3" id="mainbox_name">
-                                    <label for="name" class="col-form-label">
-                                        Display Name
-                                        <span style="color: red;"> *</span>
-                                    </label>
-                                    <div class="col">
-                                        <input id="name" name="name" class="form-control" placeholder="Enter Display Name" data-name="name" data-type="Text"
-                                               data-class="form-control" data-label="Display Name" data-placeholder="Enter Display Name"
-                                               data-required="true" clearonsave="1"
-                                               data-onchange="bindEntityNameField" data-id="name" onkeyup="bindEntityNameField()">
-                                    </div>
-                                </div><div class="col-md-6 mb-3" id="mainbox_physicalname">
-                                    <label for="physicalname" class="col-form-label">
-                                        Physical Name
-                                        <span style="color: red;"> *</span>
-                                    </label><div class="col">
-                                        <input id="physicalname" name="physicalname" class="form-control"
-                                               readonly="readonly" placeholder="Enter Physical Name" data-name="physicalname"
-                                               data-type="Text" data-class="form-control" data-label="Physical Name"
-                                               data-placeholder="Enter Physical Name" data-defaultvalue="null"
-                                               data-required="true" clearonsave="1" data-readonly="1"
-                                               data-onchangerefreshgrid="0" data-id="physicalname"
-                                               style="background-color: rgb(240, 240, 240); color: rgb(153, 153, 153); cursor: not-allowed;">
-                                    </div>
-                                </div>
+    <!-- Entities Modal -->
+    <div class="modal fade" id="entityModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Entity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="entityForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Name</label>
+                                <input type="text" id="name" class="form-control" required
+                                    onkeyup="bindEntityNameField()" />
                             </div>
-                        </form>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-primary" onclick="addEntity()">Save Entity</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
+                            <div class="col-md-6">
+                                <label>Physical Name</label>
+                                <input type="text" id="physicalname" class="form-control" disabled />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveEntity()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
 
             </div>
         </div>
     </div>
 
-
     <script>
 
-        let grid;
-        let appointmentsMain = [];
-        var columns = [
-            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
-            { field: 'id', headerText: 'id', visible: false },
-            { field: 'name', headerText: 'Name', width: 220 },
-            { field: 'PhysicalName', headerText: 'Physical Name', width: 220 },
-            { field: 'createdon', headerText: 'Created On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, allowPdfExport: false, visible: false },
-            { field: 'modifiedon', headerText: 'Modified On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 150, visible: false, allowPdfExport: false },
-            { headerText: 'Actions', width: 160, textAlign: 'Center', template: actionTemplate, allowPdfExport: false }
-        ];
+        let entityGrid;
+        let editingEntityId = null;
 
-        function initGrid(columns, patientGrid) {
+        function initEntityGrid() {
+
             ej.grids.Grid.Inject(
-                ej.grids.Filter,
-                ej.grids.Group,
                 ej.grids.Page,
                 ej.grids.Sort,
+                ej.grids.Filter,
                 ej.grids.Toolbar,
-                ej.grids.ColumnChooser,
                 ej.grids.ExcelExport,
                 ej.grids.PdfExport
             );
 
-            grid = new ej.grids.Grid({
+            entityGrid = new ej.grids.Grid({
                 dataSource: [],
                 allowPaging: true,
-                pageSettings: { pageSize: 10 },
                 allowSorting: true,
                 allowFiltering: true,
                 filterSettings: { type: 'Excel' },
-                showColumnChooser: true,
-                toolbar: ['ColumnChooser',
+                toolbar: [
                     'Search',
+                    { text: 'New Entity', prefixIcon: 'e-icons e-plus', id: 'newEntity' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editEntity' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteEntity' },
                     'ExcelExport',
-                    {
-                        text: 'New Entity',
-                        tooltipText: 'New Entity',
-                        prefixIcon: 'e-icons e-plus',
-                        id: 'newEntity'
-                    }],
-                columns: columns,
-                allowExcelExport: true,
-                allowPdfExport: true,
+                    'PdfExport'
+                ],
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'name', headerText: 'Name', width: 200 },
+                    { field: 'physicalname', headerText: 'Physical Name', width: 200 },
+                    { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 180 }
+                ],
+                toolbarClick: async function (args) {
 
-
-                toolbarClick: function (args) {
-                    if (args.item.id === patientGrid + '_excelexport') {
-                        grid.excelExport({
-                            fileName: `Appointments_${formatDate(new Date())}.xlsx`,
-                            exportType: 'AllPages',
-                        });
-                    }
                     if (args.item.id === 'newEntity') {
-                        openNewAppointment(); // your function
+                        editingEntityId = null;
+                        document.getElementById('entityForm').reset();
+                        document.querySelector('#entityModal .modal-title').innerText = "Add Entity";
+                        new bootstrap.Modal(entityModal).show();
+                    }
+
+                    if (args.item.id === 'editEntity') {
+                        const selected = entityGrid.getSelectedRecords();
+                        if (selected.length !== 1) return alert("Select one record");
+                        editingEntityId = selected[0].id;
+
+                        document.getElementById('name').value = selected[0].name;
+                        document.getElementById('physicalname').value = selected[0].physicalname;
+
+                        document.querySelector('#entityModal .modal-title').innerText = "Edit Entity";
+                        new bootstrap.Modal(entityModal).show();
+                    }
+
+                    if (args.item.id === 'deleteEntity') {
+                        const selected = entityGrid.getSelectedRecords();
+                        if (!selected.length) return alert("Select record(s)");
+
+                        const ids = selected.map(r => r.id);
+                        await deleteRecordData('entities', ids, true, true);
+                        loadEntities();
                     }
                 }
             });
-            grid.appendTo('#' + patientGrid);
-        }
 
-        function openNewAppointment() {
-            const modal = new bootstrap.Modal(
-                document.getElementById('appointmentModal'),
-                { backdrop: 'static', keyboard: false }
-            );
-            modal.show();
-        }
-
-        function actionTemplate() {
-            return (
-                '<div class="d-grid gap-2 d-md-flex justify-content-md-center">' +
-                '<button class="btn btn-sm btn-warning" onclick="onEditAppointment(this)">Edit</button>' +
-                '<button class="btn btn-sm btn-danger ms-2" onclick="onDeleteAppointment(this)">Delete</button>' +
-                '</div>'
-            );
-        }
-        // Helper: get row data from template button element
-        function getRowDataFromButton(btn) {
-            const row = btn.closest('tr');
-            // EJ2 sets aria-rowindex; we map to current view records
-            const index = row.getAttribute('aria-rowindex');
-            const view = grid.getCurrentViewRecords();
-            // pageSettings.currentPageStartIndex is not an API; compute offset from pager
-            const page = grid.pageSettings.currentPage || 1;
-            const size = grid.pageSettings.pageSize || 10;
-            const startIdx = (page - 1) * size;
-            return view[index - startIdx - 1];
-        }
-
-        window.onDeleteAppointment = function (btn) {
-            const data = getRowDataFromButton(btn);
-            if (data?.id) {
-                deleteRecord("entities", data?.id, successFallback);
-            }
-        };
-        async function successFallback() {
-            loadEntities();
+            entityGrid.appendTo('#entitiesGrid');
         }
 
         async function loadEntities() {
-            const filter = "";
-            var joinCondition = "";
-            try {
-                const appointments = await DBHandler.fetchEntityRecords(
-                    'entities',
-                    'entities.*',
-                    'entities.modifiedon',
-                    'desc',
-                    filter, true,
-                    0,
-                    joinCondition
-                );
-                appointmentsMain = appointments || [];
-                let serialNumber = 1;
-                const rows = appointmentsMain.map((a) => ({
-                    id: a.id,
-                    srno: serialNumber++,
-                    createdon: normalizeDate(a.createdon),
-                    modifiedon: normalizeDate(a.modifiedon),
-                    Name: a.name,
-                    PhysicalName: a.physicalname,
-                }));
-                grid.dataSource = rows;
-                grid.refresh();
-            } catch (err) {
-                console.error('Failed to load appointments:', err);
+
+            const data = await DBHandler.fetchEntityRecords(
+                'entities',
+                '*',
+                'createdon',
+                'desc'
+            );
+
+            entityGrid.dataSource = data || [];
+        }
+
+        async function saveEntity() {
+
+            const name = document.getElementById('name').value.trim();
+            const physicalname = document.getElementById('physicalname').value.trim();
+
+            if (!name || !physicalname) return alert("All fields required");
+
+            await DBHandler.submitRecordData('entities', {
+                name,
+                physicalname
+            }, editingEntityId, false);
+
+            bootstrap.Modal.getInstance(entityModal).hide();
+            loadEntities();
+        }
+
+        function bindEntityNameField() {
+
+            const entityNameField = document.getElementById('name');
+            const physicalNameField = document.getElementById('physicalname');
+
+            if (!entityNameField || !physicalNameField) {
+                console.error("Entity name or physical name field not found.");
+                return;
+            }
+
+            const entityName = entityNameField.value;
+
+            if (entityName) {
+                const physicalName = entityName
+                    .toLowerCase()
+                    .replace(/\s+/g, '')       // remove spaces
+                    .replace(/[^a-z0-9]/g, ''); // remove special characters
+
+                physicalNameField.value = physicalName;
+            } else {
+                physicalNameField.value = '';
             }
         }
 
-        function normalizeDate(val) {
-            if (!val) return null;
-            const d = val instanceof Date ? val : new Date(val);
-            return isNaN(d) ? null : d;
-        }
-
-        $(document).ready(async () => {
-            initGrid(columns, 'entityGrid');
+        $(document).ready(() => {
+            initEntityGrid();
             loadEntities();
         });
-
-        async function addEntity() {
-            validateRequiredFields("appointmentForm");
-            var data = await getFormDataMain("appointmentForm");
-            await DBHandler_submitRecordData("entities", data, null, true);
-            clearFormControlNew("appointmentForm");
-            bootstrap.Modal.getInstance(document.getElementById('appointmentModal')).hide();
-            loadEntities();
-        }
-
-
     </script>
 
     <style>
-        #patientAppointmentGrid_toolbarItems {
+        #entitiesGrid_toolbarItems {
             height: 10px !important;
         }
     </style>
-
+    
 </body>
+
 </html>
