@@ -49,424 +49,427 @@
 
 <body>
 
-<div class="container2">
-    <div id="webResourceGrid"></div>
-</div>
+    <div class="container2">
+        <div id="webResourceGrid"></div>
+    </div>
 
-<!-- Modal -->
-<div class="modal fade" id="webResourceModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
+    <!-- Modal -->
+    <div class="modal fade" id="webResourceModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title">Add Web Resource</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Web Resource</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="webResourceForm">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label>Name <span class="text-danger">*</span></label>
+                                <input type="text" id="wr_name" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Title</label>
+                                <input type="text" id="wr_title" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Page Title</label>
+                                <input type="text" id="wr_pagetitle" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Resource Type</label>
+                                <select id="wr_resourcetype" class="form-control">
+                                    <option value="">Select Type</option>
+                                    <option value="1">HTML</option>
+                                    <option value="2">JavaScript</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Lookup Entity</label>
+                                <input type="text" id="wr_lookupentityid" class="form-control" />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>Resource Text</label>
+                                <textarea id="wr_resourcetext" class="form-control" rows="12"
+                                    style="font-family: monospace;"></textarea>
+                            </div>
+
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveWebResource()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
             </div>
-
-            <div class="modal-body">
-                <form id="webResourceForm">
-
-                    <div class="row g-3">
-
-                        <div class="col-md-6">
-                            <label>Name <span class="text-danger">*</span></label>
-                            <input type="text" id="wr_name" class="form-control"/>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label>Title</label>
-                            <input type="text" id="wr_title" class="form-control"/>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label>Page Title</label>
-                            <input type="text" id="wr_pagetitle" class="form-control"/>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label>Resource Type</label>
-                            <select id="wr_resourcetype" class="form-control">
-                                <option value="">Select Type</option>
-                                <option value="1">HTML</option>
-                                <option value="2">JavaScript</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label>Lookup Entity</label>
-                            <input type="text" id="wr_lookupentityid" class="form-control"/>
-                        </div>
-
-                        <div class="col-md-12">
-                            <label>Resource Text</label>
-                            <textarea id="wr_resourcetext" class="form-control" rows="12" style="font-family: monospace;"></textarea>
-                        </div>
-
-                    </div>
-
-                </form>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="saveWebResource()">Save</button>
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-
         </div>
     </div>
-</div>
 
-<script>
+    <script>
 
-let grid;
-let editingId = null;
-let entitiesData = [];
-let lookupEntityDropdown;
+        let grid;
+        let editingId = null;
+        let entitiesData = [];
+        let lookupEntityDropdown;
 
-var columns = [
-    { type:'checkbox', width:50 },
-    { field:'srno', headerText:'S.No', width:80, textAlign:'Right'},
-    { field:'name', headerText:'Name', width:180},
-    { field:'title', headerText:'Title', width:180},
-    { field:'pagetitle', headerText:'Page Title', width:180},
-    { field:'resourcetype', headerText:'Type', width:120},
-    { field:'isactive', headerText:'Active', width:100},
-    {
-        field:'createdon',
-        headerText:'Created On',
-        type:'date',
-        format:{ type:'dateTime', format:'dd/MMM/yyyy hh:mm'},
-        width:160
-    },
-    { field:'entityid', visible:false },
-    { field:'id', visible:false }
-];
+        var columns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
+            { field: 'name', headerText: 'Name', width: 180 },
+            { field: 'title', headerText: 'Title', width: 180 },
+            { field: 'pagetitle', headerText: 'Page Title', width: 180 },
+            { field: 'resourcetype', headerText: 'Type', width: 120 },
+            { field: 'isactive', headerText: 'Active', width: 100 },
+            {
+                field: 'createdon',
+                headerText: 'Created On',
+                type: 'date',
+                format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' },
+                width: 160
+            },
+            { field: 'entityid', visible: false },
+            { field: 'id', visible: false }
+        ];
 
 
-// ---------- GRID ----------
-function initGrid(){
+        // ---------- GRID ----------
+        function initGrid() {
 
-    ej.grids.Grid.Inject(
-        ej.grids.Page,
-        ej.grids.Sort,
-        ej.grids.Filter,
-        ej.grids.Toolbar,
-        ej.grids.ColumnChooser,
-        ej.grids.ExcelExport,
-        ej.grids.PdfExport
-    );
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
 
-    grid = new ej.grids.Grid({
+            grid = new ej.grids.Grid({
 
-        dataSource:[],
-        allowPaging:true,
-        allowSorting:true,
-        allowFiltering:true,
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
 
-        filterSettings:{ type:'Excel' },
+                filterSettings: { type: 'Excel' },
 
-        showColumnChooser:true,
-        allowExcelExport:true,
-        allowPdfExport:true,
+                showColumnChooser: true,
+                allowExcelExport: true,
+                allowPdfExport: true,
 
-        pageSettings:{ pageSize:10 },
+                pageSettings: { pageSize: 10 },
 
-        toolbar:[
-            'ColumnChooser',
-            'Search',
-            { prefixIcon:'e-icons e-excelexport', tooltipText:'Export Excel', id:'excelExport'},
-            { prefixIcon:'e-icons e-pdfexport', tooltipText:'Export PDF', id:'pdfExport'},
-            { prefixIcon:'e-icons e-refresh', tooltipText:'Refresh Grid', id:'refreshGrid'},
-            { text:'New', prefixIcon:'e-icons e-plus', id:'new'},
-            { text:'Edit', prefixIcon:'e-icons e-edit', id:'edit'},
-            { text:'Delete', prefixIcon:'e-icons e-delete', id:'delete'},
-            { text:'Preview', prefixIcon:'e-icons e-preview', id:'preview'}
-        ],
+                toolbar: [
+                    'ColumnChooser',
+                    'Search',
+                    { prefixIcon: 'e-icons e-excelexport', tooltipText: 'Export Excel', id: 'excelExport' },
+                    { prefixIcon: 'e-icons e-pdfexport', tooltipText: 'Export PDF', id: 'pdfExport' },
+                    { prefixIcon: 'e-icons e-refresh', tooltipText: 'Refresh Grid', id: 'refreshGrid' },
+                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' },
+                    { text: 'Preview', prefixIcon: 'e-icons e-preview', id: 'preview' }
+                ],
 
-        columns:columns,
+                columns: columns,
 
-        toolbarClick:function(args){
+                toolbarClick: function (args) {
 
-            if(args.item.id==='excelExport'){
-                grid.excelExport({
-                    fileName:`WebResource_${formatDate(new Date())}.xlsx`,
-                    exportType:'AllPages'
-                });
-            }
+                    if (args.item.id === 'excelExport') {
+                        grid.excelExport({
+                            fileName: `WebResource_${formatDate(new Date())}.xlsx`,
+                            exportType: 'AllPages'
+                        });
+                    }
 
-            if(args.item.id==='pdfExport'){
-                grid.pdfExport({
-                    fileName:`WebResource_${formatDate(new Date())}.pdf`,
-                    exportType:'CurrentPage',
-                    pageOrientation:'Landscape',
-                    pageSize:'A4'
-                });
-            }
+                    if (args.item.id === 'pdfExport') {
+                        grid.pdfExport({
+                            fileName: `WebResource_${formatDate(new Date())}.pdf`,
+                            exportType: 'CurrentPage',
+                            pageOrientation: 'Landscape',
+                            pageSize: 'A4'
+                        });
+                    }
 
-            if(args.item.id==='refreshGrid'){
-                loadWebResources();
-            }
+                    if (args.item.id === 'refreshGrid') {
+                        loadWebResources();
+                    }
 
-            if(args.item.id==='new'){
+                    if (args.item.id === 'new') {
 
-                clearForm();
-                editingId=null;
+                        clearForm();
+                        editingId = null;
 
-                if(lookupEntityDropdown) lookupEntityDropdown.destroy();
+                        if (lookupEntityDropdown) lookupEntityDropdown.destroy();
 
-                const modal=new bootstrap.Modal(webResourceModal,{focus:false});
-                modal.show();
+                        const modal = new bootstrap.Modal(webResourceModal, { focus: false });
+                        modal.show();
 
-                lookupEntityDropdown = new ej.dropdowns.DropDownList({
+                        lookupEntityDropdown = new ej.dropdowns.DropDownList({
 
-                    dataSource:entitiesData,
-                    fields:{ text:'name', value:'id'},
-                    placeholder:'Select Lookup Entity',
+                            dataSource: entitiesData,
+                            fields: { text: 'name', value: 'id' },
+                            placeholder: 'Select Lookup Entity',
 
-                    allowFiltering:true,
-                    filterBarPlaceholder:'Search entities...',
-                    filterType:'Contains',
-                    ignoreCase:true,
-                    popupHeight:'250px'
-                });
+                            allowFiltering: true,
+                            filterBarPlaceholder: 'Search entities...',
+                            filterType: 'Contains',
+                            ignoreCase: true,
+                            popupHeight: '250px'
+                        });
 
-                lookupEntityDropdown.appendTo('#wr_lookupentityid');
+                        lookupEntityDropdown.appendTo('#wr_lookupentityid');
 
-                document.querySelector('#webResourceModal .modal-title').innerText="Add Web Resource";
-            }
+                        document.querySelector('#webResourceModal .modal-title').innerText = "Add Web Resource";
+                    }
 
-            if(args.item.id==='edit'){
-                editWebResource();
-            }
+                    if (args.item.id === 'edit') {
+                        editWebResource();
+                    }
 
-            if(args.item.id==='delete'){
-                deleteWebResource();
-            }
+                    if (args.item.id === 'delete') {
+                        deleteWebResource();
+                    }
 
+                }
+            });
+
+            grid.appendTo('#webResourceGrid');
         }
-    });
 
-    grid.appendTo('#webResourceGrid');
-}
 
+        // ---------- LOAD ----------
+        async function loadWebResources() {
 
-// ---------- LOAD ----------
-async function loadWebResources(){
+            const data = await DBHandler.fetchEntityRecords(
 
-    const data = await DBHandler.fetchEntityRecords(
+                'webresource',
+                'id,name,title,pagetitle,resourcetype,isactive,createdon,entityid',
+                'createdon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
 
-        'webresource',
-        'id,name,title,pagetitle,resourcetype,isactive,createdon,entityid',
-        'createdon',
-        'desc',
-        '',
-        true,
-        0,
-        ''
-    );
+            let sr = 1;
 
-    let sr=1;
+            grid.dataSource = (data || []).map(r => ({
 
-    grid.dataSource=(data||[]).map(r=>({
+                ...r,
 
-        ...r,
+                srno: sr++,
+                isactive: r.isactive == 1 ? "Yes" : "No",
+                resourcetype: formatResourceType(r.resourcetype)
 
-        srno:sr++,
-        isactive:r.isactive==1?"Yes":"No",
-        resourcetype:formatResourceType(r.resourcetype)
+            }));
 
-    }));
+            grid.refresh();
+        }
 
-    grid.refresh();
-}
 
+        // ---------- FORMAT TYPE ----------
+        function formatResourceType(type) {
 
-// ---------- FORMAT TYPE ----------
-function formatResourceType(type){
+            switch (type) {
 
-    switch(type){
+                case 1: return "HTML";
+                case 2: return "JavaScript";
+                case 3: return "CSS";
+                case 4: return "JSON";
+                default: return "";
+            }
+        }
 
-        case 1: return "HTML";
-        case 2: return "JavaScript";
-        case 3: return "CSS";
-        case 4: return "JSON";
-        default:return "";
-    }
-}
 
+        // ---------- FORM ----------
+        function clearForm() {
 
-// ---------- FORM ----------
-function clearForm(){
+            document.getElementById('webResourceForm').reset();
+            document.getElementById('wr_resourcetext').value = '';
 
-    document.getElementById('webResourceForm').reset();
-    document.getElementById('wr_resourcetext').value='';
+            if (lookupEntityDropdown)
+                lookupEntityDropdown.value = null;
+        }
 
-    if(lookupEntityDropdown)
-        lookupEntityDropdown.value=null;
-}
 
+        // ---------- ENTITIES ----------
+        async function loadEntitiesData() {
 
-// ---------- ENTITIES ----------
-async function loadEntitiesData(){
+            entitiesData = await DBHandler.fetchEntityRecords(
 
-    entitiesData = await DBHandler.fetchEntityRecords(
+                'entities',
+                'id,name',
+                'name',
+                'asc'
 
-        'entities',
-        'id,name',
-        'name',
-        'asc'
+            ) || [];
+        }
 
-    ) || [];
-}
 
+        // ---------- EDIT ----------
+        async function editWebResource() {
 
-// ---------- EDIT ----------
-async function editWebResource(){
+            const selected = grid.getSelectedRecords();
 
-    const selected = grid.getSelectedRecords();
+            if (selected.length !== 1)
+                return alert("Select one record to edit");
 
-    if(selected.length!==1)
-        return alert("Select one record to edit");
+            const r = selected[0];
 
-    const r = selected[0];
+            editingId = r.id;
 
-    editingId=r.id;
+            if (lookupEntityDropdown) lookupEntityDropdown.destroy();
 
-    if(lookupEntityDropdown) lookupEntityDropdown.destroy();
+            const modal = new bootstrap.Modal(webResourceModal, { focus: false });
+            modal.show();
 
-    const modal = new bootstrap.Modal(webResourceModal,{focus:false});
-    modal.show();
+            lookupEntityDropdown = new ej.dropdowns.DropDownList({
 
-    lookupEntityDropdown = new ej.dropdowns.DropDownList({
+                dataSource: entitiesData,
+                fields: { text: 'name', value: 'id' },
+                placeholder: 'Select Lookup Entity',
 
-        dataSource:entitiesData,
-        fields:{ text:'name', value:'id'},
-        placeholder:'Select Lookup Entity',
+                allowFiltering: true,
+                filterType: 'Contains',
+                ignoreCase: true,
+                popupHeight: '250px',
 
-        allowFiltering:true,
-        filterType:'Contains',
-        ignoreCase:true,
-        popupHeight:'250px',
+                value: r.entityid || null
+            });
 
-        value:r.entityid || null
-    });
+            lookupEntityDropdown.appendTo('#wr_lookupentityid');
 
-    lookupEntityDropdown.appendTo('#wr_lookupentityid');
+            document.getElementById('wr_name').value = r.name;
+            document.getElementById('wr_title').value = r.title;
+            document.getElementById('wr_pagetitle').value = r.pagetitle;
 
-    document.getElementById('wr_name').value=r.name;
-    document.getElementById('wr_title').value=r.title;
-    document.getElementById('wr_pagetitle').value=r.pagetitle;
+            let typeValue = '';
 
-    let typeValue='';
+            switch (r.resourcetype) {
 
-    switch(r.resourcetype){
+                case "HTML": typeValue = "1"; break;
+                case "JavaScript": typeValue = "2"; break;
+            }
 
-        case "HTML": typeValue="1"; break;
-        case "JavaScript": typeValue="2"; break;
-    }
+            document.getElementById('wr_resourcetype').value = typeValue;
 
-    document.getElementById('wr_resourcetype').value=typeValue;
+            const fullRecord = await DBHandler.fetchEntityRecords(
 
-    const fullRecord = await DBHandler.fetchEntityRecords(
+                'webresource',
+                '*',
+                'id',
+                'desc',
+                `id='${editingId}'`,
+                false,
+                1
+            );
 
-        'webresource',
-        '*',
-        'id',
-        'desc',
-        `id='${editingId}'`,
-        false,
-        1
-    );
+            if (fullRecord && fullRecord.length) {
 
-    if(fullRecord && fullRecord.length){
+                const data = fullRecord[0];
 
-        const data=fullRecord[0];
+                document.getElementById('wr_resourcetext').value = data.resourcetext || '';
 
-        document.getElementById('wr_resourcetext').value=data.resourcetext || '';
+                if (lookupEntityDropdown)
+                    lookupEntityDropdown.value = data.entityid || null;
+            }
+        }
 
-        if(lookupEntityDropdown)
-            lookupEntityDropdown.value=data.entityid || null;
-    }
-}
 
+        // ---------- SAVE ----------
+        async function saveWebResource() {
 
-// ---------- SAVE ----------
-async function saveWebResource(){
+            const name = document.getElementById('wr_name').value.trim();
 
-    const name=document.getElementById('wr_name').value.trim();
+            if (!name)
+                return alert("Name is required");
 
-    if(!name)
-        return alert("Name is required");
+            await DBHandler.submitRecordData('webresource', {
 
-    await DBHandler.submitRecordData('webresource',{
+                name: name,
+                title: document.getElementById('wr_title').value,
+                pagetitle: document.getElementById('wr_pagetitle').value,
+                resourcetype: document.getElementById('wr_resourcetype').value || null,
+                resourcetext: document.getElementById('wr_resourcetext').value,
 
-        name:name,
-        title:document.getElementById('wr_title').value,
-        pagetitle:document.getElementById('wr_pagetitle').value,
-        resourcetype:document.getElementById('wr_resourcetype').value || null,
-        resourcetext:document.getElementById('wr_resourcetext').value,
+                entityid: lookupEntityDropdown ?
+                    (lookupEntityDropdown.value || null) : null
 
-        entityid: lookupEntityDropdown ?
-        (lookupEntityDropdown.value || null) : null
+            }, editingId, false);
 
-    }, editingId,false);
+            bootstrap.Modal.getInstance(
+                document.getElementById('webResourceModal')
+            ).hide();
 
-    bootstrap.Modal.getInstance(
-        document.getElementById('webResourceModal')
-    ).hide();
+            loadWebResources();
+        }
 
-    loadWebResources();
-}
 
+        // ---------- DELETE ----------
+        async function deleteWebResource() {
 
-// ---------- DELETE ----------
-async function deleteWebResource(){
+            const selected = grid.getSelectedRecords();
 
-    const selected=grid.getSelectedRecords();
+            if (!selected.length)
+                return alert("Select record(s) to delete");
 
-    if(!selected.length)
-        return alert("Select record(s) to delete");
+            if (!confirm("Delete selected records?"))
+                return;
 
-    if(!confirm("Delete selected records?"))
-        return;
+            const ids = selected.map(r => r.id);
 
-    const ids=selected.map(r=>r.id);
+            await deleteRecordData('webresource', ids, true, true);
 
-    await deleteRecordData('webresource',ids,true,true);
+            loadWebResources();
+        }
 
-    loadWebResources();
-}
 
+        // ---------- DATE ----------
+        function formatDate(date) {
 
-// ---------- DATE ----------
-function formatDate(date){
+            const d = new Date(date);
 
-    const d=new Date(date);
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
 
-    const day=String(d.getDate()).padStart(2,'0');
-    const month=String(d.getMonth()+1).padStart(2,'0');
-    const year=d.getFullYear();
+            return `${day}${month}${year}`;
+        }
 
-    return `${day}${month}${year}`;
-}
 
+        // ---------- READY ----------
+        $(document).ready(function () {
 
-// ---------- READY ----------
-$(document).ready(function(){
+            initGrid();
+            loadWebResources();
+            loadEntitiesData();
 
-    initGrid();
-    loadWebResources();
-    loadEntitiesData();
+        });
 
-});
+    </script>
 
-</script>
-
-<style>
-#webResourceGrid_toolbarItems{
-height:10px!important;
-}
-</style>
+    <style>
+        #webResourceGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
 
 </body>
 
