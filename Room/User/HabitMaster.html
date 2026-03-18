@@ -87,10 +87,56 @@
                             </div>
                             <div class="col-md-6">
                                 <label>Habit Type</label>
-                                <input type="text" id="habittype" class="form-control" required />
+                                <select id="habittype" class="form-control" required onchange="toggleOptionsField()">
+                                    <option value="">Select Type</option>
+                                    <option value="Text">Text</option>
+                                    <option value="Option">Option</option>
+                                </select>
                             </div>
                         </div>
-                    </form>
+                        <div class="row mt-3" id="optionsRow" style="display: none;">
+                            <div class="col-md-12">
+                                <label>Options (comma-separated)</label>
+                                <input type="text" id="habitoptions" class="form-control" placeholder="e.g., Yes,No,Maybe" />
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Code</label>
+                                <input type="text" id="habitcode" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Order</label>
+                                <input type="number" id="habitorder" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Frequency</label>
+                                <select id="habitfrequency" class="form-control" onchange="updateFrequencyNumber()">
+                                    <option value="">Select Frequency</option>
+                                     <option value="Weekly">Weekly</option>
+                                    <option value="Monthly">Monthly</option>
+                                    <option value="Quarterly">Quarterly</option>
+                                    <option value="Annually">Annually</option>
+                                </select>
+                            </div>
+                        </div>                        <div class="row mt-3" id="freqRow" style="display: none;">
+                            <div class="col-md-6">
+                                <label id="freqLabel">Frequency Number</label>
+                                <input type="number" id="habitfrequencynumber" class="form-control" />
+                                <select id="habitfrequencynumberselect" class="form-control" style="display: none;">
+                                    <option value="">Select Day</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
+                                </select>
+                            </div>
+                        </div>                    </form>
                 </div>
 
                 <div class="modal-footer">
@@ -135,7 +181,12 @@
                 columns: [
                     { type: 'checkbox', width: 50 },
                     { field: 'habitname', headerText: 'Habit Name', width: 200 },
-                    { field: 'habittype', headerText: 'Habit Type', width: 200 },
+                    { field: 'habittype', headerText: 'Habit Type', width: 150 },
+                    { field: 'options', headerText: 'Options', width: 200 },
+                    { field: 'code', headerText: 'Code', width: 150 },
+                    { field: 'order', headerText: 'Order', width: 100 },
+                    { field: 'frequency', headerText: 'Frequency', width: 120 },
+                    { field: 'frequencynumber', headerText: 'Frequency Number', width: 140 },
                     { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 180 }
                 ],
                 toolbarClick: async function (args) {
@@ -143,6 +194,8 @@
                     if (args.item.id === 'newHabit') {
                         editingHabitId = null;
                         document.getElementById('habitForm').reset();
+                        toggleOptionsField();
+                        updateFrequencyNumber();
                         document.querySelector('#habitModal .modal-title').innerText = "Add Habit";
                         new bootstrap.Modal(habitModal).show();
                     }
@@ -154,7 +207,13 @@
 
                         document.getElementById('habitname').value = selected[0].habitname;
                         document.getElementById('habittype').value = selected[0].habittype;
-
+                        document.getElementById('habitoptions').value = selected[0].options || '';
+                        document.getElementById('habitcode').value = selected[0].code || '';
+                        document.getElementById('habitorder').value = selected[0].order || '';
+                        document.getElementById('habitfrequency').value = selected[0].frequency || '';
+                        document.getElementById('habitfrequencynumber').value = selected[0].frequencynumber || '';
+                        toggleOptionsField();
+                        updateFrequencyNumber();
                         document.querySelector('#habitModal .modal-title').innerText = "Edit Habit";
                         new bootstrap.Modal(habitModal).show();
                     }
@@ -188,17 +247,66 @@
         async function saveHabit() {
 
             const habitname = document.getElementById('habitname').value.trim();
-            const habittype = document.getElementById('habittype').value.trim();
+            const habittype = document.getElementById('habittype').value;
+            const options = document.getElementById('habitoptions').value.trim();
+            const code = document.getElementById('habitcode').value.trim();
+            const order = parseInt(document.getElementById('habitorder').value) || 0;
+            const frequency = document.getElementById('habitfrequency').value;
+            const frequencynumber = parseInt(document.getElementById('habitfrequencynumber').value) || 0;
 
             if (!habitname || !habittype) return alert("All fields required");
 
+            if (habittype === 'Option' && !options) return alert("Options are required for Option type");
+
             await DBHandler.submitRecordData('habitmaster', {
                 habitname,
-                habittype
+                habittype,
+                options: habittype === 'Option' ? options : '',
+                code,
+                order,
+                frequency,
+                frequencynumber
             }, editingHabitId, false);
 
             bootstrap.Modal.getInstance(habitModal).hide();
             loadHabits();
+        }
+
+        function toggleOptionsField() {
+            const type = document.getElementById('habittype').value;
+            const optionsRow = document.getElementById('optionsRow');
+            if (type === 'Option') {
+                optionsRow.style.display = 'block';
+            } else {
+                optionsRow.style.display = 'none';
+                document.getElementById('habitoptions').value = '';
+            }
+        }
+
+        function updateFrequencyNumber() {
+            const freq = document.getElementById('habitfrequency').value;
+            const label = document.getElementById('freqLabel');
+            const input = document.getElementById('habitfrequencynumber');
+            const select = document.getElementById('habitfrequencynumberselect');
+            const row = document.getElementById('freqRow');
+            if (freq) {
+                row.style.display = 'block';
+                if (freq === 'Weekly') {
+                    label.textContent = 'Days';
+                    input.style.display = 'none';
+                    select.style.display = 'block';
+                } else {
+                    input.style.display = 'block';
+                    select.style.display = 'none';
+                    if (freq === 'Monthly') label.textContent = 'Months';
+                    else if (freq === 'Quarterly') label.textContent = 'Quarter';
+                    else if (freq === 'Annually') label.textContent = 'Annual';
+                }
+            } else {
+                row.style.display = 'none';
+                input.value = '';
+                select.value = '';
+            }
         }
 
         $(document).ready(() => {
