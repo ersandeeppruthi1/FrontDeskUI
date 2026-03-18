@@ -99,6 +99,16 @@
                                 <input type="text" id="wr_lookupentityid" class="form-control" />
                             </div>
 
+                            <div class="col-md-6">
+                                <label>Business Unit</label>
+                                <input type="text" id="wr_businessunitid" class="form-control" datatype="dropdown" dbcolumnname="businessunitid" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Icon</label>
+                                <input type="text" id="wr_icon" class="form-control" dbcolumnname="icon" />
+                            </div>
+
                             <div class="col-md-12">
                                 <label>Resource Text</label>
                                 <textarea id="wr_resourcetext" class="form-control" rows="12"
@@ -122,7 +132,9 @@
         let grid;
         let editingId = null;
         let entitiesData = [];
+        let businessunitData = [];
         let lookupEntityDropdown;
+        let businessunitDropdown;
 
         var columns = [
             { type: 'checkbox', width: 50 },
@@ -245,6 +257,7 @@
 
                         // Destroy if already exists
                         if (lookupEntityDropdown) lookupEntityDropdown.destroy();
+                        if (businessunitDropdown) businessunitDropdown.destroy();
 
                         const modal = new bootstrap.Modal(webResourceModal, {
                             focus: false,
@@ -266,6 +279,18 @@
                             popupHeight: '250px'
                         });
                         lookupEntityDropdown.appendTo('#wr_lookupentityid');
+
+                        businessunitDropdown = new ej.dropdowns.DropDownList({
+                            dataSource: businessunitData,
+                            fields: { text: 'name', value: 'id' },
+                            placeholder: 'Select Business Unit',
+                            allowFiltering: true,
+                            filterBarPlaceholder: 'Search business units...',
+                            ignoreCase: true,
+                            filterType: 'Contains',
+                            popupHeight: '250px'
+                        });
+                        businessunitDropdown.appendTo('#wr_businessunitid');
 
                         document.querySelector('#webResourceModal .modal-title').innerText = "Add Web Resource";
                     }
@@ -352,14 +377,27 @@
         function clearForm() {
             document.getElementById('webResourceForm').reset();
             document.getElementById('wr_resourcetext').value = '';
+            document.getElementById('wr_icon').value = '';
             if (lookupEntityDropdown) {
                 lookupEntityDropdown.value = null;
+            }
+            if (businessunitDropdown) {
+                businessunitDropdown.value = null;
             }
         }
 
         async function loadEntitiesData() {
             entitiesData = await DBHandler.fetchEntityRecords(
                 'entities',
+                'id,name',
+                'name',
+                'asc'
+            ) || [];
+        }
+
+        async function loadBusinessunitData() {
+            businessunitData = await DBHandler.fetchEntityRecords(
+                'businessunit',
                 'id,name',
                 'name',
                 'asc'
@@ -379,6 +417,7 @@
 
             // Destroy if already exists
             if (lookupEntityDropdown) lookupEntityDropdown.destroy();
+            if (businessunitDropdown) businessunitDropdown.destroy();
 
             // 1️⃣ Open modal immediately with basic info
             const modal = new bootstrap.Modal(webResourceModal, {
@@ -403,9 +442,23 @@
             });
             lookupEntityDropdown.appendTo('#wr_lookupentityid');
 
+            businessunitDropdown = new ej.dropdowns.DropDownList({
+                dataSource: businessunitData,
+                fields: { text: 'name', value: 'id' },
+                placeholder: 'Select Business Unit',
+                allowFiltering: true,
+                filterBarPlaceholder: 'Search business units...',
+                ignoreCase: true,
+                filterType: 'Contains',
+                popupHeight: '250px',
+                value: r.businessunitid || null
+            });
+            businessunitDropdown.appendTo('#wr_businessunitid');
+
             document.getElementById('wr_name').value = r.name;
             document.getElementById('wr_title').value = r.title;
             document.getElementById('wr_pagetitle').value = r.pagetitle;
+            document.getElementById('wr_icon').value = r.icon || '';
             let typeValue = '';
             switch (r.resourcetype) {
                 case "HTML": typeValue = "2"; break;
@@ -439,6 +492,9 @@
                 document.getElementById('wr_resourcetext').value = data.resourcetext || '';
                 if (lookupEntityDropdown) {
                     lookupEntityDropdown.value = data.entityid || null;
+                }
+                if (businessunitDropdown) {
+                    businessunitDropdown.value = data.businessunitid || null;
                 }
 
             } catch (err) {
@@ -498,6 +554,8 @@
                 resourcetype: document.getElementById('wr_resourcetype').value || null,
                 resourcetext: resourceText,
                 entityid: lookupEntityDropdown ? (lookupEntityDropdown.value || null) : null,
+                businessunitid: businessunitDropdown ? (businessunitDropdown.value || null) : null,
+                icon: document.getElementById('wr_icon').value.trim() || null,
 
             }, editingId, false);
 
@@ -542,6 +600,7 @@
             initGrid();
             loadWebResources();
             loadEntitiesData();
+            loadBusinessunitData();
         });
 
     </script>
