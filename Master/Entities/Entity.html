@@ -91,6 +91,12 @@
                                 <input type="text" id="physicalname" class="form-control" disabled />
                             </div>
                         </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Icon</label>
+                                <input type="text" id="icon" class="form-control" dbcolumnname="icon" placeholder="fa-table" />
+                            </div>
+                        </div>
                     </form>
                 </div>
 
@@ -138,6 +144,7 @@
                     { type: 'checkbox', width: 50 },
                     { field: 'name', headerText: 'Name', width: 200 },
                     { field: 'physicalname', headerText: 'Physical Name', width: 200 },
+                    { field: 'icon', headerText: 'Icon', width: 140, template: '<i class="fa ${icon}"></i> ${icon}' },
                     { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 180 }
                 ],
                 toolbarClick: async function (args) {
@@ -156,6 +163,7 @@
 
                         document.getElementById('name').value = selected[0].name;
                         document.getElementById('physicalname').value = selected[0].physicalname;
+                        document.getElementById('icon').value = selected[0].icon || '';
 
                         document.querySelector('#entityModal .modal-title').innerText = "Edit Entity";
                         new bootstrap.Modal(entityModal).show();
@@ -195,12 +203,14 @@
 
             const name = document.getElementById('name').value.trim();
             const physicalname = document.getElementById('physicalname').value.trim();
+            const icon = document.getElementById('icon').value.trim();
 
             if (!name || !physicalname) return alert("All fields required");
 
             await DBHandler.submitRecordData('entities', {
                 name,
-                physicalname
+                physicalname,
+                icon: icon || null
             }, editingEntityId, false);
 
             bootstrap.Modal.getInstance(entityModal).hide();
