@@ -241,6 +241,7 @@
                     const res = webResourcesData.find(r => r.id == args.value);
                     if (res) {
                         document.getElementById('menuItemName').value = res.name;
+                        document.getElementById('menuIcon').value = res.icon || '';
                         let typeStr = 'html';
                         switch (parseInt(res.resourcetype)) {
                             case 1: typeStr = 'javascript'; break;
@@ -278,7 +279,7 @@
             // Load web resources
             DBHandler.fetchEntityRecords(
                 'webresource',
-                'id,name,resourcetype',
+                'id,name,resourcetype,icon',
                 'name',
                 'asc',
                 'isactive = 1',
