@@ -521,6 +521,7 @@
             // Generate JSON format matching C# UserPermission class
             const permissionData = entityPermissions.map(ep => ({
                 UserId: null, // Will be set on server side
+                EntityId: ep.entityId,
                 BusinessUnitId: ep.businessUnitId,
                 ReadPermission: ep.permissions.read,
                 WritePermission: ep.permissions.write,
@@ -539,7 +540,7 @@
                 // Handle C# UserPermission format
                 if (Array.isArray(permissionData)) {
                     entityPermissions = permissionData.map(entity => ({
-                        entityId: entity.entityId || null,
+                        entityId: entity.EntityId || entity.entityId,
                         entityName: entity.EntityName || entity.entityName,
                         tableName: entity.EntityName || entity.entityName || entity.tableName,
                         businessUnitId: entity.BusinessUnitId || entity.businessUnitId,
