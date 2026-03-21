@@ -418,13 +418,7 @@
                                         <label class="permission-label" for="businessUnit-${index}">
                                             <i class="fa fa-building text-primary me-1"></i> Business Unit
                                         </label>
-                                        <select class="form-select form-select-sm" id="businessUnit-${index}" 
-                                               onchange="updateEntityBusinessUnit(${index}, this.value)">
-                                            <option value="">Select Business Unit</option>
-                                            ${businessUnitDropdown?.dataSource?.map(bu => 
-                                                `<option value="${bu.id}" ${entityPerm.businessUnitId == bu.id ? 'selected' : ''}>${bu.name}</option>`
-                                            ).join('') || ''}
-                                        </select>
+                                        <input class="form-control" id="businessUnit-${index}" />
                                         <small class="text-muted">Select the business unit for this entity</small>
                                     </div>
                                 </div>
@@ -481,6 +475,23 @@
             });
 
             container.innerHTML = html;
+            
+            // Initialize ej.dropdowns.DropDownList for each business unit dropdown
+            entityPermissions.forEach((entityPerm, index) => {
+                const businessUnitData = businessUnitDropdown?.dataSource || [];
+                const entityBusinessUnitDropdown = new ej.dropdowns.DropDownList({
+                    dataSource: businessUnitData,
+                    fields: { text: 'name', value: 'id' },
+                    allowFiltering: true,
+                    filterBarPlaceholder: 'Search business unit...',
+                    placeholder: 'Select Business Unit',
+                    value: entityPerm.businessUnitId,
+                    change: function(args) {
+                        updateEntityBusinessUnit(index, args.value);
+                    }
+                });
+                entityBusinessUnitDropdown.appendTo(`#businessUnit-${index}`);
+            });
         }
 
         function updateEntityPermission(index, permission, value) {
