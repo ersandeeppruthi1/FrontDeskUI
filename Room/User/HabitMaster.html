@@ -210,17 +210,12 @@
                         toggleOptionsField();
                         updateFrequencyNumber();
 
+                        if (frequencyMultiSelect) frequencyMultiSelect.value = [];
+
                         document.querySelector('#habitModal .modal-title').innerText = "Add Habit";
 
                         const modal = new bootstrap.Modal(habitModal);
                         modal.show();
-
-                        setTimeout(() => {
-                            if (frequencyMultiSelect) {
-                                frequencyMultiSelect.value = [];
-                                frequencyMultiSelect.refresh();
-                            }
-                        }, 200);
                     }
 
                     if (args.item.id === 'editHabit') {
@@ -240,14 +235,11 @@
                         updateFrequencyNumber();
 
                         // Set frequency value after updateFrequencyNumber creates the multiselect
-                        setTimeout(() => {
-                            if (frequencyMultiSelect) {
-                                frequencyMultiSelect.value = selected[0].frequencynumber
-                                    ? selected[0].frequencynumber.split(',')
-                                    : [];
-                                frequencyMultiSelect.refresh();
-                            }
-                        }, 100);
+                        if (frequencyMultiSelect) {
+                            frequencyMultiSelect.value = selected[0].frequencynumber
+                                ? selected[0].frequencynumber.split(',')
+                                : [];
+                        }
 
                         document.querySelector('#habitModal .modal-title').innerText = "Edit Habit";
                         const modal = new bootstrap.Modal(habitModal);
@@ -319,25 +311,24 @@
                     placeholder = 'Select Years';
                 }
 
-                // Destroy existing
                 if (frequencyMultiSelect) {
-                    frequencyMultiSelect.destroy();
+                    // Update existing
+                    frequencyMultiSelect.setProperties({
+                        dataSource: dataSource,
+                        placeholder: placeholder
+                    });
+                    frequencyMultiSelect.value = []; // Reset value on change
+                } else {
+                    // Create new
+                    frequencyMultiSelect = new ej.dropdowns.MultiSelect({
+                        dataSource: dataSource,
+                        mode: 'CheckBox',
+                        showDropDownIcon: true,
+                        placeholder: placeholder
+                    });
+
+                    frequencyMultiSelect.appendTo('#habitfrequencynumberselect');
                 }
-
-                // Create new
-                frequencyMultiSelect = new ej.dropdowns.MultiSelect({
-                    dataSource: dataSource,
-                    mode: 'CheckBox',
-                    showDropDownIcon: true,
-                    placeholder: placeholder
-                });
-
-                frequencyMultiSelect.appendTo('#habitfrequencynumberselect');
-
-                // 🔥 Important: refresh to avoid blink
-                setTimeout(() => {
-                    frequencyMultiSelect.refresh();
-                }, 50);
 
             } else {
                 row.style.display = 'none';
@@ -356,28 +347,6 @@
             habitGrid.dataSource = data || [];
         }
 
-
-        let frequencyMultiSelect;
-
-        function createMultiSelect() {
-
-            if (frequencyMultiSelect) {
-                frequencyMultiSelect.destroy();
-            }
-
-            frequencyMultiSelect = new ej.dropdowns.MultiSelect({
-                dataSource: [
-                    'Monday', 'Tuesday', 'Wednesday',
-                    'Thursday', 'Friday', 'Saturday', 'Sunday'
-                ],
-                mode: 'CheckBox',
-                showDropDownIcon: true,
-                placeholder: 'Select Days',
-                width: '100%'
-            });
-
-            frequencyMultiSelect.appendTo('#habitfrequencynumberselect');
-        }
 
         // INIT
         $(document).ready(() => {
