@@ -518,14 +518,14 @@
         }
 
         function updatePermissionJSON() {
-            // Generate the simplified JSON format as requested
+            // Generate JSON format matching C# UserPermission class
             const permissionData = entityPermissions.map(ep => ({
-                entityId: ep.entityId,
-                entityName: ep.tableName,
-                businessUnitId: ep.businessUnitId,
-                read: ep.permissions.read,
-                write: ep.permissions.write,
-                delete: ep.permissions.delete
+                UserId: null, // Will be set on server side
+                BusinessUnitId: ep.businessUnitId,
+                ReadPermission: ep.permissions.read,
+                WritePermission: ep.permissions.write,
+                DeletePermission: ep.permissions.delete,
+                EntityName: ep.tableName
             }));
 
             document.getElementById('permissionJSON').value = JSON.stringify(permissionData, null, 2);
@@ -536,17 +536,17 @@
                 const permissionData = JSON.parse(jsonString);
                 entityPermissions = [];
 
-                // Handle new simplified format (array of entities)
+                // Handle C# UserPermission format
                 if (Array.isArray(permissionData)) {
                     entityPermissions = permissionData.map(entity => ({
-                        entityId: entity.entityId,
-                        entityName: entity.entityName,
-                        tableName: entity.entityName.toLowerCase().replace(/\s+/g, ''),
-                        businessUnitId: entity.businessUnitId || null,
+                        entityId: entity.entityId || null,
+                        entityName: entity.EntityName || entity.entityName,
+                        tableName: entity.EntityName || entity.entityName || entity.tableName,
+                        businessUnitId: entity.BusinessUnitId || entity.businessUnitId,
                         permissions: {
-                            read: entity.read || 0,
-                            write: entity.write || 0,
-                            delete: entity.delete || 0
+                            read: entity.ReadPermission || entity.read || 0,
+                            write: entity.WritePermission || entity.write || 0,
+                            delete: entity.DeletePermission || entity.delete || 0
                         }
                     }));
                 }
