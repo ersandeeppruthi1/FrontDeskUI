@@ -7,7 +7,7 @@
 
     <script>
         let classMap = [];
-        var apiURL = "https://dbsit.vsservices.in/";
+        var apiURL = "https://dbsit2.vsservices.in/";
         //var apiURL = "";
     </script>
 
@@ -330,6 +330,7 @@
                     entityId: entityId,
                     entityName: entityName,
                     tableName: tableName,
+                    businessUnitId: null,
                     permissions: {
                         read: 0,
                         write: 0,
@@ -412,6 +413,21 @@
                         </div>
                         <div class="card-body permission-container">
                             <div class="row g-3">
+                                <div class="col-md-12 mb-3">
+                                    <div class="form-group">
+                                        <label class="permission-label" for="businessUnit-${index}">
+                                            <i class="fa fa-building text-primary me-1"></i> Business Unit
+                                        </label>
+                                        <select class="form-select form-select-sm" id="businessUnit-${index}" 
+                                               onchange="updateEntityBusinessUnit(${index}, this.value)">
+                                            <option value="">Select Business Unit</option>
+                                            ${businessUnitDropdown?.dataSource?.map(bu => 
+                                                `<option value="${bu.id}" ${entityPerm.businessUnitId == bu.id ? 'selected' : ''}>${bu.name}</option>`
+                                            ).join('') || ''}
+                                        </select>
+                                        <small class="text-muted">Select the business unit for this entity</small>
+                                    </div>
+                                </div>
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label class="permission-label" for="read-${index}">
@@ -474,6 +490,13 @@
             }
         }
 
+        function updateEntityBusinessUnit(index, businessUnitId) {
+            if (entityPermissions[index]) {
+                entityPermissions[index].businessUnitId = businessUnitId || null;
+                updatePermissionJSON();
+            }
+        }
+
         function removeEntityPermission(index) {
             if (confirm('Are you sure you want to remove this entity permission?')) {
                 entityPermissions.splice(index, 1);
@@ -488,6 +511,7 @@
             const permissionData = entityPermissions.map(ep => ({
                 entityId: ep.entityId,
                 entityName: ep.tableName,
+                businessUnitId: ep.businessUnitId,
                 read: ep.permissions.read,
                 write: ep.permissions.write,
                 delete: ep.permissions.delete
@@ -507,6 +531,7 @@
                         entityId: entity.entityId,
                         entityName: entity.entityName,
                         tableName: entity.entityName.toLowerCase().replace(/\s+/g, ''),
+                        businessUnitId: entity.businessUnitId || null,
                         permissions: {
                             read: entity.read || 0,
                             write: entity.write || 0,
@@ -520,6 +545,7 @@
                         entityId: entity.entityId,
                         entityName: entity.entityName,
                         tableName: entity.tableName,
+                        businessUnitId: entity.businessUnitId || null,
                         permissions: {
                             read: entity.permissions.read || 0,
                             write: entity.permissions.write || entity.permissions.create || 0,
