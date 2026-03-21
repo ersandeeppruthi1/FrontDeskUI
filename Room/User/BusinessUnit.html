@@ -86,7 +86,8 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <label>Business Unit Name <span class="text-danger">*</span></label>
-                                <input type="text" id="bu_name" class="form-control" required onfocusout="validateBusinessUnitName()" />
+                                <input type="text" id="bu_name" class="form-control" required
+                                    onfocusout="validateBusinessUnitName()" />
                                 <div id="buNameMessage" class="mt-1" style="font-size: 12px;"></div>
                             </div>
 
@@ -105,7 +106,8 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button id="saveBusinessUnitBtn" class="btn btn-primary" onclick="saveBusinessUnit()" disabled>Save</button>
+                    <button id="saveBusinessUnitBtn" class="btn btn-primary" onclick="saveBusinessUnit()"
+                        disabled>Save</button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
 
@@ -182,7 +184,7 @@
                         type: 'date',
                         format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' },
                         width: 180,
-                        visible: false 
+                        visible: false
                     },
                     {
                         field: 'modifiedon',
@@ -432,7 +434,7 @@
 
             $('#businessUnitModal').on('shown.bs.modal', function () {
                 $(document).off('focusin.modal');
-                
+
                 // Set default user from cookie when modal is shown
                 setDefaultUserFromCookie();
             });
@@ -445,7 +447,6 @@
             height: 10px !important;
         }
     </style>
-
 </body>
 
 </html>
