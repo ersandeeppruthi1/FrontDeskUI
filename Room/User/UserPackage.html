@@ -121,172 +121,172 @@
         </div>
     </div>
 
-   <script>
-    let userPackageGrid;
-let editingPackageId = null;
-let assessmentMultiSelect;
-let habitMultiSelect;
+    <script>
+        let userPackageGrid;
+        let editingPackageId = null;
+        let assessmentMultiSelect;
+        let habitMultiSelect;
 
-const userPackageModalEl = document.getElementById('userPackageModal');
-const userPackageModal = new bootstrap.Modal(userPackageModalEl);
+        const userPackageModalEl = document.getElementById('userPackageModal');
+        const userPackageModal = new bootstrap.Modal(userPackageModalEl);
 
-// Initialize Grid
-function initUserPackageGrid() {
-    ej.grids.Grid.Inject(
-        ej.grids.Page,
-        ej.grids.Sort,
-        ej.grids.Filter,
-        ej.grids.Toolbar,
-        ej.grids.ExcelExport,
-        ej.grids.PdfExport
-    );
+        // Initialize Grid
+        function initUserPackageGrid() {
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
 
-    userPackageGrid = new ej.grids.Grid({
-        dataSource: [],
-        allowPaging: true,
-        allowSorting: true,
-        allowFiltering: true,
-        filterSettings: { type: 'Excel' },
-        toolbar: [
-            'Search',
-            { text: 'New Package', prefixIcon: 'e-icons e-plus', id: 'newPackage' },
-            { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editPackage' },
-            { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deletePackage' },
-            'ExcelExport',
-            'PdfExport'
-        ],
-        columns: [
-            { type: 'checkbox', width: 50 },
-            { field: 'id', headerText: 'ID', isPrimaryKey: true, visible: false },
-            { field: 'packagename', headerText: 'Package Name', width: 200 },
-            { field: 'code', headerText: 'Code', width: 150 },
-            { field: 'description', headerText: 'Description', width: 250 },
-            { field: 'status', headerText: 'Status', width: 120 },
-            { field: 'assessmentid1', headerText: 'Assessments', width: 200 },
-            { field: 'habitid1', headerText: 'Habits', width: 200 },
-            { field: 'createdon', headerText: 'Created On', width: 150, type: 'datetime' },
-            { field: 'modifiedon', headerText: 'Modified On', width: 150, type: 'datetime' }
-        ],
-        toolbarClick: function(args) {
-            if (args.item.id === 'newPackage') {
+            userPackageGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                toolbar: [
+                    'Search',
+                    { text: 'New Package', prefixIcon: 'e-icons e-plus', id: 'newPackage' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editPackage' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deletePackage' },
+                    'ExcelExport',
+                    'PdfExport'
+                ],
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'id', headerText: 'ID', isPrimaryKey: true, visible: false },
+                    { field: 'packagename', headerText: 'Package Name', width: 200 },
+                    { field: 'code', headerText: 'Code', width: 150 },
+                    { field: 'description', headerText: 'Description', width: 250 },
+                    { field: 'status', headerText: 'Status', width: 120 },
+                    { field: 'assessmentid1', headerText: 'Assessments', width: 200 },
+                    { field: 'habitid1', headerText: 'Habits', width: 200 },
+                    { field: 'createdon', headerText: 'Created On', width: 150, type: 'datetime' },
+                    { field: 'modifiedon', headerText: 'Modified On', width: 150, type: 'datetime' }
+                ],
+                toolbarClick: function (args) {
+                    if (args.item.id === 'newPackage') {
+                        editingPackageId = null;
+                        document.getElementById('userPackageForm').reset();
+                        if (assessmentMultiSelect) assessmentMultiSelect.value = [];
+                        if (habitMultiSelect) habitMultiSelect.value = [];
+                        document.querySelector('#userPackageModal .modal-title').innerText = "Add User Package";
+                        userPackageModal.show();
+                    }
+
+                    if (args.item.id === 'editPackage') {
+                        const selected = userPackageGrid.getSelectedRecords();
+                        if (selected.length !== 1) return alert("Select one record");
+
+                        editingPackageId = selected[0].id;
+                        document.getElementById('packagename').value = selected[0].packagename;
+                        document.getElementById('packagecode').value = selected[0].code;
+                        document.getElementById('packagedescription').value = selected[0].description;
+                        document.getElementById('packagestatus').value = selected[0].status;
+
+                        if (assessmentMultiSelect) assessmentMultiSelect.value = selected[0].assessmentid1 ? selected[0].assessmentid1.split(',') : [];
+                        if (habitMultiSelect) habitMultiSelect.value = selected[0].habitid1 ? selected[0].habitid1.split(',') : [];
+
+                        document.querySelector('#userPackageModal .modal-title').innerText = "Edit User Package";
+                        userPackageModal.show();
+                    }
+                }
+            });
+
+            userPackageGrid.appendTo('#userPackageGrid');
+        }
+
+        // Initialize MultiSelects with real DB data
+        async function initMultiSelects() {
+            // --- Assessments ---
+            const assessments = await DBHandler.fetchEntityRecords(
+                'assessmentmaster1',
+                'id,assessmentname',
+                'assessmentname', 'asc'
+            );
+
+            const assessmentData = assessments.map(a => ({
+                value: a.id.toString(),
+                text: a.assessmentname
+            }));
+
+            assessmentMultiSelect = new ej.dropdowns.MultiSelect({
+                dataSource: assessmentData,
+                fields: { value: 'value', text: 'text' },
+                showDropDownIcon: true,
+                placeholder: 'Select Assessments'
+            });
+            assessmentMultiSelect.appendTo('#assessmentSelect');
+
+            // --- Habits ---
+            const habits = await DBHandler.fetchEntityRecords(
+                'habitmaster',
+                'code,habitname',
+                'habitname', 'asc'
+            );
+
+            const habitData = habits.map(h => ({
+                value: h.code,
+                text: h.habitname
+            }));
+
+            habitMultiSelect = new ej.dropdowns.MultiSelect({
+                dataSource: habitData,
+                fields: { value: 'value', text: 'text' },
+                showDropDownIcon: true,
+                placeholder: 'Select Habits'
+            });
+            habitMultiSelect.appendTo('#habitSelect');
+        }
+
+        // Save User Package
+        async function saveUserPackage() {
+            const packagename = document.getElementById('packagename').value.trim();
+            const code = document.getElementById('packagecode').value.trim();
+            const description = document.getElementById('packagedescription').value.trim();
+            const status = document.getElementById('packagestatus').value;
+
+            const assessmentid = assessmentMultiSelect ? assessmentMultiSelect.value.join(',') : '';
+            const habitid = habitMultiSelect ? habitMultiSelect.value.join(',') : '';
+
+            if (!packagename || !code) { alert("Package Name and Code are required"); return; }
+
+            const record = {
+                packagename,
+                code,
+                description,
+                status,
+                assessmentid1: assessmentid,
+                habitid1: habitid
+            };
+
+            try {
+                await DBHandler.submitRecordData('userpackage', record, editingPackageId || null, false);
+                userPackageModal.hide();
+                loadUserPackages();
                 editingPackageId = null;
-                document.getElementById('userPackageForm').reset();
-                if (assessmentMultiSelect) assessmentMultiSelect.value = [];
-                if (habitMultiSelect) habitMultiSelect.value = [];
-                document.querySelector('#userPackageModal .modal-title').innerText = "Add User Package";
-                userPackageModal.show();
-            }
-
-            if (args.item.id === 'editPackage') {
-                const selected = userPackageGrid.getSelectedRecords();
-                if (selected.length !== 1) return alert("Select one record");
-
-                editingPackageId = selected[0].id;
-                document.getElementById('packagename').value = selected[0].packagename;
-                document.getElementById('packagecode').value = selected[0].code;
-                document.getElementById('packagedescription').value = selected[0].description;
-                document.getElementById('packagestatus').value = selected[0].status;
-
-                if (assessmentMultiSelect) assessmentMultiSelect.value = selected[0].assessmentid1 ? selected[0].assessmentid1.split(',') : [];
-                if (habitMultiSelect) habitMultiSelect.value = selected[0].habitid1 ? selected[0].habitid1.split(',') : [];
-
-                document.querySelector('#userPackageModal .modal-title').innerText = "Edit User Package";
-                userPackageModal.show();
+            } catch (err) {
+                console.error(err);
+                alert("Failed to save package");
             }
         }
-    });
 
-    userPackageGrid.appendTo('#userPackageGrid');
-}
+        // Load User Packages into Grid
+        async function loadUserPackages() {
+            const data = await DBHandler.fetchEntityRecords('userpackage', '*', 'createdon', 'desc');
+            userPackageGrid.dataSource = data || [];
+        }
 
-// Initialize MultiSelects with real DB data
-async function initMultiSelects() {
-    // --- Assessments ---
-    const assessments = await DBHandler.fetchEntityRecords(
-        'assessmentmaster1',
-        'id,assessmentname',
-        'assessmentname', 'asc'
-    );
-
-    const assessmentData = assessments.map(a => ({
-        value: a.id.toString(),
-        text: a.assessmentname
-    }));
-
-    assessmentMultiSelect = new ej.dropdowns.MultiSelect({
-        dataSource: assessmentData,
-        fields: { value: 'value', text: 'text' },
-        showDropDownIcon: true,
-        placeholder: 'Select Assessments'
-    });
-    assessmentMultiSelect.appendTo('#assessmentSelect');
-
-    // --- Habits ---
-    const habits = await DBHandler.fetchEntityRecords(
-        'habitmaster',
-        'code,habitname',
-        'habitname', 'asc'
-    );
-
-    const habitData = habits.map(h => ({
-        value: h.code,
-        text: h.habitname
-    }));
-
-    habitMultiSelect = new ej.dropdowns.MultiSelect({
-        dataSource: habitData,
-        fields: { value: 'value', text: 'text' },
-        showDropDownIcon: true,
-        placeholder: 'Select Habits'
-    });
-    habitMultiSelect.appendTo('#habitSelect');
-}
-
-// Save User Package
-async function saveUserPackage() {
-    const packagename = document.getElementById('packagename').value.trim();
-    const code = document.getElementById('packagecode').value.trim();
-    const description = document.getElementById('packagedescription').value.trim();
-    const status = document.getElementById('packagestatus').value;
-
-    const assessmentid = assessmentMultiSelect ? assessmentMultiSelect.value.join(',') : '';
-    const habitid = habitMultiSelect ? habitMultiSelect.value.join(',') : '';
-
-    if (!packagename || !code) { alert("Package Name and Code are required"); return; }
-
-    const record = {
-        packagename,
-        code,
-        description,
-        status,
-        assessmentid1: assessmentid,
-        habitid1: habitid
-    };
-
-    try {
-        await DBHandler.submitRecordData('userpackage', record, editingPackageId || null, false);
-        userPackageModal.hide();
-        loadUserPackages();
-        editingPackageId = null;
-    } catch (err) {
-        console.error(err);
-        alert("Failed to save package");
-    }
-}
-
-// Load User Packages into Grid
-async function loadUserPackages() {
-    const data = await DBHandler.fetchEntityRecords('userpackage', '*', 'createdon', 'desc');
-    userPackageGrid.dataSource = data || [];
-}
-
-// INIT
-document.addEventListener('DOMContentLoaded', () => {
-    initUserPackageGrid();
-    initMultiSelects();
-    loadUserPackages();
-});
-   </script>
+        // INIT
+        document.addEventListener('DOMContentLoaded', () => {
+            initUserPackageGrid();
+            initMultiSelects();
+            loadUserPackages();
+        });
+    </script>
 </body>
 
 </html>
