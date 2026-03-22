@@ -737,6 +737,12 @@
                 return;
             }
 
+            if (type === "maintenance") {
+                // Show maintenance rooms
+                await showMaintenanceRoomsList();
+                return;
+            }
+
             // Handle other booking types
             let filteredBookings = [];
 
@@ -957,6 +963,69 @@
             modal.show();
         }
 
+        async function showMaintenanceRoomsList() {
+            const container = document.getElementById("bookingListContainer");
+            
+            // Get maintenance rooms (inactive rooms)
+            let maintenanceRooms = [];
+            
+            if (roomsCacheLoaded && roomsCache.length > 0) {
+                // Filter for inactive rooms from cache
+                maintenanceRooms = roomsCache.filter(room => room.bookingstatus == 'Maintenance');
+            } else {
+                // Load from database if cache is not available
+                try {
+                    maintenanceRooms = await DBHandler.fetchEntityRecords(
+                        'roommaster',
+                        'id,roomnumber,roomtype,capacity,isactive',
+                        'roomnumber',
+                        'asc',
+                        "bookingstatus='Maintenance'",
+                        false,
+                        0
+                    );
+                    maintenanceRooms = maintenanceRooms || [];
+                } catch (error) {
+                    console.error("Error loading maintenance rooms:", error);
+                    maintenanceRooms = [];
+                }
+            }
+
+            // Display maintenance rooms
+            if (maintenanceRooms.length === 0) {
+                container.innerHTML = `
+                    <li class="list-group-item text-center text-muted">
+                        <i class="fas fa-info-circle"></i> No rooms under maintenance
+                    </li>
+                `;
+            } else {
+                maintenanceRooms.forEach(room => {
+                    container.innerHTML += `
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-tools text-warning"></i> Room ${room.roomnumber}</h6>
+                                    ${room.roomtype ? `<small class="text-muted">Type: ${room.roomtype}</small><br>` : ''}
+                                    ${room.capacity ? `<small class="text-muted">Capacity: ${room.capacity} guests</small>` : ''}
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-warning text-dark">Under Maintenance</span>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                });
+            }
+
+            // Set modal title and show modal
+            document.getElementById("bookingListTitle").innerText = `Rooms Under Maintenance (${maintenanceRooms.length})`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('bookingListModal'), {
+                focus: false
+            });
+            modal.show();
+        }
+
         function setCurrentCheckInTime() {
 
             const now = new Date();
@@ -994,7 +1063,7 @@
                     availableRoomsCount = roomsCache.filter(room => room.isactive === 1).length;
 
                     maintenanceRoomsCount = roomsCache.filter(room =>
-                        room.isactive === 0
+                        room.bookingstatus === 'Maintenance'
                     ).length;
 
                     roomsCacheLoaded = true;
