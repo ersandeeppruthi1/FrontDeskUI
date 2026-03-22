@@ -731,6 +731,12 @@
                 return;
             }
 
+            if (type === "total") {
+                // Show total rooms
+                await showTotalRoomsList();
+                return;
+            }
+
             // Handle other booking types
             let filteredBookings = [];
 
@@ -856,6 +862,94 @@
 
             // Set modal title and show modal
             document.getElementById("bookingListTitle").innerText = `Available Rooms (${availableRooms.length})`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('bookingListModal'), {
+                focus: false
+            });
+            modal.show();
+        }
+
+        async function showTotalRoomsList() {
+            const container = document.getElementById("bookingListContainer");
+            
+            // Get all rooms
+            let allRooms = [];
+            
+            if (roomsCacheLoaded && roomsCache.length > 0) {
+                // Use cached data
+                allRooms = roomsCache;
+            } else {
+                // Load from database if cache is not available
+                try {
+                    allRooms = await DBHandler.fetchEntityRecords(
+                        'roommaster',
+                        'id,roomnumber,roomtype,capacity,isactive',
+                        'roomnumber',
+                        'asc',
+                        '',
+                        false,
+                        0
+                    );
+                    allRooms = allRooms || [];
+                } catch (error) {
+                    console.error("Error loading total rooms:", error);
+                    allRooms = [];
+                }
+            }
+
+            // Get booked room IDs for status display
+            const bookedRoomIds = new Set();
+            if (bookedRoomsCacheLoaded && bookedRoomsCache.length > 0) {
+                bookedRoomsCache.forEach(bookedRoom => {
+                    if (bookedRoom.roomid) bookedRoomIds.add(bookedRoom.roomid);
+                });
+            }
+
+            // Display all rooms
+            if (allRooms.length === 0) {
+                container.innerHTML = `
+                    <li class="list-group-item text-center text-muted">
+                        <i class="fas fa-info-circle"></i> No rooms found
+                    </li>
+                `;
+            } else {
+                allRooms.forEach(room => {
+                    const isActive = room.isactive === 1;
+                    const isBooked = bookedRoomIds.has(room.id);
+                    
+                    let statusBadge = '';
+                    let statusIcon = '';
+                    
+                    if (!isActive) {
+                        statusBadge = '<span class="badge bg-secondary">Inactive</span>';
+                        statusIcon = '<i class="fas fa-bed text-secondary"></i>';
+                    } else if (isBooked) {
+                        statusBadge = '<span class="badge bg-danger">Booked</span>';
+                        statusIcon = '<i class="fas fa-bed text-danger"></i>';
+                    } else {
+                        statusBadge = '<span class="badge bg-success">Available</span>';
+                        statusIcon = '<i class="fas fa-bed text-success"></i>';
+                    }
+
+                    container.innerHTML += `
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">${statusIcon} Room ${room.roomnumber}</h6>
+                                    ${room.roomtype ? `<small class="text-muted">Type: ${room.roomtype}</small><br>` : ''}
+                                    ${room.capacity ? `<small class="text-muted">Capacity: ${room.capacity} guests</small>` : ''}
+                                </div>
+                                <div class="text-end">
+                                    ${statusBadge}
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                });
+            }
+
+            // Set modal title and show modal
+            document.getElementById("bookingListTitle").innerText = `All Rooms (${allRooms.length})`;
             
             const modal = new bootstrap.Modal(document.getElementById('bookingListModal'), {
                 focus: false
