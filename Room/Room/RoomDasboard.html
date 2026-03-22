@@ -7,7 +7,7 @@
 
     <script>
         let classMap = [];
-        var apiURL = "https://dbsit.vsservices.in/";
+        var apiURL = "https://dbsit2.vsservices.in/";
         //var apiURL = "";
     </script>
 
@@ -89,7 +89,17 @@
 
         <!-- Room Stats with improved mobile layout -->
         <div class="row g-2 g-md-3">
-            <div class="col-md-4">
+            <div class="col-md-2-4">
+                <div class="card shadow-sm border-0 text-center">
+                    <div class="card-body">
+                        <h6 class="text-muted">Total Rooms</h6>
+                        <h2 id="totalRooms" class="fw-bold dashboard-link dashboard-number" data-type="total"
+                            onclick="showBookingList(this.dataset.type)">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2-4">
                 <div class="card shadow-sm border-0 text-center bg-success text-white">
                     <div class="card-body">
                         <h6>Available Rooms</h6>
@@ -99,7 +109,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-2-4">
                 <div class="card shadow-sm border-0 text-center bg-danger text-white">
                     <div class="card-body">
                         <h6>Booked Rooms</h6>
@@ -110,7 +120,17 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-2-4">
+                <div class="card shadow-sm border-0 text-center bg-warning text-dark">
+                    <div class="card-body">
+                        <h6>Under Maintenance</h6>
+                        <h2 id="maintenanceRooms" class="fw-bold dashboard-link dashboard-number"l̥
+                            data-type="maintenance" onclick="showBookingList(this.dataset.type)">0</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2-4">
                 <div class="card shadow-sm border-0 text-center bg-dark text-white">
                     <div class="card-body">
                         <h6>Overdue Check-outs</h6>
@@ -249,9 +269,7 @@
 
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">Guest Check-Out</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
@@ -310,7 +328,9 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title" id="bookingListTitle">Bookings</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
                 </div>
 
                 <div class="modal-body">
@@ -325,7 +345,9 @@
         // Local cache for rooms
         let roomsCache = [];
         let roomsCacheLoaded = false;
+        let totalRoomsCount = 0;
         let availableRoomsCount = 0;
+        let maintenanceRoomsCount = 0;
 
         // Local cache for bookings
         let bookingsCache = [];
@@ -672,6 +694,9 @@
 
         async function loadDashboard() {
 
+            // Animate total rooms count
+            animateNumber("totalRooms", totalRoomsCount);
+
             // Calculate booked rooms from cache
             const bookedRoomsCount = getBookedRoomsCount();
             animateNumber("bookedRooms", bookedRoomsCount, true);
@@ -679,6 +704,9 @@
             // Calculate available rooms dynamically (total active rooms - booked rooms)
             const dynamicAvailableRoomsCount = Math.max(0, (roomsCache.filter(room => room.isactive === 1).length) - bookedRoomsCount);
             animateNumber("availableRooms", dynamicAvailableRoomsCount, true);
+
+            // Animate maintenance rooms count
+            animateNumber("maintenanceRooms", maintenanceRoomsCount);
 
             // Calculate overdue check-outs from cache
             const overdueCount = getOverdueCheckOutsCount();
@@ -694,6 +722,16 @@
         }
 
         async function showBookingList(type) {
+            const container = document.getElementById("bookingListContainer");
+            container.innerHTML = "";
+
+            if (type === "available") {
+                // Show available rooms
+                await showAvailableRoomsList();
+                return;
+            }
+
+            // Handle other booking types
             let filteredBookings = [];
 
             if (type === "checkin") {
@@ -705,9 +743,6 @@
             } else if (type === "overdue") {
                 filteredBookings = getOverdueBookings();
             }
-
-            const container = document.getElementById("bookingListContainer");
-            container.innerHTML = "";
 
             filteredBookings.forEach(item => {
                 // Calculate overdue hours for overdue bookings
@@ -755,6 +790,79 @@
             modal.show();
         }
 
+        async function showAvailableRoomsList() {
+            const container = document.getElementById("bookingListContainer");
+            
+            // Get available rooms (active rooms that are not currently booked)
+            let availableRooms = [];
+            
+            if (roomsCacheLoaded && roomsCache.length > 0) {
+                // Get currently booked room IDs
+                const bookedRoomIds = new Set();
+                if (bookedRoomsCacheLoaded && bookedRoomsCache.length > 0) {
+                    bookedRoomsCache.forEach(bookedRoom => {
+                        if (bookedRoom.roomid) bookedRoomIds.add(bookedRoom.roomid);
+                    });
+                }
+                
+                // Filter for available rooms
+                availableRooms = roomsCache.filter(room => 
+                    room.isactive === 1 && !bookedRoomIds.has(room.id)
+                );
+            } else {
+                // Load from database if cache is not available
+                try {
+                    availableRooms = await DBHandler.fetchEntityRecords(
+                        'roommaster',
+                        'id,roomnumber,roomtype,capacity,isactive',
+                        'roomnumber',
+                        'asc',
+                        'isactive=1',
+                        false,
+                        0
+                    );
+                    availableRooms = availableRooms || [];
+                } catch (error) {
+                    console.error("Error loading available rooms:", error);
+                    availableRooms = [];
+                }
+            }
+
+            // Display available rooms
+            if (availableRooms.length === 0) {
+                container.innerHTML = `
+                    <li class="list-group-item text-center text-muted">
+                        <i class="fas fa-info-circle"></i> No available rooms at the moment
+                    </li>
+                `;
+            } else {
+                availableRooms.forEach(room => {
+                    container.innerHTML += `
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><i class="fas fa-bed text-success"></i> Room ${room.roomnumber}</h6>
+                                    ${room.roomtype ? `<small class="text-muted">Type: ${room.roomtype}</small><br>` : ''}
+                                    ${room.capacity ? `<small class="text-muted">Capacity: ${room.capacity} guests</small>` : ''}
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success">Available</span>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                });
+            }
+
+            // Set modal title and show modal
+            document.getElementById("bookingListTitle").innerText = `Available Rooms (${availableRooms.length})`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('bookingListModal'), {
+                focus: false
+            });
+            modal.show();
+        }
+
         function setCurrentCheckInTime() {
 
             const now = new Date();
@@ -785,17 +893,28 @@
                     );
                     roomsCache = rooms || [];
 
+                    // Calculate counts from cached data
+                    totalRoomsCount = roomsCache.length;
+
                     // Calculate available rooms dynamically (active rooms that are not currently booked)
                     availableRoomsCount = roomsCache.filter(room => room.isactive === 1).length;
 
+                    maintenanceRoomsCount = roomsCache.filter(room =>
+                        room.isactive === 0
+                    ).length;
+
                     roomsCacheLoaded = true;
                     console.log("Rooms cache loaded:", roomsCache.length, "rooms");
+                    console.log("Total rooms count cached:", totalRoomsCount);
                     console.log("Available rooms count cached:", availableRoomsCount);
+                    console.log("Maintenance rooms count cached:", maintenanceRoomsCount);
                     loadDashboard();
                 } catch (error) {
                     console.error("Error loading rooms cache:", error);
                     roomsCache = [];
+                    totalRoomsCount = 0;
                     availableRoomsCount = 0;
+                    maintenanceRoomsCount = 0;
                 }
             }
         }
@@ -1114,10 +1233,15 @@
         // Function to refresh rooms cache when needed
         function refreshRoomsCache() {
             roomsCacheLoaded = false;
+            totalRoomsCount = 0;
+            maintenanceRoomsCount = 0;
             return loadRoomsCache().then(() => {
                 if (checkInRoomDropdown) {
                     filterRoomsForCheckIn(); // Use filter function for dynamic calculation
                 }
+                // Update dashboard with new counts (dashboard will calculate available rooms dynamically)
+                animateNumber("totalRooms", totalRoomsCount);
+                animateNumber("maintenanceRooms", maintenanceRoomsCount);
                 return loadDashboard(); // This will calculate available and booked rooms dynamically
             });
         }
@@ -1156,7 +1280,9 @@
                 bookedRoomsCache = [];
 
                 // Reset all counts
+                totalRoomsCount = 0;
                 availableRoomsCount = 0;
+                maintenanceRoomsCount = 0;
 
                 // Show loading shimmer on all numbers
                 document.querySelectorAll('.dashboard-number').forEach(element => {
@@ -1171,6 +1297,8 @@
                 await loadDashboard();
 
                 console.log("Dashboard refreshed successfully");
+                console.log("Total rooms:", totalRoomsCount);
+                console.log("Maintenance rooms:", maintenanceRoomsCount);
             } catch (error) {
                 console.error("Error refreshing dashboard:", error);
                 alert("Error refreshing dashboard. Please try again.");
@@ -1504,13 +1632,42 @@
             background: linear-gradient(45deg, #343a40, #495057) !important;
         }
 
-        /* Custom responsive layout for 3 cards */
+        /* Custom column for 5 cards layout - Mobile First Design */
+        .col-md-2-4 {
+            flex: 0 0 auto;
+            width: 100%; /* Mobile first - full width */
+            margin-bottom: 1rem;
+        }
+
+        /* Small devices (landscape phones, 576px and up) */
+        @media (min-width: 576px) {
+            .col-md-2-4 {
+                width: 50%;
+            }
+        }
+
+        /* Medium devices (tablets, 768px and up) */
+        @media (min-width: 768px) {
+            .col-md-2-4 {
+                width: 50%;
+            }
+        }
+
+        /* Large devices (desktops, 992px and up) */
+        @media (min-width: 992px) {
+            .col-md-2-4 {
+                width: 20%;
+                margin-bottom: 0;
+            }
+        }
+
+        /* Mobile specific enhancements */
         @media (max-width: 767px) {
-            .col-md-4 {
+            .col-md-2-4 {
                 margin-bottom: 0.75rem;
             }
             
-            .col-md-4:last-child {
+            .col-md-2-4:last-child {
                 margin-bottom: 0;
             }
         }
@@ -1659,6 +1816,7 @@
             }
         }
     </style>
+
 </body>
 
 </html>
