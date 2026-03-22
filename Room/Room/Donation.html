@@ -67,6 +67,7 @@
 
 <body>
 
+
     <div class="container-fluid mt-4">
         
         <!-- Page Header -->
@@ -336,11 +337,11 @@
         async function loadDonations() {
             try {
                 const donations = await DBHandler.fetchEntityRecords(
-                    'roombooking rb',
-                    'rb.*, rb.donationamount',
-                    'rb.createdon',
+                    'roombooking',
+                    'roombooking.*, roombooking.donationamount',
+                    'roombooking.createdon',
                     'desc',
-                    'rb.donationamount > 0',
+                    'roombooking.donationamount > 0',
                     false,
                     0,
                     ''
