@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220259"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <script src="https://apisit.vsservices.in/JS/ej2.min.vk02bdl5ad.js"></script>
+
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://free-crm.csharpasp.net/lib/syncfusion/css/bootstrap5.dvnzgvxkcq.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.css">
+    <link href="https://apisit.vsservices.in/css/app.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="container2 mt-4">
+        <div id="userPackageGrid"></div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal fade" id="userPackageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add User Package</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="userPackageForm">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Package Name</label>
+                                <input type="text" id="packagename" class="form-control" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Code</label>
+                                <input type="text" id="packagecode" class="form-control" required />
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label>Description</label>
+                                <textarea id="packagedescription" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Status</label>
+                                <select id="packagestatus" class="form-control">
+                                    <option value="">Select Status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Multi-select for Assessments -->
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Assessments</label>
+                                <input type="text" id="assessmentSelect" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Habits</label>
+                                <input type="text" id="habitSelect" />
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveUserPackage()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userPackageGrid;
+        let editingPackageId = null;
+        let assessmentMultiSelect;
+        let habitMultiSelect;
+
+        // ✅ INIT GRID
+        function initUserPackageGrid() {
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            userPackageGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+
+                toolbar: [
+                    'Search',
+                    { text: 'New Package', prefixIcon: 'e-icons e-plus', id: 'newPackage' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editPackage' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deletePackage' },
+                    'ExcelExport',
+                    'PdfExport'
+                ],
+
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'packagename', headerText: 'Package Name', width: 200 },
+                    { field: 'code', headerText: 'Code', width: 150 },
+                    { field: 'description', headerText: 'Description', width: 250 },
+                    { field: 'status', headerText: 'Status', width: 120 },
+                    { field: 'assessmentid', headerText: 'Assessments', width: 200 },
+                    { field: 'habitid', headerText: 'Habits', width: 200 },
+                    { field: 'createdon', headerText: 'Created On', width: 150, type: 'datetime' },
+                    { field: 'modifiedon', headerText: 'Modified On', width: 150, type: 'datetime' }
+                ],
+
+                toolbarClick: function (args) {
+                    if (args.item.id === 'newPackage') {
+                        editingPackageId = null;
+                        document.getElementById('userPackageForm').reset();
+                        if (assessmentMultiSelect) assessmentMultiSelect.value = [];
+                        if (habitMultiSelect) habitMultiSelect.value = [];
+
+                        document.querySelector('#userPackageModal .modal-title').innerText = "Add User Package";
+                        new bootstrap.Modal(userPackageModal).show();
+                    }
+
+                    if (args.item.id === 'editPackage') {
+                        const selected = userPackageGrid.getSelectedRecords();
+                        if (selected.length !== 1) return alert("Select one record");
+
+                        editingPackageId = selected[0].id;
+
+                        document.getElementById('packagename').value = selected[0].packagename;
+                        document.getElementById('packagecode').value = selected[0].code;
+                        document.getElementById('packagedescription').value = selected[0].description;
+                        document.getElementById('packagestatus').value = selected[0].status;
+
+                        if (assessmentMultiSelect) assessmentMultiSelect.value = selected[0].assessmentid ? selected[0].assessmentid.split(',') : [];
+                        if (habitMultiSelect) habitMultiSelect.value = selected[0].habitid ? selected[0].habitid.split(',') : [];
+
+                        document.querySelector('#userPackageModal .modal-title').innerText = "Edit User Package";
+                        new bootstrap.Modal(userPackageModal).show();
+                    }
+                }
+            });
+
+            userPackageGrid.appendTo('#userPackageGrid');
+        }
+
+        // ✅ INIT MULTISELECT
+        function initMultiSelects() {
+            // Dummy data, replace with DB fetch
+            const assessments = ['1', '2', '3'];
+            const habits = ['1', '2', '3'];
+
+            assessmentMultiSelect = new ej.dropdowns.MultiSelect({
+                dataSource: assessments,
+                showDropDownIcon: true,
+                placeholder: 'Select Assessments'
+            });
+            assessmentMultiSelect.appendTo('#assessmentSelect');
+
+            habitMultiSelect = new ej.dropdowns.MultiSelect({
+                dataSource: habits,
+                showDropDownIcon: true,
+                placeholder: 'Select Habits'
+            });
+            habitMultiSelect.appendTo('#habitSelect');
+        }
+
+        // ✅ SAVE FUNCTION
+        async function initializeUserPackageMultiSelects() {
+
+            // Fetch data dynamically from DB (replace DBHandler with your implementation)
+            const assessmentsData = await DBHandler.fetchEntityRecords('assessmentmaster', 'id, assessmentname');
+            const habitsData = await DBHandler.fetchEntityRecords('habitmaster', 'id, habitname');
+
+            // ✅ Assessment MultiSelect
+            assessmentMultiSelect = new ej.dropdowns.MultiSelect({
+                placeholder: "Select Assessments",
+                mode: 'CheckBox',
+                showSelectAll: true,
+                allowFiltering: true,
+                filterBarPlaceholder: 'Search assessments...',
+                fields: { text: 'assessmentname', value: 'id' },
+                dataSource: assessmentsData || []
+            });
+            assessmentMultiSelect.appendTo('#assessmentSelect');
+
+            // ✅ Habit MultiSelect
+            habitMultiSelect = new ej.dropdowns.MultiSelect({
+                placeholder: "Select Habits",
+                mode: 'CheckBox',
+                showSelectAll: true,
+                allowFiltering: true,
+                filterBarPlaceholder: 'Search habits...',
+                fields: { text: 'habitname', value: 'id' },
+                dataSource: habitsData || []
+            });
+            habitMultiSelect.appendTo('#habitSelect');
+        }
+
+
+        async function saveUserPackage() {
+            // Get form values
+            const packagename = document.getElementById('packagename').value.trim();
+            const code = document.getElementById('packagecode').value.trim();
+            const description = document.getElementById('packagedescription').value.trim();
+            const status = document.getElementById('packagestatus').value;
+
+            // Get selected IDs from MultiSelects
+            const assessmentid = assessmentMultiSelect ? assessmentMultiSelect.value.join(',') : '';
+            const habitid = habitMultiSelect ? habitMultiSelect.value.join(',') : '';
+
+            // Basic validation
+            if (!packagename || !code) {
+                alert("Package Name and Code are required");
+                return;
+            }
+
+            // Prepare record object
+            const record = {
+                packagename,
+                code,
+                description,
+                status,
+                assessmentid,
+                habitid
+            };
+
+            try {
+                // Save record via DBHandler (insert or update based on editingPackageId)
+                await DBHandler.submitRecordData('userpackage', record, editingPackageId || null, false);
+
+                // Close modal
+                const modalInstance = bootstrap.Modal.getInstance(userPackageModal);
+                modalInstance.hide();
+
+                // Reload grid
+                loadUserPackages();
+
+                // Reset editing ID
+                editingPackageId = null;
+            } catch (err) {
+                console.error("Error saving package:", err);
+                alert("Failed to save package. Check console for details.");
+            }
+        }
+
+        // ✅ LOAD DATA
+        async function loadUserPackages() {
+            const data = await DBHandler.fetchEntityRecords('userpackage', '*', 'createdon', 'desc');
+            userPackageGrid.dataSource = data || [];
+        }
+
+        // INIT
+        $(document).ready(() => {
+            initUserPackageGrid();
+            initMultiSelects();
+            loadUserPackages();
+        });
+    </script>
+</body>
+
+</html>
