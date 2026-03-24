@@ -618,7 +618,9 @@
                 renderHabitGrid(); renderAssessmentGrid();
                 populateHabitSelector(); populateAssessmentSelector();
                 updatePackageJSON();
-            } catch (e) { console.error(e); alert('Invalid JSON format.'); }
+            } catch (e) {
+                console.error(e); alert('Invalid JSON format.');
+            }
         }
 
         function viewPackageJSON() {
@@ -655,8 +657,10 @@
         function clearAllPackageItems() {
             if (confirm('Clear all selected habits and assessments? This action cannot be undone.')) {
                 selectedHabits = []; selectedAssessments = [];
-                renderHabitGrid(); renderAssessmentGrid();
-                populateHabitSelector(); populateAssessmentSelector();
+                renderHabitGrid();
+                renderAssessmentGrid();
+                populateHabitSelector();
+                populateAssessmentSelector();
                 updatePackageJSON();
             }
         }

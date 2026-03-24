@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+<body>
+    <div class="container2 mt-4">
+        <div id="allocationGrid"></div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal fade" id="allocationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Allocation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="allocationForm">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>User</label>
+                                <select id="userid" class="form-control" required></select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Package</label>
+                                <select id="packageid" class="form-control" required></select>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Allocation Date</label>
+                                <input type="date" id="allocationdate" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label>Status</label>
+                                <select id="status" class="form-control" required>
+                                    <option value="">Select Status</option>
+                                    <option value="active">Active</option>
+                                    <option value="expired">Expired</option>
+                                    <option value="cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label>Remarks</label>
+                                <textarea id="remarks" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveAllocation()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        let allocationGrid;
+        let editingAllocationId = null;
+        let allocationModalObj;
+
+        function initAllocationGrid() {
+
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            allocationGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                toolbar: [
+                    'Search',
+                    { text: 'New Allocation', prefixIcon: 'e-icons e-plus', id: 'newAllocation' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editAllocation' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteAllocation' },
+                    'ExcelExport',
+                    'PdfExport'
+                ],
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'userid', headerText: 'User', width: 150 },
+                    { field: 'packageid', headerText: 'Package', width: 150 },
+                    { field: 'allocationdate', headerText: 'Date', width: 150 },
+                    { field: 'status', headerText: 'Status', width: 120 },
+                    { field: 'remarks', headerText: 'Remarks', width: 200 },
+                    { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 180 }
+                ],
+
+                toolbarClick: function (args) {
+
+                    if (args.item.id === 'newAllocation') {
+
+                        editingAllocationId = null;
+                        document.getElementById('allocationForm').reset();
+
+                        openModal();
+                    }
+
+                    if (args.item.id === 'editAllocation') {
+
+                        const selected = allocationGrid.getSelectedRecords();
+                        if (selected.length !== 1) return alert("Select one record");
+
+                        editingAllocationId = selected[0].id;
+
+                        openModal(selected[0]);
+                    }
+
+                    if (args.item.id === 'deleteAllocation') {
+
+                        const selected = allocationGrid.getSelectedRecords();
+                        if (!selected.length) return alert("Select record(s)");
+
+                        const ids = selected.map(r => r.id);
+                        deleteRecordData('packageallocation', ids, true, true)
+                            .then(() => loadAllocations());
+                    }
+                }
+            });
+
+            allocationGrid.appendTo('#allocationGrid');
+
+            allocationModalObj = new bootstrap.Modal(document.getElementById('allocationModal'));
+        }
+
+        function openModal(data = null) {
+
+            loadDropdowns().then(() => {
+
+                if (data) {
+                    document.getElementById('userid').value = data.userid;
+                    document.getElementById('packageid').value = data.packageid;
+                    document.getElementById('allocationdate').value = data.allocationdate?.split('T')[0] || '';
+                    document.getElementById('status').value = data.status;
+                    document.getElementById('remarks').value = data.remarks || '';
+
+                    document.querySelector('#allocationModal .modal-title').innerText = "Edit Allocation";
+                } else {
+                    document.querySelector('#allocationModal .modal-title').innerText = "Add Allocation";
+                }
+
+                allocationModalObj.show();
+            });
+        }
+
+        async function loadAllocations() {
+
+            const data = await DBHandler.fetchEntityRecords(
+                'packageallocation',
+                '*',
+                'createdon',
+                'desc'
+            );
+
+            allocationGrid.dataSource = data || [];
+        }
+
+        async function saveAllocation() {
+
+            const data = {
+                userid: document.getElementById('userid').value,
+                packageid: document.getElementById('packageid').value,
+                allocationdate: document.getElementById('allocationdate').value || null,
+                status: document.getElementById('status').value,
+                remarks: document.getElementById('remarks').value
+            };
+
+            if (!data.userid || !data.packageid || !data.status)
+                return alert("Please fill required fields");
+
+            await DBHandler.submitRecordData('packageallocation', data, editingAllocationId, false);
+
+            allocationModalObj.hide();
+            loadAllocations();
+        }
+
+        async function loadDropdowns() {
+
+            const users = await DBHandler.fetchEntityRecords('users', '*');
+            const packages = await DBHandler.fetchEntityRecords('userpackage', '*'); // ✅ FIXED
+
+            const userDropdown = document.getElementById('userid');
+            const packageDropdown = document.getElementById('packageid');
+
+            userDropdown.innerHTML = '<option value="">Select User</option>';
+            packageDropdown.innerHTML = '<option value="">Select Package</option>';
+
+            users.forEach(u => {
+                userDropdown.innerHTML += `<option value="${u.id}">${u.name}</option>`;
+            });
+
+            packages.forEach(p => {
+                packageDropdown.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            });
+        }
+
+        document.getElementById('allocationModal').addEventListener('hidden.bs.modal', function () {
+            editingAllocationId = null;
+        });
+
+        $(document).ready(() => {
+            initAllocationGrid();
+            loadAllocations();
+        });
+
+    </script>
+
+    <style>
+        #allocationGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
+
+</body>
+
+</html>
