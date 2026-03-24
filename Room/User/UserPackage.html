@@ -743,10 +743,16 @@
             openPackageModal();
             try {
                 const full = await DBHandler.fetchEntityRecords('userpackage', '*', 'id', 'desc', `id='${editingPackageId}'`, false, 1);
-                if (!full?.length) { document.getElementById('packageJSON').value = ''; return alert('Unable to load full package record.'); }
+                if (!full?.length) {
+                    document.getElementById('packageJSON').value = '';
+                    return alert('Unable to load full package record.');
+                }
                 const d = full[0];
-                if (d.habitid2) loadPackageFromJSON(d.habitid2); else updatePackageJSON();
-            } catch (err) { console.error(err); document.getElementById('packageJSON').value = ''; alert('Error fetching package data.'); }
+                if (d.habitid2) loadPackageFromJSON(d.habitid2);
+                else updatePackageJSON();
+            } catch (err) {
+                console.error(err); document.getElementById('packageJSON').value = ''; alert('Error fetching package data.');
+            }
         }
 
         async function deleteUserPackage() {
@@ -764,13 +770,17 @@
                 document.getElementById('packageDescription').value = '';
                 if (statusDropdown) statusDropdown.value = null;
                 selectedHabits = []; selectedAssessments = [];
-                renderHabitGrid(); renderAssessmentGrid();
-                populateHabitSelector(); populateAssessmentSelector();
+                renderHabitGrid();
+                renderAssessmentGrid();
+                populateHabitSelector();
+                populateAssessmentSelector();
                 updatePackageJSON();
                 document.querySelector('#userPackageModal .modal-title').innerText = 'Add User Package';
             }
-            const m = new bootstrap.Modal(document.getElementById('userPackageModal'), { backdrop: 'static', keyboard: false, focus: false });
-            m.show(); ej.base.enableRipple(true);
+            const m = new bootstrap.Modal(document.getElementById('userPackageModal'),
+                { backdrop: 'static', keyboard: false, focus: false });
+            m.show();
+            ej.base.enableRipple(true);
         }
 
         async function loadUserPackageGrid() {
@@ -783,7 +793,9 @@
                     createdon: normalizeDate(p.createdon), modifiedon: normalizeDate(p.modifiedon)
                 }));
                 grid.refresh();
-            } catch (err) { console.error('Failed to load packages:', err); }
+            } catch (err) {
+                console.error('Failed to load packages:', err);
+            }
         }
 
         function normalizeDate(val) {
@@ -838,11 +850,17 @@
                 document.getElementById('packageDescription').value = '';
                 if (statusDropdown) statusDropdown.value = null;
                 selectedHabits = []; selectedAssessments = [];
-                renderHabitGrid(); renderAssessmentGrid();
-                populateHabitSelector(); populateAssessmentSelector();
+                renderHabitGrid();
+                renderAssessmentGrid();
+                populateHabitSelector();
+                populateAssessmentSelector();
                 updatePackageJSON();
-            } catch (err) { console.error(err); alert('Failed to save User Package'); }
-            finally { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-floppy-disk"></i> Save Package'; } }
+            } catch (err) {
+                console.error(err); alert('Failed to save User Package');
+            }
+            finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-floppy-disk"></i> Save Package'; }
+            }
         }
     </script>
 
