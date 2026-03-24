@@ -11,6 +11,7 @@
         //var apiURL = "";
     </script>
 
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
     <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
@@ -18,7 +19,7 @@
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
     <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220259"></script>
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
     <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
@@ -29,7 +30,17 @@
 
     <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -37,256 +48,789 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <script src="https://apisit.vsservices.in/JS/ej2.min.vk02bdl5ad.js"></script>
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
 
-    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.92rem;
+        }
 
-    <link rel="stylesheet" href="https://free-crm.csharpasp.net/lib/syncfusion/css/bootstrap5.dvnzgvxkcq.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.css">
-    <link href="https://apisit.vsservices.in/css/app.css" rel="stylesheet">
+        .page-header {
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            color: #fff;
+            padding: 18px 28px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
+        .page-header h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .page-header p {
+            margin: 2px 0 0;
+            font-size: 0.82rem;
+            opacity: 0.85;
+        }
+
+        .container2 {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        }
+
+        .custom-modal .modal-header {
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            color: #fff;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .custom-modal .modal-header .close {
+            color: #fff;
+            opacity: 0.9;
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+
+        .custom-modal .modal-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .custom-modal label {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .custom-modal .card {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+
+        .custom-modal .card-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 16px;
+        }
+
+        .custom-modal .card-header h6 {
+            font-weight: 600;
+            color: #333;
+        }
+
+        #userPackageGrid_toolbarItems {
+            height: 10px !important;
+        }
+
+        #habitInnerGrid,
+        #assessmentInnerGrid {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .entity-count-badge {
+            background-color: #6c757d;
+            color: #fff;
+            font-size: 0.72rem;
+            padding: 0.18rem 0.5rem;
+            border-radius: 12px;
+            margin-left: 6px;
+        }
+
+        #packageJSON {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            background: #f8f9fa;
+            color: #333;
+            resize: vertical;
+        }
+        
+    </style>
 </head>
 
 <body>
-    <div class="container2 mt-4">
+    <!-- Main Grid -->
+    <div class="container2 mt-2">
         <div id="userPackageGrid"></div>
     </div>
+    </div>
 
-    <!-- MODAL -->
-    <div class="modal fade" id="userPackageModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
+    <div class="modal fade" id="userPackageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content custom-modal">
 
                 <div class="modal-header">
-                    <h5 class="modal-title">Add User Package</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal">
-                        <span>&times;</span>
+                    <h5 class="modal-title">
+                        <i class="fa fa-box me-2"></i>Add User Package
+                    </h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
 
                 <div class="modal-body">
-                    <form id="userPackageForm">
+                    <form id="userPackageForm" class="row g-4">
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label>Package Name</label>
-                                <input type="text" id="packagename" class="form-control" required />
-                            </div>
-                            <div class="col-md-6">
-                                <label>Code</label>
-                                <input type="text" id="packagecode" class="form-control" required />
+                        <div class="col-md-6">
+                            <label>Package Name <span style="color:red">*</span></label>
+                            <input class="form-control" id="packageName" dbcolumnname="packagename"
+                                placeholder="Enter package name" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Code <span style="color:red">*</span></label>
+                            <input class="form-control" id="packageCode" dbcolumnname="code"
+                                placeholder="Enter unique code" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Status <span style="color:red">*</span></label>
+                            <input id="packageStatus" class="form-control" datatype="dropdown" dbcolumnname="status" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Description</label>
+                            <textarea class="form-control" id="packageDescription" dbcolumnname="description" rows="2"
+                                placeholder="Optional description..."></textarea>
+                        </div>
+
+                        <!-- HABITS -->
+                        <div class="col-md-12">
+                            <label>Habits <span style="color:red">*</span></label>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fa fa-tasks text-success me-2"></i>Select Habits and Configure
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="habitSelector">Select Habits:</label>
+                                            <input id="habitSelector" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row g-2">
+                                                <div class="col-auto d-flex align-items-end">
+                                                    <button type="button" class="btn btn-primary btn-sm"
+                                                        onclick="addHabit()">
+                                                        <i class="fa fa-plus"></i> Add Selected
+                                                    </button>
+                                                </div>
+                                                <div class="col-auto d-flex align-items-end">
+                                                    <button type="button" class="btn btn-outline-info btn-sm"
+                                                        onclick="selectAllAvailableHabits()" title="Select all habits">
+                                                        <i class="fa fa-check-double"></i> All
+                                                    </button>
+                                                </div>
+                                                <div class="col-auto d-flex align-items-end">
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                        onclick="clearAllHabits()" title="Clear all">
+                                                        <i class="fa fa-eraser"></i> Clear
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="habitGridContainer">
+                                        <div class="alert alert-info text-center mb-0">
+                                            <i class="fa fa-info-circle"></i> No habits selected yet. Add habits to
+                                            configure.
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row mt-3">
-                            <div class="col-md-12">
-                                <label>Description</label>
-                                <textarea id="packagedescription" class="form-control" rows="3"></textarea>
+                        <!-- ASSESSMENTS -->
+                        <div class="col-md-12">
+                            <label>Assessments <span style="color:red">*</span></label>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">
+                                        <i class="fa fa-clipboard-list text-warning me-2"></i>Select Assessments and
+                                        Configure
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="assessmentSelector">Select Assessments:</label>
+                                            <input id="assessmentSelector" type="text" class="form-control" />
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="row g-2">
+                                                <div class="col-auto d-flex align-items-end">
+                                                    <button type="button" class="btn btn-primary btn-sm"
+                                                        onclick="addAssessment()">
+                                                        <i class="fa fa-plus"></i> Add Selected
+                                                    </button>
+                                                </div>
+                                                <div class="col-auto d-flex align-items-end">
+                                                    <button type="button" class="btn btn-outline-info btn-sm"
+                                                        onclick="selectAllAvailableAssessments()" title="Select all">
+                                                        <i class="fa fa-check-double"></i> All
+                                                    </button>
+                                                </div>
+                                                <div class="col-auto d-flex align-items-end">
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                        onclick="clearAllAssessments()" title="Clear all">
+                                                        <i class="fa fa-eraser"></i> Clear
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="assessmentGridContainer">
+                                        <div class="alert alert-info text-center mb-0">
+                                            <i class="fa fa-info-circle"></i> No assessments selected yet. Add
+                                            assessments to configure.
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label>Status</label>
-                                <select id="packagestatus" class="form-control">
-                                    <option value="">Select Status</option>
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Multi-select for Assessments -->
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label>Assessments</label>
-                                <input type="text" id="assessmentSelect" />
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Habits</label>
-                                <input type="text" id="habitSelect" />
-                            </div>
+                        <!-- JSON -->
+                        <div class="col-md-12">
+                            <label>Generated Package JSON <span style="color:red">*</span></label>
+                            <textarea class="form-control" id="packageJSON" dbcolumnname="habitid2" rows="8" readonly
+                                placeholder='{"habits":[],"assessments":[]}'></textarea>
+                            <small class="text-muted">This JSON is automatically generated based on your selections
+                                above</small>
                         </div>
 
                     </form>
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-primary" onclick="saveUserPackage()">Save</button>
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button class="btn btn-info" onclick="viewPackageJSON()">
+                        <i class="fa fa-eye"></i> View JSON
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearAllPackageItems()">
+                        <i class="fa fa-rotate-right"></i> Clear All
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveUserPackage()">
+                        <i class="fa fa-floppy-disk"></i> Save Package
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fa fa-xmark"></i> Close
+                    </button>
                 </div>
 
             </div>
         </div>
     </div>
 
+    <!-- CDN Scripts -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.syncfusion.com/ej2/25.1.35/dist/ej2.min.js"></script>
+
+    <!-- Mock DBHandler -->
     <script>
-        let userPackageGrid;
-        let editingPackageId = null;
-        let assessmentMultiSelect;
-        let habitMultiSelect;
 
-        const userPackageModalEl = document.getElementById('userPackageModal');
-        const userPackageModal = new bootstrap.Modal(userPackageModalEl);
-
-        // Initialize Grid
-        function initUserPackageGrid() {
-            ej.grids.Grid.Inject(
-                ej.grids.Page,
-                ej.grids.Sort,
-                ej.grids.Filter,
-                ej.grids.Toolbar,
-                ej.grids.ExcelExport,
-                ej.grids.PdfExport
-            );
-
-            userPackageGrid = new ej.grids.Grid({
-                dataSource: [],
-                allowPaging: true,
-                allowSorting: true,
-                allowFiltering: true,
-                filterSettings: { type: 'Excel' },
-                toolbar: [
-                    'Search',
-                    { text: 'New Package', prefixIcon: 'e-icons e-plus', id: 'newPackage' },
-                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editPackage' },
-                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deletePackage' },
-                    'ExcelExport',
-                    'PdfExport'
-                ],
-                columns: [
-                    { type: 'checkbox', width: 50 },
-                    { field: 'id', headerText: 'ID', isPrimaryKey: true, visible: false },
-                    { field: 'packagename', headerText: 'Package Name', width: 200 },
-                    { field: 'code', headerText: 'Code', width: 150 },
-                    { field: 'description', headerText: 'Description', width: 250 },
-                    { field: 'status', headerText: 'Status', width: 120 },
-                    { field: 'assessmentid1', headerText: 'Assessments', width: 200 },
-                    { field: 'habitid1', headerText: 'Habits', width: 200 },
-                    { field: 'createdon', headerText: 'Created On', width: 150, type: 'datetime' },
-                    { field: 'modifiedon', headerText: 'Modified On', width: 150, type: 'datetime' }
-                ],
-                toolbarClick: function (args) {
-                    if (args.item.id === 'newPackage') {
-                        editingPackageId = null;
-                        document.getElementById('userPackageForm').reset();
-                        if (assessmentMultiSelect) assessmentMultiSelect.value = [];
-                        if (habitMultiSelect) habitMultiSelect.value = [];
-                        document.querySelector('#userPackageModal .modal-title').innerText = "Add User Package";
-                        userPackageModal.show();
-                    }
-
-                    if (args.item.id === 'editPackage') {
-                        const selected = userPackageGrid.getSelectedRecords();
-                        if (selected.length !== 1) return alert("Select one record");
-
-                        editingPackageId = selected[0].id;
-                        document.getElementById('packagename').value = selected[0].packagename;
-                        document.getElementById('packagecode').value = selected[0].code;
-                        document.getElementById('packagedescription').value = selected[0].description;
-                        document.getElementById('packagestatus').value = selected[0].status;
-
-                        if (assessmentMultiSelect) assessmentMultiSelect.value = selected[0].assessmentid1 ? selected[0].assessmentid1.split(',') : [];
-                        if (habitMultiSelect) habitMultiSelect.value = selected[0].habitid1 ? selected[0].habitid1.split(',') : [];
-
-                        document.querySelector('#userPackageModal .modal-title').innerText = "Edit User Package";
-                        userPackageModal.show();
-                    }
-                }
-            });
-
-            userPackageGrid.appendTo('#userPackageGrid');
-        }
-
-        // Initialize MultiSelects with real DB data
-        async function initMultiSelects() {
-            // --- Assessments ---
-            const assessments = await DBHandler.fetchEntityRecords(
-                'assessmentmaster1',
-                'id,assessmentname',
-                'assessmentname', 'asc'
-            );
-
-            const assessmentData = assessments.map(a => ({
-                value: a.id.toString(),
-                text: a.assessmentname
-            }));
-
-            assessmentMultiSelect = new ej.dropdowns.MultiSelect({
-                dataSource: assessmentData,
-                fields: { value: 'value', text: 'text' },
-                showDropDownIcon: true,
-                placeholder: 'Select Assessments'
-            });
-            assessmentMultiSelect.appendTo('#assessmentSelect');
-
-            // --- Habits ---
-            const habits = await DBHandler.fetchEntityRecords(
-                'habitmaster',
-                'code,habitname',
-                'habitname', 'asc'
-            );
-
-            const habitData = habits.map(h => ({
-                value: h.code,
-                text: h.habitname
-            }));
-
-            habitMultiSelect = new ej.dropdowns.MultiSelect({
-                dataSource: habitData,
-                fields: { value: 'value', text: 'text' },
-                showDropDownIcon: true,
-                placeholder: 'Select Habits'
-            });
-            habitMultiSelect.appendTo('#habitSelect');
-        }
-
-        // Save User Package
-        async function saveUserPackage() {
-            const packagename = document.getElementById('packagename').value.trim();
-            const code = document.getElementById('packagecode').value.trim();
-            const description = document.getElementById('packagedescription').value.trim();
-            const status = document.getElementById('packagestatus').value;
-
-            const assessmentid = assessmentMultiSelect ? assessmentMultiSelect.value.join(',') : '';
-            const habitid = habitMultiSelect ? habitMultiSelect.value.join(',') : '';
-
-            if (!packagename || !code) { alert("Package Name and Code are required"); return; }
-
-            const record = {
-                packagename,
-                code,
-                description,
-                status,
-                assessmentid1: assessmentid,
-                habitid1: habitid
-            };
+        async function loadHabitsAndAssessments() {
 
             try {
-                await DBHandler.submitRecordData('userpackage', record, editingPackageId || null, false);
-                userPackageModal.hide();
-                loadUserPackages();
-                editingPackageId = null;
+                // ✅ FETCH ASSESSMENTS
+                const assessmentData = await DBHandler.fetchEntityRecords(
+                    'assessmentmaster1',
+                    'id, assessmentname',
+                    'assessmentname',
+                    'asc',
+                    '',
+                    true,
+                    0,
+                    ''
+                );
+
+                // ✅ FETCH HABITS
+                const habitData = await DBHandler.fetchEntityRecords(
+                    'habitmaster',
+                    'id, habitname', // ⚠️ use id (IMPORTANT)
+                    'habitname',
+                    'asc',
+                    '',
+                    true,
+                    0,
+                    ''
+                );
+
+                // ✅ STORE GLOBALLY
+                availableAssessments = assessmentData || [];
+                availableHabits = habitData || [];
+
+                console.log("Habits Loaded:", availableHabits);
+                console.log("Assessments Loaded:", availableAssessments);
+
+                // ✅ NOW populate dropdowns (after data comes)
+                populateHabitSelector();
+                populateAssessmentSelector();
+
             } catch (err) {
-                console.error(err);
-                alert("Failed to save package");
+                console.error("Error loading data:", err);
+            }
+        }
+        async function deleteRecordData(entity, ids) {
+            await new Promise(r => setTimeout(r, 100));
+            if (entity === 'userpackage') _mP = _mP.filter(p => !ids.includes(p.id));
+        }
+        function formatDate(d) { return d.toISOString().slice(0, 10).replace(/-/g, ''); }
+    </script>
+
+    <!-- Selectors + Inner Grids -->
+    <script>
+        let statusDropdown = null, habitSelectorDropdown = null, assessmentSelectorDropdown = null;
+        let habitInnerGrid = null, assessmentInnerGrid = null;
+        let availableHabits = [], availableAssessments = [], selectedHabits = [], selectedAssessments = [];
+
+        $(document).ready(function () {
+            statusDropdown = new ej.dropdowns.DropDownList({
+                dataSource: [{ text: 'Active', value: 'active' }, { text: 'Inactive', value: 'inactive' }, { text: 'Draft', value: 'draft' }],
+                fields: { text: 'text', value: 'value' }, placeholder: 'Select Status', allowFiltering: false
+            });
+            statusDropdown.appendTo('#packageStatus');
+            loadHabitsAndAssessments();
+        });
+
+        async function loadHabitsAndAssessments() {
+            try {
+                const habits = await DBHandler.fetchEntityRecords(
+                    'habitmaster', '*', 'habitname', 'asc', '', true, 0, ''
+                );
+
+                const assessments = await DBHandler.fetchEntityRecords(
+                    'assessmentmaster1', '*', 'assessmentname', 'asc', '', true, 0, ''
+                );
+
+                availableHabits = habits || [];
+                availableAssessments = assessments || [];
+
+            } catch (err) {
+                console.error("Error fetching data:", err);
+                availableHabits = [];
+                availableAssessments = [];
+            }
+        }
+        function populateHabitSelector() {
+            if (habitSelectorDropdown) habitSelectorDropdown.destroy();
+
+            habitSelectorDropdown = new ej.dropdowns.MultiSelect({
+                dataSource: [...availableHabits], // 🔥 IMPORTANT
+                fields: { text: 'habitname', value: 'id' },
+                placeholder: 'Select Habits...',
+                allowFiltering: true,
+                mode: 'CheckBox',
+                showSelectAll: true,
+                popupHeight: '250px',
+                width: '100%'
+            });
+
+            habitSelectorDropdown.appendTo('#habitSelector');
+        }
+
+        function addHabit() {
+            if (!habitSelectorDropdown?.value?.length) { alert('Please select at least one habit first'); return; }
+            let added = 0, skipped = 0;
+            habitSelectorDropdown.value.forEach(id => {
+                const h = availableHabits.find(x => x.id === id);
+                if (!h) return;
+                if (selectedHabits.find(s => s.id === id)) { skipped++; return; }
+                selectedHabits.push({ ...h }); added++;
+            });
+            if (added > 0) {
+                alert(`Successfully added ${added} habit${added > 1 ? 's' : ''}${skipped > 0 ? ` (${skipped} already existed)` : ''}`);
+                renderHabitGrid(); populateHabitSelector(); updatePackageJSON();
+            } else if (skipped > 0) alert('All selected habits are already added');
+        }
+
+        function selectAllAvailableHabits() {
+            if (!habitSelectorDropdown) return;
+            const ids = availableHabits.filter(h => !selectedHabits.find(s => s.id === h.id)).map(h => h.id);
+            if (!ids.length) { alert('No more habits available to select'); return; }
+            habitSelectorDropdown.value = ids;
+            alert(`Selected ${ids.length} available habit${ids.length > 1 ? 's' : ''}`);
+        }
+
+        function renderHabitGrid() {
+            const c = document.getElementById('habitGridContainer');
+            if (habitInnerGrid) { habitInnerGrid.destroy(); habitInnerGrid = null; }
+            if (!selectedHabits.length) {
+                c.innerHTML = '<div class="alert alert-info text-center mb-0"><i class="fa fa-info-circle"></i> No habits selected yet. Add habits to configure.</div>';
+                return;
+            }
+            c.innerHTML = '<div id="habitInnerGrid"></div>';
+            ej.grids.Grid.Inject(ej.grids.Page, ej.grids.Sort, ej.grids.Filter, ej.grids.Toolbar);
+            habitInnerGrid = new ej.grids.Grid({
+                dataSource: selectedHabits.map((h, i) => ({ ...h, _idx: i })),
+                allowPaging: selectedHabits.length > 5, pageSettings: { pageSize: 5 },
+                allowSorting: true, allowFiltering: true, filterSettings: { type: 'Excel' },
+                toolbar: [{ template: `<span class="ms-2 fw-semibold" style="line-height:2.2rem;">Configured Habits <span class="entity-count-badge">${selectedHabits.length}</span></span>` }],
+                columns: [
+                    { field: 'habitname', headerText: 'Habit Name', width: 170 },
+                    { field: 'habittype', headerText: 'Type', width: 120 },
+                    { field: 'frequency', headerText: 'Frequency', width: 120 },
+                    { field: 'frequencynumber', headerText: 'Freq. No.', width: 100 },
+                    { field: 'options', headerText: 'Options', width: 110 },
+                    { field: 'code', headerText: 'Code', width: 90 },
+                    { field: 'order', headerText: 'Order', width: 80, textAlign: 'Right' },
+                    {
+                        headerText: 'Action', width: 90, textAlign: 'Center',
+                        template: '<button class="btn btn-danger btn-sm" onclick="removeHabit(\'${_idx}\')" title="Remove"><i class="fa fa-trash"></i></button>'
+                    }
+                ]
+            });
+            habitInnerGrid.appendTo('#habitInnerGrid');
+        }
+
+        function removeHabit(idx) {
+            if (confirm('Are you sure you want to remove this habit?')) {
+                selectedHabits.splice(parseInt(idx), 1);
+                renderHabitGrid(); populateHabitSelector(); updatePackageJSON();
             }
         }
 
-        // Load User Packages into Grid
-        async function loadUserPackages() {
-            const data = await DBHandler.fetchEntityRecords('userpackage', '*', 'createdon', 'desc');
-            userPackageGrid.dataSource = data || [];
+        function clearAllHabits() {
+            if (!selectedHabits.length) { alert('No habits configured to clear'); return; }
+            if (confirm(`Clear all ${selectedHabits.length} habit(s)?`)) {
+                selectedHabits = []; renderHabitGrid(); populateHabitSelector(); updatePackageJSON();
+            }
         }
 
-        // INIT
-        document.addEventListener('DOMContentLoaded', () => {
-            initUserPackageGrid();
-            initMultiSelects();
-            loadUserPackages();
-        });
+        function populateAssessmentSelector() {
+            if (assessmentSelectorDropdown) assessmentSelectorDropdown.destroy();
+
+            assessmentSelectorDropdown = new ej.dropdowns.MultiSelect({
+                dataSource: [...availableAssessments], // 🔥 IMPORTANT
+                fields: { text: 'assessmentname', value: 'id' },
+                placeholder: 'Select Assessments...',
+                allowFiltering: true,
+                mode: 'CheckBox',
+                showSelectAll: true,
+                popupHeight: '250px',
+                width: '100%'
+            });
+
+            assessmentSelectorDropdown.appendTo('#assessmentSelector');
+        }
+
+        function addAssessment() {
+            if (!assessmentSelectorDropdown?.value?.length) { alert('Please select at least one assessment first'); return; }
+            let added = 0, skipped = 0;
+            assessmentSelectorDropdown.value.forEach(id => {
+                const a = availableAssessments.find(x => x.id === id);
+                if (!a) return;
+                if (selectedAssessments.find(s => s.id === id)) { skipped++; return; }
+                selectedAssessments.push({ ...a }); added++;
+            });
+            if (added > 0) {
+                alert(`Successfully added ${added} assessment${added > 1 ? 's' : ''}${skipped > 0 ? ` (${skipped} already existed)` : ''}`);
+                renderAssessmentGrid(); populateAssessmentSelector(); updatePackageJSON();
+            } else if (skipped > 0) alert('All selected assessments are already added');
+        }
+
+        function selectAllAvailableAssessments() {
+            if (!assessmentSelectorDropdown) return;
+            const ids = availableAssessments.filter(a => !selectedAssessments.find(s => s.id === a.id)).map(a => a.id);
+            if (!ids.length) { alert('No more assessments available to select'); return; }
+            assessmentSelectorDropdown.value = ids;
+            alert(`Selected ${ids.length} available assessment${ids.length > 1 ? 's' : ''}`);
+        }
+
+        function renderAssessmentGrid() {
+            const c = document.getElementById('assessmentGridContainer');
+            if (assessmentInnerGrid) { assessmentInnerGrid.destroy(); assessmentInnerGrid = null; }
+            if (!selectedAssessments.length) {
+                c.innerHTML = '<div class="alert alert-info text-center mb-0"><i class="fa fa-info-circle"></i> No assessments selected yet. Add assessments to configure.</div>';
+                return;
+            }
+            c.innerHTML = '<div id="assessmentInnerGrid"></div>';
+            ej.grids.Grid.Inject(ej.grids.Page, ej.grids.Sort, ej.grids.Filter, ej.grids.Toolbar);
+            assessmentInnerGrid = new ej.grids.Grid({
+                dataSource: selectedAssessments.map((a, i) => ({ ...a, _idx: i })),
+                allowPaging: selectedAssessments.length > 5, pageSettings: { pageSize: 5 },
+                allowSorting: true, allowFiltering: true, filterSettings: { type: 'Excel' },
+                toolbar: [{ template: `<span class="ms-2 fw-semibold" style="line-height:2.2rem;">Configured Assessments <span class="entity-count-badge">${selectedAssessments.length}</span></span>` }],
+                columns: [
+                    { field: 'assessmentname', headerText: 'Assessment Name', width: 170 },
+                    { field: 'assessmenttype', headerText: 'Type', width: 120 },
+                    { field: 'maxscore', headerText: 'Max Score', width: 100, textAlign: 'Right' },
+                    { field: 'passingscore', headerText: 'Pass Score', width: 100, textAlign: 'Right' },
+                    { field: 'code', headerText: 'Code', width: 90 },
+                    { field: 'status', headerText: 'Status', width: 100 },
+                    {
+                        headerText: 'Action', width: 90, textAlign: 'Center',
+                        template: '<button class="btn btn-danger btn-sm" onclick="removeAssessment(\'${_idx}\')" title="Remove"><i class="fa fa-trash"></i></button>'
+                    }
+                ]
+            });
+            assessmentInnerGrid.appendTo('#assessmentInnerGrid');
+        }
+
+        function removeAssessment(idx) {
+            if (confirm('Are you sure you want to remove this assessment?')) {
+                selectedAssessments.splice(parseInt(idx), 1);
+                renderAssessmentGrid(); populateAssessmentSelector(); updatePackageJSON();
+            }
+        }
+
+        function clearAllAssessments() {
+            if (!selectedAssessments.length) { alert('No assessments configured to clear'); return; }
+            if (confirm(`Clear all ${selectedAssessments.length} assessment(s)?`)) {
+                selectedAssessments = []; renderAssessmentGrid(); populateAssessmentSelector(); updatePackageJSON();
+            }
+        }
+
+        function updatePackageJSON() {
+            document.getElementById('packageJSON').value = JSON.stringify({
+                habits: selectedHabits.map(h => ({ id: h.id, habitname: h.habitname, habittype: h.habittype, options: h.options, code: h.code, order: h.order, frequency: h.frequency, frequencynumber: h.frequencynumber })),
+                assessments: selectedAssessments.map(a => ({ id: a.id, assessmentname: a.assessmentname, assessmenttype: a.assessmenttype, description: a.description, maxscore: a.maxscore, passingscore: a.passingscore, code: a.code, status: a.status }))
+            }, null, 2);
+        }
+
+        function loadPackageFromJSON(str) {
+            try {
+                const d = JSON.parse(str);
+                selectedHabits = Array.isArray(d.habits) ? d.habits : [];
+                selectedAssessments = Array.isArray(d.assessments) ? d.assessments : [];
+                renderHabitGrid(); renderAssessmentGrid();
+                populateHabitSelector(); populateAssessmentSelector();
+                updatePackageJSON();
+            } catch (e) { console.error(e); alert('Invalid JSON format.'); }
+        }
+
+        function viewPackageJSON() {
+            const v = document.getElementById('packageJSON').value.trim();
+            if (!v) { alert('No package data to view'); return; }
+            try {
+                const f = JSON.stringify(JSON.parse(v), null, 4);
+                const ex = document.getElementById('jsonViewModal'); if (ex) ex.remove();
+                document.body.insertAdjacentHTML('beforeend', `
+                <div class="modal fade" id="jsonViewModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header"><h5 class="modal-title">Package JSON Preview</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                            <div class="modal-body">
+                                <pre class="bg-light p-3 rounded" style="max-height:420px;overflow-y:auto;font-size:0.8rem;"><code>${f}</code></pre>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary btn-sm" onclick="copyPackageJsonToClipboard()"><i class="fa fa-copy"></i> Copy</button>
+                                <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`);
+                new bootstrap.Modal(document.getElementById('jsonViewModal')).show();
+            } catch { alert('Invalid JSON format'); }
+        }
+
+        function copyPackageJsonToClipboard() {
+            navigator.clipboard.writeText(document.getElementById('packageJSON').value)
+                .then(() => alert('JSON copied to clipboard!')).catch(() => alert('Failed to copy'));
+        }
+
+        function clearAllPackageItems() {
+            if (confirm('Clear all selected habits and assessments? This action cannot be undone.')) {
+                selectedHabits = []; selectedAssessments = [];
+                renderHabitGrid(); renderAssessmentGrid();
+                populateHabitSelector(); populateAssessmentSelector();
+                updatePackageJSON();
+            }
+        }
     </script>
+
+    <!-- Main Grid + CRUD -->
+    <script>
+        let grid, packagesMain = [], editingPackageId = null;
+
+        const columns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+            { field: 'packagename', headerText: 'Package Name', width: 250 },
+            { field: 'code', headerText: 'Code', width: 130 },
+            { field: 'status', headerText: 'Status', width: 120 },
+            { field: 'modifiedon', headerText: 'Modified On', width: 160, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' } },
+            { field: 'id', headerText: 'id', width: 130, visible: false },
+            { field: 'createdon', headerText: 'Created On', width: 150, type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, visible: false },
+            { field: 'description', headerText: 'Description', width: 200, visible: false },
+        ];
+
+        function initGrid(cols, gid) {
+            ej.grids.Grid.Inject(ej.grids.Filter, ej.grids.Group, ej.grids.Page, ej.grids.Sort,
+                ej.grids.Toolbar, ej.grids.ColumnChooser, ej.grids.ExcelExport, ej.grids.PdfExport);
+            grid = new ej.grids.Grid({
+                dataSource: [], allowPaging: true, pageSettings: { pageSize: 10 },
+                allowSorting: true, allowFiltering: true, filterSettings: { type: 'Excel' },
+                showColumnChooser: true,
+                toolbar: ['ColumnChooser', 'Search',
+                    { prefixIcon: 'e-icons e-excelexport', tooltipText: 'Export Excel', id: 'excelExport' },
+                    { prefixIcon: 'e-icons e-pdfexport', tooltipText: 'Export PDF', id: 'pdfExport' },
+                    { prefixIcon: 'e-icons e-refresh', tooltipText: 'Refresh Grid', id: 'refreshGrid' },
+                    { text: 'New Package', tooltipText: 'New Package', prefixIcon: 'e-icons e-plus', id: 'newPackage' },
+                    { text: 'Edit', tooltipText: 'Edit Package', prefixIcon: 'e-icons e-edit', id: 'editPackage' },
+                    { text: 'Delete', tooltipText: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deletePackage' },
+                ],
+                columns: cols, allowExcelExport: true, allowPdfExport: true,
+                toolbarClick: function (args) {
+                    if (args.item.id === gid + '_excelexport') grid.excelExport({ fileName: `UserPackages_${formatDate(new Date())}.xlsx`, exportType: 'AllPages' });
+                    if (args.item.id === gid + '_pdfexport') grid.pdfExport({
+                        fileName: `UserPackages_${formatDate(new Date())}.pdf`, exportType: 'CurrentPage',
+                        theme: { header: { fontColor: '#000000' } }, pageOrientation: 'Landscape', pageSize: 'LETTER',
+                        header: { fromTop: 0, height: 120, contents: [{ type: 'Text', value: 'User Package Management', position: { x: 280, y: 0 }, style: { textBrushColor: '#C25050', fontSize: 25 } }] },
+                        footer: { fromBottom: 160, height: 150, contents: [{ type: 'PageNumber', pageNumberType: 'Arabic', format: 'Page {$current} of {$total}', position: { x: 520, y: 10 }, style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' } }] }
+                    });
+                    if (args.item.id === 'refreshGrid') loadUserPackageGrid();
+                    if (args.item.id === 'newPackage') openPackageModal();
+                    if (args.item.id === 'editPackage') editUserPackage();
+                    if (args.item.id === 'deletePackage') deleteUserPackage();
+                }
+            });
+            grid.appendTo('#' + gid);
+        }
+
+        async function editUserPackage() {
+            const sel = grid.getSelectedRecords();
+            if (sel.length !== 1) return alert('Select one record to edit');
+            const rec = sel[0]; editingPackageId = rec.id;
+            document.getElementById('packageName').value = rec.packagename || '';
+            document.getElementById('packageCode').value = rec.code || '';
+            document.getElementById('packageDescription').value = rec.description || '';
+            if (statusDropdown) statusDropdown.value = rec.status || null;
+            selectedHabits = []; selectedAssessments = [];
+            renderHabitGrid(); renderAssessmentGrid();
+            populateHabitSelector(); populateAssessmentSelector();
+            document.getElementById('packageJSON').value = 'Loading...';
+            document.querySelector('#userPackageModal .modal-title').innerText = 'Edit User Package';
+            openPackageModal();
+            try {
+                const full = await DBHandler.fetchEntityRecords('userpackage', '*', 'id', 'desc', `id='${editingPackageId}'`, false, 1);
+                if (!full?.length) { document.getElementById('packageJSON').value = ''; return alert('Unable to load full package record.'); }
+                const d = full[0];
+                if (d.habitid2) loadPackageFromJSON(d.habitid2); else updatePackageJSON();
+            } catch (err) { console.error(err); document.getElementById('packageJSON').value = ''; alert('Error fetching package data.'); }
+        }
+
+        async function deleteUserPackage() {
+            const sel = grid.getSelectedRecords();
+            if (!sel.length) return alert('Select record(s) to delete');
+            if (!confirm(`Delete ${sel.length} package(s)?`)) return;
+            await deleteRecordData('userpackage', sel.map(r => r.id));
+            loadUserPackageGrid();
+        }
+
+        function openPackageModal() {
+            if (!editingPackageId) {
+                document.getElementById('packageName').value = '';
+                document.getElementById('packageCode').value = '';
+                document.getElementById('packageDescription').value = '';
+                if (statusDropdown) statusDropdown.value = null;
+                selectedHabits = []; selectedAssessments = [];
+                renderHabitGrid(); renderAssessmentGrid();
+                populateHabitSelector(); populateAssessmentSelector();
+                updatePackageJSON();
+                document.querySelector('#userPackageModal .modal-title').innerText = 'Add User Package';
+            }
+            const m = new bootstrap.Modal(document.getElementById('userPackageModal'), { backdrop: 'static', keyboard: false, focus: false });
+            m.show(); ej.base.enableRipple(true);
+        }
+
+        async function loadUserPackageGrid() {
+            try {
+                const pkgs = await DBHandler.fetchEntityRecords('userpackage', '*', 'userpackage.modifiedon', 'desc', '', true, 0, '');
+                packagesMain = pkgs || []; let srno = 1;
+                grid.dataSource = packagesMain.map(p => ({
+                    id: p.id, srno: srno++, packagename: p.packagename, code: p.code,
+                    status: p.status, description: p.description,
+                    createdon: normalizeDate(p.createdon), modifiedon: normalizeDate(p.modifiedon)
+                }));
+                grid.refresh();
+            } catch (err) { console.error('Failed to load packages:', err); }
+        }
+
+        function normalizeDate(val) {
+            if (!val) return null;
+            const d = val instanceof Date ? val : new Date(val);
+            return isNaN(d) ? null : d;
+        }
+
+        $(document).ready(async () => {
+            initGrid(columns, 'userPackageGrid');
+            loadUserPackageGrid();
+
+            $('#userPackageModal').on('shown.bs.modal', function () {
+                $(document).off('focusin.modal');
+
+                // ✅ ADD THIS HERE
+                populateHabitSelector();
+                populateAssessmentSelector();
+            });
+
+            $('#userPackageModal').on('hidden.bs.modal', function () {
+                editingPackageId = null;
+            });
+        });
+
+        async function saveUserPackage() {
+            const btn = event.target;
+            const packageName = document.getElementById('packageName').value.trim();
+            const packageCode = document.getElementById('packageCode').value.trim();
+            const packageDescription = document.getElementById('packageDescription').value.trim();
+            const packageStatus = statusDropdown ? statusDropdown.value : '';
+            const packageJSON = document.getElementById('packageJSON').value.trim();
+
+            if (!packageName) return alert('Please enter package name');
+            if (!packageCode) return alert('Please enter package code');
+            if (!packageStatus) return alert('Please select a status');
+            if (!selectedHabits.length && !selectedAssessments.length) return alert('Please add at least one habit or assessment');
+
+            try { JSON.parse(packageJSON); } catch { return alert('Invalid JSON format in package data.'); }
+
+            try {
+                if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Saving...'; }
+                await DBHandler.submitRecordData('userpackage', {
+                    packagename: packageName, code: packageCode, description: packageDescription,
+                    status: packageStatus, habitid2: packageJSON, assessmentid2: packageJSON
+                }, editingPackageId, false);
+                await loadUserPackageGrid();
+                bootstrap.Modal.getInstance(document.getElementById('userPackageModal')).hide();
+                editingPackageId = null;
+                document.getElementById('packageName').value = '';
+                document.getElementById('packageCode').value = '';
+                document.getElementById('packageDescription').value = '';
+                if (statusDropdown) statusDropdown.value = null;
+                selectedHabits = []; selectedAssessments = [];
+                renderHabitGrid(); renderAssessmentGrid();
+                populateHabitSelector(); populateAssessmentSelector();
+                updatePackageJSON();
+            } catch (err) { console.error(err); alert('Failed to save User Package'); }
+            finally { if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa fa-floppy-disk"></i> Save Package'; } }
+        }
+    </script>
+
 </body>
 
 </html>
