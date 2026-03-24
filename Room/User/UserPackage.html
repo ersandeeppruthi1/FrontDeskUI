@@ -166,7 +166,6 @@
             color: #333;
             resize: vertical;
         }
-        
     </style>
 </head>
 
@@ -416,25 +415,25 @@
             loadHabitsAndAssessments();
         });
 
-        async function loadHabitsAndAssessments() {
-            try {
-                const habits = await DBHandler.fetchEntityRecords(
-                    'habitmaster', '*', 'habitname', 'asc', '', true, 0, ''
-                );
+        // async function loadHabitsAndAssessments() {
+        //     try {
+        //         const habits = await DBHandler.fetchEntityRecords(
+        //             'habitmaster', '*', 'habitname', 'asc', '', true, 0, ''
+        //         );
 
-                const assessments = await DBHandler.fetchEntityRecords(
-                    'assessmentmaster1', '*', 'assessmentname', 'asc', '', true, 0, ''
-                );
+        //         const assessments = await DBHandler.fetchEntityRecords(
+        //             'assessmentmaster1', '*', 'assessmentname', 'asc', '', true, 0, ''
+        //         );
 
-                availableHabits = habits || [];
-                availableAssessments = assessments || [];
+        //         availableHabits = habits || [];
+        //         availableAssessments = assessments || [];
 
-            } catch (err) {
-                console.error("Error fetching data:", err);
-                availableHabits = [];
-                availableAssessments = [];
-            }
-        }
+        //     } catch (err) {
+        //         console.error("Error fetching data:", err);
+        //         availableHabits = [];
+        //         availableAssessments = [];
+        //     }
+        // }
         function populateHabitSelector() {
             if (habitSelectorDropdown) habitSelectorDropdown.destroy();
 
@@ -680,11 +679,23 @@
         ];
 
         function initGrid(cols, gid) {
-            ej.grids.Grid.Inject(ej.grids.Filter, ej.grids.Group, ej.grids.Page, ej.grids.Sort,
-                ej.grids.Toolbar, ej.grids.ColumnChooser, ej.grids.ExcelExport, ej.grids.PdfExport);
+            ej.grids.Grid.Inject(
+                ej.grids.Filter,
+                ej.grids.Group,
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
             grid = new ej.grids.Grid({
-                dataSource: [], allowPaging: true, pageSettings: { pageSize: 10 },
-                allowSorting: true, allowFiltering: true, filterSettings: { type: 'Excel' },
+                dataSource: [],
+                allowPaging: true,
+                pageSettings: { pageSize: 10 },
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
                 showColumnChooser: true,
                 toolbar: ['ColumnChooser', 'Search',
                     { prefixIcon: 'e-icons e-excelexport', tooltipText: 'Export Excel', id: 'excelExport' },
@@ -703,10 +714,14 @@
                         header: { fromTop: 0, height: 120, contents: [{ type: 'Text', value: 'User Package Management', position: { x: 280, y: 0 }, style: { textBrushColor: '#C25050', fontSize: 25 } }] },
                         footer: { fromBottom: 160, height: 150, contents: [{ type: 'PageNumber', pageNumberType: 'Arabic', format: 'Page {$current} of {$total}', position: { x: 520, y: 10 }, style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' } }] }
                     });
-                    if (args.item.id === 'refreshGrid') loadUserPackageGrid();
-                    if (args.item.id === 'newPackage') openPackageModal();
-                    if (args.item.id === 'editPackage') editUserPackage();
-                    if (args.item.id === 'deletePackage') deleteUserPackage();
+                    if (args.item.id === 'refreshGrid')
+                        loadUserPackageGrid();
+                    if (args.item.id === 'newPackage')
+                        openPackageModal();
+                    if (args.item.id === 'editPackage')
+                        editUserPackage();
+                    if (args.item.id === 'deletePackage')
+                        deleteUserPackage();
                 }
             });
             grid.appendTo('#' + gid);
