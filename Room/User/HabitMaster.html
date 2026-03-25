@@ -7,7 +7,7 @@
 
     <script>
         let classMap = [];
-        var apiURL = "https://dbsit.vsservices.in/";
+        var apiURL = "https://dbsit2.vsservices.in/";
         //var apiURL = "";
     </script>
 
@@ -76,7 +76,9 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title">Add Habit</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
                 </div>
 
                 <div class="modal-body">
@@ -258,15 +260,19 @@
             const habittype = document.getElementById('habittype').value;
             const options = document.getElementById('habitoptions').value.trim();
             const frequency = document.getElementById('habitfrequency').value;
+            const code = document.getElementById('habitcode').value.trim();
+            const order = document.getElementById('habitorder').value;
 
             let frequencynumber = frequency ? frequencyMultiSelect.value.join(',') : '';
 
-            if (!habitname || !habittype) return alert("Required fields missing");
+            if (!habitname || !habittype || !code || !order) return alert("Required fields missing");
 
             await DBHandler.submitRecordData('habitmaster', {
                 habitname,
                 habittype,
                 options,
+                code,
+                order,
                 frequency,
                 frequencynumber
             }, editingHabitId, false);
@@ -301,13 +307,17 @@
                     dataSource = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
                     placeholder = 'Select Days';
                 } else if (freq === 'Monthly') {
-                    dataSource = Array.from({length: 12}, (_, i) => (i + 1).toString());
+                    dataSource = [
+                        'January', 'February', 'March', 'April',
+                        'May', 'June', 'July', 'August',
+                        'September', 'October', 'November', 'December'
+                    ];
                     placeholder = 'Select Months';
                 } else if (freq === 'Quarterly') {
                     dataSource = ['1', '2', '3', '4'];
                     placeholder = 'Select Quarters';
                 } else if (freq === 'Annually') {
-                    dataSource = Array.from({length: 12}, (_, i) => (i + 1).toString());
+                    dataSource = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
                     placeholder = 'Select Years';
                 }
 
@@ -322,7 +332,6 @@
                     // Create new
                     frequencyMultiSelect = new ej.dropdowns.MultiSelect({
                         dataSource: dataSource,
-                        mode: 'CheckBox',
                         showDropDownIcon: true,
                         placeholder: placeholder
                     });
