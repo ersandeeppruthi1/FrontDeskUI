@@ -227,7 +227,7 @@
                         <!-- Expected Check-Out -->
                         <div class="col-md-6">
                             <label class="form-label">Expected Check-Out</label>
-                            <input type="datetime-local" id="checkOutDateTime" class="form-control">
+                            <input type="datetime-local" id="expectedcheckout" class="form-control">
                         </div>
 
                         <!-- Guest Count -->
@@ -366,7 +366,6 @@
         function openCheckInModal() {
 
             setCurrentCheckInTime();
-            document.getElementById("checkOutDateTime").value = "";
             // Clear form fields
             document.getElementById("displayName").value = "";
             document.getElementById("mobileNumber").value = "";
@@ -409,6 +408,8 @@
 
         function setCurrentCheckOutTime() {
             const now = new Date();
+            
+            // Format datetime-local input value (YYYY-MM-DDTHH:MM)
             const formattedDate =
                 now.getFullYear() + '-' +
                 String(now.getMonth() + 1).padStart(2, '0') + '-' +
@@ -1520,9 +1521,9 @@
         // Initialize Syncfusion components
         function initializeSyncfusionControls() {
             // Initialize DateTimePicker for checkout
-            new ej.calendars.DateTimePicker({
-                placeholder: "Select Check-Out Time"
-            }).appendTo('#checkOutDateTime');
+            // new ej.calendars.DateTimePicker({
+            //     placeholder: "Select Check-Out Time"
+            // }).appendTo('#checkOutDateTime');
 
             // Initialize Feedback Rating Dropdown
             feedbackRatingDropdown = new ej.dropdowns.DropDownList({
@@ -1584,6 +1585,9 @@
             initializeRoomDropdown();
             initializeBookingsDropdown();
             initializeDataCaches();
+            
+            // Set default checkout datetime to current time
+            setCurrentCheckOutTime();
         }
 
         $(document).ready(() => {
