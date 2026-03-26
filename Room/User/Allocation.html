@@ -2,373 +2,375 @@
 <html lang="en">
 
 <head runat="server">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script>
-        let classMap = [];
-        var apiURL = "https://dbsit2.vsservices.in/";
-        //var apiURL = "";
-    </script>
+	<script>
+		let classMap = [];
+		var apiURL = "https://dbsit2.vsservices.in/";
+		//var apiURL = "";
+	</script>
 
-    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
-    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
-    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
-    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+	<link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+	<script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+	<script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+	<link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
-    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+	<script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+	<link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
-    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
-    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
-    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
-    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
-    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
-    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
-    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+	<script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+	<script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
 
-    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
-    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
-    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+	<script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+	<script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+	<link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
-    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+	<script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
-    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+	<script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+	<link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
-    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+	<script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+	<script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
 
-    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
-    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+	<script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+	<script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+		crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
-    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
-    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+	<link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+	<script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+	<script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
 </head>
 
 <body>
-    <div class="container2">
-        <div id="allocationGrid"></div>
-    </div>
+	<div class="container2">
+		<div id="allocationGrid"></div>
+	</div>
 
-    <div class="modal fade" id="allocationModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
+	<div class="modal fade" id="allocationModal" tabindex="-1">
+		<div class="modal-dialog modal-lg modal-dialog-centered">
+			<div class="modal-content">
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Allocation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+				<div class="modal-header">
+					<h5 class="modal-title">Add Allocation</h5>
+					<button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
 
-                <div class="modal-body">
-                    <form id="allocationForm">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label>User</label>
-                                <input type="text" id="userid" class="form-control" required />
-                            </div>
-                            <div class="col-md-6">
-                                <label>Package</label>
-                                <input type="text" id="packageid" class="form-control" required />
-                            </div>
-                        </div>
+				<div class="modal-body">
+					<form id="allocationForm">
+						<div class="row">
+							<div class="col-md-6">
+								<label>User</label>
+								<input type="text" id="userid" class="form-control" required />
+							</div>
+							<div class="col-md-6">
+								<label>Package</label>
+								<input type="text" id="packageid" class="form-control" required />
+							</div>
+						</div>
 
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label>Allocation Date</label>
-                                <input type="text" id="allocationdate" class="form-control" />
-                            </div>
-                            <div class="col-md-6">
-                                <label>Status</label>
-                                <input type="text" id="status" class="form-control" required />
-                            </div>
-                        </div>
+						<div class="row mt-3">
+							<div class="col-md-6">
+								<label>Allocation Date</label>
+								<input type="text" id="allocationdate" class="form-control" />
+							</div>
+							<div class="col-md-6">
+								<label>Status</label>
+								<input type="text" id="status" class="form-control" required />
+							</div>
+						</div>
 
-                        <div class="row mt-3">
-                            <div class="col-md-12">
-                                <label>Remarks</label>
-                                <textarea id="remarks" class="form-control" rows="3"></textarea>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+						<div class="row mt-3">
+							<div class="col-md-12">
+								<label>Remarks</label>
+								<textarea id="remarks" class="form-control" rows="3"></textarea>
+							</div>
+						</div>
+					</form>
+				</div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-primary" onclick="saveAllocation()">Save</button>
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+				<div class="modal-footer">
+					<button class="btn btn-primary" onclick="saveAllocation()">Save</button>
+					<button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				</div>
 
-            </div>
-        </div>
-    </div>
+			</div>
+		</div>
+	</div>
 
-    <script>
+	<script>
 
-        let allocationGrid;
-        let editingAllocationId = null;
-        let usersData = [];
-        let packagesData = [];
-        let userDropdown = null;
-        let packageDropdown = null;
-        let statusDropdown = null;
-        let allocationDatePicker = null;
+		let allocationGrid;
+		let editingAllocationId = null;
+		let usersData = [];
+		let packagesData = [];
+		let userDropdown = null;
+		let packageDropdown = null;
+		let statusDropdown = null;
+		let allocationDatePicker = null;
 
-        function initAllocationGrid() {
+		function initAllocationGrid() {
 
-            ej.grids.Grid.Inject(
-                ej.grids.Page,
-                ej.grids.Sort,
-                ej.grids.Filter,
-                ej.grids.Toolbar,
-                ej.grids.ColumnChooser,
-                ej.grids.ExcelExport,
-                ej.grids.PdfExport
-            );
+			ej.grids.Grid.Inject(
+				ej.grids.Page,
+				ej.grids.Sort,
+				ej.grids.Filter,
+				ej.grids.Toolbar,
+				ej.grids.ColumnChooser,
+				ej.grids.ExcelExport,
+				ej.grids.PdfExport
+			);
 
-            allocationGrid = new ej.grids.Grid({
-                dataSource: [],
-                allowPaging: true,
-                allowSorting: true,
-                allowFiltering: true,
-                showColumnChooser: true,
-                filterSettings: { type: 'Excel' },
-                toolbar: [
-                    'Search',
-                    'ColumnChooser',
-                    {
-                        prefixIcon: 'e-icons e-excelexport',
-                        tooltipText: 'Export Excel',
-                        id: 'excelExport'
-                    },
-                    {
-                        prefixIcon: 'e-icons e-pdfexport',
-                        tooltipText: 'Export PDF',
-                        id: 'pdfExport'
-                    },
-                    {
-                        prefixIcon: 'e-icons e-refresh',
-                        tooltipText: 'Refresh',
-                        id: 'refreshGrid'
-                    },
-                    { text: 'New Allocation', prefixIcon: 'e-icons e-plus', id: 'newAllocation' },
-                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editAllocation' },
-                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteAllocation' },
-                ],
-                columns: [
-                    { type: 'checkbox', width: 50 },
-                    { field: 'username', headerText: 'User', width: 180 },
-                    { field: 'packagename', headerText: 'Package', width: 180 },
-                    { field: 'allocationdate', headerText: 'Allocation Date', type: 'date', format: 'dd/MMM/yyyy', width: 160 },
-                    { field: 'status', headerText: 'Status', width: 140 },
-                    { field: 'remarks', headerText: 'Remarks', width: 220 },
-                    { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 180 },
-                    { field: 'userid', visible: false },
-                    { field: 'packageid', visible: false },
-                    { field: 'id', visible: false }
-                ],
-                toolbarClick: async function (args) {
-                    const clickedId = (args.item && args.item.id) ? String(args.item.id) : '';
+			allocationGrid = new ej.grids.Grid({
+				dataSource: [],
+				allowPaging: true,
+				allowSorting: true,
+				allowFiltering: true,
+				showColumnChooser: true,
+				filterSettings: { type: 'Excel' },
+				toolbar: [
+					'Search',
+					'ColumnChooser',
+					{
+						prefixIcon: 'e-icons e-excelexport',
+						tooltipText: 'Export Excel',
+						id: 'excelExport'
+					},
+					{
+						prefixIcon: 'e-icons e-pdfexport',
+						tooltipText: 'Export PDF',
+						id: 'pdfExport'
+					},
+					{
+						prefixIcon: 'e-icons e-refresh',
+						tooltipText: 'Refresh',
+						id: 'refreshGrid'
+					},
+					{ text: 'New Allocation', prefixIcon: 'e-icons e-plus', id: 'newAllocation' },
+					{ text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editAllocation' },
+					{ text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteAllocation' },
+				],
+				columns: [
+					{ type: 'checkbox', width: 50 },
+					{ field: 'username', headerText: 'User', width: 180 },
+					{ field: 'packagename', headerText: 'Package', width: 180 },
+					{ field: 'allocationdate', headerText: 'Allocation Date', type: 'date', format: 'dd/MMM/yyyy', width: 160 },
+					{ field: 'status', headerText: 'Status', width: 140 },
+					{ field: 'remarks', headerText: 'Remarks', width: 220 },
+					{ field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 180 },
+					{ field: 'userid', visible: false },
+					{ field: 'packageid', visible: false },
+					{ field: 'id', visible: false }
+				],
+				toolbarClick: async function (args) {
+					const clickedId = (args.item && args.item.id) ? String(args.item.id) : '';
 
-                    if (clickedId === 'newAllocation' || clickedId.endsWith('_newAllocation')) {
-                        editingAllocationId = null;
-                        openAllocationModal();
-                    }
+					if (clickedId === 'newAllocation' || clickedId.endsWith('_newAllocation')) {
+						editingAllocationId = null;
+						openAllocationModal();
+					}
 
-                    if (clickedId === 'editAllocation' || clickedId.endsWith('_editAllocation')) {
-                        const selected = allocationGrid.getSelectedRecords();
-                        if (selected.length !== 1) return alert("Select one record");
-                        editingAllocationId = selected[0].id;
-                        openAllocationModal(selected[0]);
-                    }
+					if (clickedId === 'editAllocation' || clickedId.endsWith('_editAllocation')) {
+						const selected = allocationGrid.getSelectedRecords();
+						if (selected.length !== 1) return alert("Select one record");
+						editingAllocationId = selected[0].id;
+						openAllocationModal(selected[0]);
+					}
 
-                    if (clickedId === 'deleteAllocation' || clickedId.endsWith('_deleteAllocation')) {
-                        const selected = allocationGrid.getSelectedRecords();
-                        if (!selected.length) return alert("Select record(s)");
+					if (clickedId === 'deleteAllocation' || clickedId.endsWith('_deleteAllocation')) {
+						const selected = allocationGrid.getSelectedRecords();
+						if (!selected.length) return alert("Select record(s)");
 
-                        const ids = selected.map(r => r.id);
-                        await deleteRecordData('allocation', ids, true, true);
-                        loadAllocations();
-                    }
+						const ids = selected.map(r => r.id);
+						await deleteRecordData('allocation', ids, true, true);
+						loadAllocations();
+					}
 
-                    if (clickedId === 'refreshGrid' || clickedId.endsWith('_refreshGrid')) {
-                        await loadMasterData();
-                        await loadAllocations();
-                    }
+					if (clickedId === 'refreshGrid' || clickedId.endsWith('_refreshGrid')) {
+						await loadMasterData();
+						await loadAllocations();
+					}
 
-                    if (clickedId === 'excelExport' || clickedId.endsWith('_excelExport')) {
-                        allocationGrid.excelExport({
-                            fileName: `Allocations_${new Date().getTime()}.xlsx`,
-                            exportType: 'AllPages'
-                        });
-                    }
+					if (clickedId === 'excelExport' || clickedId.endsWith('_excelExport')) {
+						allocationGrid.excelExport({
+							fileName: `Allocations_${new Date().getTime()}.xlsx`,
+							exportType: 'AllPages'
+						});
+					}
 
-                    if (clickedId === 'pdfExport' || clickedId.endsWith('_pdfExport')) {
-                        allocationGrid.pdfExport({
-                            fileName: `Allocations_${new Date().getTime()}.pdf`,
-                            pageOrientation: 'Landscape'
-                        });
-                    }
-                }
-            });
+					if (clickedId === 'pdfExport' || clickedId.endsWith('_pdfExport')) {
+						allocationGrid.pdfExport({
+							fileName: `Allocations_${new Date().getTime()}.pdf`,
+							pageOrientation: 'Landscape'
+						});
+					}
+				}
+			});
 
-            allocationGrid.appendTo('#allocationGrid');
-        }
+			allocationGrid.appendTo('#allocationGrid');
+		}
 
-        async function loadMasterData() {
-            const [users, packages] = await Promise.all([
-                DBHandler.fetchEntityRecords('users', '*', 'createdon', 'desc'),
-                DBHandler.fetchEntityRecords('userpackage', '*', 'createdon', 'desc')
-            ]);
+		async function loadMasterData() {
+			const [users, packages] = await Promise.all([
+				DBHandler.fetchEntityRecords('users', '*', 'createdon', 'desc'),
+				DBHandler.fetchEntityRecords('userpackage', '*', 'createdon', 'desc')
+			]);
 
-            usersData = users || [];
-            packagesData = packages || [];
-        }
+			usersData = users || [];
+			packagesData = packages || [];
+		}
 
-        function destroyControl(selector) {
-            const element = document.querySelector(selector);
-            if (element && element.ej2_instances && element.ej2_instances.length) {
-                element.ej2_instances[0].destroy();
-            }
-        }
+		function destroyControl(selector) {
+			const element = document.querySelector(selector);
+			if (element && element.ej2_instances && element.ej2_instances.length) {
+				element.ej2_instances[0].destroy();
+			}
+		}
 
-        function initFormControls() {
-            destroyControl('#userid');
-            destroyControl('#packageid');
-            destroyControl('#status');
-            destroyControl('#allocationdate');
+		function initFormControls() {
+			destroyControl('#userid');
+			destroyControl('#packageid');
+			destroyControl('#status');
+			destroyControl('#allocationdate');
 
-            userDropdown = new ej.dropdowns.DropDownList({
-                dataSource: usersData,
-                fields: { text: 'displayname', value: 'id' },
-                placeholder: 'Select User',
-                allowFiltering: true,
-                filterBarPlaceholder: 'Search user...'
-            });
-            userDropdown.appendTo('#userid');
+			userDropdown = new ej.dropdowns.DropDownList({
+				dataSource: usersData,
+				fields: { text: 'displayname', value: 'id' },
+				placeholder: 'Select User',
+				allowFiltering: true,
+				filterBarPlaceholder: 'Search user...'
+			});
+			userDropdown.appendTo('#userid');
 
-            packageDropdown = new ej.dropdowns.DropDownList({
-                dataSource: packagesData,
-                fields: { text: 'packagename', value: 'id' },
-                placeholder: 'Select Package',
-                allowFiltering: true,
-                filterBarPlaceholder: 'Search package...'
-            });
-            packageDropdown.appendTo('#packageid');
+			packageDropdown = new ej.dropdowns.DropDownList({
+				dataSource: packagesData,
+				fields: { text: 'packagename', value: 'id' },
+				placeholder: 'Select Package',
+				allowFiltering: true,
+				filterBarPlaceholder: 'Search package...'
+			});
+			packageDropdown.appendTo('#packageid');
 
-            statusDropdown = new ej.dropdowns.DropDownList({
-                dataSource: ['Active', 'Pending', 'Closed'],
-                placeholder: 'Select Status'
-            });
-            statusDropdown.appendTo('#status');
+			statusDropdown = new ej.dropdowns.DropDownList({
+				dataSource: ['Active', 'Pending', 'Closed'],
+				placeholder: 'Select Status'
+			});
+			statusDropdown.appendTo('#status');
 
-            allocationDatePicker = new ej.calendars.DatePicker({
-                format: 'dd-MMM-yyyy',
-                value: new Date()
-            });
-            allocationDatePicker.appendTo('#allocationdate');
-        }
+			allocationDatePicker = new ej.calendars.DatePicker({
+				format: 'dd-MMM-yyyy',
+				value: new Date()
+			});
+			allocationDatePicker.appendTo('#allocationdate');
+		}
 
-        function openAllocationModal(record = null) {
-            document.getElementById('allocationForm').reset();
-            initFormControls();
+		function openAllocationModal(record = null) {
+			document.getElementById('allocationForm').reset();
+			initFormControls();
 
-            if (record) {
-                document.querySelector('#allocationModal .modal-title').innerText = 'Edit Allocation';
-                userDropdown.value = record.userid || null;
-                packageDropdown.value = record.packageid || null;
-                statusDropdown.value = record.status || null;
-                allocationDatePicker.value = record.allocationdate ? new Date(record.allocationdate) : null;
-                document.getElementById('remarks').value = record.remarks || '';
-            } else {
-                document.querySelector('#allocationModal .modal-title').innerText = 'Add Allocation';
-                statusDropdown.value = null;
-                allocationDatePicker.value = new Date();
-            }
+			if (record) {
+				document.querySelector('#allocationModal .modal-title').innerText = 'Edit Allocation';
+				userDropdown.value = record.userid || null;
+				packageDropdown.value = record.packageid || null;
+				statusDropdown.value = record.status || null;
+				allocationDatePicker.value = record.allocationdate ? new Date(record.allocationdate) : null;
+				document.getElementById('remarks').value = record.remarks || '';
+			} else {
+				document.querySelector('#allocationModal .modal-title').innerText = 'Add Allocation';
+				statusDropdown.value = null;
+				allocationDatePicker.value = new Date();
+			}
 
-            const modalElement = document.getElementById('allocationModal');
-            const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-            modal.show();
-        }
+			const modalElement = document.getElementById('allocationModal');
+			const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+			modal.show();
+		}
 
-        async function loadAllocations() {
+		async function loadAllocations() {
 
-            const data = await DBHandler.fetchEntityRecords(
-                'allocation',
-                '*',
-                'createdon',
-                'desc'
-            );
+			const data = await DBHandler.fetchEntityRecords(
+				'allocation',
+				'*',
+				'createdon',
+				'desc'
+			);
 
-            allocationGrid.dataSource = (data || []).map(row => {
-                const user = usersData.find(item => String(item.id) === String(row.userid));
-                const pkg = packagesData.find(item => String(item.id) === String(row.packageid));
+			allocationGrid.dataSource = (data || []).map(row => {
+				const user = usersData.find(item => String(item.id) === String(row.userid));
+				const pkg = packagesData.find(item => String(item.id) === String(row.packageid));
 
-                return {
-                    ...row,
-                    username: user ? (user.displayname || user.username || user.name || '') : '',
-                    packagename: pkg ? (pkg.packagename || pkg.name || '') : '',
-                    allocationdate: row.allocationdate ? new Date(row.allocationdate) : null,
-                    createdon: row.createdon ? new Date(row.createdon) : null
-                };
-            });
-        }
+				return {
+					...row,
+					username: user ? (user.displayname || user.username || user.name || '') : '',
+					packagename: pkg ? (pkg.packagename || pkg.name || '') : '',
+					allocationdate: row.allocationdate ? new Date(row.allocationdate) : null,
+					createdon: row.createdon ? new Date(row.createdon) : null
+				};
+			});
+		}
 
-        async function saveAllocation() {
+		async function saveAllocation() {
 
-            const userid = userDropdown ? String(userDropdown.value || '').trim() : '';
-            const packageid = packageDropdown ? String(packageDropdown.value || '').trim() : '';
-            const allocationdate = allocationDatePicker && allocationDatePicker.value
-                ? dayjs(allocationDatePicker.value).format('YYYY-MM-DD')
-                : null;
-            const status = statusDropdown ? String(statusDropdown.value || '').trim() : '';
-            const remarks = document.getElementById('remarks').value.trim();
+			const userid = userDropdown ? String(userDropdown.value || '').trim() : '';
+			const packageid = packageDropdown ? String(packageDropdown.value || '').trim() : '';
+			const allocationdate = allocationDatePicker && allocationDatePicker.value
+				? dayjs(allocationDatePicker.value).format('YYYY-MM-DD')
+				: null;
+			const status = statusDropdown ? String(statusDropdown.value || '').trim() : '';
+			const remarks = document.getElementById('remarks').value.trim();
 
-            if (!userid || !packageid || !status) return alert("All fields required");
+			if (!userid || !packageid || !status) return alert("All fields required");
 
-            await DBHandler.submitRecordData('allocation', {
-                userid,
-                packageid,
-                allocationdate,
-                status,
-                remarks
-            }, editingAllocationId, false);
+			await DBHandler.submitRecordData('allocation', {
+				userid,
+				packageid,
+				allocationdate,
+				status,
+				remarks
+			}, editingAllocationId, false);
 
-            const modalElement = document.getElementById('allocationModal');
-            const modal = bootstrap.Modal.getInstance(modalElement);
-            if (modal) modal.hide();
-            loadAllocations();
-        }
+			const modalElement = document.getElementById('allocationModal');
+			const modal = bootstrap.Modal.getInstance(modalElement);
+			if (modal) modal.hide();
+			loadAllocations();
+		}
 
-        $(document).ready(async () => {
-            initAllocationGrid();
-            await loadMasterData();
-            await loadAllocations();
-        });
-    </script>
+		$(document).ready(async () => {
+			initAllocationGrid();
+			await loadMasterData();
+			await loadAllocations();
+		});
+	</script>
 
-    <style>
-        #allocationGrid_toolbarItems {
-            height: 10px !important;
-        }
-    </style>
+	<style>
+		#allocationGrid_toolbarItems {
+			height: 10px !important;
+		}
+	</style>
 
 </body>
 
