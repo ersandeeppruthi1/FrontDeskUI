@@ -97,25 +97,68 @@
     </div>
 </div>
 <script>
+    // ── State ─────────────────────────────────────────────────────────────────
     let healthGrid;
-    let editingHealthId = null;
-    let packagesData = [];
+    let packagesData  = [];   // userpackage rows (id, packagename)
+    let allQuestions  = [];   // all questionmaster rows
 
-    let currentTrackingUserId = '';
-    let currentPackageId = '';
-    let currentPackageName = '';
-    let currentQuestions = [];
-    let dynamicControls = {};
+    let currentUserId        = '';
+    let currentAllocation    = null;   // active allocation record
+    let currentQsForModal    = [];     // ordered questionmaster rows for open modal
+    let editingAnswerMap     = {};     // questionid → existing answers.row  (edit mode)
+
+    let dynamicControls      = {};     // questionid → { question, control, inputType }
     let dynamicControlInstances = [];
 
-    const defaultQuestions = [
-        { key: 'bedtime', itemtype: 'habit', itemid: null, code: 'BED_TIME', question: 'Bed Time', inputType: 'time' },
-        { key: 'waketime', itemtype: 'habit', itemid: null, code: 'WAKE_TIME', question: 'Wake Time', inputType: 'time' },
-        { key: 'steps', itemtype: 'habit', itemid: null, code: 'STEPS', question: 'Steps Walked', inputType: 'number', max: 5000 },
-        { key: 'bpchecked', itemtype: 'assessment', itemid: null, code: 'BP_CHECKED', question: 'BP Checked', inputType: 'boolean' },
-        { key: 'junkfood', itemtype: 'assessment', itemid: null, code: 'JUNK_FOOD', question: 'Junk Food', inputType: 'boolean' },
-        { key: 'remarks', itemtype: 'assessment', itemid: null, code: 'REMARKS', question: 'Remarks', inputType: 'text' }
-    ];
+    // ── Master-data helpers ───────────────────────────────────────────────────
+
+    async function loadMasterData() {
+        const [pkgs, qs] = await Promise.all([
+            DBHandler.fetchEntityRecords('userpackage', 'id,packagename', 'packagename', 'asc', '', true, 0, ''),
+            DBHandler.fetchEntityRecords('questionmaster', '*', 'id', 'asc', '', true, 0, '')
+        ]);
+        packagesData = pkgs  || [];
+        allQuestions = qs    || [];
+    }
+
+    // ── Resolve active allocation for a user ─────────────────────────────────
+
+    async function resolveAllocation(userId) {
+        if (!userId) return null;
+        const list = await DBHandler.fetchEntityRecords(
+            'allocation', '*', 'createdon', 'desc', `userid='${userId}'`, true, 0, ''
+        );
+        if (!list || !list.length) return null;
+        return list.find(a => String(a.status || '').toLowerCase() === 'active') || list[0];
+    }
+
+    // ── Fetch ordered questions for a package via packagequestions ────────────
+    // packagequestions: id, packageid, questionid, displayorder, isactive
+
+    async function fetchPackageQuestions(packageid) {
+        const rows = await DBHandler.fetchEntityRecords(
+            'packagequestions', '*', 'displayorder', 'asc',
+            `packageid='${packageid}' and isactive='Yes'`, true, 0, ''
+        );
+        // join with allQuestions (id, question, type, isrequired)
+        return (rows || [])
+            .map(pq => allQuestions.find(q => String(q.id) === String(pq.questionid)))
+            .filter(Boolean);
+    }
+
+    // ── Map questionmaster.type → EJ2 control type ───────────────────────────
+    // Supported values: time | number | boolean | dropdown | text
+
+    function resolveInputType(typeStr) {
+        const t = String(typeStr || '').toLowerCase().trim();
+        if (t === 'time')                        return 'time';
+        if (['number', 'numeric'].includes(t))   return 'number';
+        if (['boolean', 'yesno'].includes(t))    return 'boolean';
+        if (t === 'dropdown')                    return 'dropdown';
+        return 'text';
+    }
+
+    // ── Destroy EJ2 controls ─────────────────────────────────────────────────
 
     function destroyDynamicControls() {
         dynamicControlInstances.forEach(ctrl => {
@@ -123,342 +166,301 @@
         });
         dynamicControlInstances = [];
         dynamicControls = {};
-
         const container = document.getElementById('dynamicQuestionsContainer');
         if (container) container.innerHTML = '';
     }
 
-    function resetAndDestroyHealthControls() {
-        destroyDynamicControls();
-        const form = document.getElementById('healthForm');
-        if (form) form.reset();
-    }
+    // ── Render questions from questionmaster into the modal ──────────────────
+    // answerMap: { questionid(string) → answer(string) }
 
-    function safeParseJson(value, fallback) {
-        try {
-            return value ? JSON.parse(value) : fallback;
-        } catch (e) {
-            return fallback;
-        }
-    }
-
-    function parseOptions(optionsStr) {
-        if (!optionsStr || !String(optionsStr).trim()) return null;
-        const parts = String(optionsStr).split(/[,|;]/).map(s => s.trim()).filter(Boolean);
-        return parts.length > 1 ? parts : null;
-    }
-
-    function inferInputType(item) {
-        // habitmaster.options with multiple values → dropdown
-        if (item.options && String(item.options).trim()) {
-            const parts = String(item.options).split(/[,|;]/).map(s => s.trim()).filter(Boolean);
-            if (parts.length > 1) return 'dropdown';
-        }
-
-        // Direct type match from habitmaster.habittype / assessmentmaster1.assessmenttype
-        const typeVal = String(item.habittype || item.assessmenttype || '').toLowerCase().trim();
-        if (['time', 'timepicker'].includes(typeVal)) return 'time';
-        if (['number', 'numeric', 'integer', 'score'].includes(typeVal)) return 'number';
-        if (['boolean', 'bool', 'yesno', 'yes/no'].includes(typeVal)) return 'boolean';
-        if (['dropdown', 'select', 'list'].includes(typeVal)) return 'dropdown';
-        if (['text', 'string', 'textarea'].includes(typeVal)) return 'text';
-
-        // Name-based hints
-        const name = `${item.habitname || ''} ${item.assessmentname || ''}`.toLowerCase();
-        if (name.includes('time') || name.includes('hour')) return 'time';
-        if (name.includes('steps') || name.includes('count') || name.includes('score')) return 'number';
-
-        // assessmentmaster1: maxscore set → numeric
-        if (item.maxscore && Number(item.maxscore) > 0) return 'number';
-
-        return 'text';
-    }
-
-    function buildQuestionsFromPackage(pkg) {
-        // habitid2 stores complete JSON: { habits: [...], assessments: [...] }
-        // assessmentid2 stores same JSON — read habitid2 only
-        const raw = pkg && pkg.habitid2 ? pkg.habitid2 : '';
-        const parsed = safeParseJson(raw, {});
-        const habits = Array.isArray(parsed.habits) ? parsed.habits : [];
-        const assessments = Array.isArray(parsed.assessments) ? parsed.assessments : [];
-
-        // habitmaster fields: habitname, habittype, options, code, order, frequency, frequencynumber
-        const mappedHabits = habits.map(h => ({
-            key: `habit_${h.id || h.code || h.habitname}`,
-            itemtype: 'habit',
-            itemid: h.id || null,
-            code: h.code || '',
-            question: h.habitname || h.code || 'Habit',
-            inputType: inferInputType(h),
-            max: null,
-            options: parseOptions(h.options)
-        }));
-
-        // assessmentmaster1 fields: assessmentname, assessmenttype, maxscore, passingscore, code, status
-        const mappedAssessments = assessments.map(a => ({
-            key: `assessment_${a.id || a.code || a.assessmentname}`,
-            itemtype: 'assessment',
-            itemid: a.id || null,
-            code: a.code || '',
-            question: a.assessmentname || a.code || 'Assessment',
-            inputType: inferInputType(a),
-            max: a.maxscore || null,
-            options: null
-        }));
-
-        const questions = [...mappedHabits, ...mappedAssessments];
-        return questions.length ? questions : [...defaultQuestions];
-    }
-
-    async function resolveAssignedPackage(userId) {
-        if (!userId) return null;
-
-        const allocations = await DBHandler.fetchEntityRecords(
-            'allocation',
-            '*',
-            'createdon',
-            'desc',
-            `userid='${userId}'`,
-            true,
-            0,
-            ''
-        );
-
-        const list = allocations || [];
-        if (!list.length) return null;
-
-        const active = list.find(a => String(a.status || '').toLowerCase() === 'active') || list[0];
-        if (!active.packageid) return null;
-
-        const packages = await DBHandler.fetchEntityRecords(
-            'userpackage',
-            '*',
-            'createdon',
-            'desc',
-            `id='${active.packageid}'`,
-            false,
-            1,
-            ''
-        );
-
-        if (!packages || !packages.length) return null;
-
-        return {
-            packageId: active.packageid,
-            packageName: packages[0].packagename || '',
-            packageRecord: packages[0]
-        };
-    }
-
-    function readExistingAnswers(record) {
-        const answerJson = record && (record.answerjson || record.answersjson || record.responsejson)
-            ? (record.answerjson || record.answersjson || record.responsejson)
-            : '';
-
-        const parsed = safeParseJson(answerJson, []);
-        const map = {};
-
-        if (Array.isArray(parsed)) {
-            parsed.forEach(row => {
-                if (!row) return;
-                if (row.key) map[row.key] = row.answer;
-                if (row.code) map[`code_${String(row.code).toLowerCase()}`] = row.answer;
-            });
-        }
-
-        if (record) {
-            if (record.bedtime != null) map.bedtime = record.bedtime;
-            if (record.waketime != null) map.waketime = record.waketime;
-            if (record.steps != null) map.steps = record.steps;
-            if (record.bpchecked != null) map.bpchecked = record.bpchecked;
-            if (record.junkfood != null) map.junkfood = record.junkfood;
-            if (record.remarks != null) map.remarks = record.remarks;
-        }
-
-        return map;
-    }
-
-    function getInitialValue(question, existingMap) {
-        const direct = existingMap[question.key];
-        if (direct !== undefined) return direct;
-
-        const codeKey = question.code ? `code_${String(question.code).toLowerCase()}` : '';
-        if (codeKey && existingMap[codeKey] !== undefined) return existingMap[codeKey];
-
-        const normalized = String(question.question || '').toLowerCase();
-        if (normalized.includes('bed') && existingMap.bedtime !== undefined) return existingMap.bedtime;
-        if (normalized.includes('wake') && existingMap.waketime !== undefined) return existingMap.waketime;
-        if (normalized.includes('step') && existingMap.steps !== undefined) return existingMap.steps;
-        if (normalized.includes('bp') && existingMap.bpchecked !== undefined) return existingMap.bpchecked;
-        if (normalized.includes('junk') && existingMap.junkfood !== undefined) return existingMap.junkfood;
-        if (normalized.includes('remark') && existingMap.remarks !== undefined) return existingMap.remarks;
-
-        return null;
-    }
-
-    function renderDynamicQuestions(record = null) {
+    function renderDynamicQuestions(answerMap = {}) {
         const container = document.getElementById('dynamicQuestionsContainer');
         destroyDynamicControls();
 
-        const existingMap = readExistingAnswers(record);
         let currentRow = null;
 
-        currentQuestions.forEach((question, index) => {
-            // 2-column layout: pair questions side by side
+        currentQsForModal.forEach((q, index) => {
+
             if (index % 2 === 0) {
                 currentRow = document.createElement('div');
                 currentRow.className = 'row mt-3';
                 container.appendChild(currentRow);
             }
 
-            const col = document.createElement('div');
+            const col   = document.createElement('div');
             col.className = 'col-md-6';
 
             const label = document.createElement('label');
-            label.textContent = question.question;
+            label.textContent = q.question + (String(q.isrequired || '').toLowerCase() === 'yes' ? ' *' : '');
 
             const input = document.createElement('input');
-            input.type = 'text';
-            input.id = `dyn_q_${index}`;
+            input.type  = 'text';
+            input.id    = `dyn_q_${q.id}`;
 
             col.appendChild(label);
             col.appendChild(input);
             currentRow.appendChild(col);
 
-            const initialValue = getInitialValue(question, existingMap);
-            let control = null;
+            const existingVal = answerMap[String(q.id)] != null ? String(answerMap[String(q.id)]) : null;
+            const inputType   = resolveInputType(q.type);
+            let control       = null;
 
-            if (question.inputType === 'time') {
+            if (inputType === 'time') {
                 control = new ej.calendars.TimePicker({
                     placeholder: 'Select time',
-                    value: initialValue ? new Date(`1970-01-01T${String(initialValue).substring(0, 8)}`) : null
+                    value: existingVal ? new Date(`1970-01-01T${existingVal.substring(0, 8)}`) : null
                 });
-            } else if (question.inputType === 'number') {
+            } else if (inputType === 'number') {
                 control = new ej.inputs.NumericTextBox({
                     placeholder: 'Enter value',
                     min: 0,
-                    max: question.max || 99999,
-                    value: initialValue != null && initialValue !== '' ? Number(initialValue) : null
+                    value: existingVal != null && existingVal !== '' ? Number(existingVal) : null
                 });
-            } else if (question.inputType === 'boolean') {
+            } else if (inputType === 'boolean') {
                 control = new ej.dropdowns.DropDownList({
                     dataSource: ['Yes', 'No'],
                     placeholder: 'Select',
-                    value: initialValue != null && initialValue !== '' ? String(initialValue) : null
+                    value: existingVal || null
                 });
-            } else if (question.inputType === 'dropdown' && question.options && question.options.length) {
-                // habitmaster.options parsed into array drives this dropdown
+            } else if (inputType === 'dropdown') {
+                // No external options source needed — answered as free text if no options,
+                // extend here when option lists are added to questionmaster.
                 control = new ej.dropdowns.DropDownList({
-                    dataSource: question.options,
+                    dataSource: ['Yes', 'No'],
                     placeholder: 'Select',
-                    value: initialValue != null && initialValue !== '' ? String(initialValue) : null
+                    value: existingVal || null
                 });
             } else {
                 control = new ej.inputs.TextBox({
                     placeholder: 'Enter value',
-                    value: initialValue != null ? String(initialValue) : ''
+                    value: existingVal || ''
                 });
             }
 
             control.appendTo(`#${input.id}`);
-
             dynamicControlInstances.push(control);
-            dynamicControls[question.key] = {
-                question,
-                control
-            };
+            dynamicControls[String(q.id)] = { question: q, control, inputType };
         });
     }
 
-    function getControlValue(question, control) {
-        if (!control) return null;
+    // ── Read current value from a rendered control ────────────────────────────
 
-        if (question.inputType === 'time') {
-            if (!control.value) return null;
-            return dayjs(control.value).format('HH:mm:ss');
+    function getControlValue(questionId) {
+        const item = dynamicControls[String(questionId)];
+        if (!item) return null;
+        const { control, inputType } = item;
+
+        if (inputType === 'time') {
+            return control.value ? dayjs(control.value).format('HH:mm:ss') : null;
         }
-        if (question.inputType === 'number') {
-            return control.value == null ? null : Number(control.value);
-        }
-        if (question.inputType === 'boolean' || question.inputType === 'dropdown') {
-            return control.value == null ? null : String(control.value);
+        if (inputType === 'number') {
+            return control.value == null ? null : String(Number(control.value));
         }
         return control.value == null ? null : String(control.value);
     }
 
-    function collectAnswers() {
-        return Object.keys(dynamicControls).map(key => {
-            const item = dynamicControls[key];
-            return {
-                key,
-                itemtype: item.question.itemtype,
-                itemid: item.question.itemid,
-                code: item.question.code,
-                question: item.question.question,
-                inputType: item.question.inputType,
-                answer: getControlValue(item.question, item.control)
-            };
-        });
-    }
-
-    function mapLegacyFieldsFromAnswers(answers) {
-        const result = {
-            bedtime: null,
-            waketime: null,
-            steps: 0,
-            bpchecked: null,
-            junkfood: null,
-            remarks: ''
-        };
-
-        answers.forEach(row => {
-            const hint = `${row.key || ''} ${row.code || ''} ${row.question || ''}`.toLowerCase();
-            if (hint.includes('bed')) result.bedtime = row.answer;
-            else if (hint.includes('wake')) result.waketime = row.answer;
-            else if (hint.includes('step')) result.steps = Number(row.answer || 0);
-            else if (hint.includes('bp')) result.bpchecked = row.answer;
-            else if (hint.includes('junk')) result.junkfood = row.answer;
-            else if (hint.includes('remark')) result.remarks = row.answer || '';
-        });
-
-        return result;
-    }
+    // ── Grid init ─────────────────────────────────────────────────────────────
 
     function initHealthGrid() {
-
         ej.grids.Grid.Inject(
-            ej.grids.Page,
-            ej.grids.Sort,
-            ej.grids.Filter,
-            ej.grids.Toolbar
+            ej.grids.Page, ej.grids.Sort, ej.grids.Filter,
+            ej.grids.Toolbar, ej.grids.ExcelExport, ej.grids.PdfExport
         );
 
         healthGrid = new ej.grids.Grid({
             dataSource: [],
             allowPaging: true,
             allowSorting: true,
+            allowFiltering: true,
+            filterSettings: { type: 'Excel' },
             toolbar: [
                 'Search',
                 'ExcelExport',
                 'PdfExport',
-                { text: 'New Entry', id: 'newHealth' },
-                { text: 'Edit', id: 'editHealth' },
-                { text: 'Delete', id: 'deleteHealth' },
-                'ColumnChooser'
+                { text: 'New Entry', prefixIcon: 'e-icons e-plus',   id: 'newHealth' },
+                { text: 'Edit',      prefixIcon: 'e-icons e-edit',   id: 'editHealth' },
+                { text: 'Delete',    prefixIcon: 'e-icons e-delete', id: 'deleteHealth' }
             ],
             columns: [
                 { type: 'checkbox', width: 50 },
-                { field: 'packagename', headerText: 'Package', width: 160 },
-                { field: 'createdon', headerText: 'Date', width: 140, type: 'date', format: 'dd/MMM/yyyy' },
-                { field: 'bedtime', headerText: 'Bed Time', width: 110 },
-                { field: 'waketime', headerText: 'Wake Time', width: 110 },
-                { field: 'steps', headerText: 'Steps', width: 90 },
-                { field: 'bpchecked', headerText: 'BP Checked', width: 110 },
-                { field: 'junkfood', headerText: 'Junk Food', width: 110 },
-                { field: 'remarks', headerText: 'Remarks', width: 180 },
-                { field: 'userid', headerText: 'User ID', width: 120, visible: false },
-                { field: 'packageid', headerText: 'Package ID', width: 120, visible: false }
+                { field: 'createdon',    headerText: 'Date',         width: 140, type: 'date', format: 'dd/MMM/yyyy' },
+                { field: 'packagename', headerText: 'Package',       width: 180 },
+                { field: 'questiontext',headerText: 'Question',      width: 260 },
+                { field: 'answer',      headerText: 'Answer',        width: 200 },
+                { field: 'id',          visible: false },
+                { field: 'questionid',  visible: false },
+                { field: 'allocationid',visible: false },
+                { field: 'userid',      visible: false }
             ],
+            toolbarClick: async function (args) {
+                const clickedId = args.item.id;
+
+                if (clickedId.includes('newHealth')) {
+                    editingAnswerMap = {};
+                    openHealthModal([]);
+                }
+
+                if (clickedId.includes('editHealth')) {
+                    const selected = healthGrid.getSelectedRecords();
+                    if (!selected.length) return alert('Select at least one answer row to edit.');
+
+                    // Identify the session: same allocationid + same date
+                    const allocationid = selected[0].allocationid;
+                    const dateStr      = dayjs(selected[0].createdon).format('YYYY-MM-DD');
+
+                    const allForAlloc = await DBHandler.fetchEntityRecords(
+                        'answers', '*', 'createdon', 'asc',
+                        `allocationid='${allocationid}'`, true, 0, ''
+                    );
+
+                    // Filter to the same submission day
+                    const sessionAnswers = (allForAlloc || []).filter(a =>
+                        a.createdon && dayjs(a.createdon).format('YYYY-MM-DD') === dateStr
+                    );
+
+                    editingAnswerMap = {};
+                    sessionAnswers.forEach(a => {
+                        editingAnswerMap[String(a.questionid)] = a;
+                    });
+
+                    openHealthModal(sessionAnswers);
+                }
+
+                if (clickedId.includes('deleteHealth')) {
+                    const selected = healthGrid.getSelectedRecords();
+                    if (!selected.length) return alert('Select record(s) to delete.');
+                    if (!confirm(`Delete ${selected.length} answer(s)?`)) return;
+                    await deleteRecordData('answers', selected.map(r => r.id), true, true);
+                    loadHealth();
+                }
+
+                if (clickedId.includes('excelexport')) healthGrid.excelExport();
+                if (clickedId.includes('pdfexport'))   healthGrid.pdfExport();
+            }
+        });
+
+        healthGrid.appendTo('#healthGrid');
+    }
+
+    // ── Open modal ────────────────────────────────────────────────────────────
+    // existingAnswers: array of answers.rows for edit mode, [] for new
+
+    async function openHealthModal(existingAnswers) {
+        currentUserId = String(getCookie('userid') || '').trim();
+        if (!currentUserId) {
+            alert('Unable to detect user. Please login again.');
+            return;
+        }
+
+        currentAllocation = await resolveAllocation(currentUserId);
+
+        const packageContext = document.getElementById('packageContext');
+
+        if (!currentAllocation || !currentAllocation.packageid) {
+            packageContext.className = 'alert alert-warning py-2 mb-3';
+            packageContext.textContent = 'No active package allocation found for this user.';
+            currentQsForModal = [];
+        } else {
+            currentQsForModal = await fetchPackageQuestions(currentAllocation.packageid);
+            const pkg = packagesData.find(p => String(p.id) === String(currentAllocation.packageid));
+            packageContext.className = 'alert alert-success py-2 mb-3';
+            packageContext.textContent = `Package: ${pkg ? pkg.packagename : currentAllocation.packageid}`;
+        }
+
+        const modalEl = document.getElementById('healthModal');
+        const modal   = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+
+        modalEl.addEventListener('shown.bs.modal', function handler() {
+            // Build answer map from existing answers.rows: questionid → answer value
+            const answerMap = {};
+            (existingAnswers || []).forEach(a => {
+                answerMap[String(a.questionid)] = a.answer;
+            });
+
+            destroyDynamicControls();
+            renderDynamicQuestions(answerMap);
+
+            modalEl.removeEventListener('shown.bs.modal', handler);
+        });
+    }
+
+    // ── Save ──────────────────────────────────────────────────────────────────
+    // Writes one row per question to the answers table.
+    // On edit: updates existing row (matched by editingAnswerMap[questionid].id).
+    // On new:  inserts fresh row (id = null).
+
+    async function saveHealth() {
+        if (!currentAllocation) {
+            alert('No active allocation found. Cannot save.');
+            return;
+        }
+
+        // Required-field validation
+        for (const qid of Object.keys(dynamicControls)) {
+            const { question } = dynamicControls[qid];
+            if (String(question.isrequired || '').toLowerCase() === 'yes') {
+                const val = getControlValue(qid);
+                if (val === null || val === '') {
+                    alert(`"${question.question}" is required.`);
+                    return;
+                }
+            }
+        }
+
+        // Persist each answer
+        for (const qid of Object.keys(dynamicControls)) {
+            const answer        = getControlValue(qid);
+            const existingRow   = editingAnswerMap[qid] || null;
+
+            await DBHandler.submitRecordData('answers', {
+                userid:       currentUserId,
+                allocationid: currentAllocation.id,
+                questionid:   qid,
+                answer:       answer != null ? String(answer) : ''
+            }, existingRow ? existingRow.id : null, false);
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('healthModal')).hide();
+        loadHealth();
+    }
+
+    // ── Load grid data ────────────────────────────────────────────────────────
+
+    async function loadHealth() {
+        const userId = String(getCookie('userid') || '').trim();
+        if (!userId) return;
+
+        const data = await DBHandler.fetchEntityRecords(
+            'answers', '*', 'createdon', 'desc', `userid='${userId}'`, true, 0, ''
+        );
+
+        // Build allocationid → packageid map from packagesData join via allocation
+        // (single fetch; reuse currentAllocation if page-scoped user)
+        const allocation = await resolveAllocation(userId);
+
+        healthGrid.dataSource = (data || []).map(row => {
+            const q   = allQuestions.find(q => String(q.id) === String(row.questionid));
+            const pkg = allocation && String(allocation.id) === String(row.allocationid)
+                ? packagesData.find(p => String(p.id) === String(allocation.packageid))
+                : null;
+            return {
+                ...row,
+                questiontext: q   ? q.question          : `Q #${row.questionid}`,
+                packagename:  pkg ? (pkg.packagename || '') : '',
+                createdon:    row.createdon ? new Date(row.createdon) : null
+            };
+        });
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+
+    $(document).ready(async () => {
+        initHealthGrid();
+        await loadMasterData();
+        await loadHealth();
+    });
+</script>
 
             toolbarClick: async function (args) {
 
