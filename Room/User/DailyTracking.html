@@ -110,6 +110,16 @@
     let dynamicControls      = {};     // questionid → { question, control, inputType }
     let dynamicControlInstances = [];
 
+    // ── Safe user-id reader (works with or without utility.js getCookie) ──────
+    function safeGetUserId() {
+        if (typeof getCookie === 'function') {
+            const v = getCookie('userid');
+            if (v) return String(v).trim();
+        }
+        const match = document.cookie.match(/(?:^|;\s*)userid=([^;]*)/);
+        return match ? decodeURIComponent(match[1]).trim() : '';
+    }
+
     // ── Master-data helpers ───────────────────────────────────────────────────
 
     async function loadMasterData() {
@@ -346,7 +356,7 @@
     // existingAnswers: array of answers.rows for edit mode, [] for new
 
     async function openHealthModal(existingAnswers) {
-        currentUserId = String(getCookie('userid') || '').trim();
+        currentUserId = safeGetUserId();
         if (!currentUserId) {
             alert('Unable to detect user. Please login again.');
             return;
@@ -428,7 +438,7 @@
     // ── Load grid data ────────────────────────────────────────────────────────
 
     async function loadHealth() {
-        const userId = String(getCookie('userid') || '').trim();
+        const userId = safeGetUserId();
         if (!userId) return;
 
         const data = await DBHandler.fetchEntityRecords(
@@ -454,144 +464,6 @@
     }
 
     // ── Init ──────────────────────────────────────────────────────────────────
-
-    $(document).ready(async () => {
-        initHealthGrid();
-        await loadMasterData();
-        await loadHealth();
-    });
-</script>
-
-            toolbarClick: async function (args) {
-
-                const id = args.item.id;
-
-                if (id.includes('newHealth')) {
-                    editingHealthId = null;
-                    openHealthModal();
-                }
-
-                if (id.includes('editHealth')) {
-                    const selected = healthGrid.getSelectedRecords();
-                    if (selected.length !== 1) return alert("Select one record");
-
-                    editingHealthId = selected[0].id;
-                    openHealthModal(selected[0]);
-                }
-
-                if (id.includes('deleteHealth')) {
-                    const selected = healthGrid.getSelectedRecords();
-                    if (!selected.length) return alert("Select record");
-
-                    const ids = selected.map(r => r.id);
-                    await deleteRecordData('healthtracker', ids, true, true);
-                    loadHealth();
-                }
-            }
-        });
-
-        healthGrid.appendTo('#healthGrid');
-    }
-
-    async function openHealthModal(record = null) {
-
-        const cookieUserId = String(getCookie('userid') || '').trim();
-        currentTrackingUserId = record && record.userid ? String(record.userid) : cookieUserId;
-
-        if (!currentTrackingUserId) {
-            alert('Unable to detect user. Please login again.');
-            return;
-        }
-
-        const packageData = await resolveAssignedPackage(currentTrackingUserId);
-        currentPackageId = packageData && packageData.packageId ? String(packageData.packageId) : '';
-        currentPackageName = packageData && packageData.packageName ? packageData.packageName : '';
-        currentQuestions = packageData && packageData.packageRecord
-            ? buildQuestionsFromPackage(packageData.packageRecord)
-            : [...defaultQuestions];
-
-        const packageContext = document.getElementById('packageContext');
-        if (currentPackageId) {
-            packageContext.className = 'alert alert-success py-2 mb-3';
-            packageContext.textContent = `Questions loaded from package: ${currentPackageName || currentPackageId}`;
-        } else {
-            packageContext.className = 'alert alert-warning py-2 mb-3';
-            packageContext.textContent = 'No package assigned for this user. Showing default questions.';
-        }
-
-        const modalEl = document.getElementById('healthModal');
-        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-
-        modal.show();
-
-        modalEl.addEventListener('shown.bs.modal', function handler() {
-
-            resetAndDestroyHealthControls();
-            renderDynamicQuestions(record);
-
-            modalEl.removeEventListener('shown.bs.modal', handler);
-        });
-    }
-
-    async function saveHealth() {
-
-        const answers = collectAnswers();
-        const legacy = mapLegacyFieldsFromAnswers(answers);
-
-        if (legacy.steps > 5000) {
-            alert("Steps cannot exceed 5000");
-            return;
-        }
-
-        const data = {
-            userid: currentTrackingUserId,
-            packageid: currentPackageId || null,
-            answerjson: JSON.stringify(answers),
-            bedtime: legacy.bedtime,
-            waketime: legacy.waketime,
-            steps: legacy.steps,
-            bpchecked: legacy.bpchecked,
-            junkfood: legacy.junkfood,
-            remarks: legacy.remarks
-        };
-
-        await DBHandler.submitRecordData(
-            'healthtracker',
-            data,
-            editingHealthId,
-            false
-        );
-
-        bootstrap.Modal.getInstance(document.getElementById('healthModal')).hide();
-
-        loadHealth();
-    }
-
-    async function loadMasterData() {
-        const pkgs = await DBHandler.fetchEntityRecords('userpackage', 'id,packagename', 'packagename', 'asc', '', true, 0, '');
-        packagesData = pkgs || [];
-    }
-
-    async function loadHealth() {
-
-        const data = await DBHandler.fetchEntityRecords(
-            'healthtracker',
-            '*',
-            'createdon',
-            'desc'
-        );
-
-        const rows = (data || []).map(row => {
-            const pkg = packagesData.find(p => String(p.id) === String(row.packageid || ''));
-            return {
-                ...row,
-                packagename: pkg ? (pkg.packagename || '') : '',
-                createdon: row.createdon ? new Date(row.createdon) : null
-            };
-        });
-
-        healthGrid.dataSource = rows;
-    }
 
     $(document).ready(async () => {
         initHealthGrid();
