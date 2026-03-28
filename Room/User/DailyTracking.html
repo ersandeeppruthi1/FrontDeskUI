@@ -106,6 +106,7 @@
     let currentAllocation    = null;   // active allocation record
     let currentQsForModal    = [];     // ordered questionmaster rows for open modal
     let editingAnswerMap     = {};     // questionid → existing answers.row  (edit mode)
+    let usedFallbackUserId   = false;
 
     let dynamicControls      = {};     // questionid → { question, control, inputType }
     let dynamicControlInstances = [];
@@ -118,6 +119,32 @@
         }
         const match = document.cookie.match(/(?:^|;\s*)userid=([^;]*)/);
         return match ? decodeURIComponent(match[1]).trim() : '';
+    }
+
+    async function getFallbackUserIdFromAllocation() {
+        const rows = await DBHandler.fetchEntityRecords(
+            'allocation', '*', 'createdon', 'desc', '', true, 0, ''
+        );
+        const list = rows || [];
+        if (!list.length) return '';
+
+        const active = list.find(a => String(a.status || '').toLowerCase() === 'active' && String(a.userid || '').trim());
+        if (active) return String(active.userid).trim();
+
+        const firstWithUser = list.find(a => String(a.userid || '').trim());
+        return firstWithUser ? String(firstWithUser.userid).trim() : '';
+    }
+
+    async function getEffectiveUserId() {
+        const cookieUserId = safeGetUserId();
+        if (cookieUserId) {
+            usedFallbackUserId = false;
+            return cookieUserId;
+        }
+
+        const fallbackUserId = await getFallbackUserIdFromAllocation();
+        usedFallbackUserId = !!fallbackUserId;
+        return fallbackUserId;
     }
 
     // ── Master-data helpers ───────────────────────────────────────────────────
@@ -356,9 +383,9 @@
     // existingAnswers: array of answers.rows for edit mode, [] for new
 
     async function openHealthModal(existingAnswers) {
-        currentUserId = safeGetUserId();
+        currentUserId = await getEffectiveUserId();
         if (!currentUserId) {
-            alert('Unable to detect user. Please login again.');
+            alert('Unable to detect user. Please create allocation first or login again.');
             return;
         }
 
@@ -374,7 +401,7 @@
             currentQsForModal = await fetchPackageQuestions(currentAllocation.packageid);
             const pkg = packagesData.find(p => String(p.id) === String(currentAllocation.packageid));
             packageContext.className = 'alert alert-success py-2 mb-3';
-            packageContext.textContent = `Package: ${pkg ? pkg.packagename : currentAllocation.packageid}`;
+            packageContext.textContent = `Package: ${pkg ? pkg.packagename : currentAllocation.packageid}${usedFallbackUserId ? ' (auto-selected user)' : ''}`;
         }
 
         const modalEl = document.getElementById('healthModal');
@@ -438,7 +465,7 @@
     // ── Load grid data ────────────────────────────────────────────────────────
 
     async function loadHealth() {
-        const userId = safeGetUserId();
+        const userId = await getEffectiveUserId();
         if (!userId) return;
 
         const data = await DBHandler.fetchEntityRecords(
