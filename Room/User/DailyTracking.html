@@ -193,6 +193,35 @@
         return null;
     }
 
+    function toStrictInt(value) {
+        const s = String(value == null ? '' : value).trim();
+        if (!/^\d+$/.test(s)) return null;
+        const n = Number(s);
+        return Number.isInteger(n) ? n : null;
+    }
+
+    function hashToPositiveInt(text) {
+        let hash = 0;
+        const input = String(text || '');
+        for (let i = 0; i < input.length; i++) {
+            hash = ((hash << 5) - hash) + input.charCodeAt(i);
+            hash |= 0;
+        }
+        const positive = Math.abs(hash);
+        return positive === 0 ? 1 : positive;
+    }
+
+    function resolveDbQuestionId(question) {
+        const direct = toStrictInt(question && question.dbQuestionId);
+        if (direct != null) return direct;
+
+        const fromId = toStrictInt(question && question.id);
+        if (fromId != null) return fromId;
+
+        const stableKey = `${question && question.source ? question.source : 'q'}|${question && question.id ? question.id : ''}|${question && question.question ? question.question : ''}`;
+        return hashToPositiveInt(stableKey);
+    }
+
     // ── Fetch ordered questions for a package via packagequestions ────────────
     // packagequestions: id, packageid, questionid, displayorder, isactive
 
@@ -203,7 +232,15 @@
         );
         // join with allQuestions (id, question, type, isrequired)
         const mappedFromQuestionMaster = (rows || [])
-            .map(pq => allQuestions.find(q => String(q.id) === String(pq.questionid)))
+            .map(pq => {
+                const q = allQuestions.find(item => String(item.id) === String(pq.questionid));
+                if (!q) return null;
+                return {
+                    ...q,
+                    dbQuestionId: toStrictInt(pq.questionid),
+                    source: 'questionmaster'
+                };
+            })
             .filter(Boolean);
 
         // Primary path: explicit packagequestions mapping exists
@@ -248,6 +285,7 @@
                 question: a.assessmentname,
                 type: a.assessmenttype || 'text',
                 isrequired: 'No',
+                dbQuestionId: toStrictInt(a.id),
                 source: 'assessmentmaster1'
             }));
     }
@@ -299,15 +337,17 @@
             const label = document.createElement('label');
             label.textContent = q.question + (String(q.isrequired || '').toLowerCase() === 'yes' ? ' *' : '');
 
+            const dbQuestionId = resolveDbQuestionId(q);
+
             const input = document.createElement('input');
             input.type  = 'text';
-            input.id    = `dyn_q_${q.id}`;
+            input.id    = `dyn_q_${dbQuestionId}`;
 
             col.appendChild(label);
             col.appendChild(input);
             currentRow.appendChild(col);
 
-            const existingVal = answerMap[String(q.id)] != null ? String(answerMap[String(q.id)]) : null;
+            const existingVal = answerMap[String(dbQuestionId)] != null ? String(answerMap[String(dbQuestionId)]) : null;
             const inputType   = resolveInputType(q.type);
             let control       = null;
 
@@ -345,7 +385,7 @@
 
             control.appendTo(`#${input.id}`);
             dynamicControlInstances.push(control);
-            dynamicControls[String(q.id)] = { question: q, control, inputType };
+            dynamicControls[String(dbQuestionId)] = { question: { ...q, dbQuestionId }, control, inputType };
         });
     }
 
@@ -559,8 +599,8 @@
         const numericAllocationId = getNumericAllocationId(allocation);
 
         healthGrid.dataSource = (data || []).map(row => {
-            const q = allQuestions.find(qm => String(qm.id) === String(row.questionid));
-            const assessment = allAssessments.find(a => String(a.id) === String(row.questionid));
+            const q = allQuestions.find(qm => resolveDbQuestionId({ ...qm, source: 'questionmaster' }) === Number(row.questionid));
+            const assessment = allAssessments.find(a => resolveDbQuestionId({ ...a, question: a.assessmentname, source: 'assessmentmaster1' }) === Number(row.questionid));
             const pkg = allocation && numericAllocationId != null && String(numericAllocationId) === String(row.allocationid)
                 ? packagesData.find(p => String(p.id) === String(allocation.packageid))
                 : null;
