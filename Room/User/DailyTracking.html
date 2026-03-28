@@ -101,6 +101,7 @@
     let healthGrid;
     let packagesData  = [];   // userpackage rows (id, packagename)
     let allQuestions  = [];   // all questionmaster rows
+    let allAssessments = [];  // assessmentmaster1 rows
 
     let currentUserId        = '';
     let currentAllocation    = null;   // active allocation record
@@ -150,12 +151,14 @@
     // ── Master-data helpers ───────────────────────────────────────────────────
 
     async function loadMasterData() {
-        const [pkgs, qs] = await Promise.all([
+        const [pkgs, qs, assessments] = await Promise.all([
             DBHandler.fetchEntityRecords('userpackage', 'id,packagename', 'packagename', 'asc', '', true, 0, ''),
-            DBHandler.fetchEntityRecords('questionmaster', '*', 'id', 'asc', '', true, 0, '')
+            DBHandler.fetchEntityRecords('questionmaster', '*', 'id', 'asc', '', true, 0, ''),
+            DBHandler.fetchEntityRecords('assessmentmaster1', '*', 'assessmentname', 'asc', '', true, 0, '')
         ]);
         packagesData = pkgs  || [];
         allQuestions = qs    || [];
+        allAssessments = assessments || [];
     }
 
     // ── Resolve active allocation for a user ─────────────────────────────────
@@ -169,6 +172,27 @@
         return list.find(a => String(a.status || '').toLowerCase() === 'active') || list[0];
     }
 
+    function getNumericAllocationId(allocation) {
+        if (!allocation) return null;
+
+        // Try common integer columns first; keep `id` last because it may be GUID in some environments.
+        const candidates = [
+            allocation.allocationid,
+            allocation.allocation_id,
+            allocation.intid,
+            allocation.rowid,
+            allocation.id
+        ];
+
+        for (const value of candidates) {
+            if (value == null || value === '') continue;
+            const parsed = Number(value);
+            if (Number.isInteger(parsed) && parsed > 0) return parsed;
+        }
+
+        return null;
+    }
+
     // ── Fetch ordered questions for a package via packagequestions ────────────
     // packagequestions: id, packageid, questionid, displayorder, isactive
 
@@ -178,9 +202,54 @@
             `packageid='${packageid}' and isactive='Yes'`, true, 0, ''
         );
         // join with allQuestions (id, question, type, isrequired)
-        return (rows || [])
+        const mappedFromQuestionMaster = (rows || [])
             .map(pq => allQuestions.find(q => String(q.id) === String(pq.questionid)))
             .filter(Boolean);
+
+        // Primary path: explicit packagequestions mapping exists
+        if (mappedFromQuestionMaster.length) return mappedFromQuestionMaster;
+
+        // Fallback path: derive questions from userpackage JSON -> assessments[]
+        const pkgRows = await DBHandler.fetchEntityRecords(
+            'userpackage',
+            '*',
+            'createdon',
+            'desc',
+            `id='${packageid}'`,
+            false,
+            1,
+            ''
+        );
+
+        const pkg = pkgRows && pkgRows.length ? pkgRows[0] : null;
+        if (!pkg || !pkg.habitid2) return [];
+
+        let parsed = null;
+        try {
+            parsed = JSON.parse(pkg.habitid2);
+        } catch (e) {
+            parsed = null;
+        }
+
+        if (!parsed || !Array.isArray(parsed.assessments)) return [];
+
+        const assessmentIds = parsed.assessments
+            .map(a => String(a && a.id != null ? a.id : '').trim())
+            .filter(Boolean);
+
+        if (!assessmentIds.length) return [];
+
+        // Preserve package JSON order in modal
+        return assessmentIds
+            .map(id => allAssessments.find(a => String(a.id) === id))
+            .filter(Boolean)
+            .map(a => ({
+                id: a.id,
+                question: a.assessmentname,
+                type: a.assessmenttype || 'text',
+                isrequired: 'No',
+                source: 'assessmentmaster1'
+            }));
     }
 
     // ── Map questionmaster.type → EJ2 control type ───────────────────────────
@@ -433,6 +502,12 @@
             return;
         }
 
+        const numericAllocationId = getNumericAllocationId(currentAllocation);
+        if (!numericAllocationId) {
+            alert('Allocation ID is not numeric. Please ensure allocation.id (or allocationid) is integer.');
+            return;
+        }
+
         // Required-field validation
         for (const qid of Object.keys(dynamicControls)) {
             const { question } = dynamicControls[qid];
@@ -452,7 +527,7 @@
 
             await DBHandler.submitRecordData('answers', {
                 userid:       currentUserId,
-                allocationid: currentAllocation.id,
+                allocationid: numericAllocationId,
                 questionid:   qid,
                 answer:       answer != null ? String(answer) : ''
             }, existingRow ? existingRow.id : null, false);
@@ -475,15 +550,17 @@
         // Build allocationid → packageid map from packagesData join via allocation
         // (single fetch; reuse currentAllocation if page-scoped user)
         const allocation = await resolveAllocation(userId);
+        const numericAllocationId = getNumericAllocationId(allocation);
 
         healthGrid.dataSource = (data || []).map(row => {
-            const q   = allQuestions.find(q => String(q.id) === String(row.questionid));
-            const pkg = allocation && String(allocation.id) === String(row.allocationid)
+            const q = allQuestions.find(qm => String(qm.id) === String(row.questionid));
+            const assessment = allAssessments.find(a => String(a.id) === String(row.questionid));
+            const pkg = allocation && numericAllocationId != null && String(numericAllocationId) === String(row.allocationid)
                 ? packagesData.find(p => String(p.id) === String(allocation.packageid))
                 : null;
             return {
                 ...row,
-                questiontext: q   ? q.question          : `Q #${row.questionid}`,
+                questiontext: q ? q.question : (assessment ? assessment.assessmentname : `Q #${row.questionid}`),
                 packagename:  pkg ? (pkg.packagename || '') : '',
                 createdon:    row.createdon ? new Date(row.createdon) : null
             };
