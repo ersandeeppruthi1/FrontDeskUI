@@ -412,12 +412,22 @@
 
                     // Identify the session: same allocationid + same date
                     const allocationid = selected[0].allocationid;
+                    const userid = selected[0].userid;
                     const dateStr      = dayjs(selected[0].createdon).format('YYYY-MM-DD');
 
-                    const allForAlloc = await DBHandler.fetchEntityRecords(
-                        'answers', '*', 'createdon', 'asc',
-                        `allocationid='${allocationid}'`, true, 0, ''
-                    );
+                    let allForAlloc = [];
+
+                    if (allocationid != null && allocationid !== '') {
+                        allForAlloc = await DBHandler.fetchEntityRecords(
+                            'answers', '*', 'createdon', 'asc',
+                            `allocationid='${allocationid}'`, true, 0, ''
+                        );
+                    } else {
+                        allForAlloc = await DBHandler.fetchEntityRecords(
+                            'answers', '*', 'createdon', 'asc',
+                            `userid='${userid}'`, true, 0, ''
+                        );
+                    }
 
                     // Filter to the same submission day
                     const sessionAnswers = (allForAlloc || []).filter(a =>
@@ -503,10 +513,6 @@
         }
 
         const numericAllocationId = getNumericAllocationId(currentAllocation);
-        if (!numericAllocationId) {
-            alert('Allocation ID is not numeric. Please ensure allocation.id (or allocationid) is integer.');
-            return;
-        }
 
         // Required-field validation
         for (const qid of Object.keys(dynamicControls)) {
@@ -527,7 +533,7 @@
 
             await DBHandler.submitRecordData('answers', {
                 userid:       currentUserId,
-                allocationid: numericAllocationId,
+                allocationid: numericAllocationId != null ? numericAllocationId : null,
                 questionid:   qid,
                 answer:       answer != null ? String(answer) : ''
             }, existingRow ? existingRow.id : null, false);
