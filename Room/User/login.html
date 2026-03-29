@@ -267,6 +267,39 @@
 	</main>
 
 	<script>
+		let dbHandlerInstance = null;
+		let dbHandlerPromise = null;
+
+		async function getDbHandler() {
+			if (dbHandlerInstance && typeof dbHandlerInstance.fetchEntityRecords === 'function') {
+				return dbHandlerInstance;
+			}
+
+			if (typeof DBHandler !== 'undefined' && DBHandler && typeof DBHandler.fetchEntityRecords === 'function') {
+				dbHandlerInstance = DBHandler;
+				return dbHandlerInstance;
+			}
+
+			if (window.DBHandler && typeof window.DBHandler.fetchEntityRecords === 'function') {
+				dbHandlerInstance = window.DBHandler;
+				return dbHandlerInstance;
+			}
+
+			if (!dbHandlerPromise) {
+				dbHandlerPromise = import('https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258')
+					.then(mod => mod.DBHandler || mod.default || window.DBHandler || null)
+					.catch(() => null);
+			}
+
+			const imported = await dbHandlerPromise;
+			if (imported && typeof imported.fetchEntityRecords === 'function') {
+				dbHandlerInstance = imported;
+				return dbHandlerInstance;
+			}
+
+			throw new Error('DBHandler module not loaded.');
+		}
+
 		function setCookie(name, value, days) {
 			const maxAge = days * 24 * 60 * 60;
 			document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value || '')}; max-age=${maxAge}; path=/; SameSite=Lax`;
@@ -295,9 +328,10 @@
 		}
 
 		async function authenticate(username, password) {
+			const db = await getDbHandler();
 			const inputUser = String(username || '').trim();
 			const safeUser = inputUser.replace(/'/g, "''");
-			const rows = await DBHandler.fetchEntityRecords(
+			const rows = await db.fetchEntityRecords(
 				'users',
 				'*',
 				'id',
@@ -312,7 +346,7 @@
 
 			// Fallback: case-insensitive username search for environments with mixed-case values
 			if (!user) {
-				const allUsers = await DBHandler.fetchEntityRecords('users', '*', 'id', 'asc', '', true, 0, '');
+				const allUsers = await db.fetchEntityRecords('users', '*', 'id', 'asc', '', true, 0, '');
 				user = (allUsers || []).find(u => String(u.username || '').toLowerCase() === inputUser.toLowerCase()) || null;
 			}
 
@@ -397,7 +431,8 @@
 				}, 350);
 			} catch (err) {
 				console.error('Login error:', err);
-				setStatus('Unable to login right now. Please try again.');
+				const detail = err && err.message ? ` (${err.message})` : '';
+				setStatus(`Unable to login right now. Please try again.${detail}`);
 			} finally {
 				lockLoginButton(false);
 			}
