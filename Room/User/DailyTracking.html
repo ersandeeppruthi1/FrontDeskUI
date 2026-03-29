@@ -509,6 +509,8 @@
             allowPaging: true,
             allowSorting: true,
             allowFiltering: true,
+            allowExcelExport: true,
+            allowPdfExport: true,
             showColumnChooser: true,
             filterSettings: { type: 'Excel' },
             toolbar: [
@@ -546,6 +548,7 @@
             ],
             toolbarClick: async function (args) {
                 const clickedId = (args.item && args.item.id) ? String(args.item.id) : '';
+                const clickedIdLower = clickedId.toLowerCase();
 
                 if (clickedId.includes('newHealth')) {
                     editingAnswerMap = {};
@@ -596,19 +599,19 @@
                     loadHealth();
                 }
 
-                if (clickedId === 'refreshGrid' || clickedId.endsWith('_refreshGrid')) {
+                if (clickedIdLower === 'refreshgrid' || clickedIdLower.endsWith('_refreshgrid')) {
                     await loadMasterData();
                     await loadHealth();
                 }
 
-                if (clickedId === 'excelExport' || clickedId.endsWith('_excelExport')) {
+                if (clickedIdLower === 'excelexport' || clickedIdLower.endsWith('_excelexport')) {
                     healthGrid.excelExport({
                         fileName: `DailyTracking_${new Date().getTime()}.xlsx`,
                         exportType: 'AllPages'
                     });
                 }
 
-                if (clickedId === 'pdfExport' || clickedId.endsWith('_pdfExport')) {
+                if (clickedIdLower === 'pdfexport' || clickedIdLower.endsWith('_pdfexport')) {
                     healthGrid.pdfExport({
                         fileName: `DailyTracking_${new Date().getTime()}.pdf`,
                         pageOrientation: 'Landscape'
