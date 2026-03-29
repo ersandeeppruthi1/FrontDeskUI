@@ -101,6 +101,7 @@
     let healthGrid;
     let packagesData  = [];   // userpackage rows (id, packagename)
     let allQuestions  = [];   // all questionmaster rows
+    let allHabits = [];       // habitmaster rows
     let allAssessments = [];  // assessmentmaster1 rows
 
     let currentUserId        = '';
@@ -138,13 +139,15 @@
     // ── Master-data helpers ───────────────────────────────────────────────────
 
     async function loadMasterData() {
-        const [pkgs, qs, assessments] = await Promise.all([
+        const [pkgs, qs, habits, assessments] = await Promise.all([
             DBHandler.fetchEntityRecords('userpackage', 'id,packagename', 'packagename', 'asc', '', true, 0, ''),
             DBHandler.fetchEntityRecords('questionmaster', '*', 'id', 'asc', '', true, 0, ''),
+            DBHandler.fetchEntityRecords('habitmaster', '*', 'habitname', 'asc', '', true, 0, ''),
             DBHandler.fetchEntityRecords('assessmentmaster1', '*', 'assessmentname', 'asc', '', true, 0, '')
         ]);
         packagesData = pkgs  || [];
         allQuestions = qs    || [];
+        allHabits = habits || [];
         allAssessments = assessments || [];
     }
 
@@ -233,7 +236,7 @@
         // Primary path: explicit packagequestions mapping exists
         if (mappedFromQuestionMaster.length) return mappedFromQuestionMaster;
 
-        // Fallback path: derive questions from userpackage JSON -> assessments[]
+        // Fallback path: derive questions from userpackage JSON -> habits[] + assessments[]
         const pkgRows = await DBHandler.fetchEntityRecords(
             'userpackage',
             '*',
@@ -255,26 +258,68 @@
             parsed = null;
         }
 
-        if (!parsed || !Array.isArray(parsed.assessments)) return [];
+        if (!parsed) return [];
 
-        const assessmentIds = parsed.assessments
-            .map(a => String(a && a.id != null ? a.id : '').trim())
+        const mappedHabits = (Array.isArray(parsed.habits) ? parsed.habits : [])
+            .map(h => {
+                const habitId = String(h && h.id != null ? h.id : '').trim();
+                const habit = allHabits.find(item => String(item.id) === habitId) || h;
+                if (!habit || !habitId) return null;
+                return {
+                    id: habit.id || h.id,
+                    question: habit.habitname || h.habitname,
+                    type: habit.habittype || h.habittype || 'text',
+                    options: habit.options || h.options || '',
+                    isrequired: 'No',
+                    dbQuestionId: toStrictInt(habit.id || h.id),
+                    source: 'habitmaster'
+                };
+            })
             .filter(Boolean);
 
-        if (!assessmentIds.length) return [];
+        const mappedAssessments = (Array.isArray(parsed.assessments) ? parsed.assessments : [])
+            .map(a => {
+                const assessmentId = String(a && a.id != null ? a.id : '').trim();
+                const assessment = allAssessments.find(item => String(item.id) === assessmentId) || a;
+                if (!assessment || !assessmentId) return null;
+                return {
+                    id: assessment.id || a.id,
+                    question: assessment.assessmentname || a.assessmentname,
+                    type: assessment.assessmenttype || a.assessmenttype || 'text',
+                    options: assessment.options || a.options || '',
+                    isrequired: 'No',
+                    dbQuestionId: toStrictInt(assessment.id || a.id),
+                    source: 'assessmentmaster1'
+                };
+            })
+            .filter(Boolean);
 
-        // Preserve package JSON order in modal
-        return assessmentIds
-            .map(id => allAssessments.find(a => String(a.id) === id))
-            .filter(Boolean)
-            .map(a => ({
-                id: a.id,
-                question: a.assessmentname,
-                type: a.assessmenttype || 'text',
-                isrequired: 'No',
-                dbQuestionId: toStrictInt(a.id),
-                source: 'assessmentmaster1'
-            }));
+        return [...mappedHabits, ...mappedAssessments];
+    }
+
+    function parseQuestionOptions(question) {
+        const raw = question && (question.optionlist || question.options || question.optionslist || '');
+        if (!raw) return ['Yes', 'No'];
+
+        if (Array.isArray(raw)) {
+            return raw.map(item => String(item).trim()).filter(Boolean);
+        }
+
+        const text = String(raw).trim();
+        if (!text) return ['Yes', 'No'];
+
+        try {
+            if (text.startsWith('[')) {
+                const parsed = JSON.parse(text);
+                if (Array.isArray(parsed)) {
+                    return parsed.map(item => String(item).trim()).filter(Boolean);
+                }
+            }
+        } catch (e) {
+        }
+
+        const values = text.split(',').map(item => item.trim()).filter(Boolean);
+        return values.length ? values : ['Yes', 'No'];
     }
 
     // ── Map questionmaster.type → EJ2 control type ───────────────────────────
@@ -285,7 +330,7 @@
         if (t === 'time')                        return 'time';
         if (['number', 'numeric'].includes(t))   return 'number';
         if (['boolean', 'yesno'].includes(t))    return 'boolean';
-        if (t === 'dropdown')                    return 'dropdown';
+        if (['dropdown', 'option', 'options', 'select'].includes(t)) return 'dropdown';
         return 'text';
     }
 
@@ -351,15 +396,13 @@
                 });
             } else if (inputType === 'boolean') {
                 control = new ej.dropdowns.DropDownList({
-                    dataSource: ['Yes', 'No'],
+                    dataSource: parseQuestionOptions(q),
                     placeholder: 'Select',
                     value: existingVal || null
                 });
             } else if (inputType === 'dropdown') {
-                // No external options source needed — answered as free text if no options,
-                // extend here when option lists are added to questionmaster.
                 control = new ej.dropdowns.DropDownList({
-                    dataSource: ['Yes', 'No'],
+                    dataSource: parseQuestionOptions(q),
                     placeholder: 'Select',
                     value: existingVal || null
                 });
@@ -586,13 +629,14 @@
 
         healthGrid.dataSource = (data || []).map(row => {
             const q = allQuestions.find(qm => resolveDbQuestionId({ ...qm, source: 'questionmaster' }) === Number(row.questionid));
+            const habit = allHabits.find(h => resolveDbQuestionId({ ...h, question: h.habitname, source: 'habitmaster' }) === Number(row.questionid));
             const assessment = allAssessments.find(a => resolveDbQuestionId({ ...a, question: a.assessmentname, source: 'assessmentmaster1' }) === Number(row.questionid));
             const pkg = allocation && numericAllocationId != null && String(numericAllocationId) === String(row.allocationid)
                 ? packagesData.find(p => String(p.id) === String(allocation.packageid))
                 : null;
             return {
                 ...row,
-                questiontext: q ? q.question : (assessment ? assessment.assessmentname : `Q #${row.questionid}`),
+                questiontext: q ? q.question : (habit ? habit.habitname : (assessment ? assessment.assessmentname : `Q #${row.questionid}`)),
                 packagename:  pkg ? (pkg.packagename || '') : '',
                 createdon:    row.createdon ? new Date(row.createdon) : null
             };
