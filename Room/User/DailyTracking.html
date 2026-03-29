@@ -83,6 +83,12 @@
             <div class="modal-body">
                 <form id="healthForm">
                     <div id="packageContext" class="alert alert-info py-2 mb-3"></div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="healthEntryDate">Entry Date</label>
+                            <input type="text" id="healthEntryDate" class="form-control" />
+                        </div>
+                    </div>
                     <div id="dynamicQuestionsContainer"></div>
 
                 </form>
@@ -108,6 +114,7 @@
     let currentAllocation    = null;   // active allocation record
     let currentQsForModal    = [];     // ordered questionmaster rows for open modal
     let editingAnswerMap     = {};     // questionid → existing answers.row  (edit mode)
+    let healthEntryDatePicker = null;
 
     let dynamicControls      = {};     // questionid → { question, control, inputType }
     let dynamicControlInstances = [];
@@ -346,6 +353,22 @@
         if (container) container.innerHTML = '';
     }
 
+    function initHealthEntryDatePicker(value) {
+        const element = document.getElementById('healthEntryDate');
+        if (!element) return;
+
+        if (healthEntryDatePicker && typeof healthEntryDatePicker.destroy === 'function') {
+            healthEntryDatePicker.destroy();
+            healthEntryDatePicker = null;
+        }
+
+        healthEntryDatePicker = new ej.calendars.DatePicker({
+            format: 'dd-MMM-yyyy',
+            value: value || new Date()
+        });
+        healthEntryDatePicker.appendTo('#healthEntryDate');
+    }
+
     // ── Render questions from questionmaster into the modal ──────────────────
     // answerMap: { questionid(string) → answer(string) }
 
@@ -557,12 +580,17 @@
         modal.show();
 
         modalEl.addEventListener('shown.bs.modal', function handler() {
+            const entryDate = existingAnswers && existingAnswers.length && existingAnswers[0].createdon
+                ? new Date(existingAnswers[0].createdon)
+                : new Date();
+
             // Build answer map from existing answers.rows: questionid → answer value
             const answerMap = {};
             (existingAnswers || []).forEach(a => {
                 answerMap[String(a.questionid)] = a.answer;
             });
 
+            initHealthEntryDatePicker(entryDate);
             destroyDynamicControls();
             renderDynamicQuestions(answerMap);
 
@@ -578,6 +606,15 @@
     async function saveHealth() {
         if (!currentAllocation) {
             alert('No active allocation found. Cannot save.');
+            return;
+        }
+
+        const entryDateValue = healthEntryDatePicker && healthEntryDatePicker.value
+            ? dayjs(healthEntryDatePicker.value).format('YYYY-MM-DD')
+            : null;
+
+        if (!entryDateValue) {
+            alert('Please select an entry date.');
             return;
         }
 
@@ -603,6 +640,7 @@
             await DBHandler.submitRecordData('answers', {
                 userid:       currentUserId,
                 allocationid: numericAllocationId != null ? numericAllocationId : null,
+                createdon:    entryDateValue,
                 questionid:   qid,
                 answer:       answer != null ? String(answer) : ''
             }, existingRow ? existingRow.id : null, false);
