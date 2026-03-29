@@ -516,7 +516,8 @@
                 'PdfExport',
                 { text: 'New Entry', prefixIcon: 'e-icons e-plus',   id: 'newHealth' },
                 { text: 'Edit',      prefixIcon: 'e-icons e-edit',   id: 'editHealth' },
-                { text: 'Delete',    prefixIcon: 'e-icons e-delete', id: 'deleteHealth' }
+                { text: 'Delete',    prefixIcon: 'e-icons e-delete', id: 'deleteHealth' },
+                { text: 'Refresh',   prefixIcon: 'e-icons e-refresh', id: 'refreshHealth' }
             ],
             columns: [
                 { type: 'checkbox', width: 50 },
@@ -579,6 +580,11 @@
                     if (!confirm(`Delete ${selected.length} answer(s)?`)) return;
                     await deleteRecordData('answers', selected.map(r => r.id), true, true);
                     loadHealth();
+                }
+
+                if (clickedId.includes('refreshHealth')) {
+                    await loadMasterData();
+                    await loadHealth();
                 }
 
                 if (clickedId.includes('excelexport')) healthGrid.excelExport();
