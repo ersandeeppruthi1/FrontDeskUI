@@ -236,7 +236,7 @@
 
 		async function loadMasterData() {
 			const [users, packages] = await Promise.all([
-				DBHandler.fetchEntityRecords('users', '*', 'createdon', 'desc'),
+				DBHandler.fetchEntityRecords('users', '*', 'id', 'asc'),
 				DBHandler.fetchEntityRecords('userpackage', '*', 'createdon', 'desc')
 			]);
 

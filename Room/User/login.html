@@ -9,6 +9,32 @@
 	<script>
 		let classMap = [];
 		var apiURL = "https://dbsit2.vsservices.in/";
+
+		// Compatibility shim: shared DBHandler expects a global AuthManager.
+		if (typeof window.AuthManager === 'undefined') {
+			window.AuthManager = {
+				getAuthToken: function () {
+					if (typeof getCookie === 'function') {
+						const c1 = getCookie('AuthToken');
+						if (c1) return c1;
+						const c2 = getCookie('token');
+						if (c2) return c2;
+					}
+					return sessionStorage.getItem('token') || localStorage.getItem('AuthToken') || '';
+				},
+				getDataToken: function () {
+					if (typeof getCookie === 'function') {
+						const d1 = getCookie('DataToken');
+						if (d1) return d1;
+						const d2 = getCookie('AuthToken');
+						if (d2) return d2;
+						const d3 = getCookie('token');
+						if (d3) return d3;
+					}
+					return sessionStorage.getItem('DataToken') || sessionStorage.getItem('token') || localStorage.getItem('AuthToken') || '';
+				}
+			};
+		}
 	</script>
 
 	<link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
@@ -318,13 +344,19 @@
 		}
 
 		function normalizePath(defaultPage) {
-			const fallback = '/main.html';
+			const fallback = '/Room/User/DailyTracking.html';
 			const raw = String(defaultPage || '').trim();
 			if (!raw) return fallback;
 
 			if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
-			if (raw.startsWith('/')) return raw;
-			return `/${raw}`;
+			const normalized = raw.startsWith('/') ? raw : `/${raw}`;
+
+			// Local workspace does not host main.html; route to an existing page.
+			if ((location.hostname === '127.0.0.1' || location.hostname === 'localhost') && normalized.toLowerCase().startsWith('/main.html')) {
+				return fallback;
+			}
+
+			return normalized;
 		}
 
 		async function authenticate(username, password) {
@@ -382,6 +414,7 @@
 			setCookie('issystemadministrator', String(user.issystemadministrator || 0), 7);
 			setCookie('token', authToken, 7);
 			setCookie('AuthToken', authToken, 7);
+			setCookie('DataToken', authToken, 7);
 
 			sessionStorage.setItem('userid', userId);
 			sessionStorage.setItem('userId', userId);
@@ -390,6 +423,7 @@
 			sessionStorage.setItem('displayName', displayName);
 			sessionStorage.setItem('defaultpage', defaultPage);
 			sessionStorage.setItem('token', authToken);
+			sessionStorage.setItem('DataToken', authToken);
 
 			localStorage.setItem('userid', userId);
 			localStorage.setItem('userName', username);
