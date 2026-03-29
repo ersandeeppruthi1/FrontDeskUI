@@ -514,9 +514,21 @@
             toolbar: [
                 'Search',
                 'ColumnChooser',
-                'ExcelExport',
-                'PdfExport',
-                { text: 'Refresh',   prefixIcon: 'e-icons e-refresh', id: 'refreshHealth' },
+                {
+                    prefixIcon: 'e-icons e-excelexport',
+                    tooltipText: 'Export Excel',
+                    id: 'excelExport'
+                },
+                {
+                    prefixIcon: 'e-icons e-pdfexport',
+                    tooltipText: 'Export PDF',
+                    id: 'pdfExport'
+                },
+                {
+                    prefixIcon: 'e-icons e-refresh',
+                    tooltipText: 'Refresh',
+                    id: 'refreshGrid'
+                },
                 { text: 'New Entry', prefixIcon: 'e-icons e-plus',   id: 'newHealth' },
                 { text: 'Edit',      prefixIcon: 'e-icons e-edit',   id: 'editHealth' },
                 { text: 'Delete',    prefixIcon: 'e-icons e-delete', id: 'deleteHealth' },
@@ -533,7 +545,7 @@
                 { field: 'userid',      visible: false }
             ],
             toolbarClick: async function (args) {
-                const clickedId = args.item.id;
+                const clickedId = (args.item && args.item.id) ? String(args.item.id) : '';
 
                 if (clickedId.includes('newHealth')) {
                     editingAnswerMap = {};
@@ -584,13 +596,24 @@
                     loadHealth();
                 }
 
-                if (clickedId.includes('refreshHealth')) {
+                if (clickedId === 'refreshGrid' || clickedId.endsWith('_refreshGrid')) {
                     await loadMasterData();
                     await loadHealth();
                 }
 
-                if (clickedId.includes('excelexport')) healthGrid.excelExport();
-                if (clickedId.includes('pdfexport'))   healthGrid.pdfExport();
+                if (clickedId === 'excelExport' || clickedId.endsWith('_excelExport')) {
+                    healthGrid.excelExport({
+                        fileName: `DailyTracking_${new Date().getTime()}.xlsx`,
+                        exportType: 'AllPages'
+                    });
+                }
+
+                if (clickedId === 'pdfExport' || clickedId.endsWith('_pdfExport')) {
+                    healthGrid.pdfExport({
+                        fileName: `DailyTracking_${new Date().getTime()}.pdf`,
+                        pageOrientation: 'Landscape'
+                    });
+                }
             }
         });
 
