@@ -501,7 +501,7 @@
     function initHealthGrid() {
         ej.grids.Grid.Inject(
             ej.grids.Page, ej.grids.Sort, ej.grids.Filter,
-            ej.grids.Toolbar, ej.grids.ExcelExport, ej.grids.PdfExport
+            ej.grids.Toolbar, ej.grids.ColumnChooser, ej.grids.ExcelExport, ej.grids.PdfExport
         );
 
         healthGrid = new ej.grids.Grid({
@@ -509,15 +509,17 @@
             allowPaging: true,
             allowSorting: true,
             allowFiltering: true,
+            showColumnChooser: true,
             filterSettings: { type: 'Excel' },
             toolbar: [
                 'Search',
+                'ColumnChooser',
                 'ExcelExport',
                 'PdfExport',
+                { text: 'Refresh',   prefixIcon: 'e-icons e-refresh', id: 'refreshHealth' },
                 { text: 'New Entry', prefixIcon: 'e-icons e-plus',   id: 'newHealth' },
                 { text: 'Edit',      prefixIcon: 'e-icons e-edit',   id: 'editHealth' },
                 { text: 'Delete',    prefixIcon: 'e-icons e-delete', id: 'deleteHealth' },
-                { text: 'Refresh',   prefixIcon: 'e-icons e-refresh', id: 'refreshHealth' }
             ],
             columns: [
                 { type: 'checkbox', width: 50 },
