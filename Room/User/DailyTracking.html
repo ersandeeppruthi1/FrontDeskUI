@@ -353,6 +353,40 @@
         if (container) container.innerHTML = '';
     }
 
+    async function loadAnswersForEntryDate(entryDate) {
+        if (!currentUserId || !entryDate) return;
+
+        const dateStr = dayjs(entryDate).format('YYYY-MM-DD');
+        const numericAllocationId = getNumericAllocationId(currentAllocation);
+
+        let rows = [];
+        if (numericAllocationId != null) {
+            rows = await DBHandler.fetchEntityRecords(
+                'answers', '*', 'createdon', 'asc',
+                `allocationid='${numericAllocationId}'`, true, 0, ''
+            );
+        } else {
+            rows = await DBHandler.fetchEntityRecords(
+                'answers', '*', 'createdon', 'asc',
+                `userid='${currentUserId}'`, true, 0, ''
+            );
+        }
+
+        const sessionAnswers = (rows || []).filter(a =>
+            a.createdon && dayjs(a.createdon).format('YYYY-MM-DD') === dateStr
+        );
+
+        editingAnswerMap = {};
+        const answerMap = {};
+        sessionAnswers.forEach(a => {
+            editingAnswerMap[String(a.questionid)] = a;
+            answerMap[String(a.questionid)] = a.answer;
+        });
+
+        destroyDynamicControls();
+        renderDynamicQuestions(answerMap);
+    }
+
     function initHealthEntryDatePicker(value) {
         const element = document.getElementById('healthEntryDate');
         if (!element) return;
@@ -364,7 +398,11 @@
 
         healthEntryDatePicker = new ej.calendars.DatePicker({
             format: 'dd-MMM-yyyy',
-            value: value || new Date()
+            value: value || new Date(),
+            change: async function (args) {
+                if (!args.value) return;
+                await loadAnswersForEntryDate(args.value);
+            }
         });
         healthEntryDatePicker.appendTo('#healthEntryDate');
     }
@@ -584,15 +622,8 @@
                 ? new Date(existingAnswers[0].createdon)
                 : new Date();
 
-            // Build answer map from existing answers.rows: questionid → answer value
-            const answerMap = {};
-            (existingAnswers || []).forEach(a => {
-                answerMap[String(a.questionid)] = a.answer;
-            });
-
             initHealthEntryDatePicker(entryDate);
-            destroyDynamicControls();
-            renderDynamicQuestions(answerMap);
+            loadAnswersForEntryDate(entryDate);
 
             modalEl.removeEventListener('shown.bs.modal', handler);
         });
