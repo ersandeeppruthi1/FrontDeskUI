@@ -214,15 +214,18 @@
     </div>
 
     <!-- Detail Modal -->
-    <div class="modal fade detail-modal" id="detailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Answer Details</h5>
+                    <h5 class="modal-title" id="detailModalTitle">Daily Tracking</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="detailContent">
                     <!-- Populated dynamically -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -237,6 +240,9 @@
         let allAllocations = [];
         let allAnswers = [];
         let filteredAnswers = [];
+        let allQuestions = [];
+        let allHabits = [];
+        let allAssessments = [];
 
         function pickField(obj, keys) {
             if (!obj) return '';
@@ -269,17 +275,23 @@
         }
 
         async function loadMasterData() {
-            const [users, packages, allocations, answers] = await Promise.all([
+            const [users, packages, allocations, answers, questions, habits, assessments] = await Promise.all([
                 DBHandler.fetchEntityRecords('users', '*', 'id', 'asc', '', true, 0, ''),
                 DBHandler.fetchEntityRecords('userpackage', 'id,packagename', 'packagename', 'asc', '', true, 0, ''),
                 DBHandler.fetchEntityRecords('allocation', 'id,userid,packageid,status', 'id', 'asc', '', true, 0, ''),
-                DBHandler.fetchEntityRecords('answers', '*', 'createdon', 'desc', '', true, 0, '')
+                DBHandler.fetchEntityRecords('answers', '*', 'createdon', 'desc', '', true, 0, ''),
+                DBHandler.fetchEntityRecords('questionmaster', '*', 'id', 'asc', '', true, 0, ''),
+                DBHandler.fetchEntityRecords('habitmaster', '*', 'id', 'asc', '', true, 0, ''),
+                DBHandler.fetchEntityRecords('assessmentmaster1', '*', 'id', 'asc', '', true, 0, '')
             ]);
 
             allUsers = users || [];
             allPackages = packages || [];
             allAllocations = allocations || [];
             allAnswers = answers || [];
+            allQuestions = questions || [];
+            allHabits = habits || [];
+            allAssessments = assessments || [];
 
             console.log('Master data loaded:', {
                 users: allUsers.length,
@@ -458,7 +470,7 @@
                     {
                         headerText: 'Actions',
                         width: 100,
-                        template: '<button class="btn btn-sm btn-info" onclick="viewDetails(${id})">View</button>'
+                        template: '<button class="btn btn-sm btn-info" onclick="viewDetails(\'${id}\')">View</button>'
                     }
                 ],
                 toolbarClick: async function (args) {
@@ -498,39 +510,56 @@
             trackingGrid.appendTo('#trackingGrid');
         }
 
-        window.viewDetails = function (id) {
-            const answer = filteredAnswers.find(a => a.id === id);
-            if (!answer) return;
+        function resolveQuestionName(questionid) {
+            const qid = String(questionid);
+            const q = allQuestions.find(x => String(x.id) === qid);
+            if (q) return q.question || q.name || `Q #${qid}`;
+            const h = allHabits.find(x => String(x.id) === qid);
+            if (h) return h.habitname || h.name || `Q #${qid}`;
+            const a = allAssessments.find(x => String(x.id) === qid);
+            if (a) return a.assessmentname || a.name || `Q #${qid}`;
+            return `Q #${qid}`;
+        }
 
-            const content = `
-                <div class="detail-item">
-                    <div class="detail-label">Date:</div>
-                    <div class="detail-value">${dayjs(answer.createdon).format('DD/MMM/YYYY HH:mm')}</div>
+        window.viewDetails = function (id) {
+            const clicked = filteredAnswers.find(a => String(a.id) === String(id));
+            if (!clicked) return;
+
+            const clickedDate = dayjs(clicked.createdon).format('YYYY-MM-DD');
+
+            // All answers for this user on this date
+            const sessionRows = filteredAnswers.filter(a =>
+                String(a.userid) === String(clicked.userid) &&
+                dayjs(a.createdon).format('YYYY-MM-DD') === clickedDate
+            );
+
+            document.getElementById('detailModalTitle').textContent =
+                `Daily Tracking — ${clicked.username} — ${dayjs(clicked.createdon).format('DD MMM YYYY')}`;
+
+            const rows = sessionRows.map(a => `
+                <tr>
+                    <td>${resolveQuestionName(a.questionid)}</td>
+                    <td>${a.answer != null && a.answer !== '' ? a.answer : '<span class="text-muted">—</span>'}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('detailContent').innerHTML = `
+                <div class="mb-3">
+                    <span class="badge bg-primary me-2">${clicked.username}</span>
+                    <span class="badge bg-secondary me-2">${clicked.packagename}</span>
+                    <span class="badge bg-info text-dark">${dayjs(clicked.createdon).format('DD MMM YYYY')}</span>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">User:</div>
-                    <div class="detail-value">${answer.username}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Package:</div>
-                    <div class="detail-value">${answer.packagename}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Question ID:</div>
-                    <div class="detail-value">${answer.questionid || 'N/A'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Answer:</div>
-                    <div class="detail-value">${answer.answer || 'No answer'}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Allocation ID:</div>
-                    <div class="detail-value">${answer.allocationid || 'N/A'}</div>
-                </div>
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr><th>Question</th><th>Answer</th></tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
             `;
 
-            document.getElementById('detailContent').innerHTML = content;
-            new bootstrap.Modal(document.getElementById('detailModal')).show();
+            const modalEl = document.getElementById('detailModal');
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.show();
         };
 
         // Initialize on page load
