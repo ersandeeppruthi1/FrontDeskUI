@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js" type="module"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <script src="https://cdn.syncfusion.com/ej2/dist/ej2.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/dist/ej2.min.css" />
+
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .header-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-section {
+            background: white;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .grid-section {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .btn-group-custom {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .btn-custom {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .grid-container {
+            margin-top: 20px;
+        }
+
+        .detail-modal .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: #666;
+            word-break: break-word;
+        }
+
+        .no-data-message {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+
+    <title>Daily Tracking - All Users</title>
+</head>
+
+<body>
+
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="header-section">
+            <h1 class="mb-3">Daily Tracking - All Users</h1>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section" id="filterSection">
+            <h5 class="mb-3">Filters</h5>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>User:</label>
+                    <select id="userFilter">
+                        <option value="">-- All Users --</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>From Date:</label>
+                    <input type="date" id="dateFromFilter" />
+                </div>
+                <div class="filter-group">
+                    <label>To Date:</label>
+                    <input type="date" id="dateToFilter" />
+                </div>
+                <div class="filter-group">
+                    <label>Package:</label>
+                    <select id="packageFilter">
+                        <option value="">-- All Packages --</option>
+                    </select>
+                </div>
+                <div class="btn-group-custom">
+                    <button class="btn btn-primary btn-custom" onclick="applyFilters()">Apply Filters</button>
+                    <button class="btn btn-secondary btn-custom" onclick="resetFilters()">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid -->
+        <div class="grid-section" id="gridSection">
+            <div id="trackingGrid"></div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal fade detail-modal" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Answer Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detailContent">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { DBHandler } from "https://apisit.vsservices.in/JS/Master/DBHandler.js";
+
+        // ── State ─────────────────────────────────────────────────────────────
+        let trackingGrid;
+        let allUsers = [];
+        let allPackages = [];
+        let allAllocations = [];
+        let allAnswers = [];
+        let filteredAnswers = [];
+
+        function pickField(obj, keys) {
+            if (!obj) return '';
+            for (const key of keys) {
+                const value = obj[key];
+                if (value != null && String(value).trim() !== '') {
+                    return String(value).trim();
+                }
+            }
+            return '';
+        }
+
+        function normalizeId(value) {
+            return String(value == null ? '' : value).trim();
+        }
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        async function init() {
+            try {
+                await loadMasterData();
+                populateUserFilter();
+                populatePackageFilter();
+                await loadAndMapAnswers();
+                initTrackingGrid();
+                applyFilters();
+            } catch (e) {
+                console.error('Init error:', e);
+                alert('Failed to load data. Check console.');
+            }
+        }
+
+        async function loadMasterData() {
+            const [users, packages, allocations, answers] = await Promise.all([
+                DBHandler.fetchEntityRecords('users', '*', 'id', 'asc', '', true, 0, ''),
+                DBHandler.fetchEntityRecords('userpackage', 'id,packagename', 'packagename', 'asc', '', true, 0, ''),
+                DBHandler.fetchEntityRecords('allocation', 'id,userid,packageid,status', 'id', 'asc', '', true, 0, ''),
+                DBHandler.fetchEntityRecords('answers', '*', 'createdon', 'desc', '', true, 0, '')
+            ]);
+
+            allUsers = users || [];
+            allPackages = packages || [];
+            allAllocations = allocations || [];
+            allAnswers = answers || [];
+
+            console.log('Master data loaded:', {
+                users: allUsers.length,
+                packages: allPackages.length,
+                allocations: allAllocations.length,
+                answers: allAnswers.length
+            });
+        }
+
+        function populateUserFilter() {
+            const select = document.getElementById('userFilter');
+            select.innerHTML = '<option value="">-- All Users --</option>';
+
+            allUsers.forEach(user => {
+                const userId = pickField(user, ['id', 'ID', 'userid', 'userId']);
+                const userText = pickField(user, ['displayname', 'displayName', 'username', 'userName', 'name']);
+                if (userId && userText) {
+                    const opt = document.createElement('option');
+                    opt.value = userId;
+                    opt.textContent = userText;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
+        function populatePackageFilter() {
+            const select = document.getElementById('packageFilter');
+            select.innerHTML = '<option value="">-- All Packages --</option>';
+
+            allPackages.forEach(pkg => {
+                if (pkg.id && pkg.packagename) {
+                    const opt = document.createElement('option');
+                    opt.value = pkg.id;
+                    opt.textContent = pkg.packagename;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
+        async function loadAndMapAnswers() {
+            try {
+                const allocationPackageMap = new Map();
+                allAllocations.forEach(allocation => {
+                    const allocationId = pickField(allocation, ['id', 'ID', 'allocationid', 'allocationId']);
+                    const packageId = pickField(allocation, ['packageid', 'packageId']);
+                    if (allocationId) {
+                        allocationPackageMap.set(normalizeId(allocationId), normalizeId(packageId));
+                    }
+                });
+
+                const userMap = new Map();
+                allUsers.forEach(user => {
+                    const id = pickField(user, ['id', 'ID', 'userid', 'userId']);
+                    if (!id) return;
+                    userMap.set(normalizeId(id), pickField(user, ['displayname', 'displayName', 'username', 'userName', 'name']) || 'Unknown User');
+                });
+
+                filteredAnswers = allAnswers.map(answer => {
+                    const answerUserId = pickField(answer, ['userid', 'userId', 'userid1']);
+                    const userName = userMap.get(normalizeId(answerUserId)) || 'Unknown User';
+
+                    const answerAllocationId = pickField(answer, ['allocationid', 'allocationId']);
+                    const packageId = allocationPackageMap.get(normalizeId(answerAllocationId)) || '';
+                    const pkg = allPackages.find(p => String(p.id) === packageId);
+                    const packageName = pkg ? pkg.packagename : 'Unknown Package';
+
+                    return {
+                        ...answer,
+                        userid: normalizeId(answerUserId),
+                        packageid: packageId,
+                        username: userName,
+                        packagename: packageName
+                    };
+                });
+
+                console.log('Answers mapped with user and package data:', {
+                    total: filteredAnswers.length,
+                    sample: filteredAnswers.slice(0, 2)
+                });
+            } catch (e) {
+                console.error('Error mapping answers:', e);
+                alert('Failed to map answers. Check console.');
+            }
+        }
+
+        function applyFilters() {
+            let filtered = [...filteredAnswers];
+
+            const userId = document.getElementById('userFilter').value;
+            if (userId) {
+                filtered = filtered.filter(a => normalizeId(a.userid) === normalizeId(userId));
+            }
+
+            const dateFrom = document.getElementById('dateFromFilter').value;
+            const dateTo = document.getElementById('dateToFilter').value;
+
+            if (dateFrom) {
+                const from = new Date(dateFrom);
+                filtered = filtered.filter(a => new Date(a.createdon) >= from);
+            }
+
+            if (dateTo) {
+                const to = new Date(dateTo);
+                to.setHours(23, 59, 59, 999);
+                filtered = filtered.filter(a => new Date(a.createdon) <= to);
+            }
+
+            const packageId = document.getElementById('packageFilter').value;
+            if (packageId) {
+                filtered = filtered.filter(a => String(a.packageid) === String(packageId));
+            }
+
+            if (trackingGrid && trackingGrid.dataSource) {
+                trackingGrid.dataSource = filtered;
+            }
+
+            console.log('Filters applied. Showing', filtered.length, 'records');
+        }
+
+        function resetFilters() {
+            document.getElementById('userFilter').value = '';
+            document.getElementById('dateFromFilter').value = '';
+            document.getElementById('dateToFilter').value = '';
+            document.getElementById('packageFilter').value = '';
+            applyFilters();
+        }
+
+        window.applyFilters = applyFilters;
+        window.resetFilters = resetFilters;
+
+        function initTrackingGrid() {
+            ej.grids.Grid.Inject(
+                ej.grids.Page, ej.grids.Sort, ej.grids.Filter,
+                ej.grids.Toolbar, ej.grids.ExcelExport, ej.grids.PdfExport
+            );
+
+            if (trackingGrid && trackingGrid.destroy) {
+                trackingGrid.destroy();
+            }
+
+            trackingGrid = new ej.grids.Grid({
+                dataSource: filteredAnswers,
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                allowExcelExport: true,
+                allowPdfExport: true,
+                pageSettings: { pageSize: 20 },
+                filterSettings: { type: 'Excel' },
+                toolbar: [
+                    'Search',
+                    {
+                        prefixIcon: 'e-icons e-excelexport',
+                        tooltipText: 'Export Excel',
+                        id: 'excelExportCustom'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-pdfexport',
+                        tooltipText: 'Export PDF',
+                        id: 'pdfExportCustom'
+                    }
+                ],
+                columns: [
+                    { field: 'createdon', headerText: 'Date', width: 140, type: 'date', format: 'dd/MMM/yyyy' },
+                    { field: 'username', headerText: 'User', width: 150 },
+                    { field: 'packagename', headerText: 'Package', width: 180 },
+                    { field: 'questionid', headerText: 'Question ID', width: 100, visible: false },
+                    { field: 'answer', headerText: 'Answer', width: 200 },
+                    {
+                        headerText: 'Actions',
+                        width: 100,
+                        template: '<button class="btn btn-sm btn-info" onclick="viewDetails(${id})">View</button>'
+                    }
+                ],
+                toolbarClick: function (args) {
+                    const clickedId = (args.item && args.item.id) ? String(args.item.id) : '';
+                    const actionId = clickedId.toLowerCase().includes('custom') 
+                        ? clickedId.toLowerCase().replace('custom', '')
+                        : clickedId.toLowerCase();
+
+                    if (actionId.includes('excelexport')) {
+                        trackingGrid.excelExport({
+                            fileName: `DailyTracking_AllUsers_${new Date().getTime()}.xlsx`,
+                            exportType: 'AllPages'
+                        });
+                    }
+
+                    if (actionId.includes('pdfexport')) {
+                        setTimeout(() => {
+                            trackingGrid.pdfExport({
+                                fileName: `DailyTracking_AllUsers_${new Date().getTime()}.pdf`,
+                                exportType: 'AllPages',
+                                pageOrientation: 'Landscape',
+                                pageSize: 'LETTER'
+                            });
+                        }, 100);
+                    }
+                }
+            });
+
+            trackingGrid.appendTo('#trackingGrid');
+        }
+
+        window.viewDetails = function (id) {
+            const answer = filteredAnswers.find(a => a.id === id);
+            if (!answer) return;
+
+            const content = `
+                <div class="detail-item">
+                    <div class="detail-label">Date:</div>
+                    <div class="detail-value">${dayjs(answer.createdon).format('DD/MMM/YYYY HH:mm')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">User:</div>
+                    <div class="detail-value">${answer.username}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Package:</div>
+                    <div class="detail-value">${answer.packagename}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Question ID:</div>
+                    <div class="detail-value">${answer.questionid || 'N/A'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Answer:</div>
+                    <div class="detail-value">${answer.answer || 'No answer'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Allocation ID:</div>
+                    <div class="detail-value">${answer.allocationid || 'N/A'}</div>
+                </div>
+            `;
+
+            document.getElementById('detailContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('detailModal')).show();
+        };
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+
+</html>
