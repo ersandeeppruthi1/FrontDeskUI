@@ -413,7 +413,7 @@
         function initTrackingGrid() {
             ej.grids.Grid.Inject(
                 ej.grids.Page, ej.grids.Sort, ej.grids.Filter,
-                ej.grids.Toolbar, ej.grids.ExcelExport, ej.grids.PdfExport
+                ej.grids.Toolbar, ej.grids.ColumnChooser, ej.grids.ExcelExport, ej.grids.PdfExport
             );
 
             if (trackingGrid && trackingGrid.destroy) {
@@ -427,10 +427,12 @@
                 allowFiltering: true,
                 allowExcelExport: true,
                 allowPdfExport: true,
+                showColumnChooser: true,
                 pageSettings: { pageSize: 20 },
                 filterSettings: { type: 'Excel' },
                 toolbar: [
                     'Search',
+                    'ColumnChooser',
                     {
                         prefixIcon: 'e-icons e-excelexport',
                         tooltipText: 'Export Excel',
@@ -440,6 +442,11 @@
                         prefixIcon: 'e-icons e-pdfexport',
                         tooltipText: 'Export PDF',
                         id: 'pdfExportCustom'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-refresh',
+                        tooltipText: 'Refresh',
+                        id: 'refreshGridCustom'
                     }
                 ],
                 columns: [
@@ -454,7 +461,7 @@
                         template: '<button class="btn btn-sm btn-info" onclick="viewDetails(${id})">View</button>'
                     }
                 ],
-                toolbarClick: function (args) {
+                toolbarClick: async function (args) {
                     const clickedId = (args.item && args.item.id) ? String(args.item.id) : '';
                     const actionId = clickedId.toLowerCase().includes('custom') 
                         ? clickedId.toLowerCase().replace('custom', '')
@@ -476,6 +483,14 @@
                                 pageSize: 'LETTER'
                             });
                         }, 100);
+                    }
+
+                    if (actionId.includes('refreshgrid')) {
+                        await loadMasterData();
+                        populateUserFilter();
+                        populatePackageFilter();
+                        await loadAndMapAnswers();
+                        applyFilters();
                     }
                 }
             });
