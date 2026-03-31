@@ -181,15 +181,30 @@
                 allowPaging: true,
                 allowSorting: true,
                 allowFiltering: true,
+                allowExcelExport: true,
+                allowPdfExport: true,
                 filterSettings: { type: 'Excel' },
 
                 toolbar: [
                     'Search',
+                    {
+                        prefixIcon: 'e-icons e-excelexport',
+                        tooltipText: 'Export Excel',
+                        id: 'excelExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-pdfexport',
+                        tooltipText: 'Export PDF',
+                        id: 'pdfExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-refresh',
+                        tooltipText: 'Refresh',
+                        id: 'refreshGrid'
+                    },
                     { text: 'New Habit', prefixIcon: 'e-icons e-plus', id: 'newHabit' },
                     { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editHabit' },
                     { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteHabit' },
-                    'ExcelExport',
-                    'PdfExport'
                 ],
 
                 columns: [
@@ -204,8 +219,9 @@
                 ],
 
                 toolbarClick: function (args) {
+                    const clickedId = (args.item && args.item.id) ? String(args.item.id) : '';
 
-                    if (args.item.id === 'newHabit') {
+                    if (clickedId === 'newHabit' || clickedId.endsWith('_newHabit')) {
                         editingHabitId = null;
                         document.getElementById('habitForm').reset();
 
@@ -220,7 +236,7 @@
                         modal.show();
                     }
 
-                    if (args.item.id === 'editHabit') {
+                    if (clickedId === 'editHabit' || clickedId.endsWith('_editHabit')) {
                         const selected = habitGrid.getSelectedRecords();
                         if (selected.length !== 1) return alert("Select one record");
 
@@ -246,6 +262,34 @@
                         document.querySelector('#habitModal .modal-title').innerText = "Edit Habit";
                         const modal = new bootstrap.Modal(habitModal);
                         modal.show();
+                    }
+
+                    if (clickedId === 'deleteHabit' || clickedId.endsWith('_deleteHabit')) {
+                        const selected = habitGrid.getSelectedRecords();
+                        if (!selected.length) return alert('Select record(s) to delete');
+                        if (!confirm(`Delete ${selected.length} habit(s)?`)) return;
+                        deleteRecordData('habitmaster', selected.map(r => r.id), true, true)
+                            .then(() => loadHabits());
+                    }
+
+                    if (clickedId === 'excelExport' || clickedId.endsWith('_excelExport')) {
+                        habitGrid.excelExport({
+                            fileName: `HabitMaster_${new Date().getTime()}.xlsx`,
+                            exportType: 'AllPages'
+                        });
+                    }
+
+                    if (clickedId === 'pdfExport' || clickedId.endsWith('_pdfExport')) {
+                        habitGrid.pdfExport({
+                            fileName: `HabitMaster_${new Date().getTime()}.pdf`,
+                            exportType: 'AllPages',
+                            pageOrientation: 'Landscape',
+                            pageSize: 'A4'
+                        });
+                    }
+
+                    if (clickedId === 'refreshGrid' || clickedId.endsWith('_refreshGrid')) {
+                        loadHabits();
                     }
                 }
             });
