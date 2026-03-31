@@ -218,8 +218,10 @@
                     { field: 'frequencynumber', headerText: 'Frequency Value', width: 180 }
                 ],
 
-                toolbarClick: function (args) {
+                toolbarClick: async function (args) {
                     const clickedId = (args.item && args.item.id) ? String(args.item.id) : '';
+                    const clickedIdLower = clickedId.toLowerCase();
+                    const actionId = clickedIdLower.includes('_') ? clickedIdLower.split('_').pop() : clickedIdLower;
 
                     if (clickedId === 'newHabit' || clickedId.endsWith('_newHabit')) {
                         editingHabitId = null;
@@ -268,18 +270,18 @@
                         const selected = habitGrid.getSelectedRecords();
                         if (!selected.length) return alert('Select record(s) to delete');
                         if (!confirm(`Delete ${selected.length} habit(s)?`)) return;
-                        deleteRecordData('habitmaster', selected.map(r => r.id), true, true)
-                            .then(() => loadHabits());
+                        await deleteRecordData('habitmaster', selected.map(r => r.id), true, true);
+                        await loadHabits();
                     }
 
-                    if (clickedId === 'excelExport' || clickedId.endsWith('_excelExport')) {
+                    if (clickedId === 'excelExport' || clickedId.endsWith('_excelExport') || actionId === 'excelexport') {
                         habitGrid.excelExport({
                             fileName: `HabitMaster_${new Date().getTime()}.xlsx`,
                             exportType: 'AllPages'
                         });
                     }
 
-                    if (clickedId === 'pdfExport' || clickedId.endsWith('_pdfExport')) {
+                    if (clickedId === 'pdfExport' || clickedId.endsWith('_pdfExport') || actionId === 'pdfexport') {
                         habitGrid.pdfExport({
                             fileName: `HabitMaster_${new Date().getTime()}.pdf`,
                             exportType: 'AllPages',
@@ -288,8 +290,10 @@
                         });
                     }
 
-                    if (clickedId === 'refreshGrid' || clickedId.endsWith('_refreshGrid')) {
-                        loadHabits();
+                    if (clickedId === 'refreshGrid' || clickedId.endsWith('_refreshGrid') || actionId === 'refreshgrid') {
+                        await loadHabits();
+                        habitGrid.clearSelection();
+                        habitGrid.refresh();
                     }
                 }
             });
@@ -398,6 +402,7 @@
                 'habitmaster', '*', 'createdon', 'desc'
             );
             habitGrid.dataSource = data || [];
+            habitGrid.refresh();
         }
 
 
