@@ -711,20 +711,26 @@
                 ],
                 columns: cols, allowExcelExport: true, allowPdfExport: true,
                 toolbarClick: function (args) {
-                    if (args.item.id === gid + '_excelexport') grid.excelExport({ fileName: `UserPackages_${formatDate(new Date())}.xlsx`, exportType: 'AllPages' });
-                    if (args.item.id === gid + '_pdfexport') grid.pdfExport({
+                    const clickedId = (args.item && args.item.id) ? String(args.item.id) : '';
+
+                    if (clickedId === 'excelExport' || clickedId === gid + '_excelExport' || clickedId.endsWith('_excelExport')) {
+                        grid.excelExport({ fileName: `UserPackages_${formatDate(new Date())}.xlsx`, exportType: 'AllPages' });
+                    }
+                    if (clickedId === 'pdfExport' || clickedId === gid + '_pdfExport' || clickedId.endsWith('_pdfExport')) {
+                        grid.pdfExport({
                         fileName: `UserPackages_${formatDate(new Date())}.pdf`, exportType: 'CurrentPage',
                         theme: { header: { fontColor: '#000000' } }, pageOrientation: 'Landscape', pageSize: 'LETTER',
                         header: { fromTop: 0, height: 120, contents: [{ type: 'Text', value: 'User Package Management', position: { x: 280, y: 0 }, style: { textBrushColor: '#C25050', fontSize: 25 } }] },
                         footer: { fromBottom: 160, height: 150, contents: [{ type: 'PageNumber', pageNumberType: 'Arabic', format: 'Page {$current} of {$total}', position: { x: 520, y: 10 }, style: { textBrushColor: '#ffff80', fontSize: 15, hAlign: 'Center' } }] }
                     });
-                    if (args.item.id === 'refreshGrid')
+                    }
+                    if (clickedId === 'refreshGrid' || clickedId === gid + '_refreshGrid' || clickedId.endsWith('_refreshGrid'))
                         loadUserPackageGrid();
-                    if (args.item.id === 'newPackage')
+                    if (clickedId === 'newPackage' || clickedId === gid + '_newPackage' || clickedId.endsWith('_newPackage'))
                         openPackageModal();
-                    if (args.item.id === 'editPackage')
+                    if (clickedId === 'editPackage' || clickedId === gid + '_editPackage' || clickedId.endsWith('_editPackage'))
                         editUserPackage();
-                    if (args.item.id === 'deletePackage')
+                    if (clickedId === 'deletePackage' || clickedId === gid + '_deletePackage' || clickedId.endsWith('_deletePackage'))
                         deleteUserPackage();
                 }
             });
