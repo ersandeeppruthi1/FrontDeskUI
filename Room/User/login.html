@@ -296,6 +296,34 @@
 		let dbHandlerInstance = null;
 		let dbHandlerPromise = null;
 
+		function wait(ms) {
+			return new Promise(resolve => setTimeout(resolve, ms));
+		}
+
+		function getCookieValue(name) {
+			const encodedName = String(name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${encodedName}=([^;]*)`));
+			return match ? decodeURIComponent(match[1]).trim() : '';
+		}
+
+		function ensureDataToken() {
+			const existingDataToken = getCookieValue('DataToken');
+			if (existingDataToken) return existingDataToken;
+
+			const token =
+				getCookieValue('AuthToken') ||
+				getCookieValue('token') ||
+				(typeof sessionStorage !== 'undefined' ? (sessionStorage.getItem('DataToken') || sessionStorage.getItem('AuthToken') || sessionStorage.getItem('token')) : '') ||
+				(typeof localStorage !== 'undefined' ? (localStorage.getItem('DataToken') || localStorage.getItem('AuthToken') || localStorage.getItem('token')) : '');
+
+			if (!token) return '';
+
+			setCookie('DataToken', token, 7);
+			if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('DataToken', token);
+			if (typeof localStorage !== 'undefined') localStorage.setItem('DataToken', token);
+			return token;
+		}
+
 		async function getDbHandler() {
 			if (dbHandlerInstance && typeof dbHandlerInstance.fetchEntityRecords === 'function') {
 				return dbHandlerInstance;
@@ -309,6 +337,15 @@
 			if (window.DBHandler && typeof window.DBHandler.fetchEntityRecords === 'function') {
 				dbHandlerInstance = window.DBHandler;
 				return dbHandlerInstance;
+			}
+
+			const start = Date.now();
+			while (Date.now() - start < 5000) {
+				await wait(80);
+				if (window.DBHandler && typeof window.DBHandler.fetchEntityRecords === 'function') {
+					dbHandlerInstance = window.DBHandler;
+					return dbHandlerInstance;
+				}
 			}
 
 			if (!dbHandlerPromise) {
@@ -360,6 +397,7 @@
 		}
 
 		async function authenticate(username, password) {
+			ensureDataToken();
 			const db = await getDbHandler();
 			const inputUser = String(username || '').trim();
 			const safeUser = inputUser.replace(/'/g, "''");
@@ -430,6 +468,7 @@
 			localStorage.setItem('displayName', displayName);
 			localStorage.setItem('defaultpage', defaultPage);
 			localStorage.setItem('AuthToken', authToken);
+			localStorage.setItem('DataToken', authToken);
 
 			if (user.permissionjson != null) sessionStorage.setItem('permissionjson', String(user.permissionjson));
 			if (user.menujson != null) sessionStorage.setItem('menujson', String(user.menujson));
