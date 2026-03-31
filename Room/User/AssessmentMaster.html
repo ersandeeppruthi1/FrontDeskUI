@@ -86,24 +86,7 @@
                         </div>
 
                         <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label>Max Score</label>
-                                <input type="number" id="maxscore" class="form-control" />
-                            </div>
-
-                            <div class="col-md-6">
-                                <label>Passing Score</label>
-                                <input type="number" id="passingscore" class="form-control" />
-                            </div>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label>Code</label>
-                                <input type="text" id="assessmentcode" class="form-control" />
-                            </div>
-
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label>Status</label>
                                 <select id="assessmentstatus" class="form-control">
                                     <option value="">Select Status</option>
@@ -161,9 +144,6 @@
                     { field: 'assessmentname', headerText: 'Name', width: 200 },
                     { field: 'assessmenttype', headerText: 'Type', width: 150 },
                     { field: 'description', headerText: 'Description', width: 250 },
-                    { field: 'maxscore', headerText: 'Max Score', width: 120 },
-                    { field: 'passingscore', headerText: 'Passing Score', width: 120 },
-                    { field: 'code', headerText: 'Code', width: 150 },
                     { field: 'status', headerText: 'Status', width: 120 },
                     { field: 'createdon', headerText: 'Created On', width: 150, type: 'datetime' },
                     { field: 'modifiedon', headerText: 'Modified On', width: 150, type: 'datetime' }
@@ -186,9 +166,6 @@
                         document.getElementById('assessmentname').value = selected[0].assessmentname;
                         document.getElementById('assessmenttype').value = selected[0].assessmenttype;
                         document.getElementById('assessmentdescription').value = selected[0].description;
-                        document.getElementById('maxscore').value = selected[0].maxscore;
-                        document.getElementById('passingscore').value = selected[0].passingscore;
-                        document.getElementById('assessmentcode').value = selected[0].code;
                         document.getElementById('assessmentstatus').value = selected[0].status;
 
                         document.querySelector('#assessmentModal .modal-title').innerText = "Edit Assessment";
@@ -205,20 +182,14 @@
             const assessmentname = document.getElementById('assessmentname').value.trim();
             const assessmenttype = document.getElementById('assessmenttype').value.trim();
             const description = document.getElementById('assessmentdescription').value.trim();
-            const maxscore = document.getElementById('maxscore').value;
-            const passingscore = document.getElementById('passingscore').value;
-            const code = document.getElementById('assessmentcode').value.trim();
             const status = document.getElementById('assessmentstatus').value;
 
-            if (!assessmentname || !code) return alert("Assessment Name and Code are required");
+            if (!assessmentname) return alert("Assessment Name is required");
 
             const record = {
                 assessmentname,
                 assessmenttype,
                 description,
-                maxscore,
-                passingscore,
-                code,
                 status
             };
 
