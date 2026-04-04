@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="container2">
+        <div id="habitsGrid"></div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal fade" id="habitModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Habit</h5>
+                  <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="habitForm">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Habit Name</label>
+                                <input type="text" id="habitname" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Habit Type</label>
+                                <select id="habittype" class="form-control" required onchange="toggleOptionsField()">
+                                    <option value="">Select Type</option>
+                                    <option value="Text">Text</option>
+                                    <option value="Option">Option</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3" id="optionsRow" style="display:none;">
+                            <div class="col-md-12">
+                                <label>Options (comma-separated)</label>
+                                <input type="text" id="habitoptions" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Code</label>
+                                <input type="text" id="habitcode" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Order</label>
+                                <input type="number" id="habitorder" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Frequency</label>
+                                <select id="habitfrequency" class="form-control" onchange="updateFrequencyNumber()">
+                                    <option value="">Select Frequency</option>
+                                    <option value="Weekly">Weekly</option>
+                                    <option value="Monthly">Monthly</option>
+                                    <option value="Quarterly">Quarterly</option>
+                                    <option value="Annually">Annually</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Frequency Row -->
+                        <div class="row mt-3" id="freqRow" style="display:none;">
+                            <div class="col-md-6">
+                                <label id="freqLabel">Frequency Value</label>
+
+                                <!-- NUMBER INPUT -->
+                                <input type="number" id="habitfrequencynumber" class="form-control" />
+
+                                <!-- MULTISELECT -->
+                                <div id="multiWrapper">
+                                    <input type="text" id="habitfrequencynumberselect" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveHabit()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let habitGrid;
+        let editingHabitId = null;
+        let frequencyMultiSelect;
+
+        // ✅ GRID INIT
+        function initHabitGrid() {
+
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            habitGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                allowExcelExport: true,
+                allowPdfExport: true,
+                filterSettings: { type: 'Excel' },
+
+                toolbar: [
+                    'Search',
+                    {
+                        prefixIcon: 'e-icons e-excelexport',
+                        tooltipText: 'Export Excel',
+                        id: 'excelExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-pdfexport',
+                        tooltipText: 'Export PDF',
+                        id: 'pdfExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-refresh',
+                        tooltipText: 'Refresh',
+                        id: 'refreshGrid'
+                    },
+                    { text: 'New Habit', prefixIcon: 'e-icons e-plus', id: 'newHabit' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editHabit' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteHabit' },
+                ],
+
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'habitname', headerText: 'Habit Name', width: 200 },
+                    { field: 'habittype', headerText: 'Habit Type', width: 150 },
+                    { field: 'options', headerText: 'Options', width: 200 },
+                    { field: 'code', headerText: 'Code', width: 150 },
+                    { field: 'order', headerText: 'Order', width: 100 },
+                    { field: 'frequency', headerText: 'Frequency', width: 120 },
+                    { field: 'frequencynumber', headerText: 'Frequency Value', width: 180 }
+                ],
+
+                toolbarClick: async function (args) {
+                    const clickedId = (args.item && args.item.id) ? String(args.item.id) : '';
+                    const clickedIdLower = clickedId.toLowerCase();
+                    const actionId = clickedIdLower.includes('_') ? clickedIdLower.split('_').pop() : clickedIdLower;
+
+                    if (clickedId === 'newHabit' || clickedId.endsWith('_newHabit')) {
+                        editingHabitId = null;
+                        document.getElementById('habitForm').reset();
+
+                        toggleOptionsField();
+                        updateFrequencyNumber();
+
+                        if (frequencyMultiSelect) frequencyMultiSelect.value = [];
+
+                        document.querySelector('#habitModal .modal-title').innerText = "Add Habit";
+
+                        const modal = new bootstrap.Modal(habitModal);
+                        modal.show();
+                    }
+
+                    if (clickedId === 'editHabit' || clickedId.endsWith('_editHabit')) {
+                        const selected = habitGrid.getSelectedRecords();
+                        if (selected.length !== 1) return alert("Select one record");
+
+                        editingHabitId = selected[0].id;
+
+                        document.getElementById('habitname').value = selected[0].habitname;
+                        document.getElementById('habittype').value = selected[0].habittype;
+                        document.getElementById('habitoptions').value = selected[0].options || '';
+                        document.getElementById('habitcode').value = selected[0].code || '';
+                        document.getElementById('habitorder').value = selected[0].order || '';
+                        document.getElementById('habitfrequency').value = selected[0].frequency || '';
+
+                        toggleOptionsField();
+                        updateFrequencyNumber();
+
+                        // Set frequency value after updateFrequencyNumber creates the multiselect
+                        if (frequencyMultiSelect) {
+                            frequencyMultiSelect.value = selected[0].frequencynumber
+                                ? selected[0].frequencynumber.split(',')
+                                : [];
+                        }
+
+                        document.querySelector('#habitModal .modal-title').innerText = "Edit Habit";
+                        const modal = new bootstrap.Modal(habitModal);
+                        modal.show();
+                    }
+
+                    if (clickedId === 'deleteHabit' || clickedId.endsWith('_deleteHabit')) {
+                        const selected = habitGrid.getSelectedRecords();
+                        if (!selected.length) return alert('Select record(s) to delete');
+                        if (!confirm(`Delete ${selected.length} habit(s)?`)) return;
+                        await deleteRecordData('habitmaster', selected.map(r => r.id), true, true);
+                        await loadHabits();
+                    }
+
+                    if (clickedId === 'excelExport' || clickedId.endsWith('_excelExport') || actionId === 'excelexport') {
+                        habitGrid.excelExport({
+                            fileName: `HabitMaster_${new Date().getTime()}.xlsx`,
+                            exportType: 'AllPages'
+                        });
+                    }
+
+                    if (clickedId === 'pdfExport' || clickedId.endsWith('_pdfExport') || actionId === 'pdfexport') {
+                        habitGrid.pdfExport({
+                            fileName: `HabitMaster_${new Date().getTime()}.pdf`,
+                            exportType: 'AllPages',
+                            pageOrientation: 'Landscape',
+                            pageSize: 'A4'
+                        });
+                    }
+
+                    if (clickedId === 'refreshGrid' || clickedId.endsWith('_refreshGrid') || actionId === 'refreshgrid') {
+                        await loadHabits();
+                        habitGrid.clearSelection();
+                        habitGrid.refresh();
+                    }
+                }
+            });
+
+            habitGrid.appendTo('#habitsGrid');
+        }
+
+        // ✅ SAVE
+        async function saveHabit() {
+
+            const habitname = document.getElementById('habitname').value.trim();
+            const habittype = document.getElementById('habittype').value;
+            const options = document.getElementById('habitoptions').value.trim();
+            const frequency = document.getElementById('habitfrequency').value;
+            const code = document.getElementById('habitcode').value.trim();
+            const order = document.getElementById('habitorder').value;
+
+            let frequencynumber = frequency ? frequencyMultiSelect.value.join(',') : '';
+
+            if (!habitname || !habittype || !code || !order) return alert("Required fields missing");
+
+            await DBHandler.submitRecordData('habitmaster', {
+                habitname,
+                habittype,
+                options,
+                code,
+                order,
+                frequency,
+                frequencynumber
+            }, editingHabitId, false);
+
+            bootstrap.Modal.getInstance(habitModal).hide();
+            loadHabits();
+        }
+
+        // ✅ UI LOGIC
+        function toggleOptionsField() {
+            const type = document.getElementById('habittype').value;
+            document.getElementById('optionsRow').style.display =
+                type === 'Option' ? 'block' : 'none';
+        }
+
+        function updateFrequencyNumber() {
+            const freq = document.getElementById('habitfrequency').value;
+
+            const input = document.getElementById('habitfrequencynumber');
+            const multiWrapper = document.getElementById('multiWrapper');
+            const row = document.getElementById('freqRow');
+
+            if (freq) {
+                row.style.display = 'block';
+                input.style.display = 'none';
+                multiWrapper.style.display = 'block';
+
+                let dataSource = [];
+                let placeholder = 'Select Values';
+
+                if (freq === 'Weekly') {
+                    dataSource = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                    placeholder = 'Select Days';
+                } else if (freq === 'Monthly') {
+                    dataSource = [
+                        'January', 'February', 'March', 'April',
+                        'May', 'June', 'July', 'August',
+                        'September', 'October', 'November', 'December'
+                    ];
+                    placeholder = 'Select Months';
+                } else if (freq === 'Quarterly') {
+                    dataSource = ['1', '2', '3', '4'];
+                    placeholder = 'Select Quarters';
+                } else if (freq === 'Annually') {
+                    dataSource = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
+                    placeholder = 'Select Years';
+                }
+
+                if (frequencyMultiSelect) {
+                    // Update existing
+                    frequencyMultiSelect.setProperties({
+                        dataSource: dataSource,
+                        placeholder: placeholder
+                    });
+                    frequencyMultiSelect.value = []; // Reset value on change
+                } else {
+                    // Create new
+                    frequencyMultiSelect = new ej.dropdowns.MultiSelect({
+                        dataSource: dataSource,
+                        showDropDownIcon: true,
+                        placeholder: placeholder
+                    });
+
+                    frequencyMultiSelect.appendTo('#habitfrequencynumberselect');
+                }
+
+            } else {
+                row.style.display = 'none';
+                if (frequencyMultiSelect) {
+                    frequencyMultiSelect.destroy();
+                    frequencyMultiSelect = null;
+                }
+            }
+        }
+
+        // ✅ LOAD DATA
+        async function loadHabits() {
+            const data = await DBHandler.fetchEntityRecords(
+                'habitmaster', '*', 'createdon', 'desc'
+            );
+            habitGrid.dataSource = data || [];
+            habitGrid.refresh();
+        }
+
+
+        // INIT
+        $(document).ready(() => {
+            initHabitGrid();
+            loadHabits();
+        });
+    </script>
+
+    <style>
+		#habitsGrid {
+			height: 10px !important;
+		}
+	</style>
+
+</body>
+
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220259"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <script src="https://apisit.vsservices.in/JS/ej2.min.vk02bdl5ad.js"></script>
+
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://free-crm.csharpasp.net/lib/syncfusion/css/bootstrap5.dvnzgvxkcq.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.css">
+    <link href="https://apisit.vsservices.in/css/app.css" rel="stylesheet">
+
+</head>
+<body>
+    <div class="container2 mt-4">
+        <div id="assessmentGrid"></div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal fade" id="assessmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Assessment</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="assessmentForm">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Assessment Name</label>
+                                <input type="text" id="assessmentname" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Assessment Type</label>
+                                <input type="text" id="assessmenttype" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label>Description</label>
+                                <textarea id="assessmentdescription" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label>Status</label>
+                                <select id="assessmentstatus" class="form-control">
+                                    <option value="">Select Status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveAssessment()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let assessmentGrid;
+        let editingAssessmentId = null;
+
+        // ✅ INIT GRID
+        function initAssessmentGrid() {
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            assessmentGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+
+                toolbar: [
+                    'Search',
+                    { text: 'New Assessment', prefixIcon: 'e-icons e-plus', id: 'newAssessment' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editAssessment' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteAssessment' },
+                    'ExcelExport',
+                    'PdfExport'
+                ],
+
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'assessmentname', headerText: 'Name', width: 200 },
+                    { field: 'assessmenttype', headerText: 'Type', width: 150 },
+                    { field: 'description', headerText: 'Description', width: 250 },
+                    { field: 'status', headerText: 'Status', width: 120 },
+                    { field: 'createdon', headerText: 'Created On', width: 150, type: 'datetime' },
+                    { field: 'modifiedon', headerText: 'Modified On', width: 150, type: 'datetime' }
+                ],
+
+                toolbarClick: function(args) {
+                    if (args.item.id === 'newAssessment') {
+                        editingAssessmentId = null;
+                        document.getElementById('assessmentForm').reset();
+                        document.querySelector('#assessmentModal .modal-title').innerText = "Add Assessment";
+                        new bootstrap.Modal(assessmentModal).show();
+                    }
+
+                    if (args.item.id === 'editAssessment') {
+                        const selected = assessmentGrid.getSelectedRecords();
+                        if (selected.length !== 1) return alert("Select one record");
+
+                        editingAssessmentId = selected[0].id;
+
+                        document.getElementById('assessmentname').value = selected[0].assessmentname;
+                        document.getElementById('assessmenttype').value = selected[0].assessmenttype;
+                        document.getElementById('assessmentdescription').value = selected[0].description;
+                        document.getElementById('assessmentstatus').value = selected[0].status;
+
+                        document.querySelector('#assessmentModal .modal-title').innerText = "Edit Assessment";
+                        new bootstrap.Modal(assessmentModal).show();
+                    }
+                }
+            });
+
+            assessmentGrid.appendTo('#assessmentGrid');
+        }
+
+        // ✅ SAVE FUNCTION
+        async function saveAssessment() {
+            const assessmentname = document.getElementById('assessmentname').value.trim();
+            const assessmenttype = document.getElementById('assessmenttype').value.trim();
+            const description = document.getElementById('assessmentdescription').value.trim();
+            const status = document.getElementById('assessmentstatus').value;
+
+            if (!assessmentname) return alert("Assessment Name is required");
+
+            const record = {
+                assessmentname,
+                assessmenttype,
+                description,
+                status
+            };
+
+            try {
+                await DBHandler.submitRecordData('assessmentmaster1', record, editingAssessmentId || null, false);
+                bootstrap.Modal.getInstance(assessmentModal).hide();
+                loadAssessments();
+                editingAssessmentId = null;
+            } catch (err) {
+                console.error("Error saving assessment:", err);
+                alert("Failed to save assessment.");
+            }
+        }
+
+        // ✅ LOAD DATA
+        async function loadAssessments() {
+            const data = await DBHandler.fetchEntityRecords('assessmentmaster1', '*', 'createdon', 'desc');
+            assessmentGrid.dataSource = data || [];
+        }
+
+        // INIT
+        $(document).ready(() => {
+            initAssessmentGrid();
+            loadAssessments();
+        });
+    </script>
+
+    <style>
+		#assessmentGrid {
+			height: 10px !important;
+		}
+	</style>
+
+</body>
+
+</html>
