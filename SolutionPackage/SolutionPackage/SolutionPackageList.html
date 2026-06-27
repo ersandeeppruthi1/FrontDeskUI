@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+
+    <div class="container2">
+        <div id="solutionPackageGrid"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="solutionPackageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Solution Package</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="solutionPackageForm">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label>Name <span class="text-danger">*</span></label>
+                                <input type="text" id="sp_name" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Version</label>
+                                <input type="text" id="sp_version" class="form-control" />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>Description</label>
+                                <input type="text" id="sp_description" class="form-control" />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>Components <span class="text-muted">(Add Web Resources or Entities)</span></label>
+                                <ul class="nav nav-tabs mb-2" id="sp_component_tabs">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" href="#" onclick="switchComponentTab('webresource',this);return false;">Web Resources</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#" onclick="switchComponentTab('entity',this);return false;">Entities</a>
+                                    </li>
+                                </ul>
+                                <div class="input-group mb-2">
+                                    <input type="text" id="sp_comp_search" class="form-control" placeholder="Search..." oninput="renderAvailableComponents()" />
+                                </div>
+                                <div style="border:1px solid #dee2e6; border-radius:4px; max-height:150px; overflow-y:auto;">
+                                    <table class="table table-sm table-hover mb-0">
+                                        <thead class="table-light sticky-top">
+                                            <tr><th style="width:65px"></th><th>Name</th><th id="sp_avail_col3_header">Type</th></tr>
+                                        </thead>
+                                        <tbody id="sp_avail_body"></tbody>
+                                    </table>
+                                </div>
+                            </div>  
+
+                            <div class="col-md-12">
+                                <label>Selected Components</label>
+                                <div style="border:1px solid #dee2e6; border-radius:4px; max-height:150px; overflow-y:auto;">
+                                    <table class="table table-sm mb-0">
+                                        <thead class="table-light sticky-top">
+                                            <tr><th>Name</th><th style="width:110px">Type</th><th style="width:50px"></th></tr>
+                                        </thead>
+                                        <tbody id="sp_selected_body"><tr><td colspan="3" class="text-muted text-center">No components selected</td></tr></tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>Components JSON</label>
+                                <textarea id="sp_components_json" class="form-control" rows="4" disabled style="font-size:12px; background:#f8f9fa;"></textarea>
+                            </div>
+
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveSolutionPackage()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        let solutionPackageGrid;
+        let editingSolutionPackageId = null;
+        let solutionPackageModal;
+        let webResourcesData = [];
+        let entitiesData = [];
+        let entityColumnsData = [];
+        let selectedComponents = []; // array of {id, name, type:'webresource'|'entity'|'entitycolumn', subtype, entityid?}
+        let activeComponentTab = 'webresource';
+
+        var solutionPackageColumns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
+            { field: 'name', headerText: 'Name', width: 200 },
+            { field: 'version', headerText: 'Version', width: 120 },
+            { field: 'description', headerText: 'Description', width: 250 },
+            { field: 'componentsCount', headerText: 'Components', width: 120, textAlign: 'Right' },
+            { field: 'isactive', headerText: 'Active', width: 100 },
+            {
+                field: 'createdon',
+                headerText: 'Created On',
+                type: 'date',
+                format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' },
+                width: 160
+            },
+            { field: 'id', visible: false },
+            { field: 'components', visible: false }
+        ];
+
+        // INIT GRID
+        function initSolutionPackageGrid() {
+
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            solutionPackageGrid = new ej.grids.Grid({
+
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                pageSettings: { pageSize: 10 },
+
+                toolbar: [
+                    'Search',
+                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' },
+                    { text: 'Export Package', prefixIcon: 'e-icons e-download', id: 'export' },
+                    { text: 'Import Package', prefixIcon: 'e-icons e-upload', id: 'import' }
+                ],
+
+                columns: solutionPackageColumns,
+
+                toolbarClick: function (args) {
+
+                    if (args.item.id === 'new') {
+                        clearSolutionPackageForm();
+                        editingSolutionPackageId = null;
+                        document.querySelector('#solutionPackageModal .modal-title').innerText = "Add Solution Package";
+                        openSolutionPackageModal();
+                    }
+
+                    if (args.item.id === 'edit') {
+                        editSolutionPackage();
+                    }
+
+                    if (args.item.id === 'delete') {
+                        deleteSolutionPackage();
+                    }
+
+                    if (args.item.id === 'export') {
+                        exportSolutionPackage();
+                    }
+
+                    if (args.item.id === 'import') {
+                        triggerImportFile();
+                    }
+                }
+            });
+
+            solutionPackageGrid.appendTo('#solutionPackageGrid');
+        }
+
+
+        // LOAD DATA
+        async function loadSolutionPackages() {
+
+            const data = await DBHandler.fetchEntityRecords(
+                'solutionpackage',
+                '*',
+                'createdon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
+
+            let sr = 1;
+
+            solutionPackageGrid.dataSource = (data || []).map(r => ({
+                ...r,
+                srno: sr++,
+                isactiveid: r.isactive,
+                isactive: r.isactive == 1 ? "Yes" : "No",
+                componentsCount: r.components ? JSON.parse(r.components).length : 0
+            }));
+
+            solutionPackageGrid.refresh();
+        }
+
+        // LOAD WEB RESOURCES
+        async function loadWebResources() {
+            webResourcesData = await DBHandler.fetchEntityRecords('webresource','id,name,title,resourcetype','name','asc','',true,0,'') || [];
+        }
+
+        async function loadEntities() {
+            entitiesData = await DBHandler.fetchEntityRecords('entities','id,name,physicalname','name','asc','',true,0,'') || [];
+        }
+
+        async function loadEntityColumns() {
+            entityColumnsData = await DBHandler.fetchEntityRecords('entitycolumn','id,name,entityid,physicalname,columntype','name','asc','',true,0,'') || [];
+        }
+
+
+        // MODAL
+        function openSolutionPackageModal() {
+            if (!solutionPackageModal) {
+                solutionPackageModal = new bootstrap.Modal(document.getElementById('solutionPackageModal'));
+            }
+            activeComponentTab = 'webresource';
+            document.getElementById('sp_comp_search').value = '';
+            const tabs = document.querySelectorAll('#sp_component_tabs .nav-link');
+            tabs[0].classList.add('active');
+            tabs[1].classList.remove('active');
+            renderAvailableComponents();
+            renderSelectedComponents();
+            solutionPackageModal.show();
+        }
+
+        function switchComponentTab(type, el) {
+            activeComponentTab = type;
+            document.getElementById('sp_comp_search').value = '';
+            document.querySelectorAll('#sp_component_tabs .nav-link').forEach(a => a.classList.remove('active'));
+            el.classList.add('active');
+            renderAvailableComponents();
+        }
+
+        function renderAvailableComponents() {
+            const search = (document.getElementById('sp_comp_search').value || '').toLowerCase();
+            const tbody = document.getElementById('sp_avail_body');
+            const selectedIds = selectedComponents.filter(r => r.type === activeComponentTab).map(r => r.id);
+
+            if (activeComponentTab === 'webresource') {
+                document.getElementById('sp_avail_col3_header').innerText = 'Type';
+                const filtered = webResourcesData.filter(r =>
+                    !selectedIds.includes(r.id) && (r.name || '').toLowerCase().includes(search)
+                );
+                if (!filtered.length) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-muted text-center">No web resources found</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = filtered.map(r =>
+                    `<tr>
+                        <td><button type="button" class="btn btn-sm btn-success py-0 px-1" onclick="addComponent('${r.id}','webresource')"><i class="fa fa-plus"></i> Add</button></td>
+                        <td>${r.name}</td>
+                        <td><span class="badge bg-secondary">${r.resourcetype || ''}</span></td>
+                    </tr>`
+                ).join('');
+            } else {
+                document.getElementById('sp_avail_col3_header').innerText = 'Columns';
+                const filtered = entitiesData.filter(r =>
+                    !selectedIds.includes(r.id) && (r.name || '').toLowerCase().includes(search)
+                );
+                if (!filtered.length) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-muted text-center">No entities found</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = filtered.map(r => {
+                    const colCount = entityColumnsData.filter(c => c.entityid == r.id).length;
+                    return `<tr>
+                        <td><button type="button" class="btn btn-sm btn-success py-0 px-1" onclick="addComponent('${r.id}','entity')"><i class="fa fa-plus"></i> Add</button></td>
+                        <td>${r.name}</td>
+                        <td><span class="badge bg-info text-dark">${colCount} col(s)</span></td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+
+        function addComponent(id, type) {
+            if (selectedComponents.find(r => r.id == id && r.type === type)) return;
+            if (type === 'webresource') {
+                const wr = webResourcesData.find(r => r.id == id);
+                if (!wr) return;
+                selectedComponents.push({ id: wr.id, name: wr.name, type: 'webresource', subtype: wr.resourcetype || '' });
+            } else if (type === 'entity') {
+                const entity = entitiesData.find(r => r.id == id);
+                if (!entity) return;
+                selectedComponents.push({ id: entity.id, name: entity.name, type: 'entity', subtype: entity.physicalname || '' });
+                const cols = entityColumnsData.filter(c => c.entityid == id);
+                for (const col of cols) {
+                    if (!selectedComponents.find(r => r.id == col.id && r.type === 'entitycolumn')) {
+                        selectedComponents.push({ id: col.id, name: col.name, type: 'entitycolumn', subtype: col.columntype || '', entityid: col.entityid });
+                    }
+                }
+            }
+            renderAvailableComponents();
+            renderSelectedComponents();
+        }
+
+        function removeComponent(id, type) {
+            selectedComponents = selectedComponents.filter(r => !(r.id == id && r.type === type));
+            if (type === 'entity') {
+                selectedComponents = selectedComponents.filter(r => !(r.type === 'entitycolumn' && r.entityid == id));
+            }
+            renderAvailableComponents();
+            renderSelectedComponents();
+        }
+
+        function renderSelectedComponents() {
+            const tbody = document.getElementById('sp_selected_body');
+            if (!selectedComponents.length) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-muted text-center">No components selected</td></tr>';
+                document.getElementById('sp_components_json').value = '';
+                return;
+            }
+            const typeBadge = { webresource: 'bg-primary', entity: 'bg-success', entitycolumn: 'bg-secondary' };
+            tbody.innerHTML = selectedComponents.map(r =>
+                `<tr>
+                    <td>${r.name}</td>
+                    <td><span class="badge ${typeBadge[r.type] || 'bg-secondary'}">${r.type}</span></td>
+                    <td><button type="button" class="btn btn-sm btn-danger py-0 px-1" onclick="removeComponent('${r.id}','${r.type}')"><i class="fa fa-times"></i></button></td>
+                </tr>`
+            ).join('');
+            const jsonOut = {
+                webResources: selectedComponents.filter(r => r.type === 'webresource').map(r => ({ id: r.id, name: r.name })),
+                entities: selectedComponents.filter(r => r.type === 'entity').map(r => ({ id: r.id, name: r.name })),
+                entityColumns: selectedComponents.filter(r => r.type === 'entitycolumn').map(r => ({ id: r.id, name: r.name, entityid: r.entityid }))
+            };
+            document.getElementById('sp_components_json').value = JSON.stringify(jsonOut, null, 2);
+        }
+
+        function clearSolutionPackageForm() {
+            document.getElementById('solutionPackageForm').reset();
+            selectedComponents = [];
+            activeComponentTab = 'webresource';
+        }
+
+
+        // EDIT
+        function editSolutionPackage() {
+
+            const selected = solutionPackageGrid.getSelectedRecords();
+            if (selected.length !== 1) {
+                return alert("Select one record to edit");
+            }
+
+            const r = selected[0];
+            editingSolutionPackageId = r.id;
+
+            document.getElementById('sp_name').value = r.name;
+            document.getElementById('sp_version').value = r.version;
+            document.getElementById('sp_description').value = r.description;
+
+            document.querySelector('#solutionPackageModal .modal-title').innerText = "Edit Solution Package";
+
+            // Pre-load selected components before opening modal
+            selectedComponents = [];
+            if (r.components) {
+                try {
+                    const parsed = JSON.parse(r.components);
+                    if (Array.isArray(parsed) && parsed.length && parsed[0].type) {
+                        selectedComponents = parsed.map(c => ({ ...c }));
+                    }
+                } catch (e) {
+                    console.error('Failed to parse components', e);
+                }
+            }
+
+            openSolutionPackageModal();
+        }
+
+
+        // SAVE
+        async function saveSolutionPackage() {
+
+            const name = document.getElementById('sp_name').value.trim();
+            if (!name) return alert("Name is required");
+
+            await DBHandler.submitRecordData('solutionpackage', {
+
+                name: name,
+                version: document.getElementById('sp_version').value,
+                description: document.getElementById('sp_description').value,
+                components: JSON.stringify(selectedComponents),
+
+            }, editingSolutionPackageId, false);
+
+            bootstrap.Modal.getInstance(document.getElementById('solutionPackageModal')).hide();
+
+            editingSolutionPackageId = null;
+            loadSolutionPackages();
+        }
+
+
+        // DELETE
+        async function deleteSolutionPackage() {
+
+            const selected = solutionPackageGrid.getSelectedRecords();
+            if (!selected.length) return alert("Select record(s) to delete");
+
+            if (!confirm("Delete selected solution package(s)?")) return;
+
+            const ids = selected.map(r => r.id);
+
+            await deleteRecordData('solutionpackage', ids, true, true);
+
+            loadSolutionPackages();
+        }
+
+        // EXPORT PACKAGE
+        async function exportSolutionPackage() {
+
+            const selected = solutionPackageGrid.getSelectedRecords();
+            if (selected.length !== 1) return alert("Select one package to export");
+
+            const pkg = selected[0];
+            if (!pkg.components) return alert("No components in this package");
+
+            let components = [];
+            try {
+                components = JSON.parse(pkg.components);
+            } catch (e) {
+                return alert("Invalid components data");
+            }
+            if (!components.length) return alert("No components to export");
+
+            const wrItems = components.filter(c => c.type === 'webresource');
+            const entityItems = components.filter(c => c.type === 'entity');
+            const colItems = components.filter(c => c.type === 'entitycolumn');
+
+            const webResources = [];
+            for (const c of wrItems) {
+                const data = await DBHandler.fetchEntityRecords('webresource','*','name','asc',`id='${c.id}'`,false,1);
+                if (data && data.length) webResources.push(data[0]);
+            }
+
+            const entities = [];
+            for (const c of entityItems) {
+                const data = await DBHandler.fetchEntityRecords('entities','*','name','asc',`id='${c.id}'`,false,1);
+                if (data && data.length) entities.push(data[0]);
+            }
+
+            const entityColumns = [];
+            for (const c of colItems) {
+                const data = await DBHandler.fetchEntityRecords('entitycolumn','*','name','asc',`id='${c.id}'`,false,1);
+                if (data && data.length) entityColumns.push(data[0]);
+            }
+
+            const exportData = {
+                packageName: pkg.name,
+                version: pkg.version,
+                description: pkg.description,
+                exportedOn: new Date().toISOString(),
+                webResources,
+                entities,
+                entityColumns
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${pkg.name}_${pkg.version || 'v1.0'}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            alert(`Package exported: ${webResources.length} web resource(s), ${entities.length} entit(ies), ${entityColumns.length} column(s)`);
+        }
+
+        // IMPORT PACKAGE
+        function triggerImportFile() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    try {
+                        const importData = JSON.parse(ev.target.result);
+                        await importSolutionPackage(importData);
+                    } catch (err) {
+                        alert('Failed to parse JSON file: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        async function importSolutionPackage(importData) {
+
+            const wrCount = (importData.webResources || []).length;
+            const entityCount = (importData.entities || []).length;
+            const colCount = (importData.entityColumns || []).length;
+
+            if (!wrCount && !entityCount && !colCount) return alert("Invalid package format");
+
+            if (!confirm(`Import "${importData.packageName}"?\n${wrCount} web resource(s), ${entityCount} entit(ies), ${colCount} column(s)`)) return;
+
+            let imported = 0, updated = 0, errors = 0;
+
+            for (const wr of (importData.webResources || [])) {
+                try {
+                    const existing = await DBHandler.fetchEntityRecords('webresource','id','name','asc',`name='${wr.name}'`,false,1);
+                    const existingId = existing && existing.length ? existing[0].id : null;
+                    await DBHandler.submitRecordData('webresource', {
+                        name: wr.name, title: wr.title, pagetitle: wr.pagetitle,
+                        resourcetype: wr.resourcetype, resourcetext: wr.resourcetext,
+                        entityid: wr.entityid, businessunitid: wr.businessunitid, icon: wr.icon
+                    }, existingId, false);
+                    existingId ? updated++ : imported++;
+                } catch (err) { console.error('Failed to import webresource', wr.name, err); errors++; }
+            }
+
+            for (const ent of (importData.entities || [])) {
+                try {
+                    const existing = await DBHandler.fetchEntityRecords('entities','id','name','asc',`name='${ent.name}'`,false,1);
+                    const existingId = existing && existing.length ? existing[0].id : null;
+                    await DBHandler.submitRecordData('entities', {
+                        name: ent.name, physicalname: ent.physicalname, icon: ent.icon
+                    }, existingId, false);
+                    existingId ? updated++ : imported++;
+                } catch (err) { console.error('Failed to import entity', ent.name, err); errors++; }
+            }
+
+            for (const col of (importData.entityColumns || [])) {
+                try {
+                    const existing = await DBHandler.fetchEntityRecords('entitycolumn','id','name','asc',`name='${col.name}' AND entityid='${col.entityid}'`,false,1);
+                    const existingId = existing && existing.length ? existing[0].id : null;
+                    await DBHandler.submitRecordData('entitycolumn', {
+                        entityid: col.entityid, name: col.name, physicalname: col.physicalname,
+                        columntype: col.columntype, lookupentityid: col.lookupentityid
+                    }, existingId, false);
+                    existingId ? updated++ : imported++;
+                } catch (err) { console.error('Failed to import column', col.name, err); errors++; }
+            }
+
+            alert(`Import completed:\n${imported} new item(s) imported\n${updated} item(s) updated\n${errors} error(s)`);
+
+            await loadWebResources();
+            await loadEntities();
+            await loadEntityColumns();
+            await loadSolutionPackages();
+        }
+        $(document).ready(function () {
+            Promise.all([loadWebResources(), loadEntities(), loadEntityColumns()]).then(() => {
+                initSolutionPackageGrid();
+                loadSolutionPackages();
+            });
+        });
+    </script>
+    <style>
+        #solutionPackageGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
+
+
+
+</body>
+
+</html>
