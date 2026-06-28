@@ -67,7 +67,6 @@
 
 <body>
 
-
     <div class="container2">
         <div id="solutionPackageGrid"></div>
     </div>
@@ -158,6 +157,30 @@
         </div>
     </div>
 
+    <!-- Import History Modal -->
+    <div class="modal fade" id="importHistoryModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Import History</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="importHistoryGrid"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 
     <script>
 
@@ -169,6 +192,8 @@
         let entityColumnsData = [];
         let selectedComponents = []; // array of {id, name, type:'webresource'|'entity'|'entitycolumn', subtype, entityid?}
         let activeComponentTab = 'webresource';
+        let importHistoryGrid;
+        let importHistoryModal;
 
         var solutionPackageColumns = [
             { type: 'checkbox', width: 50 },
@@ -216,7 +241,8 @@
                     { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
                     { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' },
                     { text: 'Export Package', prefixIcon: 'e-icons e-download', id: 'export' },
-                    { text: 'Import Package', prefixIcon: 'e-icons e-upload', id: 'import' }
+                    { text: 'Import Package', prefixIcon: 'e-icons e-upload', id: 'import' },
+                    { text: 'Import History', prefixIcon: 'e-icons e-history', id: 'history' }
                 ],
 
                 columns: solutionPackageColumns,
@@ -244,6 +270,10 @@
 
                     if (args.item.id === 'import') {
                         triggerImportFile();
+                    }
+
+                    if (args.item.id === 'history') {
+                        showImportHistory();
                     }
                 }
             });
@@ -457,10 +487,14 @@
             const name = document.getElementById('sp_name').value.trim();
             if (!name) return alert("Name is required");
 
+            // Auto-increment version
+            let version = document.getElementById('sp_version').value.trim();
+            version = incrementVersion(version);
+
             await DBHandler.submitRecordData('solutionpackage', {
 
                 name: name,
-                version: document.getElementById('sp_version').value,
+                version: version,
                 description: document.getElementById('sp_description').value,
                 components: JSON.stringify(selectedComponents),
 
@@ -470,6 +504,28 @@
 
             editingSolutionPackageId = null;
             loadSolutionPackages();
+        }
+
+        // AUTO-INCREMENT VERSION
+        function incrementVersion(version) {
+            if (!version) return '1.0.1';
+
+            // Match version pattern like 1.0.0, 1.2, v1.0.0, etc.
+            const match = version.match(/^(v?)(\d+(?:\.\d+)*)$/i);
+
+            if (!match) {
+                // If not a valid version format, append .1
+                return version + '.1';
+            }
+
+            const prefix = match[1]; // 'v' or ''
+            const versionParts = match[2].split('.');
+
+            // Increment the last digit
+            const lastIndex = versionParts.length - 1;
+            versionParts[lastIndex] = String(parseInt(versionParts[lastIndex]) + 1);
+
+            return prefix + versionParts.join('.');
         }
 
 
@@ -733,10 +789,151 @@
             hideProgressOverlay();
             showToast(`Import completed: ${imported} new, ${updated} updated, ${errors} error(s)`, errors ? 'error' : 'success');
 
+            // Track import in history
+            await DBHandler.submitRecordData('solutionpackageimport', {
+                packagename: importData.packageName,
+                version: importData.version,
+                description: importData.description,
+                imported: imported,
+                updated: updated,
+                errors: errors,
+                packagedata: JSON.stringify(importData),
+                importedon: new Date().toISOString()
+            }, null, false);
+
             await loadWebResources();
             await loadEntities();
             await loadEntityColumns();
             await loadSolutionPackages();
+        }
+
+        // SHOW IMPORT HISTORY
+        function showImportHistory() {
+            if (!importHistoryModal) {
+                importHistoryModal = new bootstrap.Modal(document.getElementById('importHistoryModal'));
+            }
+
+            if (!importHistoryGrid) {
+                initImportHistoryGrid();
+            }
+
+            loadImportHistory();
+            importHistoryModal.show();
+        }
+
+        // INIT IMPORT HISTORY GRID
+        function initImportHistoryGrid() {
+
+            const historyColumns = [
+                { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
+                { field: 'packagename', headerText: 'Package Name', width: 200 },
+                { field: 'version', headerText: 'Version', width: 120 },
+                { field: 'status', headerText: 'Status', width: 120 },
+                { field: 'imported', headerText: 'Imported', width: 100, textAlign: 'Right' },
+                { field: 'updated', headerText: 'Updated', width: 100, textAlign: 'Right' },
+                { field: 'errors', headerText: 'Errors', width: 100, textAlign: 'Right' },
+                {
+                    field: 'importedon',
+                    headerText: 'Imported On',
+                    type: 'date',
+                    format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' },
+                    width: 160
+                },
+                {
+                    headerText: 'Actions',
+                    width: 120,
+                    template: '<button class="btn btn-sm btn-primary" onclick="downloadImportPackage(&quot;${id}&quot;)"><i class="e-icons e-download"></i> Download</button>'
+                },
+                { field: 'id', visible: false }
+            ];
+
+            importHistoryGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                pageSettings: { pageSize: 10 },
+                columns: historyColumns
+            });
+
+            importHistoryGrid.appendTo('#importHistoryGrid');
+        }
+
+        // LOAD IMPORT HISTORY
+        async function loadImportHistory() {
+
+            const data = await DBHandler.fetchEntityRecords(
+                'solutionpackageimport',
+                '*',
+                'importedon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
+
+            let sr = 1;
+
+            importHistoryGrid.dataSource = (data || []).map(r => ({
+                ...r,
+                srno: sr++,
+                status: r.errors > 0 ? 'Partial' : 'Success'
+            }));
+
+            importHistoryGrid.refresh();
+        }
+
+        // DOWNLOAD IMPORT PACKAGE
+        async function downloadImportPackage(importId) {
+
+            try {
+                showProgressOverlay('Downloading Package', 1, 2, 'Fetching package data...');
+
+                const data = await DBHandler.fetchEntityRecords(
+                    'solutionpackageimport',
+                    'packagename,version,packagedata',
+                    'importedon',
+                    'desc',
+                    `id='${importId}'`,
+                    false,
+                    1
+                );
+
+                if (!data || !data.length) {
+                    hideProgressOverlay();
+                    return alert('Import record not found');
+                }
+
+                const record = data[0];
+
+                if (!record.packagedata) {
+                    hideProgressOverlay();
+                    return alert('Package data not available');
+                }
+
+                showProgressOverlay('Downloading Package', 2, 2, 'Preparing download...');
+
+                // Download the package
+                const blob = new Blob([record.packagedata], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${record.packagename}_${record.version || 'v1.0'}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                hideProgressOverlay();
+                showToast('Package downloaded successfully', 'success');
+
+            } catch (err) {
+                hideProgressOverlay();
+                console.error('Download failed', err);
+                showToast('Failed to download package: ' + err.message, 'error');
+            }
         }
         $(document).ready(function () {
             Promise.all([loadWebResources(), loadEntities(), loadEntityColumns()]).then(() => {
