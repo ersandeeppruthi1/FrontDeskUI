@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+
+    <div class="container2">
+        <div id="dataPackageGrid"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="dataPackageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Data Package</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="dataPackageForm">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+                                <label>Name <span class="text-danger">*</span></label>
+                                <input type="text" id="dp_name" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Version</label>
+                                <input type="text" id="dp_version" class="form-control" />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>Description</label>
+                                <input type="text" id="dp_description" class="form-control" />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label>Entities <span class="text-muted">(Select entities to include data)</span></label>
+                                <div id="dp_entities_list"></div>
+                            </div>
+
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveDataPackage()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Import History Modal -->
+    <div class="modal fade" id="importHistoryModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Data Import History</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="importHistoryGrid"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        let dataPackageGrid;
+        let editingDataPackageId = null;
+        let dataPackageModal;
+        let entitiesData = [];
+        let entitiesMultiSelect;
+        let importHistoryGrid;
+        let importHistoryModal;
+
+        var dataPackageColumns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
+            { field: 'name', headerText: 'Name', width: 200 },
+            { field: 'version', headerText: 'Version', width: 120 },
+            { field: 'description', headerText: 'Description', width: 250 },
+            { field: 'entitiesCount', headerText: 'Entities', width: 120, textAlign: 'Right' },
+            { field: 'isactive', headerText: 'Active', width: 100 },
+            {
+                field: 'createdon',
+                headerText: 'Created On',
+                type: 'date',
+                format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' },
+                width: 160
+            },
+            { field: 'id', visible: false },
+            { field: 'entities', visible: false }
+        ];
+
+        // INIT GRID
+        function initDataPackageGrid() {
+
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            dataPackageGrid = new ej.grids.Grid({
+
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                pageSettings: { pageSize: 10 },
+
+                toolbar: [
+                    'Search',
+                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' },
+                    { text: 'Export Data', prefixIcon: 'e-icons e-download', id: 'export' },
+                    { text: 'Import Data', prefixIcon: 'e-icons e-upload', id: 'import' },
+                    { text: 'Import History', prefixIcon: 'e-icons e-history', id: 'history' }
+                ],
+
+                columns: dataPackageColumns,
+
+                toolbarClick: function (args) {
+
+                    if (args.item.id === 'new') {
+                        clearDataPackageForm();
+                        editingDataPackageId = null;
+                        document.querySelector('#dataPackageModal .modal-title').innerText = "Add Data Package";
+                        openDataPackageModal();
+                    }
+
+                    if (args.item.id === 'edit') {
+                        editDataPackage();
+                    }
+
+                    if (args.item.id === 'delete') {
+                        deleteDataPackage();
+                    }
+
+                    if (args.item.id === 'export') {
+                        exportDataPackage();
+                    }
+
+                    if (args.item.id === 'import') {
+                        triggerImportFile();
+                    }
+
+                    if (args.item.id === 'history') {
+                        showImportHistory();
+                    }
+                }
+            });
+
+            dataPackageGrid.appendTo('#dataPackageGrid');
+        }
+
+
+        // LOAD DATA
+        async function loadDataPackages() {
+
+            const data = await DBHandler.fetchEntityRecords(
+                'datapackage',
+                '*',
+                'createdon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
+
+            let sr = 1;
+
+            dataPackageGrid.dataSource = (data || []).map(r => ({
+                ...r,
+                srno: sr++,
+                isactiveid: r.isactive,
+                isactive: r.isactive == 1 ? "Yes" : "No",
+                entitiesCount: r.entities ? JSON.parse(r.entities).length : 0
+            }));
+
+            dataPackageGrid.refresh();
+        }
+
+        // LOAD ENTITIES
+        async function loadEntities() {
+            entitiesData = await DBHandler.fetchEntityRecords(
+                'entities',
+                'id,name',
+                'name',
+                'asc',
+                '',
+                true,
+                0,
+                ''
+            );
+        }
+
+
+        // MODAL
+        function openDataPackageModal() {
+
+            // Initialize entities multi-select if not already done
+            if (!entitiesMultiSelect) {
+                entitiesMultiSelect = new ej.dropdowns.MultiSelect({
+                    dataSource: entitiesData,
+                    fields: { text: 'name', value: 'id' },
+                    placeholder: 'Select Entities',
+                    mode: 'CheckBox',
+                    showSelectAll: true,
+                    showDropDownIcon: true,
+                    filterBarPlaceholder: 'Search entities...',
+                    popupHeight: '350px',
+                    allowFiltering: true
+                });
+                entitiesMultiSelect.appendTo('#dp_entities_list');
+            }
+
+            if (!dataPackageModal) {
+                dataPackageModal = new bootstrap.Modal(document.getElementById('dataPackageModal'), {
+                    focus: false,
+                    keyboard: true
+                });
+            }
+
+            dataPackageModal.show();
+        }
+
+        function clearDataPackageForm() {
+            document.getElementById('dataPackageForm').reset();
+            if (entitiesMultiSelect) {
+                entitiesMultiSelect.value = null;
+            }
+        }
+
+
+        // EDIT
+        function editDataPackage() {
+
+            const selected = dataPackageGrid.getSelectedRecords();
+            if (selected.length !== 1) {
+                return alert("Select one record to edit");
+            }
+
+            const r = selected[0];
+            editingDataPackageId = r.id;
+
+            document.getElementById('dp_name').value = r.name;
+            document.getElementById('dp_version').value = r.version;
+            document.getElementById('dp_description').value = r.description;
+
+            document.querySelector('#dataPackageModal .modal-title').innerText = "Edit Data Package";
+
+            openDataPackageModal();
+
+            // Set selected entities
+            if (r.entities) {
+                try {
+                    const selectedIds = JSON.parse(r.entities);
+                    if (entitiesMultiSelect) {
+                        entitiesMultiSelect.value = selectedIds;
+                    }
+                } catch (e) {
+                    console.error('Failed to parse entities', e);
+                }
+            }
+        }
+
+
+        // SAVE
+        async function saveDataPackage() {
+
+            const name = document.getElementById('dp_name').value.trim();
+            if (!name) return alert("Name is required");
+
+            const selectedEntities = entitiesMultiSelect ? entitiesMultiSelect.value : [];
+
+            // Auto-increment version
+            let version = document.getElementById('dp_version').value.trim();
+            version = incrementVersion(version);
+
+            await DBHandler.submitRecordData('datapackage', {
+
+                name: name,
+                version: version,
+                description: document.getElementById('dp_description').value,
+                entities: JSON.stringify(selectedEntities || []),
+
+            }, editingDataPackageId, false);
+
+            bootstrap.Modal.getInstance(document.getElementById('dataPackageModal')).hide();
+
+            editingDataPackageId = null;
+            loadDataPackages();
+        }
+
+        // AUTO-INCREMENT VERSION
+        function incrementVersion(version) {
+            if (!version) return '1.0.1';
+
+            const match = version.match(/^(v?)(\d+(?:\.\d+)*)$/i);
+
+            if (!match) {
+                return version + '.1';
+            }
+
+            const prefix = match[1];
+            const versionParts = match[2].split('.');
+
+            const lastIndex = versionParts.length - 1;
+            versionParts[lastIndex] = String(parseInt(versionParts[lastIndex]) + 1);
+
+            return prefix + versionParts.join('.');
+        }
+
+
+        // DELETE
+        async function deleteDataPackage() {
+
+            const selected = dataPackageGrid.getSelectedRecords();
+            if (!selected.length) return alert("Select record(s) to delete");
+
+            if (!confirm("Delete selected data package(s)?")) return;
+
+            const ids = selected.map(r => r.id);
+
+            await deleteRecordData('datapackage', ids, true, true);
+
+            loadDataPackages();
+        }
+
+        // EXPORT DATA PACKAGE
+        async function exportDataPackage() {
+
+            const selected = dataPackageGrid.getSelectedRecords();
+            if (selected.length !== 1) {
+                return alert("Select one package to export");
+            }
+
+            const pkg = selected[0];
+
+            if (!pkg.entities) {
+                return alert("No entities in this package");
+            }
+
+            let entityIds = [];
+            try {
+                entityIds = JSON.parse(pkg.entities);
+            } catch (e) {
+                return alert("Invalid entities data");
+            }
+
+            if (!entityIds.length) {
+                return alert("No entities to export");
+            }
+
+            showProgressOverlay('Exporting Data Package', 0, entityIds.length, 'Preparing export...');
+
+            // Fetch data for each entity
+            const entityDataMap = {};
+            let step = 0;
+
+            for (const entityId of entityIds) {
+                step++;
+                const entity = entitiesData.find(e => e.id === entityId);
+                if (!entity) continue;
+
+                showProgressOverlay('Exporting Data Package', step, entityIds.length, `Fetching data from ${entity.name}...`);
+
+                const data = await DBHandler.fetchEntityRecords(
+                    entity.name,
+                    '*',
+                    'createdon',
+                    'asc',
+                    '',
+                    true,
+                    0,
+                    ''
+                );
+
+                entityDataMap[entity.name] = {
+                    entityId: entityId,
+                    entityName: entity.name,
+                    recordCount: data ? data.length : 0,
+                    records: data || []
+                };
+            }
+
+            // Create export package
+            const exportData = {
+                packageName: pkg.name,
+                version: pkg.version,
+                description: pkg.description,
+                exportedOn: new Date().toISOString(),
+                entities: entityDataMap
+            };
+
+            // Download as JSON
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DataPackage_${pkg.name}_${pkg.version || 'v1.0'}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            hideProgressOverlay();
+
+            const totalRecords = Object.values(entityDataMap).reduce((sum, e) => sum + e.recordCount, 0);
+            showToast(`Data package exported with ${entityIds.length} entities and ${totalRecords} total records`, 'success');
+        }
+
+        // IMPORT PACKAGE
+        function triggerImportFile() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    try {
+                        const importData = JSON.parse(ev.target.result);
+                        await importDataPackage(importData);
+                    } catch (err) {
+                        alert('Failed to parse JSON file: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        async function importDataPackage(importData) {
+
+            if (!importData.entities || typeof importData.entities !== 'object') {
+                return alert("Invalid package format");
+            }
+
+            const entityNames = Object.keys(importData.entities);
+            const totalRecords = Object.values(importData.entities).reduce((sum, e) => sum + e.recordCount, 0);
+
+            if (!confirm(`Import data package "${importData.packageName}"?\n\nEntities: ${entityNames.length}\nTotal Records: ${totalRecords}`)) {
+                return;
+            }
+
+            let imported = 0;
+            let updated = 0;
+            let errors = 0;
+            let step = 0;
+            const totalSteps = totalRecords;
+
+            showProgressOverlay('Importing Data Package', 0, totalSteps, 'Starting import...');
+
+            for (const entityName of entityNames) {
+                const entityData = importData.entities[entityName];
+
+                showProgressOverlay('Importing Data Package', step, totalSteps, `Importing ${entityName}...`);
+
+                for (const record of entityData.records) {
+                    try {
+                        step++;
+
+                        // Check if record exists
+                        const existing = await DBHandler.fetchEntityRecords(
+                            entityName,
+                            'id',
+                            'createdon',
+                            'asc',
+                            `id='${record.id}'`,
+                            false,
+                            1
+                        );
+
+                        const existingId = existing && existing.length ? existing[0].id : null;
+
+                        // Import/Update record
+                        await DBHandler.submitRecordData(entityName, record, existingId, false);
+
+                        if (existingId) {
+                            updated++;
+                        } else {
+                            imported++;
+                        }
+
+                        if (step % 10 === 0) {
+                            showProgressOverlay('Importing Data Package', step, totalSteps, `Importing ${entityName}... (${step}/${totalSteps})`);
+                        }
+
+                    } catch (err) {
+                        console.error('Failed to import record', entityName, record.id, err);
+                        errors++;
+                    }
+                }
+            }
+
+            hideProgressOverlay();
+            showToast(`Import completed: ${imported} new, ${updated} updated, ${errors} error(s)`, errors ? 'error' : 'success');
+
+            // Track import in history
+            await DBHandler.submitRecordData('datapackageimport', {
+                packagename: importData.packageName,
+                version: importData.version,
+                description: importData.description,
+                imported: imported,
+                updated: updated,
+                errors: errors,
+                packagedata: JSON.stringify(importData),
+                importedon: new Date().toISOString()
+            }, null, false);
+
+            await loadDataPackages();
+        }
+
+        // SHOW IMPORT HISTORY
+        function showImportHistory() {
+            if (!importHistoryModal) {
+                importHistoryModal = new bootstrap.Modal(document.getElementById('importHistoryModal'));
+            }
+
+            if (!importHistoryGrid) {
+                initImportHistoryGrid();
+            }
+
+            loadImportHistory();
+            importHistoryModal.show();
+        }
+
+        // INIT IMPORT HISTORY GRID
+        function initImportHistoryGrid() {
+
+            const historyColumns = [
+                { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
+                { field: 'packagename', headerText: 'Package Name', width: 200 },
+                { field: 'version', headerText: 'Version', width: 120 },
+                { field: 'status', headerText: 'Status', width: 120 },
+                { field: 'imported', headerText: 'Imported', width: 100, textAlign: 'Right' },
+                { field: 'updated', headerText: 'Updated', width: 100, textAlign: 'Right' },
+                { field: 'errors', headerText: 'Errors', width: 100, textAlign: 'Right' },
+                {
+                    field: 'importedon',
+                    headerText: 'Imported On',
+                    type: 'date',
+                    format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' },
+                    width: 160
+                },
+                {
+                    headerText: 'Actions',
+                    width: 120,
+                    template: '<button class="btn btn-sm btn-primary" onclick="downloadDataPackage(&quot;${id}&quot;)"><i class="e-icons e-download"></i> Download</button>'
+                },
+                { field: 'id', visible: false }
+            ];
+
+            importHistoryGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                pageSettings: { pageSize: 10 },
+                columns: historyColumns
+            });
+
+            importHistoryGrid.appendTo('#importHistoryGrid');
+        }
+
+        // LOAD IMPORT HISTORY
+        async function loadImportHistory() {
+
+            const data = await DBHandler.fetchEntityRecords(
+                'datapackageimport',
+                '*',
+                'importedon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
+
+            let sr = 1;
+
+            importHistoryGrid.dataSource = (data || []).map(r => ({
+                ...r,
+                srno: sr++,
+                status: r.errors > 0 ? 'Partial' : 'Success'
+            }));
+
+            importHistoryGrid.refresh();
+        }
+
+        // DOWNLOAD DATA PACKAGE
+        async function downloadDataPackage(importId) {
+
+            try {
+                showProgressOverlay('Downloading Data Package', 1, 2, 'Fetching package data...');
+
+                const data = await DBHandler.fetchEntityRecords(
+                    'datapackageimport',
+                    'packagename,version,packagedata',
+                    'importedon',
+                    'desc',
+                    `id='${importId}'`,
+                    false,
+                    1
+                );
+
+                if (!data || !data.length) {
+                    hideProgressOverlay();
+                    return alert('Import record not found');
+                }
+
+                const record = data[0];
+
+                if (!record.packagedata) {
+                    hideProgressOverlay();
+                    return alert('Package data not available');
+                }
+
+                showProgressOverlay('Downloading Data Package', 2, 2, 'Preparing download...');
+
+                // Download the package
+                const blob = new Blob([record.packagedata], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `DataPackage_${record.packagename}_${record.version || 'v1.0'}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                hideProgressOverlay();
+                showToast('Data package downloaded successfully', 'success');
+
+            } catch (err) {
+                hideProgressOverlay();
+                console.error('Download failed', err);
+                showToast('Failed to download package: ' + err.message, 'error');
+            }
+        }
+
+        $(document).ready(function () {
+            loadEntities().then(() => {
+                initDataPackageGrid();
+                loadDataPackages();
+            });
+        });
+    </script>
+    <style>
+        #dataPackageGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
+
+
+
+</body>
+
+</html>
