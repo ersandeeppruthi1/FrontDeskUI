@@ -568,8 +568,14 @@
 
                         const existingId = existing && existing.length ? existing[0].id : null;
 
+                        // Prepare record data with ID explicitly included
+                        const recordData = { ...record };
+                        if (!recordData.id) {
+                            recordData.id = record.id;
+                        }
+
                         // Import/Update record
-                        await DBHandler.submitRecordData(entityName, record, existingId, false);
+                        await DBHandler.submitRecordData(entityName, recordData, existingId, false);
 
                         if (existingId) {
                             updated++;
@@ -735,6 +741,35 @@
             }
         }
 
+        // UTILITY FUNCTIONS
+        function showProgressOverlay(title, done, total, label) {
+            const overlay = document.getElementById('exportProgressOverlay');
+            const heading = document.getElementById('exportProgressTitle');
+            const bar = document.getElementById('exportProgressBar');
+            const pct = document.getElementById('exportProgressPct');
+            const lbl = document.getElementById('exportProgressLabel');
+            const pctVal = total > 0 ? Math.round((done / total) * 100) : 0;
+            overlay.style.display = 'flex';
+            heading.innerText = title || 'Processing';
+            bar.style.width = pctVal + '%';
+            pct.innerText = pctVal + '%';
+            lbl.innerText = label || '';
+        }
+
+        function hideProgressOverlay() {
+            document.getElementById('exportProgressOverlay').style.display = 'none';
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('exportToast');
+            toast.className = '';
+            toast.id = 'exportToast';
+            toast.classList.add(type === 'error' ? 'error' : 'show-host');
+            document.getElementById('exportToastMsg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
         $(document).ready(function () {
             loadEntities().then(() => {
                 initDataPackageGrid();
@@ -746,7 +781,87 @@
         #dataPackageGrid_toolbarItems {
             height: 10px !important;
         }
+
+        #exportProgressOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        #exportProgressBox {
+            background: #fff;
+            border-radius: 10px;
+            padding: 32px 40px;
+            min-width: 340px;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+        }
+        #exportProgressBox h6 {
+            font-weight: 600;
+            margin-bottom: 18px;
+            font-size: 1rem;
+        }
+        #exportProgressBar {
+            transition: width 0.2s ease;
+            background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+        }
+        #exportProgressPct {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0d6efd;
+            margin-top: 10px;
+        }
+        #exportProgressLabel {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 6px;
+        }
+        #exportToast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 10000;
+            background: #28a745;
+            color: #fff;
+            padding: 14px 22px;
+            border-radius: 6px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        #exportToast.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        #exportToast.error {
+            background: #dc3545;
+        }
     </style>
+
+    <!-- Export Progress Overlay -->
+    <div id="exportProgressOverlay">
+        <div id="exportProgressBox">
+            <h6><i class="fa fa-download me-2 text-primary"></i><span id="exportProgressTitle">Exporting Package</span></h6>
+            <div class="progress" style="height:18px; border-radius:9px;">
+                <div id="exportProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:0%"></div>
+            </div>
+            <div id="exportProgressPct">0%</div>
+            <div id="exportProgressLabel">Preparing...</div>
+        </div>
+    </div>
+
+    <!-- Export Toast -->
+    <div id="exportToast">
+        <i class="fa fa-check-circle me-2"></i><span id="exportToastMsg"></span>
+    </div>
 
 
 
