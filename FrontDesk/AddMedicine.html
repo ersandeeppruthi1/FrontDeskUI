@@ -43,8 +43,6 @@
           crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-    <script src="../../css/Default/xlsx.full.min.js"></script>
-
     <div class="container">
         <div class="row">
             <div class="col-md-4">
@@ -428,7 +426,7 @@
                     doctorName: item.doctorname,
                     patientId: item.patientid,
                     totalTest: item.totaltest,
-                    modifiedon:item.modifiedon,
+                    modifiedon: item.modifiedon,
                     medicineDetailRecord: (item.medicinedetail || ""),
                     medicineDetail: (item.medicinedetail || "").replaceAll("\n", "<br />"),
                 }));
@@ -459,35 +457,35 @@
 
 
             const tableHTML = `
-                                                                                                                                    <table class="table table-bordered">
-                                                                                                                                        <thead>
-                                                                                                                                            <tr id="headingrow">
-                                                                                                                                                <th>Sr.No.</th>
-                                                                                                                                                <th>Patient Id</th>
-                                                                                                                                                <th>Department Name</th>
-                                                                                                                                                <th>Name</th>
-                                                                                                                                                <th>Gender</th>
-                                                                                                                                                <th>Age</th>
-                                                                                                                                                <th>Mobile Number</th>
-                                                                                                                                                <th>Medicine</th>
-                                                                                                                                            </tr>
-                                                                                                                                        </thead>
-                                                                                                                                        <tbody id="tableBody">
-                                                                                                                                            ${filteredArray.map((entry, index) => `
-                                                                                                                                                <tr>
-                                                                                                                                                    <td>${entry.intValue}</td>
-                                                                                                                                                    <td>${entry.patientId}</td>
-                                                                                                                                                    <td>${entry.doctorName + (entry.totalTest ? "<br>" + entry.totalTest.replaceAll("\n", "<br>") : "")}</td>
-                                                                                                                                                    <td>${entry.patientName}</td>
-                                                                                                                                                    <td>${entry.gender}</td>
-                                                                                                                                                    <td>${entry.age}</td>
-                                                                                                                                                    <td>${entry.phone}</td>
-                                                                                                                                                    <td>${entry.medicineDetail.replaceAll('\r\n', '<br />')}</td>
+                                                                                                                                        <table class="table table-bordered">
+                                                                                                                                            <thead>
+                                                                                                                                                <tr id="headingrow">
+                                                                                                                                                    <th>Sr.No.</th>
+                                                                                                                                                    <th>Patient Id</th>
+                                                                                                                                                    <th>Department Name</th>
+                                                                                                                                                    <th>Name</th>
+                                                                                                                                                    <th>Gender</th>
+                                                                                                                                                    <th>Age</th>
+                                                                                                                                                    <th>Mobile Number</th>
+                                                                                                                                                    <th>Medicine</th>
                                                                                                                                                 </tr>
-                                                                                                                                            `).join('')}
-                                                                                                                                        </tbody>
-                                                                                                                                    </table>
-                                                                                                                                `;
+                                                                                                                                            </thead>
+                                                                                                                                            <tbody id="tableBody">
+                                                                                                                                                ${filteredArray.map((entry, index) => `
+                                                                                                                                                    <tr>
+                                                                                                                                                        <td>${entry.intValue}</td>
+                                                                                                                                                        <td>${entry.patientId}</td>
+                                                                                                                                                        <td>${entry.doctorName + (entry.totalTest ? "<br>" + entry.totalTest.replaceAll("\n", "<br>") : "")}</td>
+                                                                                                                                                        <td>${entry.patientName}</td>
+                                                                                                                                                        <td>${entry.gender}</td>
+                                                                                                                                                        <td>${entry.age}</td>
+                                                                                                                                                        <td>${entry.phone}</td>
+                                                                                                                                                        <td>${entry.medicineDetail.replaceAll('\r\n', '<br />')}</td>
+                                                                                                                                                    </tr>
+                                                                                                                                                `).join('')}
+                                                                                                                                            </tbody>
+                                                                                                                                        </table>
+                                                                                                                                    `;
 
             // Set the table HTML inside the old-records div
             oldRecordsDiv.innerHTML = tableHTML;
