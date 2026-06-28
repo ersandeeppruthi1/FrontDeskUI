@@ -508,24 +508,37 @@
             const wrItems = components.filter(c => c.type === 'webresource');
             const entityItems = components.filter(c => c.type === 'entity');
             const colItems = components.filter(c => c.type === 'entitycolumn');
+            const totalSteps = wrItems.length + entityItems.length + colItems.length;
+
+            showProgressOverlay('Exporting Package', 0, totalSteps, 'Starting export...');
+
+            let done = 0;
 
             const webResources = [];
             for (const c of wrItems) {
                 const data = await DBHandler.fetchEntityRecords('webresource','*','name','asc',`id='${c.id}'`,false,1);
                 if (data && data.length) webResources.push(data[0]);
+                done++;
+                showProgressOverlay('Exporting Package', done, totalSteps, `Fetching web resources... (${webResources.length}/${wrItems.length})`);
             }
 
             const entities = [];
             for (const c of entityItems) {
                 const data = await DBHandler.fetchEntityRecords('entities','*','name','asc',`id='${c.id}'`,false,1);
                 if (data && data.length) entities.push(data[0]);
+                done++;
+                showProgressOverlay('Exporting Package', done, totalSteps, `Fetching entities... (${entities.length}/${entityItems.length})`);
             }
 
             const entityColumns = [];
             for (const c of colItems) {
                 const data = await DBHandler.fetchEntityRecords('entitycolumn','*','name','asc',`id='${c.id}'`,false,1);
                 if (data && data.length) entityColumns.push(data[0]);
+                done++;
+                showProgressOverlay('Exporting Package', done, totalSteps, `Fetching columns... (${entityColumns.length}/${colItems.length})`);
             }
+
+            showProgressOverlay('Exporting Package', totalSteps, totalSteps, 'Building package...');
 
             const exportData = {
                 packageName: pkg.name,
@@ -547,7 +560,36 @@
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            alert(`Package exported: ${webResources.length} web resource(s), ${entities.length} entit(ies), ${entityColumns.length} column(s)`);
+            hideProgressOverlay();
+            showToast(`Exported: ${webResources.length} web resource(s), ${entities.length} entit(ies), ${entityColumns.length} column(s)`);
+        }
+
+        function showProgressOverlay(title, done, total, label) {
+            const overlay = document.getElementById('exportProgressOverlay');
+            const heading = document.getElementById('exportProgressTitle');
+            const bar = document.getElementById('exportProgressBar');
+            const pct = document.getElementById('exportProgressPct');
+            const lbl = document.getElementById('exportProgressLabel');
+            const pctVal = total > 0 ? Math.round((done / total) * 100) : 0;
+            overlay.style.display = 'flex';
+            heading.innerText = title || 'Processing';
+            bar.style.width = pctVal + '%';
+            pct.innerText = pctVal + '%';
+            lbl.innerText = label || '';
+        }
+
+        function hideProgressOverlay() {
+            document.getElementById('exportProgressOverlay').style.display = 'none';
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('exportToast');
+            toast.className = '';
+            toast.id = 'exportToast';
+            toast.classList.add(type === 'error' ? 'error' : 'show-host');
+            document.getElementById('exportToastMsg').innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
         // IMPORT PACKAGE
@@ -565,7 +607,7 @@
                         const importData = JSON.parse(ev.target.result);
                         await importSolutionPackage(importData);
                     } catch (err) {
-                        alert('Failed to parse JSON file: ' + err.message);
+                        showToast('Failed to parse JSON file: ' + err.message, 'error');
                     }
                 };
                 reader.readAsText(file);
@@ -578,50 +620,118 @@
             const wrCount = (importData.webResources || []).length;
             const entityCount = (importData.entities || []).length;
             const colCount = (importData.entityColumns || []).length;
+            const totalSteps = wrCount + entityCount + colCount;
+            const sourceEntities = importData.entities || [];
+            const entityIdMap = {};
 
-            if (!wrCount && !entityCount && !colCount) return alert("Invalid package format");
+            async function resolveTargetEntityId(sourceEntityId) {
+                if (!sourceEntityId) return null;
+                if (entityIdMap[sourceEntityId]) return entityIdMap[sourceEntityId];
+
+                const sourceEntity = sourceEntities.find(e => e.id == sourceEntityId);
+                if (!sourceEntity) return null;
+
+                const targetEntity = await DBHandler.fetchEntityRecords(
+                    'entities',
+                    'id,name,physicalname',
+                    'name',
+                    'asc',
+                    `name='${sourceEntity.name}'`,
+                    false,
+                    1
+                );
+
+                if (targetEntity && targetEntity.length) {
+                    entityIdMap[sourceEntityId] = targetEntity[0].id;
+                    return targetEntity[0].id;
+                }
+
+                return null;
+            }
+
+            if (!wrCount && !entityCount && !colCount) {
+                showToast('Invalid package format', 'error');
+                return;
+            }
 
             if (!confirm(`Import "${importData.packageName}"?\n${wrCount} web resource(s), ${entityCount} entit(ies), ${colCount} column(s)`)) return;
 
             let imported = 0, updated = 0, errors = 0;
+            let done = 0;
+
+            showProgressOverlay('Importing Package', 0, totalSteps, 'Starting import...');
+
+            for (const ent of (importData.entities || [])) {
+                try {
+                    const existing = await DBHandler.fetchEntityRecords('entities','id,name,physicalname','name','asc',`name='${ent.name}'`,false,1);
+                    const existingId = existing && existing.length ? existing[0].id : null;
+                    await DBHandler.submitRecordData('entities', {
+                        name: ent.name, physicalname: ent.physicalname, icon: ent.icon
+                    }, existingId, false);
+
+                    const savedEntity = await DBHandler.fetchEntityRecords(
+                        'entities',
+                        'id,name,physicalname',
+                        'name',
+                        'asc',
+                        `name='${ent.name}'`,
+                        false,
+                        1
+                    );
+
+                    if (savedEntity && savedEntity.length) {
+                        entityIdMap[ent.id] = savedEntity[0].id;
+                    }
+
+                    existingId ? updated++ : imported++;
+                } catch (err) { console.error('Failed to import entity', ent.name, err); errors++; }
+                done++;
+                showProgressOverlay('Importing Package', done, totalSteps, `Importing entities... (${done}/${entityCount})`);
+            }
+
+            for (const col of (importData.entityColumns || [])) {
+                try {
+                    const resolvedEntityId = await resolveTargetEntityId(col.entityid);
+                    const resolvedLookupEntityId = await resolveTargetEntityId(col.lookupentityid);
+
+                    if (!resolvedEntityId) {
+                        console.error('Entity mapping not found for column', col.name, col.entityid);
+                        errors++;
+                        done++;
+                        showProgressOverlay('Importing Package', done, totalSteps, `Importing columns... (${done - entityCount}/${colCount})`);
+                        continue;
+                    }
+
+                    const existing = await DBHandler.fetchEntityRecords('entitycolumn','id','name','asc',`name='${col.name}' AND entityid='${resolvedEntityId}'`,false,1);
+                    const existingId = existing && existing.length ? existing[0].id : null;
+                    await DBHandler.submitRecordData('entitycolumn', {
+                        entityid: resolvedEntityId, name: col.name, physicalname: col.physicalname,
+                        columntype: col.columntype, lookupentityid: resolvedLookupEntityId
+                    }, existingId, false);
+                    existingId ? updated++ : imported++;
+                } catch (err) { console.error('Failed to import column', col.name, err); errors++; }
+                done++;
+                showProgressOverlay('Importing Package', done, totalSteps, `Importing columns... (${done - entityCount}/${colCount})`);
+            }
 
             for (const wr of (importData.webResources || [])) {
                 try {
+                    const resolvedEntityId = await resolveTargetEntityId(wr.entityid);
                     const existing = await DBHandler.fetchEntityRecords('webresource','id','name','asc',`name='${wr.name}'`,false,1);
                     const existingId = existing && existing.length ? existing[0].id : null;
                     await DBHandler.submitRecordData('webresource', {
                         name: wr.name, title: wr.title, pagetitle: wr.pagetitle,
                         resourcetype: wr.resourcetype, resourcetext: wr.resourcetext,
-                        entityid: wr.entityid, businessunitid: wr.businessunitid, icon: wr.icon
+                        entityid: resolvedEntityId, businessunitid: wr.businessunitid, icon: wr.icon
                     }, existingId, false);
                     existingId ? updated++ : imported++;
                 } catch (err) { console.error('Failed to import webresource', wr.name, err); errors++; }
+                done++;
+                showProgressOverlay('Importing Package', done, totalSteps, `Importing web resources... (${done - entityCount - colCount}/${wrCount})`);
             }
 
-            for (const ent of (importData.entities || [])) {
-                try {
-                    const existing = await DBHandler.fetchEntityRecords('entities','id','name','asc',`name='${ent.name}'`,false,1);
-                    const existingId = existing && existing.length ? existing[0].id : null;
-                    await DBHandler.submitRecordData('entities', {
-                        name: ent.name, physicalname: ent.physicalname, icon: ent.icon
-                    }, existingId, false);
-                    existingId ? updated++ : imported++;
-                } catch (err) { console.error('Failed to import entity', ent.name, err); errors++; }
-            }
-
-            for (const col of (importData.entityColumns || [])) {
-                try {
-                    const existing = await DBHandler.fetchEntityRecords('entitycolumn','id','name','asc',`name='${col.name}' AND entityid='${col.entityid}'`,false,1);
-                    const existingId = existing && existing.length ? existing[0].id : null;
-                    await DBHandler.submitRecordData('entitycolumn', {
-                        entityid: col.entityid, name: col.name, physicalname: col.physicalname,
-                        columntype: col.columntype, lookupentityid: col.lookupentityid
-                    }, existingId, false);
-                    existingId ? updated++ : imported++;
-                } catch (err) { console.error('Failed to import column', col.name, err); errors++; }
-            }
-
-            alert(`Import completed:\n${imported} new item(s) imported\n${updated} item(s) updated\n${errors} error(s)`);
+            hideProgressOverlay();
+            showToast(`Import completed: ${imported} new, ${updated} updated, ${errors} error(s)`, errors ? 'error' : 'success');
 
             await loadWebResources();
             await loadEntities();
@@ -639,7 +749,85 @@
         #solutionPackageGrid_toolbarItems {
             height: 10px !important;
         }
+
+        #exportProgressOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        #exportProgressBox {
+            background: #fff;
+            border-radius: 10px;
+            padding: 32px 40px;
+            min-width: 340px;
+            max-width: 90vw;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+        }
+        #exportProgressBox h6 {
+            font-weight: 600;
+            margin-bottom: 18px;
+            font-size: 1rem;
+        }
+        #exportProgressBar {
+            transition: width 0.2s ease;
+            background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+        }
+        #exportProgressPct {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0d6efd;
+            margin-top: 10px;
+        }
+        #exportProgressLabel {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 6px;
+        }
+        #exportToast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 10000;
+            min-width: 280px;
+            background: #198754;
+            color: #fff;
+            border-radius: 8px;
+            padding: 14px 20px;
+            font-size: 0.9rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        #exportToast.error {
+            background: #dc3545;
+        }
+        #exportToast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
     </style>
+
+    <!-- Export Progress Overlay -->
+    <div id="exportProgressOverlay">
+        <div id="exportProgressBox">
+            <h6><i class="fa fa-download me-2 text-primary"></i><span id="exportProgressTitle">Exporting Package</span></h6>
+            <div class="progress" style="height:18px; border-radius:9px;">
+                <div id="exportProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:0%"></div>
+            </div>
+            <div id="exportProgressPct">0%</div>
+            <div id="exportProgressLabel">Preparing...</div>
+        </div>
+    </div>
+
+    <!-- Export Toast -->
+    <div id="exportToast">
+        <i class="fa fa-check-circle me-2"></i><span id="exportToastMsg"></span>
+    </div>
 
 
 
