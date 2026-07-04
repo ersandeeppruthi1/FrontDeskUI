@@ -11,6 +11,7 @@
         //var apiURL = "";
     </script>
 
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
     <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
@@ -18,7 +19,7 @@
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
     <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220259"></script>
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
     <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
@@ -29,25 +30,42 @@
 
     <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <script src="https://apisit.vsservices.in/JS/ej2.min.vk02bdl5ad.js"></script>
-
-    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://free-crm.csharpasp.net/lib/syncfusion/css/bootstrap5.dvnzgvxkcq.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.css">
-    <link href="https://apisit.vsservices.in/css/app.css" rel="stylesheet">
-
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
 </head>
 
 <body>
+
 
     <div class="container2">
 
@@ -62,9 +80,7 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title">Add Web Resource</h5>
-                     <button type="button" class="close" data-bs-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
@@ -114,7 +130,7 @@
                             <div class="col-md-12">
                                 <label>Resource Text</label>
                                 <textarea id="wr_resourcetext" class="form-control" rows="12"
-                                    style="font-family: monospace;" onblur="handleResourceTextBlur()"></textarea>
+                                          style="font-family: monospace;" onblur="handleResourceTextBlur()"></textarea>
                             </div>
                         </div>
 
@@ -138,46 +154,14 @@
         let lookupEntityDropdown;
         let businessunitDropdown;
 
-        async function setIconFromEntityId(entityId) {
-            if (!entityId) return;
-
-            // Try from already loaded list first
-            const existing = entitiesData.find(e => e.id == entityId);
-            if (existing) {
-                document.getElementById('wr_icon').value = existing.icon || '';
-                return;
-            }
-
-            // Fallback: fetch just this entity (if not already loaded)
-            try {
-                const result = await DBHandler.fetchEntityRecords(
-                    'entities',
-                    'id,icon',
-                    'name',
-                    'asc',
-                    `id='${entityId}'`,
-                    false,
-                    1
-                );
-                if (result && result.length) {
-                    document.getElementById('wr_icon').value = result[0].icon || '';
-                }
-            } catch (err) {
-                console.error('Failed to load entity icon', err);
-            }
-        }
-
         var columns = [
             { type: 'checkbox', width: 50 },
             { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
             { field: 'name', headerText: 'Name', width: 180 },
-            { field: 'lookupEntityName', headerText: 'Lookup Entity', width: 180 },
-            { field: 'businessUnitName', headerText: 'Business Unit', width: 180 },
-            { field: 'title', headerText: 'Title', width: 180, visible: false },
-            { field: 'pagetitle', headerText: 'Page Title', width: 180, visible: false },
-            { field: 'resourcetype', headerText: 'Type', width: 120, visible: false },
-            { field: 'isactive', headerText: 'Active', width: 100, visible: false },
-            { field: 'icon', headerText: 'Icon', width: 120, visible: false },
+            { field: 'title', headerText: 'Title', width: 180 },
+            { field: 'pagetitle', headerText: 'Page Title', width: 180 },
+            { field: 'resourcetype', headerText: 'Type', width: 120 },
+            { field: 'isactive', headerText: 'Active', width: 100 },
             {
                 field: 'createdon', headerText: 'Created On', type: 'date',
                 format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 160, visible: false
@@ -218,8 +202,8 @@
                 pageSettings: { pageSize: 10 },
 
                 toolbar: [
+                    'ColumnChooser',
                     'Search',
-                     'ColumnChooser',
                     {
                         prefixIcon: 'e-icons e-excelexport',
                         tooltipText: 'Export Excel',
@@ -310,10 +294,7 @@
                             filterBarPlaceholder: 'Search entities...',
                             ignoreCase: true,
                             filterType: 'Contains',
-                            popupHeight: '250px',
-                            change: function (args) {
-                                setIconFromEntityId(args.value);
-                            }
+                            popupHeight: '250px'
                         });
                         lookupEntityDropdown.appendTo('#wr_lookupentityid');
 
@@ -375,7 +356,7 @@
 
             const data = await DBHandler.fetchEntityRecords(
                 'webresource',
-                'id,name,title,pagetitle,resourcetype,isactive,createdon,modifiedon,entityid,businessunitid,icon',
+                'id,name,title,pagetitle,resourcetype,isactive,createdon,modifiedon',
                 'modifiedon',
                 'desc',
                 '',
@@ -390,10 +371,7 @@
                 ...r,
                 srno: sr++,
                 isactive: r.isactive == 1 ? "Yes" : "No",
-                resourcetype: formatResourceType(r.resourcetype),
-                lookupEntityName: entitiesData.find(e => e.id == r.entityid)?.name || '',
-                businessUnitName: businessunitData.find(b => b.id == r.businessunitid)?.name || '',
-                icon: r.icon
+                resourcetype: formatResourceType(r.resourcetype)
             }));
 
             grid.refresh();
@@ -429,7 +407,7 @@
         async function loadEntitiesData() {
             entitiesData = await DBHandler.fetchEntityRecords(
                 'entities',
-                'id,name,icon',
+                'id,name',
                 'name',
                 'asc'
             ) || [];
@@ -478,10 +456,7 @@
                 ignoreCase: true,
                 filterType: 'Contains',
                 popupHeight: '250px',
-                value: r.entityid || null,
-                change: function (args) {
-                    setIconFromEntityId(args.value);
-                }
+                value: r.entityid || null
             });
             lookupEntityDropdown.appendTo('#wr_lookupentityid');
 
@@ -501,7 +476,6 @@
             document.getElementById('wr_name').value = r.name;
             document.getElementById('wr_title').value = r.title;
             document.getElementById('wr_pagetitle').value = r.pagetitle;
-            document.getElementById('wr_icon').value = r.icon || '';
             let typeValue = '';
             switch (r.resourcetype) {
                 case "HTML": typeValue = "2"; break;
@@ -531,8 +505,9 @@
 
                 const data = fullRecord[0];
 
-                // 3️⃣ Update textarea with resourcetext
+                // 3️⃣ Update textarea with resourcetext and icon
                 document.getElementById('wr_resourcetext').value = data.resourcetext || '';
+                document.getElementById('wr_icon').value = data.icon || '';
                 if (lookupEntityDropdown) {
                     lookupEntityDropdown.value = data.entityid || null;
                 }
@@ -557,7 +532,7 @@
         // ---------- EXTRACT BODY CONTENT ----------
         function extractBodyContent(htmlText) {
             const resourceType = document.getElementById('wr_resourcetype').value;
-            
+
             // Only apply to HTML resources (type = 2)
             if (resourceType !== '2') {
                 return htmlText;
@@ -566,16 +541,16 @@
             // Check if it contains <body> tag
             const bodyStartRegex = /<body[^>]*>/i;
             const bodyEndRegex = /<\/body>/i;
-            
+
             const bodyStartMatch = htmlText.match(bodyStartRegex);
             const bodyEndMatch = htmlText.match(bodyEndRegex);
-            
+
             if (bodyStartMatch && bodyEndMatch) {
                 const startIndex = htmlText.indexOf(bodyStartMatch[0]) + bodyStartMatch[0].length;
                 const endIndex = htmlText.indexOf(bodyEndMatch[0]);
                 return htmlText.substring(startIndex, endIndex).trim();
             }
-            
+
             // If no body tags found, return as is
             return htmlText;
         }
@@ -639,11 +614,11 @@
 
 
         // ---------- DOCUMENT READY ----------
-        $(document).ready(async function () {
-            await loadEntitiesData();
-            await loadBusinessunitData();
+        $(document).ready(function () {
             initGrid();
             loadWebResources();
+            loadEntitiesData();
+            loadBusinessunitData();
         });
 
     </script>
@@ -653,7 +628,6 @@
             height: 10px !important;
         }
     </style>
-
 
 </body>
 

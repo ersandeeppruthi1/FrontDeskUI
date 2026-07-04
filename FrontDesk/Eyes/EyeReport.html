@@ -257,6 +257,11 @@
                         tooltipText: 'Export PDF',
                         id: 'pdfExport'
                     },
+                    {
+                        prefixIcon: 'e-icons e-refresh',
+                        tooltipText: 'Refresh',
+                        id: 'refreshGrid'
+                    },
                     { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
                     { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
                     { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' }
@@ -279,6 +284,10 @@
                             pageOrientation: 'Landscape',
                             pageSize: 'A4'
                         });
+                    }
+
+                    if (args.item.id === 'refreshGrid') {
+                        loadEyeRecords();
                     }
 
                     if (args.item.id === 'new') {
