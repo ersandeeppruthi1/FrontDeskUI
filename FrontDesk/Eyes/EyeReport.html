@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+<body>
+    <div class="container2">
+        <div class="toolbar" style="margin-bottom:10px;">
+            <div class="row g-3 align-items-end">
+                <div class="col-sm-6 col-md-3">
+                    <label for="startDate">From date</label>
+                    <input id="startDate" class="form-control" datatype="date" defaultValue="currentDate"
+                           onchange="loadEyeRecords()">
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label for="endDate">To date</label>
+                    <input id="endDate" class="form-control" datatype="date" defaultValue="currentDate"
+                           onchange="loadEyeRecords()">
+                </div>
+            </div>
+        </div>
+        <div id="eyeGrid"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="eyeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Eye Examination</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="eyeForm">
+                        <!-- Patient Search -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Patient Id<span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="patientid"
+                                           onfocus="clearPreviousValue();" onchange="clearBelowFields()" required
+                                           onkeyup="handleKeyPress(event)" onblur="patientSearchClick()" min="1"
+                                           max="9999999999">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" id="go-button"
+                                                onclick="patientSearchClick()">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Patient Detail<span class="text-danger">*</span></label>
+                                <input id="patientDetail" class="form-control" datatype="text" disabled />
+                                <input id="patientguid" datatype="text" style="display:none;" />
+                            </div>
+                        </div>
+
+                        <!-- Examination Date -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Examination Date<span class="text-danger">*</span></label>
+                                <input id="examinationDate" class="form-control" datatype="date"
+                                       defaultValue="currentDate" required />
+                            </div>
+                        </div>
+
+                        <!-- Inspection -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>Inspection</label>
+                                <textarea id="eye_inspection" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Spec Provided -->
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>Spec Provided</label>
+                                <select id="eye_specprovided" class="form-control" onchange="toggleSpecFields()">
+                                    <option value="">Select</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4" id="specNumberRearField" style="display:none;">
+                                <label>Spec Number Rear</label>
+                                <input type="text" id="eye_specnumberrear" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4" id="specNumberFarField" style="display:none;">
+                                <label>Spec Number Far</label>
+                                <input type="text" id="eye_specnumberfar" class="form-control" />
+                            </div>
+                        </div>
+
+                        <!-- Operation -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Operation</label>
+                                <select id="eye_operation" class="form-control" onchange="toggleOperationDate()">
+                                    <option value="">Select</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6" id="operationDateField" style="display:none;">
+                                <label>Operation Date</label>
+                                <input type="date" id="eye_operationdate" class="form-control" />
+                            </div>
+                        </div>
+
+                        <!-- Medication -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>Medication</label>
+                                <textarea id="eye_medication" class="form-control" rows="4"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="saveEyeRecord()">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        let eyeGrid;
+        let editingEyeId = null;
+        let previousPatientId = null;
+
+        var eyeColumns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+            { field: 'examinationdate', headerText: 'Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 130 },
+            { field: 'patientname', headerText: 'Patient Name', width: 200 },
+            { field: 'inspection', headerText: 'Inspection', width: 200 },
+            { field: 'specprovided', headerText: 'Spec Provided', width: 120 },
+            { field: 'specnumberrear', headerText: 'Spec Number Rear', width: 150 },
+            { field: 'specnumberfar', headerText: 'Spec Number Far', width: 150 },
+            { field: 'operation', headerText: 'Operation', width: 100 },
+            { field: 'operationdate', headerText: 'Operation Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 150 },
+            { field: 'medication', headerText: 'Medication', width: 200 },
+            { field: 'modifiedon', headerText: 'Modified On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 160 },
+            { field: 'patientid', visible: false },
+            { field: 'uhid', visible: false },
+            { field: 'id', visible: false }
+        ];
+
+        // INIT GRID
+        function initGrid() {
+            ej.grids.Grid.Inject(
+                ej.grids.Filter,
+                ej.grids.Group,
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            eyeGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                pageSettings: { pageSize: 10 },
+                showColumnChooser: true,
+                allowExcelExport: true,
+                allowPdfExport: true,
+
+                toolbar: [
+                    'Search',
+                    'ColumnChooser',
+                    {
+                        prefixIcon: 'e-icons e-excelexport',
+                        tooltipText: 'Export Excel',
+                        id: 'excelExport'
+                    },
+                    {
+                        prefixIcon: 'e-icons e-pdfexport',
+                        tooltipText: 'Export PDF',
+                        id: 'pdfExport'
+                    },
+                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' }
+                ],
+
+                columns: eyeColumns,
+
+                toolbarClick: function (args) {
+                    if (args.item.id === 'excelExport') {
+                        eyeGrid.excelExport({
+                            fileName: `EyeReport_${formatDate(new Date())}.xlsx`,
+                            exportType: 'AllPages'
+                        });
+                    }
+
+                    if (args.item.id === 'pdfExport') {
+                        eyeGrid.pdfExport({
+                            fileName: `EyeReport_${formatDate(new Date())}.pdf`,
+                            exportType: 'CurrentPage',
+                            pageOrientation: 'Landscape',
+                            pageSize: 'A4'
+                        });
+                    }
+
+                    if (args.item.id === 'new') {
+                        clearEyeForm();
+                        editingEyeId = null;
+                        document.querySelector('#eyeModal .modal-title').innerText = "Add Eye Examination";
+                        openEyeModal();
+                    }
+
+                    if (args.item.id === 'edit') {
+                        editEyeRecord();
+                    }
+
+                    if (args.item.id === 'delete') {
+                        deleteEyeRecord();
+                    }
+                }
+            });
+
+            eyeGrid.appendTo('#eyeGrid');
+        }
+
+        // LOAD DATA
+        async function loadEyeRecords() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            let filterString = '';
+            if (startDate && endDate) {
+                filterString = `examinationdate >= '${startDate}' AND examinationdate <= '${endDate}'`;
+            }
+
+            const data = await DBHandler.fetchEntityRecords(
+                'eyeexamination',
+                'id,patientid,uhid,patientname,examinationdate,inspection,specprovided,specnumberrear,specnumberfar,operation,operationdate,medication,modifiedon',
+                'modifiedon',
+                'desc',
+                filterString,
+                true,
+                0,
+                ''
+            );
+
+            let sr = 1;
+            eyeGrid.dataSource = (data || []).map(r => ({
+                ...r,
+                srno: sr++
+            }));
+
+            eyeGrid.refresh();
+        }
+
+        // MODAL
+        function openEyeModal() {
+            const modal = new bootstrap.Modal(document.getElementById('eyeModal'), {
+                focus: false
+            });
+            modal.show();
+        }
+
+        function clearEyeForm() {
+            document.getElementById('eyeForm').reset();
+            document.getElementById('patientDetail').value = '';
+            document.getElementById('patientguid').value = '';
+            previousPatientId = null;
+            toggleSpecFields();
+            toggleOperationDate();
+        }
+
+        // PATIENT SEARCH
+        function clearPreviousValue() {
+            previousPatientId = document.getElementById('patientid').value;
+        }
+
+        function clearBelowFields() {
+            document.getElementById('patientDetail').value = '';
+            document.getElementById('patientguid').value = '';
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                patientSearchClick();
+            }
+        }
+
+        async function patientSearchClick() {
+            const patientId = document.getElementById('patientid').value;
+
+            if (!patientId || patientId === previousPatientId) return;
+
+            try {
+                const patients = await DBHandler.fetchEntityRecords(
+                    'patientmaster',
+                    'id,name,mobilenumber,uhid',
+                    'createdon',
+                    'desc',
+                    `uhid='${patientId}'`,
+                    false,
+                    1
+                );
+
+                if (patients && patients.length > 0) {
+                    const patient = patients[0];
+                    document.getElementById('patientDetail').value = `${patient.name} - ${patient.mobilenumber}`;
+                    document.getElementById('patientguid').value = patient.id;
+                    previousPatientId = patientId;
+                } else {
+                    alert('Patient not found');
+                    document.getElementById('patientDetail').value = '';
+                    document.getElementById('patientguid').value = '';
+                }
+            } catch (err) {
+                console.error('Patient search error', err);
+                alert('Error searching for patient');
+            }
+        }
+
+        // TOGGLE CONDITIONAL FIELDS
+        function toggleSpecFields() {
+            const specProvided = document.getElementById('eye_specprovided').value;
+            const rearField = document.getElementById('specNumberRearField');
+            const farField = document.getElementById('specNumberFarField');
+
+            if (specProvided === 'Yes') {
+                rearField.style.display = 'block';
+                farField.style.display = 'block';
+            } else {
+                rearField.style.display = 'none';
+                farField.style.display = 'none';
+                document.getElementById('eye_specnumberrear').value = '';
+                document.getElementById('eye_specnumberfar').value = '';
+            }
+        }
+
+        function toggleOperationDate() {
+            const operation = document.getElementById('eye_operation').value;
+            const dateField = document.getElementById('operationDateField');
+
+            if (operation === 'Yes') {
+                dateField.style.display = 'block';
+            } else {
+                dateField.style.display = 'none';
+                document.getElementById('eye_operationdate').value = '';
+            }
+        }
+
+        // EDIT
+        async function editEyeRecord() {
+            const selected = eyeGrid.getSelectedRecords();
+            if (selected.length !== 1) {
+                return alert("Select one record to edit");
+            }
+
+            const r = selected[0];
+            editingEyeId = r.id;
+
+            // Populate patient info
+            document.getElementById('patientid').value = r.uhid;
+            document.getElementById('patientDetail').value = r.patientname;
+            document.getElementById('patientguid').value = r.patientid;
+            previousPatientId = r.uhid;
+
+            // Populate form fields
+            document.getElementById('examinationDate').value = r.examinationdate ? r.examinationdate.split('T')[0] : '';
+            document.getElementById('eye_inspection').value = r.inspection || '';
+            document.getElementById('eye_specprovided').value = r.specprovided || '';
+            document.getElementById('eye_specnumberrear').value = r.specnumberrear || '';
+            document.getElementById('eye_specnumberfar').value = r.specnumberfar || '';
+            document.getElementById('eye_operation').value = r.operation || '';
+            document.getElementById('eye_operationdate').value = r.operationdate ? r.operationdate.split('T')[0] : '';
+            document.getElementById('eye_medication').value = r.medication || '';
+
+            toggleSpecFields();
+            toggleOperationDate();
+
+            document.querySelector('#eyeModal .modal-title').innerText = "Edit Eye Examination";
+            openEyeModal();
+        }
+
+        // SAVE
+        async function saveEyeRecord() {
+            const patientguid = document.getElementById('patientguid').value;
+            const examinationDate = document.getElementById('examinationDate').value;
+
+            if (!patientguid) return alert("Patient is required");
+            if (!examinationDate) return alert("Examination Date is required");
+
+            const patientId = document.getElementById('patientid').value;
+            const patientDetail = document.getElementById('patientDetail').value;
+
+            await DBHandler.submitRecordData('eyeexamination', {
+                patientid: patientguid,
+                uhid: patientId,
+                patientname: patientDetail,
+                examinationdate: examinationDate,
+                inspection: document.getElementById('eye_inspection').value,
+                specprovided: document.getElementById('eye_specprovided').value,
+                specnumberrear: document.getElementById('eye_specnumberrear').value,
+                specnumberfar: document.getElementById('eye_specnumberfar').value,
+                operation: document.getElementById('eye_operation').value,
+                operationdate: document.getElementById('eye_operationdate').value,
+                medication: document.getElementById('eye_medication').value
+            }, editingEyeId, false);
+
+            bootstrap.Modal.getInstance(document.getElementById('eyeModal')).hide();
+
+            editingEyeId = null;
+            loadEyeRecords();
+        }
+
+        // DELETE
+        async function deleteEyeRecord() {
+            const selected = eyeGrid.getSelectedRecords();
+            if (!selected.length) return alert("Select record(s) to delete");
+
+            if (!confirm("Delete selected eye examination record(s)?")) return;
+
+            const ids = selected.map(r => r.id);
+
+            await deleteRecordData('eyeexamination', ids, true, true);
+
+            loadEyeRecords();
+        }
+
+        function formatDate(date) {
+            const d = new Date(date);
+            const month = ('0' + (d.getMonth() + 1)).slice(-2);
+            const day = ('0' + d.getDate()).slice(-2);
+            const year = d.getFullYear();
+            return `${year}${month}${day}`;
+        }
+
+        $(document).ready(function () {
+            initGrid();
+            loadEyeRecords();
+        });
+    </script>
+
+</body>
+
+</html>

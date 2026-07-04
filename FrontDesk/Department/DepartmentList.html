@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+</head>
+
+
+<body>
+
+
+    <div class="container2">
+        <div id="departmentGrid"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="departmentModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Department</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="departmentForm">
+
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label>Name <span class="text-danger">*</span></label>
+                                <input type="text" id="dept_name" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Slip Display Name</label>
+                                <input type="text" id="dept_slipdisplayname" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Group Name <span class="text-danger">*</span></label>
+                                <input type="text" id="dept_groupname" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Price <span class="text-danger">*</span></label>
+                                <input type="number" step="0.01" id="dept_price" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Category <span class="text-danger">*</span></label>
+                                <input type="text" id="dept_category" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Is Dropdown</label>
+                                <select id="dept_isdropdown" class="form-control">
+                                    <option value="">Select</option>
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveDepartment()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        let departmentGrid;
+        let editingDepartmentId = null;
+        let departmentModal;
+
+        var departmentColumns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No', width: 80, textAlign: 'Right' },
+            { field: 'name', headerText: 'Name', width: 200 },
+            { field: 'slipdisplayname', headerText: 'Slip Display Name', width: 180 },
+            { field: 'groupname', headerText: 'Group Name', width: 150 },
+            { field: 'price', headerText: 'Price', width: 120, format: 'C2' },
+            { field: 'category', headerText: 'Category', width: 120 },
+            { field: 'isdropdown', headerText: 'Is Dropdown', width: 120 },
+            {
+                field: 'modifiedon',
+                headerText: 'Modified On',
+                type: 'date',
+                format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' },
+                width: 160
+            },
+            { field: 'stockitem', visible: false },
+            { field: 'isactive', visible: false },
+            { field: 'createdon', visible: false },
+            { field: 'id', visible: false }
+        ];
+
+        // INIT GRID
+        function initDepartmentGrid() {
+
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            departmentGrid = new ej.grids.Grid({
+
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                pageSettings: { pageSize: 10 },
+
+                toolbar: [
+                    'Search',
+                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' }
+                ],
+
+                columns: departmentColumns,
+
+                toolbarClick: function (args) {
+
+                    if (args.item.id === 'new') {
+                        clearDepartmentForm();
+                        editingDepartmentId = null;
+                        document.querySelector('#departmentModal .modal-title').innerText = "Add Department";
+                        openDepartmentModal();
+                    }
+
+                    if (args.item.id === 'edit') {
+                        editDepartment();
+                    }
+
+                    if (args.item.id === 'delete') {
+                        deleteDepartment();
+                    }
+                }
+            });
+
+            departmentGrid.appendTo('#departmentGrid');
+        }
+
+
+        // LOAD DATA
+        async function loadDepartments() {
+
+            const data = await DBHandler.fetchEntityRecords(
+                'frontdeskdepartment',
+                '*',
+                'modifiedon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
+
+            let sr = 1;
+
+            departmentGrid.dataSource = (data || []).map(r => ({
+                ...r,
+                srno: sr++,
+                isactiveid: r.isactive,
+                isactive: r.isactive == 1 ? "Yes" : "No"
+            }));
+
+            departmentGrid.refresh();
+        }
+
+
+        // MODAL
+        function openDepartmentModal() {
+            if (!departmentModal) {
+                departmentModal = new bootstrap.Modal(document.getElementById('departmentModal'));
+            }
+            departmentModal.show();
+        }
+
+        function clearDepartmentForm() {
+            document.getElementById('departmentForm').reset();
+        }
+
+
+        // EDIT
+        function editDepartment() {
+
+            const selected = departmentGrid.getSelectedRecords();
+            if (selected.length !== 1) {
+                return alert("Select one record to edit");
+            }
+
+            const r = selected[0];
+            editingDepartmentId = r.id;
+
+            document.getElementById('dept_name').value = r.name;
+            document.getElementById('dept_slipdisplayname').value = r.slipdisplayname;
+            document.getElementById('dept_groupname').value = r.groupname;
+            document.getElementById('dept_price').value = r.price;
+            document.getElementById('dept_category').value = r.category;
+            document.getElementById('dept_isdropdown').value = r.isdropdown;
+
+            document.querySelector('#departmentModal .modal-title').innerText = "Edit Department";
+
+            openDepartmentModal();
+        }
+
+
+        // SAVE
+        async function saveDepartment() {
+
+            const name = document.getElementById('dept_name').value.trim();
+            const groupname = document.getElementById('dept_groupname').value.trim();
+            const price = document.getElementById('dept_price').value.trim();
+            const category = document.getElementById('dept_category').value.trim();
+
+            if (!name) return alert("Name is required");
+            if (!groupname) return alert("Group Name is required");
+            if (!price) return alert("Price is required");
+            if (!category) return alert("Category is required");
+
+            await DBHandler.submitRecordData('frontdeskdepartment', {
+
+                name: name,
+                slipdisplayname: document.getElementById('dept_slipdisplayname').value,
+                groupname: groupname,
+                price: price,
+                category: category,
+                isdropdown: document.getElementById('dept_isdropdown').value,
+                stockitem: '0',
+
+            }, editingDepartmentId, false);
+
+            bootstrap.Modal.getInstance(document.getElementById('departmentModal')).hide();
+
+            editingDepartmentId = null;
+            loadDepartments();
+        }
+
+
+        // DELETE
+        async function deleteDepartment() {
+
+            const selected = departmentGrid.getSelectedRecords();
+            if (!selected.length) return alert("Select record(s) to delete");
+
+            if (!confirm("Delete selected department(s)?")) return;
+
+            const ids = selected.map(r => r.id);
+
+            await deleteRecordData('frontdeskdepartment', ids, true, true);
+
+            loadDepartments();
+        }
+
+        $(document).ready(function () {
+            initDepartmentGrid();
+            loadDepartments();
+        });
+    </script>
+    <style>
+        #departmentGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
+
+
+
+</body>
+
+</html>

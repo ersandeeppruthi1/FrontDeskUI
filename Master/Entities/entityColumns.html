@@ -89,7 +89,7 @@
                             <div class="col-md-6">
                                 <label>Name </label>
                                 <input type="text" id="column_name" class="form-control" required
-                                    oninput="bindEntityNameField()" />
+                                       oninput="bindEntityNameField()" />
                             </div>
                             <div class="col-md-6">
                                 <label>Physical Name </label>
@@ -117,6 +117,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-primary" onclick="saveEntityColumn()"> Save </button>
+                    <button class="btn btn-success" onclick="saveAndNewEntityColumn()"> Save & New </button>
                     <button class="btn btn-secondary" data-bs-dismiss="modal"> Close </button>
                 </div>
             </div>
@@ -180,11 +181,6 @@
                         text: 'Delete',
                         prefixIcon: 'e-icons e-delete',
                         id: 'deleteColumn'
-                    },
-                    {
-                        text: 'Copy Schema',
-                        prefixIcon: 'e-icons e-copy',
-                        id: 'copySchema'
                     }
                 ],
 
@@ -270,10 +266,6 @@
                         const ids = selected.map(r => r.id);
                         await deleteRecordData('entitycolumn', ids, true, true);
                         loadEntityColumns();
-                    }
-
-                    if (args.item.id === 'copySchema') {
-                        copySchemaToClipboard();
                     }
                 }
             });
@@ -363,7 +355,7 @@
                 .innerText = "Edit Entity Column";
         }
 
-        async function saveEntityColumn() {
+        async function saveEntityColumn(closeModal = true) {
 
             if (!entityDropdown.value)
                 return alert("Please select entity");
@@ -379,60 +371,44 @@
                 lookupentityid: lookupDropdown.value,
             }, editingColumnId, false);
 
-            bootstrap.Modal.getInstance(entityColumnModal).hide();
+            if (closeModal) {
+                bootstrap.Modal.getInstance(entityColumnModal).hide();
+            }
+
             loadEntityColumns();
         }
 
-        async function copySchemaToClipboard() {
-            const selected = entityColumnGrid.getSelectedRecords();
-            if (!selected.length) {
-                alert("Select at least one column");
-                return;
-            }
+        async function saveAndNewEntityColumn() {
+            await saveEntityColumn(false);
 
-            const uniqueEntityIds = [...new Set(selected.map(r => r.entityid))];
-            if (uniqueEntityIds.length !== 1) {
-                alert("Please select columns from one entity only");
-                return;
-            }
+            // Save entity value before clearing
+            const savedEntityId = entityDropdown ? entityDropdown.value : null;
 
-            const tableName = formatSqlName(selected[0].entityname || selected[0].entityid || 'entity_table');
-            const lines = [];
-            lines.push(`CREATE TABLE ${tableName} (`);
+            // Clear form for new entry
+            editingColumnId = null;
 
-            selected.forEach((row, index) => {
-                const columnName = formatSqlName(row.physicalname || row.name || `column_${index + 1}`);
-                const dataType = (row.columntype || 'VARCHAR(255)').toUpperCase();
-                const suffix = index === selected.length - 1 ? '' : ',';
-                lines.push(`  ${columnName} ${dataType}${suffix}`);
-            });
+            // Manually clear specific fields instead of form.reset()
+            document.getElementById('column_name').value = '';
+            document.getElementById('column_physicalname').value = '';
+            document.getElementById('column_type').value = 'VARCHAR(255)';
 
-            lines.push(');');
-            const schema = lines.join('\n');
+            // Reset only lookup dropdown
+            if (lookupDropdown) lookupDropdown.value = null;
 
-            try {
-                await navigator.clipboard.writeText(schema);
-            } catch (error) {
-                const helper = document.createElement('textarea');
-                helper.value = schema;
-                helper.style.position = 'fixed';
-                helper.style.opacity = '0';
-                document.body.appendChild(helper);
-                helper.focus();
-                helper.select();
-                document.execCommand('copy');
-                document.body.removeChild(helper);
-            }
+            // Restore entity dropdown after a slight delay to ensure DOM is ready
+            setTimeout(() => {
+                if (entityDropdown && savedEntityId) {
+                    entityDropdown.value = savedEntityId;
+                }
+            }, 100);
 
-            alert('Schema copied to clipboard');
-        }
+            // Update modal title
+            document.querySelector('#entityColumnModal .modal-title').innerText = "Add Entity Column";
 
-        function formatSqlName(value) {
-            return String(value)
-                .trim()
-                .toLowerCase()
-                .replace(/\s+/g, '_')
-                .replace(/[^a-z0-9_]/g, '') || 'entity_table';
+            // Focus on first field
+            setTimeout(() => {
+                document.getElementById('column_name').focus();
+            }, 150);
         }
 
         function bindEntityNameField() {
