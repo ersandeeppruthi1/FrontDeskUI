@@ -124,7 +124,7 @@
                                         <tbody id="sp_avail_body"></tbody>
                                     </table>
                                 </div>
-                            </div>  
+                            </div>
 
                             <div class="col-md-12">
                                 <label>Selected Components</label>
@@ -311,15 +311,15 @@
 
         // LOAD WEB RESOURCES
         async function loadWebResources() {
-            webResourcesData = await DBHandler.fetchEntityRecords('webresource','id,name,title,resourcetype','name','asc','',true,0,'') || [];
+            webResourcesData = await DBHandler.fetchEntityRecords('webresource', 'id,name,title,resourcetype', 'name', 'asc', '', true, 0, '') || [];
         }
 
         async function loadEntities() {
-            entitiesData = await DBHandler.fetchEntityRecords('entities','id,name,physicalname','name','asc','',true,0,'') || [];
+            entitiesData = await DBHandler.fetchEntityRecords('entities', 'id,name,physicalname', 'name', 'asc', '', true, 0, '') || [];
         }
 
         async function loadEntityColumns() {
-            entityColumnsData = await DBHandler.fetchEntityRecords('entitycolumn','id,name,entityid,physicalname,columntype','name','asc','',true,0,'') || [];
+            entityColumnsData = await DBHandler.fetchEntityRecords('entitycolumn', 'id,name,entityid,physicalname,columntype', 'name', 'asc', '', true, 0, '') || [];
         }
 
 
@@ -362,10 +362,10 @@
                 }
                 tbody.innerHTML = filtered.map(r =>
                     `<tr>
-                        <td><button type="button" class="btn btn-sm btn-success py-0 px-1" onclick="addComponent('${r.id}','webresource')"><i class="fa fa-plus"></i> Add</button></td>
-                        <td>${r.name}</td>
-                        <td><span class="badge bg-secondary">${r.resourcetype || ''}</span></td>
-                    </tr>`
+                            <td><button type="button" class="btn btn-sm btn-success py-0 px-1" onclick="addComponent('${r.id}','webresource')"><i class="fa fa-plus"></i> Add</button></td>
+                            <td>${r.name}</td>
+                            <td><span class="badge bg-secondary">${r.resourcetype || ''}</span></td>
+                        </tr>`
                 ).join('');
             } else {
                 document.getElementById('sp_avail_col3_header').innerText = 'Columns';
@@ -379,10 +379,10 @@
                 tbody.innerHTML = filtered.map(r => {
                     const colCount = entityColumnsData.filter(c => c.entityid == r.id).length;
                     return `<tr>
-                        <td><button type="button" class="btn btn-sm btn-success py-0 px-1" onclick="addComponent('${r.id}','entity')"><i class="fa fa-plus"></i> Add</button></td>
-                        <td>${r.name}</td>
-                        <td><span class="badge bg-info text-dark">${colCount} col(s)</span></td>
-                    </tr>`;
+                            <td><button type="button" class="btn btn-sm btn-success py-0 px-1" onclick="addComponent('${r.id}','entity')"><i class="fa fa-plus"></i> Add</button></td>
+                            <td>${r.name}</td>
+                            <td><span class="badge bg-info text-dark">${colCount} col(s)</span></td>
+                        </tr>`;
                 }).join('');
             }
         }
@@ -427,10 +427,10 @@
             const typeBadge = { webresource: 'bg-primary', entity: 'bg-success', entitycolumn: 'bg-secondary' };
             tbody.innerHTML = selectedComponents.map(r =>
                 `<tr>
-                    <td>${r.name}</td>
-                    <td><span class="badge ${typeBadge[r.type] || 'bg-secondary'}">${r.type}</span></td>
-                    <td><button type="button" class="btn btn-sm btn-danger py-0 px-1" onclick="removeComponent('${r.id}','${r.type}')"><i class="fa fa-times"></i></button></td>
-                </tr>`
+                        <td>${r.name}</td>
+                        <td><span class="badge ${typeBadge[r.type] || 'bg-secondary'}">${r.type}</span></td>
+                        <td><button type="button" class="btn btn-sm btn-danger py-0 px-1" onclick="removeComponent('${r.id}','${r.type}')"><i class="fa fa-times"></i></button></td>
+                    </tr>`
             ).join('');
             const jsonOut = {
                 webResources: selectedComponents.filter(r => r.type === 'webresource').map(r => ({ id: r.id, name: r.name })),
@@ -572,7 +572,7 @@
 
             const webResources = [];
             for (const c of wrItems) {
-                const data = await DBHandler.fetchEntityRecords('webresource','*','name','asc',`id='${c.id}'`,false,1);
+                const data = await DBHandler.fetchEntityRecords('webresource', '*', 'name', 'asc', `id='${c.id}'`, false, 1);
                 if (data && data.length) webResources.push(data[0]);
                 done++;
                 showProgressOverlay('Exporting Package', done, totalSteps, `Fetching web resources... (${webResources.length}/${wrItems.length})`);
@@ -580,7 +580,7 @@
 
             const entities = [];
             for (const c of entityItems) {
-                const data = await DBHandler.fetchEntityRecords('entities','*','name','asc',`id='${c.id}'`,false,1);
+                const data = await DBHandler.fetchEntityRecords('entities', '*', 'name', 'asc', `id='${c.id}'`, false, 1);
                 if (data && data.length) entities.push(data[0]);
                 done++;
                 showProgressOverlay('Exporting Package', done, totalSteps, `Fetching entities... (${entities.length}/${entityItems.length})`);
@@ -588,7 +588,7 @@
 
             const entityColumns = [];
             for (const c of colItems) {
-                const data = await DBHandler.fetchEntityRecords('entitycolumn','*','name','asc',`id='${c.id}'`,false,1);
+                const data = await DBHandler.fetchEntityRecords('entitycolumn', '*', 'name', 'asc', `id='${c.id}'`, false, 1);
                 if (data && data.length) entityColumns.push(data[0]);
                 done++;
                 showProgressOverlay('Exporting Package', done, totalSteps, `Fetching columns... (${entityColumns.length}/${colItems.length})`);
@@ -719,11 +719,15 @@
 
             for (const ent of (importData.entities || [])) {
                 try {
-                    const existing = await DBHandler.fetchEntityRecords('entities','id,name,physicalname','name','asc',`name='${ent.name}'`,false,1);
+                    const existing = await DBHandler.fetchEntityRecords('entities', 'id,name,physicalname', 'name', 'asc', `name='${ent.name}'`, false, 1);
                     const existingId = existing && existing.length ? existing[0].id : null;
-                    await DBHandler.submitRecordData('entities', {
+                    const recordData = {
                         name: ent.name, physicalname: ent.physicalname, icon: ent.icon
-                    }, existingId, false);
+                    };
+                    if (!existingId) {
+                        recordData.id = ent.id;
+                    }
+                    await DBHandler.submitRecordData('entities', recordData, existingId, false);
 
                     const savedEntity = await DBHandler.fetchEntityRecords(
                         'entities',
@@ -758,12 +762,16 @@
                         continue;
                     }
 
-                    const existing = await DBHandler.fetchEntityRecords('entitycolumn','id','name','asc',`name='${col.name}' AND entityid='${resolvedEntityId}'`,false,1);
+                    const existing = await DBHandler.fetchEntityRecords('entitycolumn', 'id', 'name', 'asc', `name='${col.name}' AND entityid='${resolvedEntityId}'`, false, 1);
                     const existingId = existing && existing.length ? existing[0].id : null;
-                    await DBHandler.submitRecordData('entitycolumn', {
+                    const recordData = {
                         entityid: resolvedEntityId, name: col.name, physicalname: col.physicalname,
                         columntype: col.columntype, lookupentityid: resolvedLookupEntityId
-                    }, existingId, false);
+                    };
+                    if (!existingId) {
+                        recordData.id = col.id;
+                    }
+                    await DBHandler.submitRecordData('entitycolumn', recordData, existingId, false);
                     existingId ? updated++ : imported++;
                 } catch (err) { console.error('Failed to import column', col.name, err); errors++; }
                 done++;
@@ -773,13 +781,18 @@
             for (const wr of (importData.webResources || [])) {
                 try {
                     const resolvedEntityId = await resolveTargetEntityId(wr.entityid);
-                    const existing = await DBHandler.fetchEntityRecords('webresource','id','name','asc',`name='${wr.name}'`,false,1);
+                    const existing = await DBHandler.fetchEntityRecords('webresource', 'id', 'name', 'asc', `id='${wr.id}'`, false, 1);
                     const existingId = existing && existing.length ? existing[0].id : null;
-                    await DBHandler.submitRecordData('webresource', {
+                    const recordData = {
                         name: wr.name, title: wr.title, pagetitle: wr.pagetitle,
                         resourcetype: wr.resourcetype, resourcetext: wr.resourcetext,
                         entityid: resolvedEntityId, businessunitid: wr.businessunitid, icon: wr.icon
-                    }, existingId, false);
+                    };
+                    debugger;
+                    if (!existingId) {
+                        recordData.id = wr.id;
+                    }
+                    await DBHandler.submitRecordData('webresource', recordData, existingId, false);
                     existingId ? updated++ : imported++;
                 } catch (err) { console.error('Failed to import webresource', wr.name, err); errors++; }
                 done++;
@@ -956,6 +969,7 @@
             align-items: center;
             justify-content: center;
         }
+
         #exportProgressBox {
             background: #fff;
             border-radius: 10px;
@@ -965,26 +979,31 @@
             text-align: center;
             box-shadow: 0 8px 32px rgba(0,0,0,0.22);
         }
-        #exportProgressBox h6 {
-            font-weight: 600;
-            margin-bottom: 18px;
-            font-size: 1rem;
-        }
+
+            #exportProgressBox h6 {
+                font-weight: 600;
+                margin-bottom: 18px;
+                font-size: 1rem;
+            }
+
         #exportProgressBar {
             transition: width 0.2s ease;
             background: linear-gradient(90deg, #0d6efd, #0dcaf0);
         }
+
         #exportProgressPct {
             font-size: 1.3rem;
             font-weight: 700;
             color: #0d6efd;
             margin-top: 10px;
         }
+
         #exportProgressLabel {
             font-size: 0.85rem;
             color: #6c757d;
             margin-top: 6px;
         }
+
         #exportToast {
             position: fixed;
             bottom: 24px;
@@ -1000,13 +1019,15 @@
             pointer-events: none;
             transition: opacity 0.3s;
         }
-        #exportToast.error {
-            background: #dc3545;
-        }
-        #exportToast.show {
-            opacity: 1;
-            pointer-events: auto;
-        }
+
+            #exportToast.error {
+                background: #dc3545;
+            }
+
+            #exportToast.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
     </style>
 
     <!-- Export Progress Overlay -->

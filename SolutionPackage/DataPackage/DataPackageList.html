@@ -276,7 +276,7 @@
         async function loadEntities() {
             entitiesData = await DBHandler.fetchEntityRecords(
                 'entities',
-                'id,name',
+                'id,name,physicalname',
                 'name',
                 'asc',
                 '',
@@ -294,7 +294,7 @@
             if (!entitiesMultiSelect) {
                 entitiesMultiSelect = new ej.dropdowns.MultiSelect({
                     dataSource: entitiesData,
-                    fields: { text: 'name', value: 'id' },
+                    fields: { text: 'physicalname', value: 'id' },
                     placeholder: 'Select Entities',
                     mode: 'CheckBox',
                     showSelectAll: true,
@@ -455,10 +455,10 @@
                 const entity = entitiesData.find(e => e.id === entityId);
                 if (!entity) continue;
 
-                showProgressOverlay('Exporting Data Package', step, entityIds.length, `Fetching data from ${entity.name}...`);
+                showProgressOverlay('Exporting Data Package', step, entityIds.length, `Fetching data from ${entity.physicalname}...`);
 
                 const data = await DBHandler.fetchEntityRecords(
-                    entity.name,
+                    entity.physicalname,
                     '*',
                     'createdon',
                     'asc',
@@ -468,9 +468,10 @@
                     ''
                 );
 
-                entityDataMap[entity.name] = {
+                entityDataMap[entity.physicalname] = {
                     entityId: entityId,
                     entityName: entity.name,
+                    physicalName: entity.physicalname,
                     recordCount: data ? data.length : 0,
                     records: data || []
                 };
@@ -548,8 +549,9 @@
 
             for (const entityName of entityNames) {
                 const entityData = importData.entities[entityName];
+                const physicalName = entityData.physicalName || entityName;
 
-                showProgressOverlay('Importing Data Package', step, totalSteps, `Importing ${entityName}...`);
+                showProgressOverlay('Importing Data Package', step, totalSteps, `Importing ${physicalName}...`);
 
                 for (const record of entityData.records) {
                     try {
@@ -557,7 +559,7 @@
 
                         // Check if record exists
                         const existing = await DBHandler.fetchEntityRecords(
-                            entityName,
+                            physicalName,
                             'id',
                             'createdon',
                             'asc',
@@ -575,7 +577,7 @@
                         }
 
                         // Import/Update record
-                        await DBHandler.submitRecordData(entityName, recordData, existingId, false);
+                        await DBHandler.submitRecordData(physicalName, recordData, existingId, false);
 
                         if (existingId) {
                             updated++;

@@ -62,6 +62,8 @@
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
     <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
     <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
+
+
 </head>
 
 <body>
@@ -70,12 +72,12 @@
             <div class="row g-3 align-items-end">
                 <div class="col-sm-6 col-md-3">
                     <label for="startDate">From date</label>
-                    <input id="startDate" class="form-control" datatype="date" defaultValue="currentDate"
+                    <input type="date" id="startDate" class="form-control"
                            onchange="loadEyeRecords()">
                 </div>
                 <div class="col-sm-6 col-md-3">
                     <label for="endDate">To date</label>
-                    <input id="endDate" class="form-control" datatype="date" defaultValue="currentDate"
+                    <input type="date" id="endDate" class="form-control"
                            onchange="loadEyeRecords()">
                 </div>
             </div>
@@ -125,8 +127,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <label>Examination Date<span class="text-danger">*</span></label>
-                                <input id="examinationDate" class="form-control" datatype="date"
-                                       defaultValue="currentDate" required />
+                                <input type="date" id="examinationDate" class="form-control" required />
                             </div>
                         </div>
 
@@ -172,9 +173,9 @@
                             </div>
 
                             <div class="col-md-6" id="operationDateField" style="display:none;">
-                                                <label>Operation Date</label>
-                                                <input id="eye_operationdate" class="form-control" datatype="date" />
-                                            </div>
+                                <label>Operation Date</label>
+                                <input type="date" id="eye_operationdate" class="form-control" />
+                            </div>
                         </div>
 
                         <!-- Medication -->
@@ -346,11 +347,6 @@
                 focus: false
             });
             modal.show();
-
-            // Initialize datepickers after modal is shown
-            setTimeout(() => {
-                initModalDatePickers();
-            }, 300);
         }
 
         function clearEyeForm() {
@@ -361,9 +357,9 @@
             toggleSpecFields();
             toggleOperationDate();
 
-            // Reset examination date to today
-            const today = new Date();
-            $('#examinationDate').datepicker('setDate', today);
+            // Set examination date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('examinationDate').value = today;
         }
 
         // PATIENT SEARCH
@@ -461,13 +457,13 @@
             previousPatientId = r.uhid;
 
             // Populate form fields
-            document.getElementById('examinationDate').value = r.examinationdate ? formatDateForDisplay(new Date(r.examinationdate)) : formatDateForDisplay(new Date());
+            document.getElementById('examinationDate').value = r.examinationdate || new Date().toISOString().split('T')[0];
             document.getElementById('eye_inspection').value = r.inspection || '';
             document.getElementById('eye_specprovided').value = r.specprovided || '';
             document.getElementById('eye_specnumberrear').value = r.specnumberrear || '';
             document.getElementById('eye_specnumberfar').value = r.specnumberfar || '';
             document.getElementById('eye_operation').value = r.operation || '';
-            document.getElementById('eye_operationdate').value = r.operationdate ? formatDateForDisplay(new Date(r.operationdate)) : '';
+            document.getElementById('eye_operationdate').value = r.operationdate || '';
             document.getElementById('eye_medication').value = r.medication || '';
 
             toggleSpecFields();
@@ -493,13 +489,13 @@
                 patientid: patientguid,
                 uhid: patientId,
                 patientname: patientDetail,
-                examinationdate: convertDateToMySQL(examinationDate),
+                examinationdate: examinationDate,
                 inspection: document.getElementById('eye_inspection').value,
                 specprovided: document.getElementById('eye_specprovided').value,
                 specnumberrear: document.getElementById('eye_specnumberrear').value,
                 specnumberfar: document.getElementById('eye_specnumberfar').value,
                 operation: document.getElementById('eye_operation').value,
-                operationdate: operationDate ? convertDateToMySQL(operationDate) : '',
+                operationdate: operationDate || '',
                 medication: document.getElementById('eye_medication').value
             }, editingEyeId, false);
 
@@ -555,40 +551,6 @@
             return `${day}/${month}/${year}`;
         }
 
-        // Convert date from dd/mm/yyyy to YYYY-MM-DD for MySQL
-        function convertDateToMySQL(dateStr) {
-            if (!dateStr) return '';
-            const parts = dateStr.split('/');
-            if (parts.length === 3) {
-                const day = parts[0];
-                const month = parts[1];
-                const year = parts[2];
-                return `${year}-${month}-${day}`;
-            }
-            return dateStr;
-        }
-
-        // Initialize datepicker for modal date fields
-        function initModalDatePickers() {
-            // Initialize examination date with today's date
-            const today = new Date();
-            const formattedDate = formatDateForDisplay(today);
-
-            $('#examinationDate').datepicker({
-                dateFormat: 'dd/mm/yy',
-                changeMonth: true,
-                changeYear: true,
-                yearRange: '1900:+10'
-            }).datepicker('setDate', today);
-
-            $('#eye_operationdate').datepicker({
-                dateFormat: 'dd/mm/yy',
-                changeMonth: true,
-                changeYear: true,
-                yearRange: '1900:+10'
-            });
-        }
-
         $(document).ready(function () {
             initializeDateFields();
             initGrid();
@@ -596,6 +558,11 @@
         });
     </script>
 
+    <style>
+        #eyeGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
 </body>
 
 </html>
