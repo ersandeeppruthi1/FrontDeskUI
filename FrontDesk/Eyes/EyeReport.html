@@ -141,7 +141,7 @@
 
                         <!-- Spec Provided -->
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label>Spec Provided</label>
                                 <select id="eye_specprovided" class="form-control" onchange="toggleSpecFields()">
                                     <option value="">Select</option>
@@ -150,14 +150,25 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4" id="specNumberRearField" style="display:none;">
+                            <div class="col-md-3" id="specNumberRearField" style="display:none;">
                                 <label>Spec Number Rear</label>
                                 <input type="text" id="eye_specnumberrear" class="form-control" />
                             </div>
 
-                            <div class="col-md-4" id="specNumberFarField" style="display:none;">
+                            <div class="col-md-3" id="specNumberFarField" style="display:none;">
                                 <label>Spec Number Far</label>
                                 <input type="text" id="eye_specnumberfar" class="form-control" />
+                            </div>
+
+                            <div class="col-md-3" id="specPrizeField" style="display:none;">
+                                <label>Spec Prize</label>
+                                <select id="eye_specprize" class="form-control">
+                                    <option value="">Select Prize</option>
+                                    <option value="100">100</option>
+                                    <option value="250">250</option>
+                                    <option value="350">350</option>
+                                    <option value="450">450</option>
+                                </select>
                             </div>
                         </div>
 
@@ -416,15 +427,19 @@
             const specProvided = document.getElementById('eye_specprovided').value;
             const rearField = document.getElementById('specNumberRearField');
             const farField = document.getElementById('specNumberFarField');
+            const prizeField = document.getElementById('specPrizeField');
 
             if (specProvided === 'Yes') {
                 rearField.style.display = 'block';
                 farField.style.display = 'block';
+                prizeField.style.display = 'block';
             } else {
                 rearField.style.display = 'none';
                 farField.style.display = 'none';
+                prizeField.style.display = 'none';
                 document.getElementById('eye_specnumberrear').value = '';
                 document.getElementById('eye_specnumberfar').value = '';
+                document.getElementById('eye_specprize').value = '';
             }
         }
 
