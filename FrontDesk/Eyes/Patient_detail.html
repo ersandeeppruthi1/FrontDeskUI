@@ -2,433 +2,435 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Eye Patient Detail Search</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Patient Detail Search</title>
 
-	<script>
-		let classMap = [];
-		var apiURL = "https://dbsit2.vsservices.in/";
-	</script>
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+    </script>
 
-	<link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
-	<script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
-	<link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-	<script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
-	<script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
 
-	<style>
-		body {
-			background: #f7f9fc;
-		}
+    <style>
+        body {
+            background: #f7f9fc;
+        }
 
-		.page-wrap {
-			max-width: 1250px;
-			margin: 20px auto;
-			padding: 0 12px;
-		}
+        .page-wrap {
+            max-width: 1250px;
+            margin: 20px auto;
+            padding: 0 12px;
+        }
 
-		.search-card {
-			background: #ffffff;
-			border: 1px solid #dfe3eb;
-			border-radius: 12px;
-			padding: 16px;
-			box-shadow: 0 4px 16px rgba(20, 33, 61, 0.06);
-		}
+        .search-card {
+            background: #ffffff;
+            border: 1px solid #dfe3eb;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 16px rgba(20, 33, 61, 0.06);
+        }
 
-		.result-card {
-			background: #ffffff;
-			border: 1px solid #dfe3eb;
-			border-radius: 12px;
-			box-shadow: 0 4px 16px rgba(20, 33, 61, 0.06);
-			margin-top: 14px;
-			overflow: hidden;
-		}
+        .result-card {
+            background: #ffffff;
+            border: 1px solid #dfe3eb;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(20, 33, 61, 0.06);
+            margin-top: 14px;
+            overflow: hidden;
+        }
 
-		.result-header {
-			background: linear-gradient(90deg, #0f4c81 0%, #1b6ca8 100%);
-			color: #fff;
-			padding: 14px 16px;
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			gap: 12px;
-			flex-wrap: wrap;
-		}
+        .result-header {
+            background: linear-gradient(90deg, #0f4c81 0%, #1b6ca8 100%);
+            color: #fff;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-		.pill {
-			background: rgba(255, 255, 255, 0.2);
-			border-radius: 999px;
-			padding: 4px 10px;
-			font-size: 13px;
-		}
+        .pill {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 13px;
+        }
 
-		.section-title {
-			font-size: 15px;
-			font-weight: 700;
-			margin: 8px 0;
-			color: #10243e;
-		}
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 8px 0;
+            color: #10243e;
+        }
 
-		.detail-grid {
-			display: grid;
-			grid-template-columns: repeat(4, minmax(170px, 1fr));
-			gap: 10px;
-		}
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(170px, 1fr));
+            gap: 10px;
+        }
 
-		.detail-box {
-			border: 1px solid #e2e7f0;
-			border-radius: 8px;
-			background: #fdfefe;
-			padding: 10px;
-		}
+        .detail-box {
+            border: 1px solid #e2e7f0;
+            border-radius: 8px;
+            background: #fdfefe;
+            padding: 10px;
+        }
 
-		.detail-box .label {
-			color: #54657d;
-			font-size: 12px;
-			margin-bottom: 2px;
-		}
+        .detail-box .label {
+            color: #54657d;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
 
-		.detail-box .value {
-			color: #10243e;
-			font-size: 14px;
-			font-weight: 600;
-			word-break: break-word;
-		}
+        .detail-box .value {
+            color: #10243e;
+            font-size: 14px;
+            font-weight: 600;
+            word-break: break-word;
+        }
 
-		.table-sm th,
-		.table-sm td {
-			vertical-align: middle;
-		}
+        .table-sm th,
+        .table-sm td {
+            vertical-align: middle;
+        }
 
-		.med-list {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
-		}
+        .med-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
 
-		.med-chip {
-			border: 1px solid #afc7e5;
-			border-radius: 999px;
-			padding: 4px 10px;
-			color: #173d67;
-			background: #edf5ff;
-			font-size: 12px;
-			font-weight: 600;
-		}
+        .med-chip {
+            border: 1px solid #afc7e5;
+            border-radius: 999px;
+            padding: 4px 10px;
+            color: #173d67;
+            background: #edf5ff;
+            font-size: 12px;
+            font-weight: 600;
+        }
 
-		.empty-state {
-			border: 1px dashed #b9c6d8;
-			border-radius: 8px;
-			padding: 14px;
-			color: #50617a;
-			text-align: center;
-			background: #f9fbff;
-		}
+        .empty-state {
+            border: 1px dashed #b9c6d8;
+            border-radius: 8px;
+            padding: 14px;
+            color: #50617a;
+            text-align: center;
+            background: #f9fbff;
+        }
 
-		@media (max-width: 992px) {
-			.detail-grid {
-				grid-template-columns: repeat(2, minmax(160px, 1fr));
-			}
-		}
+        @media (max-width: 992px) {
+            .detail-grid {
+                grid-template-columns: repeat(2, minmax(160px, 1fr));
+            }
+        }
 
-		@media (max-width: 576px) {
-			.detail-grid {
-				grid-template-columns: 1fr;
-			}
+        @media (max-width: 576px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
 
-			.result-header {
-				align-items: flex-start;
-			}
-		}
-	</style>
+            .result-header {
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
 
 <body>
-	<div class="page-wrap">
-		<div class="search-card">
-			<div class="row g-3 align-items-end">
-				<div class="col-md-8 col-lg-9">
-					<label for="patientNameSearch" class="form-label fw-bold">Search Patient Name</label>
-					<input type="text" class="form-control" id="patientNameSearch"
-						   placeholder="Type patient name and press Enter">
-				</div>
-				<div class="col-md-4 col-lg-3 d-grid">
-					<button type="button" class="btn btn-primary" onclick="searchPatientDetails()" id="searchBtn">
-						<i class="fas fa-search me-1"></i> Search
-					</button>
-				</div>
-			</div>
-			<div class="mt-2" id="searchStatus"></div>
-		</div>
+    <div class="page-wrap">
+        <div class="search-card">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8 col-lg-9">
+                    <label for="patientNameSearch" class="form-label fw-bold">Search Patient Name</label>
+                    <input type="text" class="form-control" id="patientNameSearch"
+                        placeholder="Type patient name and press Enter">
+                </div>
+                <div class="col-md-4 col-lg-3 d-grid">
+                    <button type="button" class="btn btn-primary" onclick="searchPatientDetails()" id="searchBtn">
+                        <i class="fas fa-search me-1"></i> Search
+                    </button>
+                </div>
+            </div>
+            <div class="mt-2" id="searchStatus"></div>
+        </div>
 
-		<div id="searchResults" class="mt-3"></div>
-	</div>
+        <div id="searchResults" class="mt-3"></div>
+    </div>
 
-	<script>
-		function escapeHtml(value) {
-			return String(value || '')
-				.replace(/&/g, '&amp;')
-				.replace(/</g, '&lt;')
-				.replace(/>/g, '&gt;')
-				.replace(/"/g, '&quot;')
-				.replace(/'/g, '&#39;');
-		}
+    <script>
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
-		function normalizeText(value) {
-			return String(value || '').toLowerCase().trim().replace(/\s+/g, ' ');
-		}
+        function normalizeText(value) {
+            return String(value || '').toLowerCase().trim().replace(/\s+/g, ' ');
+        }
 
-		function formatDate(value) {
-			if (!value) return '-';
-			const d = new Date(value);
-			if (isNaN(d)) return escapeHtml(value);
-			const day = ('0' + d.getDate()).slice(-2);
-			const month = ('0' + (d.getMonth() + 1)).slice(-2);
-			const year = d.getFullYear();
-			return `${day}/${month}/${year}`;
-		}
+        function formatDate(value) {
+            if (!value) return '-';
+            const d = new Date(value);
+            if (isNaN(d)) return escapeHtml(value);
+            const day = ('0' + d.getDate()).slice(-2);
+            const month = ('0' + (d.getMonth() + 1)).slice(-2);
+            const year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
 
-		function setStatus(text, type) {
-			const el = document.getElementById('searchStatus');
-			const className = type === 'error' ? 'text-danger' : (type === 'ok' ? 'text-success' : 'text-muted');
-			el.className = className;
-			el.textContent = text || '';
-		}
+        function setStatus(text, type) {
+            const el = document.getElementById('searchStatus');
+            const className = type === 'error' ? 'text-danger' : (type === 'ok' ? 'text-success' : 'text-muted');
+            el.className = className;
+            el.textContent = text || '';
+        }
 
-		function extractMedicines(records) {
-			const meds = new Set();
-			records.forEach(r => {
-				const raw = String(r.medication || '').trim();
-				if (!raw) return;
-				raw.split(/[,;\n|]+/).forEach(item => {
-					const med = item.trim();
-					if (med) meds.add(med);
-				});
-			});
-			return Array.from(meds);
-		}
+        function extractMedicines(records) {
+            const meds = new Set();
+            records.forEach(r => {
+                const raw = String(r.medication || '').trim();
+                if (!raw) return;
+                raw.split(/[,;\n|]+/).forEach(item => {
+                    const med = item.trim();
+                    if (med) meds.add(med);
+                });
+            });
+            return Array.from(meds);
+        }
 
-		function groupByPatient(records) {
-			const map = new Map();
-			records.forEach(r => {
-				const key = r.uhid || r.patientid || r.patientname;
-				if (!map.has(key)) map.set(key, []);
-				map.get(key).push(r);
-			});
-			return Array.from(map.values()).map(group =>
-				group.sort((a, b) => new Date(b.examinationdate || b.modifiedon) - new Date(a.examinationdate || a.modifiedon))
-			);
-		}
+        function groupByPatient(records) {
+            const map = new Map();
+            records.forEach(r => {
+                const key = r.uhid || r.patientid || r.patientname;
+                if (!map.has(key)) map.set(key, []);
+                map.get(key).push(r);
+            });
+            return Array.from(map.values()).map(group =>
+                group.sort((a, b) => new Date(b.examinationdate || b.modifiedon) - new Date(a.examinationdate || a.modifiedon))
+            );
+        }
 
-		async function fetchEyeCheckupsByName(patientName) {
-			const all = await DBHandler.fetchEntityRecords(
-				'eyeexamination',
-				'id,patientid,uhid,patientname,examinationdate,inspection,specprovided,specnumberrear,specnumberfar,operation,operationdate,medication,modifiedon',
-				'modifiedon',
-				'desc',
-				'',
-				true,
-				0,
-				''
-			);
+        async function fetchEyeCheckupsByName(patientName) {
+            const all = await DBHandler.fetchEntityRecords(
+                'eyeexamination',
+                'id,patientid,uhid,patientname,examinationdate,inspection,specprovided,specnumberrear,specnumberfar,operation,operationdate,medication,modifiedon',
+                'modifiedon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
 
-			const normalizedSearch = normalizeText(patientName);
-			return (all || []).filter(r => normalizeText(r.patientname).includes(normalizedSearch));
-		}
+            const normalizedSearch = normalizeText(patientName);
+            return (all || []).filter(r => normalizeText(r.patientname).includes(normalizedSearch));
+        }
 
-		async function fetchFrontdeskHistory(uhid) {
-			if (!uhid) return [];
-			return await DBHandler.fetchEntityRecords(
-				'frontdeskpatientrecord',
-				'id,patientid,patientname,age,gender,phone,address,date,doctorname,amount,paymentmethod,totaltest,createdon',
-				'createdon',
-				'desc',
-				`patientid='${String(uhid).replace(/'/g, "''")}'`,
-				true,
-				0,
-				''
-			);
-		}
+        async function fetchFrontdeskHistory(uhid) {
+            if (!uhid) return [];
+            return await DBHandler.fetchEntityRecords(
+                'frontdeskpatientrecord',
+                'id,patientid,patientname,age,gender,phone,address,date,doctorname,amount,paymentmethod,totaltest,createdon',
+                'createdon',
+                'desc',
+                `patientid='${String(uhid).replace(/'/g, "''")}'`,
+                true,
+                0,
+                ''
+            );
+        }
 
-		function renderPatientCard(eyeRecords, frontdeskRecords) {
-			const latestEye = eyeRecords[0] || {};
-			const latestFrontdesk = (frontdeskRecords || [])[0] || {};
-			const visitCount = eyeRecords.length;
-			const medicineList = extractMedicines(eyeRecords);
-			const firstVisit = eyeRecords[eyeRecords.length - 1];
+        function renderPatientCard(eyeRecords, frontdeskRecords) {
+            const latestEye = eyeRecords[0] || {};
+            const latestFrontdesk = (frontdeskRecords || [])[0] || {};
+            const visitCount = eyeRecords.length;
+            const medicineList = extractMedicines(eyeRecords);
+            const firstVisit = eyeRecords[eyeRecords.length - 1];
 
-			const detailData = {
-				'Patient Name': latestEye.patientname || latestFrontdesk.patientname || '-',
-				'UHID': latestEye.uhid || latestFrontdesk.patientid || '-',
-				'Age': latestFrontdesk.age || '-',
-				'Gender': latestFrontdesk.gender || '-',
-				'Phone': latestFrontdesk.phone || '-',
-				'Address': latestFrontdesk.address || '-',
-				'First Eye Checkup': formatDate(firstVisit ? firstVisit.examinationdate : ''),
-				'Latest Eye Checkup': formatDate(latestEye.examinationdate)
-			};
+            const detailData = {
+                'Patient Name': latestEye.patientname || latestFrontdesk.patientname || '-',
+                'UHID': latestEye.uhid || latestFrontdesk.patientid || '-',
+                'Age': latestFrontdesk.age || '-',
+                'Gender': latestFrontdesk.gender || '-',
+                'Phone': latestFrontdesk.phone || '-',
+                'Address': latestFrontdesk.address || '-',
+                'First Eye Checkup': formatDate(firstVisit ? firstVisit.examinationdate : ''),
+                'Latest Eye Checkup': formatDate(latestEye.examinationdate)
+            };
 
-			const medicineHtml = medicineList.length
-				? medicineList.map(m => `<span class="med-chip">${escapeHtml(m)}</span>`).join('')
-				: '<div class="empty-state">No medicine recorded for this patient.</div>';
+            const medicineHtml = medicineList.length
+                ? medicineList.map(m => `<span class="med-chip">${escapeHtml(m)}</span>`).join('')
+                : '<div class="empty-state">No medicine recorded for this patient.</div>';
 
-			const eyeRows = eyeRecords.map((r, idx) => `
-				<tr>
-					<td>${idx + 1}</td>
-					<td>${formatDate(r.examinationdate)}</td>
-					<td>${escapeHtml(r.inspection || '-')}</td>
-					<td>${escapeHtml(r.specprovided || '-')}</td>
-					<td>${escapeHtml(r.specnumberrear || '-')}</td>
-					<td>${escapeHtml(r.specnumberfar || '-')}</td>
-					<td>${escapeHtml(r.operation || '-')}</td>
-					<td>${formatDate(r.operationdate)}</td>
-					<td>${escapeHtml(r.medication || '-')}</td>
-				</tr>
-			`).join('');
+            const frontdeskRows = (frontdeskRecords || []).map((r, idx) => `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${formatDate(r.date)}</td>
+                    <td>${escapeHtml(r.doctorname || '-')}</td>
+                    <td>${escapeHtml(r.totaltest || '-')}</td>
+                    <td>${escapeHtml(r.paymentmethod || '-')}</td>
+                    <td>${escapeHtml(r.amount || '-')}</td>
+                </tr>
+            `).join('');
 
-			const frontdeskRows = (frontdeskRecords || []).map((r, idx) => `
-				<tr>
-					<td>${idx + 1}</td>
-					<td>${formatDate(r.date)}</td>
-					<td>${escapeHtml(r.doctorname || '-')}</td>
-					<td>${escapeHtml(r.totaltest || '-')}</td>
-					<td>${escapeHtml(r.paymentmethod || '-')}</td>
-					<td>${escapeHtml(r.amount || '-')}</td>
-				</tr>
-			`).join('');
+            const eyeRows = (eyeRecords || []).map((r, idx) => `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${formatDate(r.examinationdate)}</td>
+                    <td>${escapeHtml(r.inspection || '-')}</td>
+                    <td>${escapeHtml(r.specprovided || '-')}</td>
+                    <td>${escapeHtml(r.specnumberrear || '-')}</td>
+                    <td>${escapeHtml(r.specnumberfar || '-')}</td>
+                    <td>${escapeHtml(r.operation || '-')}</td>
+                    <td>${formatDate(r.operationdate)}</td>
+                    <td>${escapeHtml(r.medication || '-')}</td>
+                </tr>
+            `).join('');
 
-			const detailBoxes = Object.keys(detailData).map(label => `
-				<div class="detail-box">
-					<div class="label">${escapeHtml(label)}</div>
-					<div class="value">${escapeHtml(detailData[label])}</div>
-				</div>
-			`).join('');
+            const detailBoxes = Object.keys(detailData).map(label => `
+                <div class="detail-box">
+                    <div class="label">${escapeHtml(label)}</div>
+                    <div class="value">${escapeHtml(detailData[label])}</div>
+                </div>
+            `).join('');
 
-			return `
-				<div class="result-card">
-					<div class="result-header">
-						<div>
-							<div class="fw-bold">${escapeHtml(detailData['Patient Name'])}</div>
-							<div class="small">UHID: ${escapeHtml(detailData['UHID'])}</div>
-						</div>
-						<span class="pill">Checked by eye doctor: ${visitCount} time(s)</span>
-					</div>
+            return `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div>
+                            <div class="fw-bold">${escapeHtml(detailData['Patient Name'])}</div>
+                            <div class="small">UHID: ${escapeHtml(detailData['UHID'])}</div>
+                        </div>
+                        <span class="pill">Checked by eye doctor: ${visitCount} time(s)</span>
+                    </div>
 
-					<div class="p-3">
-						<div class="section-title">Patient Details</div>
-						<div class="detail-grid">${detailBoxes}</div>
+                    <div class="p-3">
+                        <div class="section-title">Patient Details</div>
+                        <div class="detail-grid">${detailBoxes}</div>
 
-						<div class="section-title mt-3">Medicines Provided</div>
-						<div class="med-list">${medicineHtml}</div>
+                        <div class="section-title mt-3">Medicines Provided</div>
+                        <div class="med-list">${medicineHtml}</div>
 
-						<div class="section-title mt-3">Eye Checkup History</div>
-						<div class="table-responsive">
-							<table class="table table-bordered table-sm align-middle">
-								<thead class="table-light">
-									<tr>
-										<th>#</th>
-										<th>Date</th>
-										<th>Inspection</th>
-										<th>Spec Provided</th>
-										<th>Spec Rear</th>
-										<th>Spec Far</th>
-										<th>Operation</th>
-										<th>Operation Date</th>
-										<th>Medication</th>
-									</tr>
-								</thead>
-								<tbody>${eyeRows}</tbody>
-							</table>
-						</div>
+                        <div class="section-title mt-3">Eye Checkup History</div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>Inspection</th>
+                                        <th>Spec Provided</th>
+                                        <th>Spec Rear</th>
+                                        <th>Spec Far</th>
+                                        <th>Operation</th>
+                                        <th>Operation Date</th>
+                                        <th>Medication</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${eyeRows || '<tr><td colspan="9" class="text-center text-muted">No eye checkup history found.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
 
-						<div class="section-title mt-3">Other Visit Details</div>
-						<div class="table-responsive">
-							<table class="table table-bordered table-sm align-middle">
-								<thead class="table-light">
-									<tr>
-										<th>#</th>
-										<th>Date</th>
-										<th>Doctor/Department</th>
-										<th>Test</th>
-										<th>Payment</th>
-										<th>Amount</th>
-									</tr>
-								</thead>
-								<tbody>
-									${frontdeskRows || '<tr><td colspan="6" class="text-center text-muted">No additional visit history found.</td></tr>'}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			`;
-		}
+                        <div class="section-title mt-3">Other Visit Details</div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>Doctor/Department</th>
+                                        <th>Test</th>
+                                        <th>Payment</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${frontdeskRows || '<tr><td colspan="6" class="text-center text-muted">No additional visit history found.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
 
-		async function searchPatientDetails() {
-			const input = document.getElementById('patientNameSearch');
-			const searchTerm = input.value.trim();
-			const resultsEl = document.getElementById('searchResults');
-			const searchBtn = document.getElementById('searchBtn');
+        async function searchPatientDetails() {
+            const input = document.getElementById('patientNameSearch');
+            const searchTerm = input.value.trim();
+            const resultsEl = document.getElementById('searchResults');
+            const searchBtn = document.getElementById('searchBtn');
 
-			if (!searchTerm) {
-				setStatus('Please enter patient name.', 'error');
-				resultsEl.innerHTML = '';
-				input.focus();
-				return;
-			}
+            if (!searchTerm) {
+                setStatus('Please enter patient name.', 'error');
+                resultsEl.innerHTML = '';
+                input.focus();
+                return;
+            }
 
-			searchBtn.disabled = true;
-			setStatus('Searching patient records...', '');
-			resultsEl.innerHTML = '';
+            searchBtn.disabled = true;
+            setStatus('Searching patient records...', '');
+            resultsEl.innerHTML = '';
 
-			try {
-				const eyeRecords = await fetchEyeCheckupsByName(searchTerm);
+            try {
+                const eyeRecords = await fetchEyeCheckupsByName(searchTerm);
 
-				if (!eyeRecords.length) {
-					setStatus('No patient found for the entered name.', 'error');
-					resultsEl.innerHTML = '<div class="empty-state">No matching eye checkup data found.</div>';
-					return;
-				}
+                if (!eyeRecords.length) {
+                    setStatus('No patient found for the entered name.', 'error');
+                    resultsEl.innerHTML = '<div class="empty-state">No matching eye checkup data found.</div>';
+                    return;
+                }
 
-				const groupedPatients = groupByPatient(eyeRecords);
-				let html = '';
+                const groupedPatients = groupByPatient(eyeRecords);
+                let html = '';
 
-				for (const patientEyeRecords of groupedPatients) {
-					const uhid = patientEyeRecords[0].uhid;
-					const frontdeskRecords = await fetchFrontdeskHistory(uhid);
-					html += renderPatientCard(patientEyeRecords, frontdeskRecords);
-				}
+                for (const patientEyeRecords of groupedPatients) {
+                    const uhid = patientEyeRecords[0].uhid;
+                    const frontdeskRecords = await fetchFrontdeskHistory(uhid);
+                    html += renderPatientCard(patientEyeRecords, frontdeskRecords);
+                }
 
-				setStatus(`Found ${groupedPatients.length} patient result(s).`, 'ok');
-				resultsEl.innerHTML = html;
-			} catch (error) {
-				console.error('Search error', error);
-				setStatus('Unable to fetch records. Please try again.', 'error');
-				resultsEl.innerHTML = '<div class="empty-state">Error while loading data.</div>';
-			} finally {
-				searchBtn.disabled = false;
-			}
-		}
+                setStatus(`Found ${groupedPatients.length} patient result(s).`, 'ok');
+                resultsEl.innerHTML = html;
+            } catch (error) {
+                console.error('Search error', error);
+                setStatus('Unable to fetch records. Please try again.', 'error');
+                resultsEl.innerHTML = '<div class="empty-state">Error while loading data.</div>';
+            } finally {
+                searchBtn.disabled = false;
+            }
+        }
 
-		document.addEventListener('DOMContentLoaded', function () {
-			const input = document.getElementById('patientNameSearch');
-			input.addEventListener('keydown', function (event) {
-				if (event.key === 'Enter') {
-					event.preventDefault();
-					searchPatientDetails();
-				}
-			});
-		});
-	</script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('patientNameSearch');
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    searchPatientDetails();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
