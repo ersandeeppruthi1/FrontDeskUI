@@ -231,18 +231,18 @@
             );
         }
 
-        function hasDuplicatePatientNames(groupedPatients) {
-            const nameMap = new Map();
-            groupedPatients.forEach(group => {
-                const name = normalizeText((group[0] && group[0].patientname) || '');
-                if (!name) return;
-                nameMap.set(name, (nameMap.get(name) || 0) + 1);
-            });
-            for (const count of nameMap.values()) {
-                if (count > 1) return true;
-            }
-            return false;
-        }
+        // function hasDuplicatePatientNames(groupedPatients) {
+        //     const nameMap = new Map();
+        //     groupedPatients.forEach(group => {
+        //         const name = normalizeText((group[0] && group[0].patientname) || '');
+        //         if (!name) return;
+        //         nameMap.set(name, (nameMap.get(name) || 0) + 1);
+        //     });
+        //     for (const count of nameMap.values()) {
+        //         if (count > 1) return true;
+        //     }
+        //     return false;
+        // }
 
         async function fetchEyeCheckupsBySearch(searchTerm) {
             const all = await DBHandler.fetchEntityRecords(
@@ -480,26 +480,46 @@
                 }
 
                 const groupedPatients = groupByPatient(eyeRecords);
-                let html = '';
-                const patientDetailsList = [];
+let html = "";
 
-                for (let i = 0; i < groupedPatients.length; i++) {
-                    const patientEyeRecords = groupedPatients[i];
-                    const uhid = patientEyeRecords[0].uhid;
-                    const frontdeskRecords = await fetchFrontdeskHistory(uhid);
-                    patientDetailsList.push(frontdeskRecords);
-                }
+// Load all patient histories together
+const patientDetailsList = await Promise.all(
+    groupedPatients.map(group =>
+        fetchFrontdeskHistory(group[0].uhid)
+    )
+);
 
-                if (groupedPatients.length > 1 && hasDuplicatePatientNames(groupedPatients)) {
-                    html = renderPatientAccordion(groupedPatients, patientDetailsList);
-                } else {
-                    for (let i = 0; i < groupedPatients.length; i++) {
-                        html += renderPatientCard(groupedPatients[i], patientDetailsList[i]);
-                    }
-                }
+// Check if there are duplicate names
+const patientNameCount = {};
 
-                setStatus(`Found ${groupedPatients.length} patient result(s).`, 'ok');
-                resultsEl.innerHTML = html;
+groupedPatients.forEach(group => {
+    const name = normalizeText(group[0].patientname);
+
+    if (!patientNameCount[name]) {
+        patientNameCount[name] = 0;
+    }
+
+    patientNameCount[name]++;
+});
+
+const hasSameName = Object.values(patientNameCount).some(count => count > 1);
+
+if (hasSameName) {
+
+    // Show accordion
+    html = renderPatientAccordion(groupedPatients, patientDetailsList);
+
+} else {
+
+    // Show normal cards
+    groupedPatients.forEach((group, index) => {
+        html += renderPatientCard(group, patientDetailsList[index]);
+    });
+
+}
+
+setStatus(`Found ${groupedPatients.length} patient(s).`, "ok");
+resultsEl.innerHTML = html;
             } catch (error) {
                 console.error('Search error', error);
                 setStatus('Unable to fetch records. Please try again.', 'error');
