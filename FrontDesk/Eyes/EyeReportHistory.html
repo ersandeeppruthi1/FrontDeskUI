@@ -159,9 +159,9 @@
         <div class="search-card">
             <div class="row g-3 align-items-end">
                 <div class="col-md-8 col-lg-9">
-                    <label for="patientNameSearch" class="form-label fw-bold">Search Patient Name</label>
+                    <label for="patientNameSearch" class="form-label fw-bold">Search Patient Name / UHID / Phone Number</label>
                     <input type="text" class="form-control" id="patientNameSearch"
-                        placeholder="Type patient name and press Enter">
+                        placeholder="Type patient name, UHID, or phone number and press Enter">
                 </div>
                 <div class="col-md-4 col-lg-3 d-grid">
                     <button type="button" class="btn btn-primary" onclick="searchPatientDetails()" id="searchBtn">
@@ -231,7 +231,7 @@
             );
         }
 
-        async function fetchEyeCheckupsByName(patientName) {
+        async function fetchEyeCheckupsBySearch(searchTerm) {
             const all = await DBHandler.fetchEntityRecords(
                 'eyeexamination',
                 'id,patientid,uhid,patientname,examinationdate,inspection,specprovided,specnumberrear,specnumberfar,operation,operationdate,medication,modifiedon',
@@ -243,8 +243,37 @@
                 ''
             );
 
-            const normalizedSearch = normalizeText(patientName);
-            return (all || []).filter(r => normalizeText(r.patientname).includes(normalizedSearch));
+            const normalizedSearch = normalizeText(searchTerm);
+            const eyeRecords = all || [];
+
+            const frontdeskAll = await DBHandler.fetchEntityRecords(
+                'frontdeskpatientrecord',
+                'patientid,phone',
+                'createdon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
+
+            const matchingPatientIdsByPhone = new Set(
+                (frontdeskAll || [])
+                    .filter(r => normalizeText(r.phone).includes(normalizedSearch))
+                    .map(r => normalizeText(r.patientid))
+                    .filter(Boolean)
+            );
+
+            return eyeRecords.filter(r => {
+                const patientName = normalizeText(r.patientname);
+                const uhid = normalizeText(r.uhid);
+                const patientId = normalizeText(r.patientid);
+
+                return patientName.includes(normalizedSearch)
+                    || uhid.includes(normalizedSearch)
+                    || matchingPatientIdsByPhone.has(uhid)
+                    || matchingPatientIdsByPhone.has(patientId);
+            });
         }
 
         async function fetchFrontdeskHistory(uhid) {
@@ -267,14 +296,14 @@
             const visitCount = eyeRecords.length;
             const medicineList = extractMedicines(eyeRecords);
             const firstVisit = eyeRecords[eyeRecords.length - 1];
+            const rawGender = normalizeText(latestFrontdesk.gender);
+            const headerGender = rawGender === 'male' ? 'M' : (rawGender === 'female' ? 'F' : (latestFrontdesk.gender || '-'));
+            const headerName = latestEye.patientname || latestFrontdesk.patientname || '-';
+            const headerUhid = latestEye.uhid || latestFrontdesk.patientid || '-';
+            const headerAge = latestFrontdesk.age || '-';
+            const headerPhone = latestFrontdesk.phone || '-';
 
             const detailData = {
-                'Patient Name': latestEye.patientname || latestFrontdesk.patientname || '-',
-                'UHID': latestEye.uhid || latestFrontdesk.patientid || '-',
-                'Age': latestFrontdesk.age || '-',
-                'Gender': latestFrontdesk.gender || '-',
-                'Phone': latestFrontdesk.phone || '-',
-                'Address': latestFrontdesk.address || '-',
                 'First Eye Checkup': formatDate(firstVisit ? firstVisit.examinationdate : ''),
                 'Latest Eye Checkup': formatDate(latestEye.examinationdate)
             };
@@ -289,8 +318,6 @@
                     <td>${formatDate(r.date)}</td>
                     <td>${escapeHtml(r.doctorname || '-')}</td>
                     <td>${escapeHtml(r.totaltest || '-')}</td>
-                    <td>${escapeHtml(r.paymentmethod || '-')}</td>
-                    <td>${escapeHtml(r.amount || '-')}</td>
                 </tr>
             `).join('');
 
@@ -319,8 +346,9 @@
                 <div class="result-card">
                     <div class="result-header">
                         <div>
-                            <div class="fw-bold">${escapeHtml(detailData['Patient Name'])}</div>
-                            <div class="small">UHID: ${escapeHtml(detailData['UHID'])}</div>
+                            <div class="fw-bold">${escapeHtml(headerName)}</div>
+                            <div class="small">Gender: ${escapeHtml(headerGender)} | Age: ${escapeHtml(headerAge)}</div>
+                            <div class="small">UHID: ${escapeHtml(headerUhid)} | Phone: ${escapeHtml(headerPhone)}</div>
                         </div>
                         <span class="pill">Checked by eye doctor: ${visitCount} time(s)</span>
                     </div>
@@ -363,12 +391,10 @@
                                         <th>Date</th>
                                         <th>Doctor/Department</th>
                                         <th>Test</th>
-                                        <th>Payment</th>
-                                        <th>Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${frontdeskRows || '<tr><td colspan="6" class="text-center text-muted">No additional visit history found.</td></tr>'}
+                                    ${frontdeskRows || '<tr><td colspan="4" class="text-center text-muted">No additional visit history found.</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -384,7 +410,7 @@
             const searchBtn = document.getElementById('searchBtn');
 
             if (!searchTerm) {
-                setStatus('Please enter patient name.', 'error');
+                setStatus('Please enter patient name, UHID, or phone number.', 'error');
                 resultsEl.innerHTML = '';
                 input.focus();
                 return;
@@ -395,10 +421,10 @@
             resultsEl.innerHTML = '';
 
             try {
-                const eyeRecords = await fetchEyeCheckupsByName(searchTerm);
+                const eyeRecords = await fetchEyeCheckupsBySearch(searchTerm);
 
                 if (!eyeRecords.length) {
-                    setStatus('No patient found for the entered name.', 'error');
+                    setStatus('No patient found for the entered name, UHID, or phone number.', 'error');
                     resultsEl.innerHTML = '<div class="empty-state">No matching eye checkup data found.</div>';
                     return;
                 }
@@ -406,7 +432,8 @@
                 const groupedPatients = groupByPatient(eyeRecords);
                 let html = '';
 
-                for (const patientEyeRecords of groupedPatients) {
+                for (let i = 0; i < groupedPatients.length; i++) {
+                    const patientEyeRecords = groupedPatients[i];
                     const uhid = patientEyeRecords[0].uhid;
                     const frontdeskRecords = await fetchFrontdeskHistory(uhid);
                     html += renderPatientCard(patientEyeRecords, frontdeskRecords);
