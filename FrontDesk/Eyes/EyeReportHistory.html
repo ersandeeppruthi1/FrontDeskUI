@@ -159,7 +159,8 @@
         <div class="search-card">
             <div class="row g-3 align-items-end">
                 <div class="col-md-8 col-lg-9">
-                    <label for="patientNameSearch" class="form-label fw-bold">Search Patient Name / UHID / Phone Number</label>
+                    <label for="patientNameSearch" class="form-label fw-bold">Search Patient Name / UHID / Phone
+                        Number</label>
                     <input type="text" class="form-control" id="patientNameSearch"
                         placeholder="Type patient name, UHID, or phone number and press Enter">
                 </div>
@@ -230,19 +231,6 @@
                 group.sort((a, b) => new Date(b.examinationdate || b.modifiedon) - new Date(a.examinationdate || a.modifiedon))
             );
         }
-
-        // function hasDuplicatePatientNames(groupedPatients) {
-        //     const nameMap = new Map();
-        //     groupedPatients.forEach(group => {
-        //         const name = normalizeText((group[0] && group[0].patientname) || '');
-        //         if (!name) return;
-        //         nameMap.set(name, (nameMap.get(name) || 0) + 1);
-        //     });
-        //     for (const count of nameMap.values()) {
-        //         if (count > 1) return true;
-        //     }
-        //     return false;
-        // }
 
         async function fetchEyeCheckupsBySearch(searchTerm) {
             const all = await DBHandler.fetchEntityRecords(
@@ -480,46 +468,46 @@
                 }
 
                 const groupedPatients = groupByPatient(eyeRecords);
-let html = "";
+                let html = "";
 
-// Load all patient histories together
-const patientDetailsList = await Promise.all(
-    groupedPatients.map(group =>
-        fetchFrontdeskHistory(group[0].uhid)
-    )
-);
+                // Load all patient histories together
+                const patientDetailsList = await Promise.all(
+                    groupedPatients.map(group =>
+                        fetchFrontdeskHistory(group[0].uhid)
+                    )
+                );
 
-// Check if there are duplicate names
-const patientNameCount = {};
+                // Check if there are duplicate names
+                const patientNameCount = {};
 
-groupedPatients.forEach(group => {
-    const name = normalizeText(group[0].patientname);
+                groupedPatients.forEach(group => {
+                    const name = normalizeText(group[0].patientname);
 
-    if (!patientNameCount[name]) {
-        patientNameCount[name] = 0;
-    }
+                    if (!patientNameCount[name]) {
+                        patientNameCount[name] = 0;
+                    }
 
-    patientNameCount[name]++;
-});
+                    patientNameCount[name]++;
+                });
 
-const hasSameName = Object.values(patientNameCount).some(count => count > 1);
+                const hasSameName = Object.values(patientNameCount).some(count => count > 1);
 
-if (hasSameName) {
+                if (hasSameName) {
 
-    // Show accordion
-    html = renderPatientAccordion(groupedPatients, patientDetailsList);
+                    // Show accordion
+                    html = renderPatientAccordion(groupedPatients, patientDetailsList);
 
-} else {
+                } else {
 
-    // Show normal cards
-    groupedPatients.forEach((group, index) => {
-        html += renderPatientCard(group, patientDetailsList[index]);
-    });
+                    // Show normal cards
+                    groupedPatients.forEach((group, index) => {
+                        html += renderPatientCard(group, patientDetailsList[index]);
+                    });
 
-}
+                }
 
-setStatus(`Found ${groupedPatients.length} patient(s).`, "ok");
-resultsEl.innerHTML = html;
+                setStatus(`Found ${groupedPatients.length} patient(s).`, "ok");
+                resultsEl.innerHTML = html;
             } catch (error) {
                 console.error('Search error', error);
                 setStatus('Unable to fetch records. Please try again.', 'error');
