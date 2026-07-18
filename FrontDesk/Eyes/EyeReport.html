@@ -226,6 +226,7 @@
             { field: 'operation', headerText: 'Operation', width: 100 },
             { field: 'operationdate', headerText: 'Operation Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 150 },
             { field: 'medication', headerText: 'Medication', width: 200, visible: false },
+            { field: 'createdon', headerText: 'Created On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 160 },
             { field: 'modifiedon', headerText: 'Modified On', type: 'date', format: { type: 'dateTime', format: 'dd/MMM/yyyy hh:mm' }, width: 160 },
             { field: 'inspection', headerText: 'Inspection', width: 200, visible: false },
             { field: 'patientid', visible: false },
@@ -335,7 +336,7 @@
 
             const data = await DBHandler.fetchEntityRecords(
                 'eyeexamination',
-                'id,patientid,uhid,patientname,examinationdate,inspection,specprovided,specnumberrear,specnumberfar,specprize,operation,operationdate,medication,modifiedon',
+                'id,patientid,uhid,patientname,examinationdate,inspection,specprovided,specnumberrear,specnumberfar,specprize,operation,operationdate,medication,createdon,modifiedon',
                 'modifiedon',
                 'desc',
                 filterString,

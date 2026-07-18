@@ -219,40 +219,51 @@
 
         async function copySchemaToClipboard() {
             const selected = entityGrid.getSelectedRecords();
-            if (selected.length !== 1) {
-                alert("Select one entity to copy schema");
+            if (!selected.length) {
+                alert("Select at least one entity to copy schema");
                 return;
             }
 
-            const entity = selected[0];
-            const entityId = entity.id;
-            const tableName = formatSqlName(entity.physicalname || entity.name || 'entity_table');
+            const schemas = [];
+            const missingColumns = [];
 
-            const columns = await DBHandler.fetchEntityRecords(
-                'entitycolumn',
-                '*',
-                'createdon',
-                'asc',
-                `entityid = '${entityId}'`
-            ) || [];
+            for (const entity of selected) {
+                const entityId = entity.id;
+                const tableName = formatSqlName(entity.physicalname || entity.name || 'entity_table');
 
-            if (!columns.length) {
-                alert('No columns found for selected entity');
+                const columns = await DBHandler.fetchEntityRecords(
+                    'entitycolumn',
+                    '*',
+                    'createdon',
+                    'asc',
+                    `entityid = '${entityId}'`
+                ) || [];
+
+                if (!columns.length) {
+                    missingColumns.push(entity.name || tableName);
+                    continue;
+                }
+
+                const lines = [];
+                lines.push(`CREATE TABLE ${tableName} (`);
+
+                columns.forEach((column, index) => {
+                    const columnName = formatSqlName(column.physicalname || column.name || `column_${index + 1}`);
+                    const dataType = normalizeColumnType(column.columntype);
+                    const suffix = index === columns.length - 1 ? '' : ',';
+                    lines.push(`  ${columnName} ${dataType}${suffix}`);
+                });
+
+                lines.push(');');
+                schemas.push(lines.join('\n'));
+            }
+
+            if (!schemas.length) {
+                alert('No columns found for selected entities');
                 return;
             }
 
-            const lines = [];
-            lines.push(`CREATE TABLE ${tableName} (`);
-
-            columns.forEach((column, index) => {
-                const columnName = formatSqlName(column.physicalname || column.name || `column_${index + 1}`);
-                const dataType = normalizeColumnType(column.columntype);
-                const suffix = index === columns.length - 1 ? '' : ',';
-                lines.push(`  ${columnName} ${dataType}${suffix}`);
-            });
-
-            lines.push(');');
-            const schema = lines.join('\n');
+            const schema = schemas.join('\n\n');
 
             try {
                 await navigator.clipboard.writeText(schema);
@@ -266,6 +277,11 @@
                 helper.select();
                 document.execCommand('copy');
                 document.body.removeChild(helper);
+            }
+
+            if (missingColumns.length) {
+                alert(`Schema copied to clipboard. Skipped entities with no columns: ${missingColumns.join(', ')}`);
+                return;
             }
 
             alert('Schema copied to clipboard');
