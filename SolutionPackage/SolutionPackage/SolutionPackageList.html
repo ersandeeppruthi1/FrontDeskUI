@@ -503,6 +503,37 @@
             activeComponentTab = 'webresource';
         }
 
+        function escapeSqlValue(value) {
+            return String(value || '').replace(/'/g, "''");
+        }
+
+        async function getPackageByName(name) {
+            const safeName = escapeSqlValue(name);
+            const existing = await DBHandler.fetchEntityRecords(
+                'solutionpackage',
+                'id,name,version,description,components',
+                'createdon',
+                'desc',
+                `name='${safeName}'`,
+                false,
+                1
+            );
+            return existing && existing.length ? existing[0] : null;
+        }
+
+        async function upsertLatestSolutionPackage(packageData, editingId = null) {
+            const existingByName = await getPackageByName(packageData.name);
+            let targetId = editingId;
+
+            // Keep one row per package name. If this is a new save/import and name already exists,
+            // update that row instead of creating a duplicate package row.
+            if (!targetId && existingByName) {
+                targetId = existingByName.id;
+            }
+
+            await DBHandler.submitRecordData('solutionpackage', packageData, targetId, false);
+        }
+
 
         // EDIT
         function editSolutionPackage() {
@@ -548,14 +579,14 @@
             let version = document.getElementById('sp_version').value.trim();
             version = incrementVersion(version);
 
-            await DBHandler.submitRecordData('solutionpackage', {
+            await upsertLatestSolutionPackage({
 
                 name: name,
                 version: version,
                 description: document.getElementById('sp_description').value,
                 components: JSON.stringify(selectedComponents),
 
-            }, editingSolutionPackageId, false);
+            }, editingSolutionPackageId);
 
             bootstrap.Modal.getInstance(document.getElementById('solutionPackageModal')).hide();
 
@@ -914,6 +945,22 @@
 
             hideProgressOverlay();
             showToast(`Import completed: ${imported} new, ${updated} updated, ${errors} error(s)`, errors ? 'error' : 'success');
+
+            const latestPackageComponents = [
+                ...(importData.webResources || []).map(r => ({ id: r.id, name: r.name, type: 'webresource', subtype: r.resourcetype || '' })),
+                ...(importData.entities || []).map(r => ({ id: r.id, name: r.name, type: 'entity', subtype: r.physicalname || '' })),
+                ...(importData.entityColumns || []).map(r => ({ id: r.id, name: r.name, type: 'entitycolumn', subtype: r.columntype || '', entityid: entityIdMap[r.entityid] || r.entityid })),
+                ...(importData.menus || []).map(r => ({ id: r.id, name: r.name, type: 'menu' })),
+                ...(importData.permissions || []).map(r => ({ id: r.id, name: r.name, type: 'permission' }))
+            ];
+
+            // Maintain a single latest row in solutionpackage for each package name.
+            await upsertLatestSolutionPackage({
+                name: importData.packageName || 'Imported Package',
+                version: importData.version || '1.0.0',
+                description: importData.description || '',
+                components: JSON.stringify(latestPackageComponents)
+            });
 
             // Track import in history
             await DBHandler.submitRecordData('solutionpackageimport', {

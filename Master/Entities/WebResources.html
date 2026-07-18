@@ -67,6 +67,7 @@
 <body>
 
 
+
     <div class="container2">
 
         <div id="webResourceGrid"></div>
@@ -130,7 +131,7 @@
                             <div class="col-md-12">
                                 <label>Resource Text</label>
                                 <textarea id="wr_resourcetext" class="form-control" rows="12"
-                                          style="font-family: monospace;" onblur="handleResourceTextBlur()"></textarea>
+                                          style="font-family: monospace;" onblur="handleResourceTextBlur()" onpaste="handleResourceTextPaste()"></textarea>
                             </div>
                         </div>
 
@@ -529,6 +530,14 @@
             document.getElementById('wr_resourcetext').value = resourceText;
         }
 
+        function handleResourceTextPaste() {
+            // Let paste complete, then normalize full HTML to body inner content.
+            setTimeout(() => {
+                const txt = document.getElementById('wr_resourcetext').value;
+                document.getElementById('wr_resourcetext').value = extractBodyContent(txt);
+            }, 0);
+        }
+
         // ---------- EXTRACT BODY CONTENT ----------
         function extractBodyContent(htmlText) {
             const resourceType = document.getElementById('wr_resourcetype').value;
@@ -538,21 +547,34 @@
                 return htmlText;
             }
 
+            const text = String(htmlText || '');
+
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const hasFullHtml = /<html[\s>]|<head[\s>]|<body[\s>]|<!doctype/i.test(text);
+                if (hasFullHtml && doc && doc.body) {
+                    return (doc.body.innerHTML || '').trim();
+                }
+            } catch (e) {
+                console.warn('HTML parse failed; using regex fallback', e);
+            }
+
             // Check if it contains <body> tag
             const bodyStartRegex = /<body[^>]*>/i;
             const bodyEndRegex = /<\/body>/i;
 
-            const bodyStartMatch = htmlText.match(bodyStartRegex);
-            const bodyEndMatch = htmlText.match(bodyEndRegex);
+            const bodyStartMatch = text.match(bodyStartRegex);
+            const bodyEndMatch = text.match(bodyEndRegex);
 
             if (bodyStartMatch && bodyEndMatch) {
-                const startIndex = htmlText.indexOf(bodyStartMatch[0]) + bodyStartMatch[0].length;
-                const endIndex = htmlText.indexOf(bodyEndMatch[0]);
-                return htmlText.substring(startIndex, endIndex).trim();
+                const startIndex = text.indexOf(bodyStartMatch[0]) + bodyStartMatch[0].length;
+                const endIndex = text.indexOf(bodyEndMatch[0]);
+                return text.substring(startIndex, endIndex).trim();
             }
 
             // If no body tags found, return as is
-            return htmlText;
+            return text;
         }
 
         // ---------- SAVE ----------
@@ -628,7 +650,6 @@
             height: 10px !important;
         }
     </style>
-
 </body>
 
 </html>
