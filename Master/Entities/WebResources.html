@@ -239,6 +239,11 @@
                         text: 'Preview',
                         prefixIcon: 'e-icons e-preview',
                         id: 'preview'
+                    },
+                    {
+                        text: 'Copy HTML',
+                        prefixIcon: 'e-icons e-copy',
+                        id: 'copyFullHtml'
                     }
                 ],
 
@@ -344,6 +349,10 @@
 
                         const url = apiURL + `main.html?type=${typeStr}&webresourceid=${r.id}`;
                         window.open(url, '_blank'); // open in new tab
+                    }
+
+                    if (args.item.id === 'copyFullHtml') {
+                        copyWebResourceFullHtml();
                     }
                 }
             });
@@ -576,6 +585,140 @@
             // If no body tags found, return as is
             return text;
         }
+
+        function extractBodyInnerHtml(htmlText) {
+            const text = String(htmlText || '');
+
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                const hasFullHtml = /<html[\s>]|<head[\s>]|<body[\s>]|<!doctype/i.test(text);
+                if (hasFullHtml && doc && doc.body) {
+                    return (doc.body.innerHTML || '').trim();
+                }
+            } catch (e) {
+                console.warn('HTML parse failed; using regex fallback', e);
+            }
+
+            const bodyStartRegex = /<body[^>]*>/i;
+            const bodyEndRegex = /<\/body>/i;
+            const bodyStartMatch = text.match(bodyStartRegex);
+            const bodyEndMatch = text.match(bodyEndRegex);
+
+            if (bodyStartMatch && bodyEndMatch) {
+                const startIndex = text.indexOf(bodyStartMatch[0]) + bodyStartMatch[0].length;
+                const endIndex = text.indexOf(bodyEndMatch[0]);
+                return text.substring(startIndex, endIndex).trim();
+            }
+
+            return text;
+        }
+
+        function extractHeadMarkup(headText) {
+            const text = String(headText || '').trim();
+            if (!text) return '<head></head>';
+
+            const headStart = text.match(/<head[^>]*>/i);
+            const headEnd = text.match(/<\/head>/i);
+
+            if (headStart && headEnd) {
+                const start = text.indexOf(headStart[0]);
+                const end = text.indexOf(headEnd[0]) + headEnd[0].length;
+                return text.substring(start, end).trim();
+            }
+
+            return '<head>\n' + text + '\n</head>';
+        }
+
+        async function copyTextToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                return;
+            }
+
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            const ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+            if (!ok) {
+                throw new Error('Clipboard copy failed');
+            }
+        }
+
+        async function copyWebResourceFullHtml() {
+            const selected = grid.getSelectedRecords();
+            if (selected.length !== 1) {
+                return alert('Select one record to copy HTML');
+            }
+
+            const selectedRecord = selected[0];
+
+            try {
+                const [resourceData, masterHeadData] = await Promise.all([
+                    DBHandler.fetchEntityRecords(
+                        'webresource',
+                        'id,name,resourcetext',
+                        'name',
+                        'asc',
+                        `id='${selectedRecord.id}'`,
+                        false,
+                        1
+                    ),
+                    DBHandler.fetchEntityRecords(
+                        'webresource',
+                        'id,name,resourcetext',
+                        'name',
+                        'asc',
+                        `name='MasterHead'`,
+                        false,
+                        1
+                    )
+                ]);
+
+                if (!resourceData || !resourceData.length) {
+                    return alert('Selected web resource not found');
+                }
+
+                if (!masterHeadData || !masterHeadData.length) {
+                    return alert('Web resource "MasterHead" not found');
+                }
+
+                const bodyHtml = extractBodyInnerHtml(resourceData[0].resourcetext || '');
+                const headMarkup = extractHeadMarkup(masterHeadData[0].resourcetext || '');
+
+                let fullHtml = `
+<!DOCTYPE html>
+<html lang="en">
+${headMarkup}
+<body>
+${bodyHtml}
+`;
+                fullHtml = fullHtml + decodeHtml("&lt;/body&gt;");
+                fullHtml = fullHtml + decodeHtml("&lt;/html&gt;");
+
+                await copyTextToClipboard(fullHtml);
+                alert('Full HTML copied to clipboard');
+            } catch (err) {
+                console.error('Copy full HTML failed', err);
+                alert('Failed to copy HTML: ' + (err.message || err));
+            }
+        }
+
+       function decodeHtml(encodedHtml) {
+    if (!encodedHtml) return "";
+
+    return encodedHtml
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&amp;/g, "&");
+}
 
         // ---------- SAVE ----------
         async function saveWebResource() {
