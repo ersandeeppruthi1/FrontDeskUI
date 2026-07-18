@@ -222,6 +222,7 @@
             { field: 'specprovided', headerText: 'Spec Provided', width: 120 },
             { field: 'specnumberrear', headerText: 'Spec Number Rear', width: 150, visible: false },
             { field: 'specnumberfar', headerText: 'Spec Number Far', width: 150, visible: false },
+            { field: 'specprize', headerText: 'Spec Prize', width: 120, visible: false },
             { field: 'operation', headerText: 'Operation', width: 100 },
             { field: 'operationdate', headerText: 'Operation Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 150 },
             { field: 'medication', headerText: 'Medication', width: 200, visible: false },
@@ -334,7 +335,7 @@
 
             const data = await DBHandler.fetchEntityRecords(
                 'eyeexamination',
-                'id,patientid,uhid,patientname,examinationdate,inspection,specprovided,specnumberrear,specnumberfar,operation,operationdate,medication,modifiedon',
+                'id,patientid,uhid,patientname,examinationdate,inspection,specprovided,specnumberrear,specnumberfar,specprize,operation,operationdate,medication,modifiedon',
                 'modifiedon',
                 'desc',
                 filterString,
@@ -477,6 +478,7 @@
             document.getElementById('eye_specprovided').value = r.specprovided || '';
             document.getElementById('eye_specnumberrear').value = r.specnumberrear || '';
             document.getElementById('eye_specnumberfar').value = r.specnumberfar || '';
+            document.getElementById('eye_specprize').value = r.specprize || '';
             document.getElementById('eye_operation').value = r.operation || '';
             document.getElementById('eye_operationdate').value = r.operationdate || '';
             document.getElementById('eye_medication').value = r.medication || '';
@@ -509,6 +511,7 @@
                 specprovided: document.getElementById('eye_specprovided').value,
                 specnumberrear: document.getElementById('eye_specnumberrear').value,
                 specnumberfar: document.getElementById('eye_specnumberfar').value,
+                specprize: document.getElementById('eye_specprize').value,
                 operation: document.getElementById('eye_operation').value,
                 operationdate: operationDate || '',
                 medication: document.getElementById('eye_medication').value
