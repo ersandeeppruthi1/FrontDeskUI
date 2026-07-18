@@ -370,7 +370,7 @@
             toggleOperationDate();
 
             // Set examination date to today
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateInputValue(new Date());
             document.getElementById('examinationDate').value = today;
         }
 
@@ -456,6 +456,28 @@
             }
         }
 
+        function toDateInputValue(value) {
+            if (!value) return '';
+
+            const direct = String(value).trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(direct)) return direct;
+
+            const parsed = new Date(direct);
+            if (isNaN(parsed)) return '';
+
+            return getLocalDateInputValue(parsed);
+        }
+
+        function getLocalDateInputValue(dateObj) {
+            if (!(dateObj instanceof Date) || isNaN(dateObj)) return '';
+
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+        }
+
         // EDIT
         async function editEyeRecord() {
             const selected = eyeGrid.getSelectedRecords();
@@ -473,14 +495,14 @@
             previousPatientId = r.uhid;
 
             // Populate form fields
-            document.getElementById('examinationDate').value = r.examinationdate || new Date().toISOString().split('T')[0];
+            document.getElementById('examinationDate').value = toDateInputValue(r.examinationdate) || getLocalDateInputValue(new Date());
             document.getElementById('eye_inspection').value = r.inspection || '';
             document.getElementById('eye_specprovided').value = r.specprovided || '';
             document.getElementById('eye_specnumberrear').value = r.specnumberrear || '';
             document.getElementById('eye_specnumberfar').value = r.specnumberfar || '';
             document.getElementById('eye_specprize').value = r.specprize || '';
             document.getElementById('eye_operation').value = r.operation || '';
-            document.getElementById('eye_operationdate').value = r.operationdate || '';
+            document.getElementById('eye_operationdate').value = toDateInputValue(r.operationdate);
             document.getElementById('eye_medication').value = r.medication || '';
 
             toggleSpecFields();
@@ -547,7 +569,7 @@
 
         // Initialize date fields with current date
         function initializeDateFields() {
-            const today = new Date().toISOString().split('T')[0];
+            const today = getLocalDateInputValue(new Date());
 
             // Set date filter fields
             const startDateField = document.getElementById('startDate');
