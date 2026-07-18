@@ -112,6 +112,12 @@
                                     <li class="nav-item">
                                         <a class="nav-link" href="#" onclick="switchComponentTab('entity',this);return false;">Entities</a>
                                     </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#" onclick="switchComponentTab('menu',this);return false;">Menu</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#" onclick="switchComponentTab('permission',this);return false;">Permission</a>
+                                    </li>
                                 </ul>
                                 <div class="input-group mb-2">
                                     <input type="text" id="sp_comp_search" class="form-control" placeholder="Search..." oninput="renderAvailableComponents()" />
@@ -190,7 +196,9 @@
         let webResourcesData = [];
         let entitiesData = [];
         let entityColumnsData = [];
-        let selectedComponents = []; // array of {id, name, type:'webresource'|'entity'|'entitycolumn', subtype, entityid?}
+        let masterMenusData = [];
+        let masterPermissionsData = [];
+        let selectedComponents = []; // array of {id, name, type:'webresource'|'entity'|'entitycolumn'|'menu'|'permission', subtype, entityid?}
         let activeComponentTab = 'webresource';
         let importHistoryGrid;
         let importHistoryModal;
@@ -322,6 +330,14 @@
             entityColumnsData = await DBHandler.fetchEntityRecords('entitycolumn', 'id,name,entityid,physicalname,columntype', 'name', 'asc', '', true, 0, '') || [];
         }
 
+        async function loadMasterMenus() {
+            masterMenusData = await DBHandler.fetchEntityRecords('mastermenu', 'id,name,menuhtml,menujson', 'name', 'asc', '', true, 0, '') || [];
+        }
+
+        async function loadMasterPermissions() {
+            masterPermissionsData = await DBHandler.fetchEntityRecords('masterpermission', 'id,name,permissionjson', 'name', 'asc', '', true, 0, '') || [];
+        }
+
 
         // MODAL
         function openSolutionPackageModal() {
@@ -331,8 +347,7 @@
             activeComponentTab = 'webresource';
             document.getElementById('sp_comp_search').value = '';
             const tabs = document.querySelectorAll('#sp_component_tabs .nav-link');
-            tabs[0].classList.add('active');
-            tabs[1].classList.remove('active');
+            tabs.forEach((tab, index) => tab.classList.toggle('active', index === 0));
             renderAvailableComponents();
             renderSelectedComponents();
             solutionPackageModal.show();
@@ -367,7 +382,7 @@
                             <td><span class="badge bg-secondary">${r.resourcetype || ''}</span></td>
                         </tr>`
                 ).join('');
-            } else {
+            } else if (activeComponentTab === 'entity') {
                 document.getElementById('sp_avail_col3_header').innerText = 'Columns';
                 const filtered = entitiesData.filter(r =>
                     !selectedIds.includes(r.id) && (r.name || '').toLowerCase().includes(search)
@@ -384,6 +399,38 @@
                             <td><span class="badge bg-info text-dark">${colCount} col(s)</span></td>
                         </tr>`;
                 }).join('');
+            } else if (activeComponentTab === 'menu') {
+                document.getElementById('sp_avail_col3_header').innerText = 'Menu JSON';
+                const filtered = masterMenusData.filter(r =>
+                    !selectedIds.includes(r.id) && (r.name || '').toLowerCase().includes(search)
+                );
+                if (!filtered.length) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-muted text-center">No menu records found</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = filtered.map(r =>
+                    `<tr>
+                            <td><button type="button" class="btn btn-sm btn-success py-0 px-1" onclick="addComponent('${r.id}','menu')"><i class="fa fa-plus"></i> Add</button></td>
+                            <td>${r.name}</td>
+                            <td><span class="badge bg-secondary">${r.menujson ? 'Yes' : 'No'}</span></td>
+                        </tr>`
+                ).join('');
+            } else {
+                document.getElementById('sp_avail_col3_header').innerText = 'Permission JSON';
+                const filtered = masterPermissionsData.filter(r =>
+                    !selectedIds.includes(r.id) && (r.name || '').toLowerCase().includes(search)
+                );
+                if (!filtered.length) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-muted text-center">No permission records found</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = filtered.map(r =>
+                    `<tr>
+                            <td><button type="button" class="btn btn-sm btn-success py-0 px-1" onclick="addComponent('${r.id}','permission')"><i class="fa fa-plus"></i> Add</button></td>
+                            <td>${r.name}</td>
+                            <td><span class="badge bg-secondary">${r.permissionjson ? 'Yes' : 'No'}</span></td>
+                        </tr>`
+                ).join('');
             }
         }
 
@@ -403,6 +450,14 @@
                         selectedComponents.push({ id: col.id, name: col.name, type: 'entitycolumn', subtype: col.columntype || '', entityid: col.entityid });
                     }
                 }
+            } else if (type === 'menu') {
+                const menu = masterMenusData.find(r => r.id == id);
+                if (!menu) return;
+                selectedComponents.push({ id: menu.id, name: menu.name, type: 'menu' });
+            } else if (type === 'permission') {
+                const permission = masterPermissionsData.find(r => r.id == id);
+                if (!permission) return;
+                selectedComponents.push({ id: permission.id, name: permission.name, type: 'permission' });
             }
             renderAvailableComponents();
             renderSelectedComponents();
@@ -424,7 +479,7 @@
                 document.getElementById('sp_components_json').value = '';
                 return;
             }
-            const typeBadge = { webresource: 'bg-primary', entity: 'bg-success', entitycolumn: 'bg-secondary' };
+            const typeBadge = { webresource: 'bg-primary', entity: 'bg-success', entitycolumn: 'bg-secondary', menu: 'bg-warning text-dark', permission: 'bg-dark' };
             tbody.innerHTML = selectedComponents.map(r =>
                 `<tr>
                         <td>${r.name}</td>
@@ -435,7 +490,9 @@
             const jsonOut = {
                 webResources: selectedComponents.filter(r => r.type === 'webresource').map(r => ({ id: r.id, name: r.name })),
                 entities: selectedComponents.filter(r => r.type === 'entity').map(r => ({ id: r.id, name: r.name })),
-                entityColumns: selectedComponents.filter(r => r.type === 'entitycolumn').map(r => ({ id: r.id, name: r.name, entityid: r.entityid }))
+                entityColumns: selectedComponents.filter(r => r.type === 'entitycolumn').map(r => ({ id: r.id, name: r.name, entityid: r.entityid })),
+                menus: selectedComponents.filter(r => r.type === 'menu').map(r => ({ id: r.id, name: r.name })),
+                permissions: selectedComponents.filter(r => r.type === 'permission').map(r => ({ id: r.id, name: r.name }))
             };
             document.getElementById('sp_components_json').value = JSON.stringify(jsonOut, null, 2);
         }
@@ -564,7 +621,9 @@
             const wrItems = components.filter(c => c.type === 'webresource');
             const entityItems = components.filter(c => c.type === 'entity');
             const colItems = components.filter(c => c.type === 'entitycolumn');
-            const totalSteps = wrItems.length + entityItems.length + colItems.length;
+            const menuItems = components.filter(c => c.type === 'menu');
+            const permissionItems = components.filter(c => c.type === 'permission');
+            const totalSteps = wrItems.length + entityItems.length + colItems.length + menuItems.length + permissionItems.length;
 
             showProgressOverlay('Exporting Package', 0, totalSteps, 'Starting export...');
 
@@ -594,6 +653,22 @@
                 showProgressOverlay('Exporting Package', done, totalSteps, `Fetching columns... (${entityColumns.length}/${colItems.length})`);
             }
 
+            const menus = [];
+            for (const c of menuItems) {
+                const data = await DBHandler.fetchEntityRecords('mastermenu', '*', 'name', 'asc', `id='${c.id}'`, false, 1);
+                if (data && data.length) menus.push(data[0]);
+                done++;
+                showProgressOverlay('Exporting Package', done, totalSteps, `Fetching menus... (${menus.length}/${menuItems.length})`);
+            }
+
+            const permissions = [];
+            for (const c of permissionItems) {
+                const data = await DBHandler.fetchEntityRecords('masterpermission', '*', 'name', 'asc', `id='${c.id}'`, false, 1);
+                if (data && data.length) permissions.push(data[0]);
+                done++;
+                showProgressOverlay('Exporting Package', done, totalSteps, `Fetching permissions... (${permissions.length}/${permissionItems.length})`);
+            }
+
             showProgressOverlay('Exporting Package', totalSteps, totalSteps, 'Building package...');
 
             const exportData = {
@@ -603,7 +678,9 @@
                 exportedOn: new Date().toISOString(),
                 webResources,
                 entities,
-                entityColumns
+                entityColumns,
+                menus,
+                permissions
             };
 
             const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -617,7 +694,7 @@
             window.URL.revokeObjectURL(url);
 
             hideProgressOverlay();
-            showToast(`Exported: ${webResources.length} web resource(s), ${entities.length} entit(ies), ${entityColumns.length} column(s)`);
+            showToast(`Exported: ${webResources.length} web resource(s), ${entities.length} entit(ies), ${entityColumns.length} column(s), ${menus.length} menu(s), ${permissions.length} permission(s)`);
         }
 
         function showProgressOverlay(title, done, total, label) {
@@ -676,7 +753,9 @@
             const wrCount = (importData.webResources || []).length;
             const entityCount = (importData.entities || []).length;
             const colCount = (importData.entityColumns || []).length;
-            const totalSteps = wrCount + entityCount + colCount;
+            const menuCount = (importData.menus || []).length;
+            const permissionCount = (importData.permissions || []).length;
+            const totalSteps = wrCount + entityCount + colCount + menuCount + permissionCount;
             const sourceEntities = importData.entities || [];
             const entityIdMap = {};
 
@@ -705,12 +784,12 @@
                 return null;
             }
 
-            if (!wrCount && !entityCount && !colCount) {
+            if (!wrCount && !entityCount && !colCount && !menuCount && !permissionCount) {
                 showToast('Invalid package format', 'error');
                 return;
             }
 
-            if (!confirm(`Import "${importData.packageName}"?\n${wrCount} web resource(s), ${entityCount} entit(ies), ${colCount} column(s)`)) return;
+            if (!confirm(`Import "${importData.packageName}"?\n${wrCount} web resource(s), ${entityCount} entit(ies), ${colCount} column(s), ${menuCount} menu(s), ${permissionCount} permission(s)`)) return;
 
             let imported = 0, updated = 0, errors = 0;
             let done = 0;
@@ -799,6 +878,40 @@
                 showProgressOverlay('Importing Package', done, totalSteps, `Importing web resources... (${done - entityCount - colCount}/${wrCount})`);
             }
 
+            for (const menu of (importData.menus || [])) {
+                try {
+                    const existing = await DBHandler.fetchEntityRecords('mastermenu', 'id', 'name', 'asc', `name='${menu.name}'`, false, 1);
+                    const existingId = existing && existing.length ? existing[0].id : null;
+                    const recordData = {
+                        name: menu.name,
+                        menuhtml: menu.menuhtml,
+                        menujson: menu.menujson
+                    };
+                    await DBHandler.submitRecordData('mastermenu', recordData, existingId, false);
+                    existingId ? updated++ : imported++;
+                } catch (err) { console.error('Failed to import menu', menu.name, err); errors++; }
+                done++;
+                showProgressOverlay('Importing Package', done, totalSteps, `Importing menus... (${done - entityCount - colCount - wrCount}/${menuCount})`);
+            }
+
+            for (const permission of (importData.permissions || [])) {
+                try {
+                    const existing = await DBHandler.fetchEntityRecords('masterpermission', 'id', 'name', 'asc', `name='${permission.name}'`, false, 1);
+                    const existingId = existing && existing.length ? existing[0].id : null;
+                    const recordData = {
+                        name: permission.name,
+                        permissionjson: permission.permissionjson
+                    };
+                    if (!existingId && permission.id) {
+                        recordData.id = permission.id;
+                    }
+                    await DBHandler.submitRecordData('masterpermission', recordData, existingId, false);
+                    existingId ? updated++ : imported++;
+                } catch (err) { console.error('Failed to import permission', permission.name, err); errors++; }
+                done++;
+                showProgressOverlay('Importing Package', done, totalSteps, `Importing permissions... (${done - entityCount - colCount - wrCount - menuCount}/${permissionCount})`);
+            }
+
             hideProgressOverlay();
             showToast(`Import completed: ${imported} new, ${updated} updated, ${errors} error(s)`, errors ? 'error' : 'success');
 
@@ -817,6 +930,8 @@
             await loadWebResources();
             await loadEntities();
             await loadEntityColumns();
+            await loadMasterMenus();
+            await loadMasterPermissions();
             await loadSolutionPackages();
         }
 
@@ -949,7 +1064,7 @@
             }
         }
         $(document).ready(function () {
-            Promise.all([loadWebResources(), loadEntities(), loadEntityColumns()]).then(() => {
+            Promise.all([loadWebResources(), loadEntities(), loadEntityColumns(), loadMasterMenus(), loadMasterPermissions()]).then(() => {
                 initSolutionPackageGrid();
                 loadSolutionPackages();
             });
