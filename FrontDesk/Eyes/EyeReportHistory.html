@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -417,15 +417,26 @@
                 const headerAge = latestFrontdesk.age || '-';
                 const rawGender = normalizeText(latestFrontdesk.gender);
                 const headerGender = rawGender === 'male' ? 'M' : (rawGender === 'female' ? 'F' : (latestFrontdesk.gender || '-'));
+                const visitCount = patientEyeRecords.length;
 
                 const headingId = `patientHeading_${i}`;
                 const collapseId = `patientCollapse_${i}`;
 
                 html += `
-                    <div class="accordion-item mb-2 border rounded">
+                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden shadow-sm">
                         <h2 class="accordion-header" id="${headingId}">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
-                                ${escapeHtml(headerName)} | UHID: ${escapeHtml(headerUhid)} | Gender: ${escapeHtml(headerGender)} | Age: ${escapeHtml(headerAge)}
+                            <button class="accordion-button collapsed py-3" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}" style="background: #f8fafc; color: #10243e;">
+                                <div class="d-flex justify-content-between align-items-center w-100 me-3 flex-wrap gap-2">
+                                    <div>
+                                        <strong class="fs-5">${escapeHtml(headerName)}</strong> 
+                                        <span class="text-muted ms-2 small">(UHID: ${escapeHtml(headerUhid)})</span>
+                                    </div>
+                                    <div class="small text-secondary">
+                                        <span class="badge bg-secondary me-2">Gender: ${escapeHtml(headerGender)}</span>
+                                        <span class="badge bg-secondary me-2">Age: ${escapeHtml(headerAge)}</span>
+                                        <span class="badge bg-primary">Visits: ${visitCount}</span>
+                                    </div>
+                                </div>
                             </button>
                         </h2>
                         <div id="${collapseId}" class="accordion-collapse collapse" aria-labelledby="${headingId}" data-bs-parent="#patientResultAccordion">
@@ -477,37 +488,587 @@
                     )
                 );
 
-                // Check if there are duplicate names
-                const patientNameCount = {};
-
+                // FIX: Check if the SAME NAME exists across DIFFERENT patients (UHIDs)
+                const patientNameMap = {};
                 groupedPatients.forEach(group => {
                     const name = normalizeText(group[0].patientname);
-
-                    if (!patientNameCount[name]) {
-                        patientNameCount[name] = 0;
+                    const uhid = normalizeText(group[0].uhid);
+                    
+                    if (!patientNameMap[name]) {
+                        patientNameMap[name] = new Set();
                     }
-
-                    patientNameCount[name]++;
+                    patientNameMap[name].add(uhid); // Keeps track of unique individuals with this name
                 });
 
-                const hasSameName = Object.values(patientNameCount).some(count => count > 1);
+                // Trigger accordion only if a name maps to more than 1 unique UHID
+                const hasSameName = Object.values(patientNameMap).some(uhidSet => uhidSet.size > 1);
 
                 if (hasSameName) {
-
-                    // Show accordion
+                    // Show accordion format for duplicate names
                     html = renderPatientAccordion(groupedPatients, patientDetailsList);
-
                 } else {
-
-                    // Show normal cards
+                    // Show normal flat cards for unique patients
                     groupedPatients.forEach((group, index) => {
                         html += renderPatientCard(group, patientDetailsList[index]);
                     });
-
                 }
 
                 setStatus(`Found ${groupedPatients.length} patient(s).`, "ok");
                 resultsEl.innerHTML = html;
+            } catch (error) {
+                console.error('Search error', error);
+                setStatus('Unable to fetch records. Please try again.', 'error');
+                resultsEl.innerHTML = '<div class="empty-state">Error while loading data.</div>';
+            } finally {
+                searchBtn.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('patientNameSearch');
+            input.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    searchPatientDetails();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html> -->
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Patient Detail Search</title>
+
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+    </script>
+
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+</head>
+
+<body>
+    <style>
+        body {
+            background: #f7f9fc;
+        }
+
+        .page-wrap {
+            max-width: 1250px;
+            margin: 20px auto;
+            padding: 0 12px;
+        }
+
+        .search-card {
+            background: #ffffff;
+            border: 1px solid #dfe3eb;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 16px rgba(20, 33, 61, 0.06);
+        }
+
+        .result-card {
+            background: #ffffff;
+            border: 1px solid #dfe3eb;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(20, 33, 61, 0.06);
+            margin-top: 14px;
+            overflow: hidden;
+        }
+
+        .result-header {
+            background: linear-gradient(90deg, #0f4c81 0%, #1b6ca8 100%);
+            color: #fff;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .pill {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 13px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 8px 0;
+            color: #10243e;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(170px, 1fr));
+            gap: 10px;
+        }
+
+        .detail-box {
+            border: 1px solid #e2e7f0;
+            border-radius: 8px;
+            background: #fdfefe;
+            padding: 10px;
+        }
+
+        .detail-box .label {
+            color: #54657d;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .detail-box .value {
+            color: #10243e;
+            font-size: 14px;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .table-sm th,
+        .table-sm td {
+            vertical-align: middle;
+        }
+
+        .med-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .med-chip {
+            border: 1px solid #afc7e5;
+            border-radius: 999px;
+            padding: 4px 10px;
+            color: #173d67;
+            background: #edf5ff;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            border: 1px dashed #b9c6d8;
+            border-radius: 8px;
+            padding: 14px;
+            color: #50617a;
+            text-align: center;
+            background: #f9fbff;
+        }
+
+        @media (max-width: 992px) {
+            .detail-grid {
+                grid-template-columns: repeat(2, minmax(160px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-header {
+                align-items: flex-start;
+            }
+        }
+    </style>
+
+    <div class="page-wrap">
+        <div class="search-card">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8 col-lg-9">
+                    <label for="patientNameSearch" class="form-label fw-bold">Search Patient Name / UHID / Phone Number</label>
+                    <input type="text" class="form-control" id="patientNameSearch" placeholder="Type patient name, UHID, or phone number and press Enter">
+                </div>
+                <div class="col-md-4 col-lg-3 d-grid">
+                    <button type="button" class="btn btn-primary" onclick="searchPatientDetails()" id="searchBtn">
+                        <i class="fas fa-search me-1"></i> Search
+                    </button>
+                </div>
+            </div>
+            <div class="mt-2" id="searchStatus"></div>
+        </div>
+
+        <div id="searchResults" class="mt-3"></div>
+    </div>
+
+    <script>
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function normalizeText(value) {
+            return String(value || '').toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        function formatDate(value) {
+            if (!value) return '-';
+            const d = new Date(value);
+            if (isNaN(d)) return escapeHtml(value);
+            const day = ('0' + d.getDate()).slice(-2);
+            const month = ('0' + (d.getMonth() + 1)).slice(-2);
+            const year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function setStatus(text, type) {
+            const el = document.getElementById('searchStatus');
+            const className = type === 'error' ? 'text-danger' : (type === 'ok' ? 'text-success' : 'text-muted');
+            el.className = className;
+            el.textContent = text || '';
+        }
+
+        function extractMedicines(records) {
+            const meds = new Set();
+            records.forEach(r => {
+                const raw = String(r.medication || '').trim();
+                if (!raw) return;
+                raw.split(/[,;\n|]+/).forEach(item => {
+                    const med = item.trim();
+                    if (med) meds.add(med);
+                });
+            });
+            return Array.from(meds);
+        }
+
+        function groupByPatient(records) {
+            const map = new Map();
+            records.forEach(r => {
+                const key = r.uhid || r.patientid || r.patientname;
+                if (!map.has(key)) map.set(key, []);
+                map.get(key).push(r);
+            });
+            return Array.from(map.values()).map(group =>
+                group.sort((a, b) => new Date(b.examinationdate || b.modifiedon) - new Date(a.examinationdate || a.modifiedon))
+            );
+        }
+
+        async function fetchEyeCheckupsBySearch(searchTerm) {
+            const all = await DBHandler.fetchEntityRecords(
+                'eyeexamination',
+                'id,patientid,uhid,patientname,examinationdate,inspection,specprovided,specnumberrear,specnumberfar,operation,operationdate,medication,modifiedon',
+                'modifiedon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
+
+            const normalizedSearch = normalizeText(searchTerm);
+            const eyeRecords = all || [];
+
+            const frontdeskAll = await DBHandler.fetchEntityRecords(
+                'frontdeskpatientrecord',
+                'patientid,phone',
+                'createdon',
+                'desc',
+                '',
+                true,
+                0,
+                ''
+            );
+
+            const matchingPatientIdsByPhone = new Set(
+                (frontdeskAll || [])
+                    .filter(r => normalizeText(r.phone).includes(normalizedSearch))
+                    .map(r => normalizeText(r.patientid))
+                    .filter(Boolean)
+            );
+
+            return eyeRecords.filter(r => {
+                const patientName = normalizeText(r.patientname);
+                const uhid = normalizeText(r.uhid);
+                const patientId = normalizeText(r.patientid);
+
+                return patientName.includes(normalizedSearch)
+                    || uhid.includes(normalizedSearch)
+                    || matchingPatientIdsByPhone.has(uhid)
+                    || matchingPatientIdsByPhone.has(patientId);
+            });
+        }
+
+        async function fetchFrontdeskHistory(uhid) {
+            if (!uhid) return [];
+            return await DBHandler.fetchEntityRecords(
+                'frontdeskpatientrecord',
+                'id,patientid,patientname,age,gender,phone,address,date,doctorname,amount,paymentmethod,totaltest,createdon',
+                'createdon',
+                'desc',
+                `patientid='${String(uhid).replace(/'/g, "''")}'`,
+                true,
+                0,
+                ''
+            );
+        }
+
+        // Modified to accept an optional flag to drop margins inside an accordion panel
+        function renderPatientCard(eyeRecords, frontdeskRecords, isInsideAccordion = false) {
+            const latestEye = eyeRecords[0] || {};
+            const latestFrontdesk = (frontdeskRecords || [])[0] || {};
+            const visitCount = eyeRecords.length;
+            const medicineList = extractMedicines(eyeRecords);
+            const firstVisit = eyeRecords[eyeRecords.length - 1];
+            const rawGender = normalizeText(latestFrontdesk.gender);
+            const headerGender = rawGender === 'male' ? 'M' : (rawGender === 'female' ? 'F' : (latestFrontdesk.gender || '-'));
+            const headerName = latestEye.patientname || latestFrontdesk.patientname || '-';
+            const headerUhid = latestEye.uhid || latestFrontdesk.patientid || '-';
+            const headerAge = latestFrontdesk.age || '-';
+
+            const detailData = {
+                'First Eye Checkup': formatDate(firstVisit ? firstVisit.examinationdate : ''),
+                'Latest Eye Checkup': formatDate(latestEye.examinationdate)
+            };
+
+            const medicineHtml = medicineList.length
+                ? medicineList.map(m => `<span class="med-chip">${escapeHtml(m)}</span>`).join('')
+                : '<div class="empty-state">No medicine recorded for this patient.</div>';
+
+            const frontdeskRows = (frontdeskRecords || []).map((r, idx) => `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${formatDate(r.date)}</td>
+                    <td>${escapeHtml(r.doctorname || '-')}</td>
+                    <td>${escapeHtml(r.totaltest || '-')}</td>
+                </tr>
+            `).join('');
+
+            const eyeRows = (eyeRecords || []).map((r, idx) => `
+                <tr>
+                    <td>${idx + 1}</td>
+                    <td>${formatDate(r.examinationdate)}</td>
+                    <td>${escapeHtml(r.inspection || '-')}</td>
+                    <td>${escapeHtml(r.specprovided || '-')}</td>
+                    <td>${escapeHtml(r.specnumberrear || '-')}</td>
+                    <td>${escapeHtml(r.specnumberfar || '-')}</td>
+                    <td>${escapeHtml(r.operation || '-')}</td>
+                    <td>${formatDate(r.operationdate)}</td>
+                    <td>${escapeHtml(r.medication || '-')}</td>
+                </tr>
+            `).join('');
+
+            const detailBoxes = Object.keys(detailData).map(label => `
+                <div class="detail-box">
+                    <div class="label">${escapeHtml(label)}</div>
+                    <div class="value">${escapeHtml(detailData[label])}</div>
+                </div>
+            `).join('');
+
+            // If it's loaded inside an accordion, strip the outer styling box so CSS doesn't collide
+            const cardStyleClass = isInsideAccordion ? "" : "result-card";
+
+            return `
+                <div class="${cardStyleClass}">
+                    ${isInsideAccordion ? '' : `
+                    <div class="result-header">
+                        <div>
+                            <div class="fw-bold">${escapeHtml(headerName)}</div>
+                            <div class="small">UHID: ${escapeHtml(headerUhid)} | Gender: ${escapeHtml(headerGender)} | Age: ${escapeHtml(headerAge)}</div>
+                        </div>
+                        <span class="pill">Checked by eye doctor: ${visitCount} time(s)</span>
+                    </div>
+                    `}
+
+                    <div class="p-3">
+                        <div class="section-title">Patient Details</div>
+                        <div class="detail-grid">${detailBoxes}</div>
+
+                        <div class="section-title mt-3">Medicines Provided</div>
+                        <div class="med-list">${medicineHtml}</div>
+
+                        <div class="section-title mt-3">Eye Checkup History</div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>Inspection</th>
+                                        <th>Spec Provided</th>
+                                        <th>Spec Rear</th>
+                                        <th>Spec Far</th>
+                                        <th>Operation</th>
+                                        <th>Operation Date</th>
+                                        <th>Medication</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${eyeRows || '<tr><td colspan="9" class="text-center text-muted">No eye checkup history found.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="section-title mt-3">Other Visit Details</div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Date</th>
+                                        <th>Doctor/Department</th>
+                                        <th>Test</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${frontdeskRows || '<tr><td colspan="4" class="text-center text-muted">No additional visit history found.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPatientAccordion(groupedPatients, patientDetailsList) {
+            let html = '<div class="accordion" id="patientResultAccordion">';
+
+            for (let i = 0; i < groupedPatients.length; i++) {
+                const patientEyeRecords = groupedPatients[i];
+                const frontdeskRecords = patientDetailsList[i] || [];
+                const latestEye = patientEyeRecords[0] || {};
+                const latestFrontdesk = frontdeskRecords[0] || {};
+
+                const headerName = latestEye.patientname || latestFrontdesk.patientname || '-';
+                const headerUhid = latestEye.uhid || latestFrontdesk.patientid || '-';
+                const headerAge = latestFrontdesk.age || '-';
+                const rawGender = normalizeText(latestFrontdesk.gender);
+                const headerGender = rawGender === 'male' ? 'M' : (rawGender === 'female' ? 'F' : (latestFrontdesk.gender || '-'));
+
+                const headingId = `patientHeading_${i}`;
+                const collapseId = `patientCollapse_${i}`;
+
+                html += `
+                    <div class="accordion-item mb-2 border rounded">
+                        <h2 class="accordion-header" id="${headingId}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
+                                <span class="fw-bold text-dark">${escapeHtml(headerName)}</span>&nbsp;|&nbsp;UHID: ${escapeHtml(headerUhid)}&nbsp;|&nbsp;Gender: ${escapeHtml(headerGender)}&nbsp;|&nbsp;Age: ${escapeHtml(headerAge)}
+                            </button>
+                        </h2>
+                        <div id="${collapseId}" class="accordion-collapse collapse" aria-labelledby="${headingId}" data-bs-parent="#patientResultAccordion">
+                            <div class="accordion-body p-0" style="background:#fff;">
+                                ${renderPatientCard(patientEyeRecords, frontdeskRecords, true)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        async function searchPatientDetails() {
+            const input = document.getElementById('patientNameSearch');
+            const searchTerm = input.value.trim();
+            const resultsEl = document.getElementById('searchResults');
+            const searchBtn = document.getElementById('searchBtn');
+
+            if (!searchTerm) {
+                setStatus('Please enter patient name, UHID, or phone number.', 'error');
+                resultsEl.innerHTML = '';
+                input.focus();
+                return;
+            }
+
+            searchBtn.disabled = true;
+            setStatus('Searching patient records...', '');
+            resultsEl.innerHTML = '';
+
+            try {
+                const eyeRecords = await fetchEyeCheckupsBySearch(searchTerm);
+
+                if (!eyeRecords.length) {
+                    setStatus('No patient found for the entered name, UHID, or phone number.', 'error');
+                    resultsEl.innerHTML = '<div class="empty-state">No matching eye checkup data found.</div>';
+                    return;
+                }
+
+                const groupedPatients = groupByPatient(eyeRecords);
+                let html = "";
+
+            const patientDetailsList = await Promise.all(
+                    groupedPatients.map(group =>
+                        fetchFrontdeskHistory(group[0].uhid)
+                    )
+                );
+
+                // ==========================================
+                // FOOLPROOF DUPLICATE NAME DETECTION LOGIC
+                // ==========================================
+                const uniquePatientsByNameMap = {};
+
+                groupedPatients.forEach((group, index) => {
+                    const latestEye = group[0] || {};
+                    const latestFrontdesk = (patientDetailsList[index] || [])[0] || {};
+                    
+                    // Fallback names exactly like the headers do, then normalize completely
+                    const rawName = latestEye.patientname || latestFrontdesk.patientname || '';
+                    const cleanName = normalizeText(rawName);
+                    
+                    // Fallback UHID exactly like the headers do
+                    const rawUhid = latestEye.uhid || latestFrontdesk.patientid || `unknown_${index}`;
+                    const cleanUhid = normalizeText(rawUhid);
+
+                    if (cleanName) {
+                        if (!uniquePatientsByNameMap[cleanName]) {
+                            uniquePatientsByNameMap[cleanName] = new Set();
+                        }
+                        // Add this unique medical ID to this name bucket
+                        uniquePatientsByNameMap[cleanName].add(cleanUhid);
+                    }
+                });
+
+                // Check if ANY group of names maps to more than 1 distinct patient ID
+                let hasSameName = false;
+                for (const nameKey in uniquePatientsByNameMap) {
+                    if (uniquePatientsByNameMap[nameKey].size > 1) {
+                        hasSameName = true;
+                        break;
+                    }
+                }
+                // ==========================================
+
+                if (hasSameName) {
+                    // Force accordion format because matching names were found across different IDs
+                    html = renderPatientAccordion(groupedPatients, patientDetailsList);
+                } else {
+                    // Show standard flat cards for unique entries
+                    groupedPatients.forEach((group, index) => {
+                        html += renderPatientCard(group, patientDetailsList[index], false);
+                    });
+                }
+
+                setStatus(`Found ${groupedPatients.length} patient(s).`, "ok");
+                resultsEl.innerHTML = html; 
+                
             } catch (error) {
                 console.error('Search error', error);
                 setStatus('Unable to fetch records. Please try again.', 'error');
