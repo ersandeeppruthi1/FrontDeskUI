@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dental Patient Details</title>
     
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+    </script>
+    
     <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
     <link href="https://apisit.vsservices.in/css/Default/jquery-ui.min.css" rel="stylesheet" />
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
@@ -193,8 +198,8 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="tooth-tab" data-bs-toggle="tab" data-bs-target="#tooth" type="button" role="tab">Tooth Deficiency Details</button>
             </li>
-            <li class="nav-item" id="liTreatment">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#treatment">Treatments</button>
+            <li class="nav-item" role="presentation" id="liTreatment">
+                <button class="nav-link" id="treatment-tab" data-bs-toggle="tab" data-bs-target="#treatment" type="button" role="tab">Treatments</button>
             </li>
             <li class="nav-item" role="presentation" id="liFiles">
                 <button class="nav-link" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab">Files</button>
@@ -216,12 +221,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>Date:</label>
-                            <div class="date-container" style="position: relative; display: flex; align-items: center;">
-                                <input id="date" type="text" dbColumnName="date" class="form-control datepicker" placeholder="dd-mm-yy" />
-                                <i class="date-icon fa fa-calendar" aria-hidden="true"
-                                   style="position: absolute; right: 10px; cursor: pointer; z-index: 5;"
-                                   onclick="openDatePicker('date'); return false;"></i>
-                            </div>
+                            <input type="date" id="date" dbColumnName="date" class="form-control">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>Address:</label>
@@ -416,12 +416,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>Last time checked up:</label>
-                            <div class="date-container" style="position: relative; display: flex; align-items: center;">
-                                <input id="lastCheckedUp" type="text" dbColumnName="lastCheckedUp" class="form-control datepicker" placeholder="dd-MMM-yy" />
-                                <i class="date-icon fa fa-calendar" aria-hidden="true"
-                                   style="position: absolute; right: 10px; cursor: pointer;"
-                                   onclick="return openDatePicker('lastCheckedUp');"></i>
-                            </div>
+                            <input type="date" id="lastCheckedUp" dbColumnName="lastCheckedUp" class="form-control">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label>Was there a reason for the check-up?</label>
@@ -533,12 +528,7 @@
                     <form id="appointmentForm">
                         <div class="mb-3">
                             <label>Date<span style="color: red;">*</span>:</label>
-                            <div class="date-container" style="position: relative; display: flex; align-items: center;">
-                                <input id="appointmentDate" type="text" dbColumnName="appointmentDate" class="form-control datepicker" placeholder="dd-MMM-yy" />
-                                <i class="date-icon fa fa-calendar" aria-hidden="true"
-                                   style="position: absolute; right: 10px; cursor: pointer;"
-                                   onclick="return openDatePicker('appointmentDate');"></i>
-                            </div>
+                            <input type="date" id="appointmentDate" dbColumnName="appointmentDate" class="form-control">
                         </div>
                         <div class="mb-3">
                             <label>Treatment<span style="color: red;">*</span>:</label>
@@ -546,12 +536,7 @@
                         </div>
                         <div class="mb-3">
                             <label>Next Appointment:</label>
-                            <div class="date-container" style="position: relative; display: flex; align-items: center;">
-                                <input id="nextAppointment" type="text" dbColumnName="nextAppointment" class="form-control datepicker" placeholder="dd-MMM-yy" />
-                                <i class="date-icon fa fa-calendar" aria-hidden="true"
-                                   style="position: absolute; right: 10px; cursor: pointer;"
-                                   onclick="return openDatePicker('nextAppointment');"></i>
-                            </div>
+                            <input type="date" id="nextAppointment" dbColumnName="nextAppointment" class="form-control">
                         </div>
                         <div class="mb-3">
                             <label>Practitioner<span style="color: red;">*</span>:</label>
@@ -576,39 +561,8 @@
         var patientId = "";
         let currentAppointmentId = null;
 
-        // Helper function to open datepicker
+        // Helper function to open datepicker - no longer used with native HTML5 date input
         function openDatePicker(fieldId) {
-            const elem = $('#' + fieldId);
-            if (elem.length === 0) {
-                console.warn('Date field not found: ' + fieldId);
-                return false;
-            }
-            
-            try {
-                // Check if datepicker is already initialized
-                const inst = $.data(elem[0], 'datepicker');
-                if (!inst) {
-                    // Initialize datepicker if not already initialized
-                    elem.datepicker({
-                        dateFormat: "dd-M-yy",
-                        changeMonth: true,
-                        changeYear: true,
-                        yearRange: "c-100:c+10"
-                    });
-                }
-                
-                // Focus the input field
-                elem.focus();
-                
-                // Use a small delay to ensure DOM is ready, then trigger the datepicker
-                setTimeout(function() {
-                    elem.datepicker('show');
-                }, 100);
-                
-            } catch(err) {
-                console.error('Error opening datepicker for ' + fieldId + ': ' + err);
-            }
-            
             return false;
         }
 
@@ -642,6 +596,10 @@
                         $('#liFiles').show();
                     }
                     showSuccessMessage("Patient details saved successfully!");
+                })
+                .catch(error => {
+                    console.error("Error saving patient details:", error);
+                    alert("Error saving patient details: " + error.message);
                 });
         }
 
@@ -688,15 +646,19 @@
         }
 
         function addAppointment() {
-            let date = convertToTextDate($("#appointmentDate").val());
+            let appointmentDateInput = $("#appointmentDate").val();
             let treatment = $("#appointmentTreatment").val();
-            let nextAppointment = convertToTextDate($("#nextAppointment").val());
+            let nextAppointmentInput = $("#nextAppointment").val();
             let practitioner = $("#appointmentPractitioner").val();
 
-            if (!date || !treatment || !practitioner) {
-                alert("Please fill all fields!");
+            if (!appointmentDateInput || !treatment || !practitioner) {
+                alert("Please fill all required fields!");
                 return;
             }
+
+            // HTML5 date input returns YYYY-MM-DD, convert to ISO format for database
+            let date = appointmentDateInput ? new Date(appointmentDateInput).toISOString() : "";
+            let nextAppointment = nextAppointmentInput ? new Date(nextAppointmentInput).toISOString() : "";
 
             let appointmentData = {
                 patientid: patientId,
@@ -732,7 +694,7 @@
 
             $("#appointmentDate").val(appt.treatmentdate.split("T")[0]);
             $("#appointmentTreatment").val(appt.treatment);
-            $("#nextAppointment").val(appt.nextappointment);
+            $("#nextAppointment").val(appt.nextappointment ? appt.nextappointment.split("T")[0] : "");
             $("#appointmentPractitioner").val(appt.practitioner);
 
             currentAppointmentId = appointmentId;
@@ -744,7 +706,13 @@
 
         function onLoadRender() {
             patientId = getQueryStringParam("id");
-            $('#appointmentDate').val(formatDateDisplay(new Date()));
+            
+            // Set appointment date to today in YYYY-MM-DD format for HTML5 date input
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            $('#appointmentDate').val(`${year}-${month}-${day}`);
 
             if (patientId) {
                 loadPatientDetails(patientId);
@@ -753,14 +721,6 @@
                 $('#liTreatment').hide();
                 $('#liFiles').hide()
             }
-
-            // Initialize datepicker for all date fields immediately
-            $(".datepicker").datepicker({
-                dateFormat: "dd-M-yy",
-                changeMonth: true,
-                changeYear: true,
-                yearRange: "c-100:c+10"
-            });
         }
 
         $(document).ready(async () => {
