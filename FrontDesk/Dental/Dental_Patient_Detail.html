@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dental Patient Details</title>
+    
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://apisit.vsservices.in/css/Default/jquery-ui.min.css" rel="stylesheet" />
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+    
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/jquery-ui.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    
+    <style>
+        body {
+            background-color: #f5f7fa;
+        }
+        
+        .patientContainer {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h2 {
+            color: #1b6ca8;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #495057;
+            border: none;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            color: #1b6ca8;
+            border-bottom-color: #1b6ca8;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #1b6ca8;
+            background-color: transparent;
+            border-bottom-color: #1b6ca8;
+            font-weight: 600;
+        }
+        
+        label {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .form-control, .form-select {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 12px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #1b6ca8;
+            box-shadow: 0 0 0 0.2rem rgba(27, 108, 168, 0.25);
+        }
+        
+        .border.rounded {
+            border: 1px solid #ddd !important;
+            border-radius: 6px !important;
+            background-color: #fafbfc;
+        }
+        
+        .form-check-label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+        
+        .form-check {
+            padding-left: 0;
+            margin-bottom: 10px;
+        }
+        
+        .form-check-input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background-color: #1b6ca8;
+            border-color: #1b6ca8;
+            font-weight: 600;
+            border-radius: 6px;
+            padding: 10px 20px;
+        }
+        
+        .btn-primary:hover {
+            background-color: #154a7f;
+            border-color: #154a7f;
+        }
+        
+        .modal-header {
+            background-color: #1b6ca8;
+            color: white;
+        }
+        
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+        
+        .table {
+            margin-top: 20px;
+        }
+        
+        .table th {
+            background-color: #f0f4fa;
+            color: #333;
+            font-weight: 600;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .table td {
+            vertical-align: middle;
+            color: #555;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .date-container input {
+            padding-right: 40px;
+        }
+        
+        .date-icon {
+            color: #1b6ca8;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            padding: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .date-icon:hover {
+            color: #154a7f;
+            transform: scale(1.1);
+        }
+
+        /* Ensure datepicker calendar appears on top */
+        .ui-datepicker {
+            z-index: 1050 !important;
+        }
+
+        .ui-widget-overlay {
+            z-index: 1040 !important;
+        }
+        
+        textarea {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-family: inherit;
+        }
+        
+        textarea:focus {
+            border-color: #1b6ca8;
+            box-shadow: 0 0 0 0.2rem rgba(27, 108, 168, 0.25);
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4 patientContainer">
+        <h2 class="text-center">Patient Information Form</h2>
+
+        <ul class="nav nav-tabs" id="patientTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab">Personal Information</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="medical-tab" data-bs-toggle="tab" data-bs-target="#medical" type="button" role="tab">Medical Information</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tooth-tab" data-bs-toggle="tab" data-bs-target="#tooth" type="button" role="tab">Tooth Deficiency Details</button>
+            </li>
+            <li class="nav-item" id="liTreatment">
+                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#treatment">Treatments</button>
+            </li>
+            <li class="nav-item" role="presentation" id="liFiles">
+                <button class="nav-link" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab">Files</button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-3" id="patientTabsContent">
+            <!-- Personal Information Tab -->
+            <div class="tab-pane fade show active" id="personal" role="tabpanel">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Name:</label>
+                            <input type="text" class="form-control" id="patientName" dbColumnName="name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Age:</label>
+                            <input type="number" class="form-control" id="patientAge" dbColumnName="age">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Date:</label>
+                            <div class="date-container" style="position: relative; display: flex; align-items: center;">
+                                <input id="date" type="text" dbColumnName="date" class="form-control datepicker" placeholder="dd-mm-yy" />
+                                <i class="date-icon fa fa-calendar" aria-hidden="true"
+                                   style="position: absolute; right: 10px; cursor: pointer; z-index: 5;"
+                                   onclick="openDatePicker('date'); return false;"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Address:</label>
+                            <input type="text" class="form-control" id="patientAddress" dbColumnName="address">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>UHID:</label>
+                            <input type="text" class="form-control" id="uhid" dbColumnName="uhid">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Phone Number:</label>
+                            <input type="tel" class="form-control" id="patientPhone" dbColumnName="phonenumber">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Occupation:</label>
+                            <input type="text" class="form-control" id="patientOccupation" dbColumnName="occupation">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Medical Information Tab -->
+            <div class="tab-pane fade" id="medical" role="tabpanel">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Have you ever been hospitalized for a major operation or illness?</label>
+                            <select class="form-select" id="hospitalizationSelect" onchange="toggleSpecifyField(this, 'hospitalizationReason')"
+                                    dbColumnName="hospitalized">
+                                <option>No</option>
+                                <option>Yes</option>
+                            </select>
+                            <input type="text" class="form-control mt-2" id="hospitalizationReason" placeholder="Specify reason" style="display:none;"
+                                   dbColumnName="hospitalizationreasonother">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Have you ever donated blood?</label>
+                            <select class="form-select" id="bloodDonationSelect" dbColumnName="donatedblood">
+                                <option>No</option>
+                                <option>Yes</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Have you ever experienced difficulty in stopping bleeding after a tooth extraction or injury?</label>
+                            <select class="form-select" id="bleedingSelect" dbColumnName="excessbleeding">
+                                <option>No</option>
+                                <option>Yes</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Do you suffer from dizziness or epilepsy?</label>
+                            <select class="form-select" id="dizzinessSelect" dbColumnName="dizziness">
+                                <option>No</option>
+                                <option>Yes</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Are you currently taking any medications?</label>
+                            <select class="form-select" id="medicationsSelect" onchange="toggleSpecifyField(this, 'medicationDetail')"
+                                    dbColumnName="medications">
+                                <option>No</option>
+                                <option>Yes</option>
+                            </select>
+                            <input type="text" class="form-control mt-2" id="medicationDetail" placeholder="Specify medication" style="display:none;"
+                                   dbColumnName="medicationsyes">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Are you allergic to penicillin or other medications?</label>
+                            <select class="form-select" id="allergySelect" dbColumnName="allergic">
+                                <option>No</option>
+                                <option>Yes</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Female applicants: Are you pregnant?</label>
+                            <select class="form-select" id="pregnancySelect" onchange="toggleSpecifyField(this, 'pregnancyDetail')" dbColumnName="pregnant">
+                                <option>No</option>
+                                <option>Yes</option>
+                            </select>
+                            <input type="text" class="form-control mt-2" id="pregnancyDetail" placeholder="Specify remaining time until delivery"
+                                   style="display:none;" dbColumnName="pregnantother">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Have you ever received a tetanus injection?</label>
+                            <select class="form-select" id="tetanusSelect" dbColumnName="tetanusinjected">
+                                <option>No</option>
+                                <option>Yes</option>
+                            </select>
+                        </div>
+
+                        <!-- Medical Conditions -->
+                        <div class="col-md-12 mb-3">
+                            <label class="fw-bold">Has your doctor informed you or are you aware of having any of the following medical conditions?</label>
+                            <div class="row border rounded p-3">
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="diabetes" value="Diabetes" dbColumnName="diseases">
+                                    <label class="form-check-label" for="diabetes">Diabetes</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="heartDisease" value="heartDisease" dbColumnName="diseases">
+                                    <label class="form-check-label" for="heartDisease">Heart Disease</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="bloodPressure" value="bloodPressure" dbColumnName="diseases">
+                                    <label class="form-check-label" for="bloodPressure">High Blood Pressure</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="epilepsy" value="epilepsy" dbColumnName="diseases">
+                                    <label class="form-check-label" for="epilepsy">Epilepsy</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="liverDisease" value="liverDisease" dbColumnName="diseases">
+                                    <label class="form-check-label" for="liverDisease">Liver Disease</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="cancer" value="cancer" dbColumnName="diseases">
+                                    <label class="form-check-label" for="cancer">Cancer</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="aids" value="aids" dbColumnName="diseases">
+                                    <label class="form-check-label" for="aids">AIDS</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="jaundice" value="jaundice" dbColumnName="diseases">
+                                    <label class="form-check-label" for="jaundice">Jaundice</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="kidneyDisease" value="kidneyDisease" dbColumnName="diseases">
+                                    <label class="form-check-label" for="kidneyDisease">Kidney Disease</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="asthma" value="asthma" dbColumnName="diseases">
+                                    <label class="form-check-label" for="asthma">Asthma</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="tuberculosis" value="tuberculosis" dbColumnName="diseases">
+                                    <label class="form-check-label" for="tuberculosis">Tuberculosis</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="radiation" value="radiation" dbColumnName="diseases">
+                                    <label class="form-check-label" for="radiation">Radiation Treatment</label>
+                                </div>
+                                <div class="form-check col-md-12">
+                                    <input class="form-check-input medical-conditions" type="checkbox" id="otherConditionCheck" value="other"
+                                           onchange="toggleSpecifyField(this, 'otherCondition')" dbColumnName="diseases">
+                                    <label class="form-check-label" for="otherConditionCheck">Other (Specify)</label>
+                                </div>
+                                <input type="text" class="form-control mt-2" id="otherCondition" placeholder="Specify condition"
+                                       style="display:none;" dbColumnName="diseasesother">
+                            </div>
+                        </div>
+
+                        <!-- Habits -->
+                        <div class="col-md-12 mb-3">
+                            <label class="fw-bold">Do you have any of the following habits?</label>
+                            <div class="row border rounded p-3">
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input habits" type="checkbox" id="smoking" value="Smoking/Beedi" dbColumnName="habits">
+                                    <label class="form-check-label" for="smoking">Smoking/Beedi</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input habits" type="checkbox" id="tobacco" value="tobacco" dbColumnName="habits">
+                                    <label class="form-check-label" for="tobacco">Tobacco Consumption</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input habits" type="checkbox" id="teethGrinding" value="teethGrinding" dbColumnName="habits">
+                                    <label class="form-check-label" for="teethGrinding">Teeth Grinding</label>
+                                </div>
+                                <div class="form-check col-md-4">
+                                    <input class="form-check-input habits" type="checkbox" id="alcohol" value="Alcohol Consumption" dbColumnName="habits">
+                                    <label class="form-check-label" for="alcohol">Alcohol Consumption</label>
+                                </div>
+                                <div class="form-check col-md-12">
+                                    <input class="form-check-input habits" type="checkbox" id="habitDetailCheck" value="Other" dbColumnName="habits" onchange="toggleSpecifyField(this, 'habitDetail')">
+                                    <label class="form-check-label" for="habitDetailCheck">Other (Specify)</label>
+                                </div>
+                                <input type="text" class="form-control mt-2 col-md-12" id="habitDetail" placeholder="Specify since when"
+                                       style="display:none;" dbColumnName="habitsother">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tooth Deficiency Details Tab -->
+            <div class="tab-pane fade" id="tooth" role="tabpanel">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label>Current Teeth Problem </label>
+                            <input type="text" class="form-control" id="currentProblem" dbColumnName="currentproblem">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Last time checked up:</label>
+                            <div class="date-container" style="position: relative; display: flex; align-items: center;">
+                                <input id="lastCheckedUp" type="text" dbColumnName="lastCheckedUp" class="form-control datepicker" placeholder="dd-MMM-yy" />
+                                <i class="date-icon fa fa-calendar" aria-hidden="true"
+                                   style="position: absolute; right: 10px; cursor: pointer;"
+                                   onclick="return openDatePicker('lastCheckedUp');"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Was there a reason for the check-up?</label>
+                            <select class="form-select" id="checkupReason" onchange="toggleSpecifyField(this, 'checkupReasonOther')" dbColumnName="checkupreason">
+                                <option>No</option>
+                                <option>Yes</option>
+                            </select>
+                            <input type="text" class="form-control mt-2" id="checkupReasonOther" placeholder="Specify reason" style="display:none;" dbColumnName="checkupreasonother">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label>Are you aware of the surgical procedure for fixing teeth in the bone (dental implant surgery)?</label>
+                            <select class="form-select" id="implantSurgerySelect" dbColumnName="implantsurgery">
+                                <option>Yes</option>
+                                <option>No</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Treatment Tab -->
+            <div class="tab-pane fade" id="treatment">
+                <h5>Treatment Details</h5>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#appointmentModal">Add New Treatment</button>
+                <table class="table table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th style="width:30px;">S.No.</th>
+                            <th style="width:130px;">Date</th>
+                            <th>Treatment</th>
+                            <th style="width:170px;">Next Appointment</th>
+                            <th style="width:130px;">Practitioner</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="treatmentTableBody">
+                        <!-- Rows will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Files Tab -->
+            <div class="tab-pane fade" id="files" role="tabpanel">
+                <h5>File Detail</h5>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#fileUploadModal">Add New File</button>
+
+                <table class="table table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th style="width:30px;">S.No.</th>
+                            <th>File Description</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="filelist">
+                        <!-- Rows will be dynamically added here -->
+                    </tbody>
+                </table>
+
+                <ul id="fileList" class="list-group"></ul>
+                <div id="pdfViewer" class="mt-4" style="display: none;">
+                    <h5>PDF Viewer</h5>
+                    <iframe id="pdfFrame" width="100%" height="600px"></iframe>
+                </div>
+                <ul id="fileDescriptionList" class="list-group"></ul>
+            </div>
+            
+            <button type="button" class="btn btn-primary mt-3" onclick="addDetail()">Save Patient Details</button>
+        </div>
+    </div>
+
+    <!-- File Upload Modal -->
+    <div class="modal fade" id="fileUploadModal" tabindex="-1" aria-labelledby="fileModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New File</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="appointmentForm">
+                        <div class="form-check col-md-12">
+                            <label for="fileDescription" class="form-label">File Description</label><span style="color: red;">*</span>:
+                            <textarea id="fileDescription" name="w3review" placeholder="Enter file description" rows="4" cols="50"></textarea>
+                        </div>
+                        <div class="form-check col-md-12" style="margin-top:10px;">
+                            <label for="fileDescription" class="form-label">Choose file to upload</label><span style="color: red;">*</span>:
+                            <input type="file" class="form-control" id="fileInput" accept=".xlsx, .xls, .pdf">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="uploadFile()">Add File</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Appointment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="appointmentForm">
+                        <div class="mb-3">
+                            <label>Date<span style="color: red;">*</span>:</label>
+                            <div class="date-container" style="position: relative; display: flex; align-items: center;">
+                                <input id="appointmentDate" type="text" dbColumnName="appointmentDate" class="form-control datepicker" placeholder="dd-MMM-yy" />
+                                <i class="date-icon fa fa-calendar" aria-hidden="true"
+                                   style="position: absolute; right: 10px; cursor: pointer;"
+                                   onclick="return openDatePicker('appointmentDate');"></i>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Treatment<span style="color: red;">*</span>:</label>
+                            <textarea id="appointmentTreatment" name="w3review" rows="4" cols="55"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label>Next Appointment:</label>
+                            <div class="date-container" style="position: relative; display: flex; align-items: center;">
+                                <input id="nextAppointment" type="text" dbColumnName="nextAppointment" class="form-control datepicker" placeholder="dd-MMM-yy" />
+                                <i class="date-icon fa fa-calendar" aria-hidden="true"
+                                   style="position: absolute; right: 10px; cursor: pointer;"
+                                   onclick="return openDatePicker('nextAppointment');"></i>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Practitioner<span style="color: red;">*</span>:</label>
+                            <select class="form-select" id="appointmentPractitioner">
+                                <option value="">Select Practitioner</option>
+                                <option value="Dr. Saket">Dr. Saket</option>
+                                <option value="Dr. Kuldeep">Dr. Kuldeep</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="addAppointment()">Save Appointment</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var appointmentsMain = [];
+        var patientId = "";
+        let currentAppointmentId = null;
+
+        // Helper function to open datepicker
+        function openDatePicker(fieldId) {
+            const elem = $('#' + fieldId);
+            if (elem.length === 0) {
+                console.warn('Date field not found: ' + fieldId);
+                return false;
+            }
+            
+            try {
+                // Check if datepicker is already initialized
+                const inst = $.data(elem[0], 'datepicker');
+                if (!inst) {
+                    // Initialize datepicker if not already initialized
+                    elem.datepicker({
+                        dateFormat: "dd-M-yy",
+                        changeMonth: true,
+                        changeYear: true,
+                        yearRange: "c-100:c+10"
+                    });
+                }
+                
+                // Focus the input field
+                elem.focus();
+                
+                // Use a small delay to ensure DOM is ready, then trigger the datepicker
+                setTimeout(function() {
+                    elem.datepicker('show');
+                }, 100);
+                
+            } catch(err) {
+                console.error('Error opening datepicker for ' + fieldId + ': ' + err);
+            }
+            
+            return false;
+        }
+
+        function loadPatientDetails() {
+            var filter = "id='" + patientId + "'";
+            DBHandler.fetchEntityRecord("dentaldetails", "*", filter, true)
+                .then(records => {
+                    loadAppointments();
+
+                    if (records.length > 0) {
+                        setFormData(records[0]);
+                    } else {
+                        alert("No patient details found.");
+                    }
+                });
+        }
+
+        function addDetail() {
+            let formData = getFormData('.patientContainer');
+
+            formData.diseases = getCheckedValues(".medical-conditions");
+            formData.habits = getCheckedValues(".habits");
+
+            DBHandler.submitRecordData("dentaldetails", formData, patientId, true)
+                .then(response => {
+                    if (!patientId) {
+                        patientId = response;
+                        const newUrl = replaceQueryString('id', response);
+                        window.history.pushState(null, '', newUrl);
+                        $('#liTreatment').show();
+                        $('#liFiles').show();
+                    }
+                    showSuccessMessage("Patient details saved successfully!");
+                });
+        }
+
+        function loadAppointments() {
+            if (!patientId)
+                return;
+
+            var filter = "patientid='" + patientId + "'";
+            DBHandler.fetchEntityRecords("dentalappointment", "*", "modifiedon", "desc", filter)
+                .then(appointments => {
+                    let tableBody = $("#treatmentTableBody");
+                    tableBody.empty();
+
+                    if (appointments.length === 0) {
+                        tableBody.append("<tr><td colspan='6' class='text-center'>No Appointments Found</td></tr>");
+                        return;
+                    }
+
+                    appointmentsMain = appointments;
+                    let serialNumber = appointments.length;
+
+                    appointments.forEach(appt => {
+                        let formattedDate = formatDateDisplay(appt.treatmentdate);
+                        let nextAppointment = appt.nextappointment ? formatDateDisplay(appt.nextappointment) : "-";
+
+                        let row = `<tr>
+                                    <td>${serialNumber--}</td>
+                                    <td>${formattedDate}</td>
+                                    <td style="white-space: pre-wrap;">${appt.treatment}</td>
+                                    <td>${nextAppointment}</td>
+                                    <td>${appt.practitioner}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editAppointment('${appt.id}')">Edit</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteAppointment('${appt.id}')">Delete</button>
+                                    </td>
+                                </tr>`;
+                        tableBody.append(row);
+                    });
+                });
+        }
+
+        function deleteAppointment(id) {
+            deleteRecord("dentalappointment", id, loadAppointments);
+        }
+
+        function addAppointment() {
+            let date = convertToTextDate($("#appointmentDate").val());
+            let treatment = $("#appointmentTreatment").val();
+            let nextAppointment = convertToTextDate($("#nextAppointment").val());
+            let practitioner = $("#appointmentPractitioner").val();
+
+            if (!date || !treatment || !practitioner) {
+                alert("Please fill all fields!");
+                return;
+            }
+
+            let appointmentData = {
+                patientid: patientId,
+                treatmentdate: date,
+                treatment: treatment,
+                nextappointment: nextAppointment,
+                practitioner: practitioner
+            };
+
+            if (appointmentData.nextappointment == "")
+                appointmentData.nextappointment = null;
+
+            DBHandler.submitRecordData("dentalappointment", appointmentData, currentAppointmentId)
+                .then(response => {
+                    showSuccessMessage(currentAppointmentId ? "Appointment updated successfully!" : "Appointment saved successfully!");
+                    loadAppointments(patientId);
+                    currentAppointmentId = null;
+                    $("#appointmentTreatment").val("");
+                    $("#nextAppointment").val("");
+
+                    var modalElement = document.getElementById('appointmentModal');
+                    var modal = bootstrap.Modal.getInstance(modalElement);
+                    modal.hide();
+                })
+                .catch(error => {
+                    alert("Error saving appointment details: " + error.message);
+                    console.error(error);
+                });
+        }
+
+        function editAppointment(appointmentId) {
+            var appt = appointmentsMain.find(p => p.id == appointmentId);
+
+            $("#appointmentDate").val(appt.treatmentdate.split("T")[0]);
+            $("#appointmentTreatment").val(appt.treatment);
+            $("#nextAppointment").val(appt.nextappointment);
+            $("#appointmentPractitioner").val(appt.practitioner);
+
+            currentAppointmentId = appointmentId;
+            patientId = appt.patientid;
+
+            var modal = new bootstrap.Modal(document.getElementById('appointmentModal'));
+            modal.show();
+        }
+
+        function onLoadRender() {
+            patientId = getQueryStringParam("id");
+            $('#appointmentDate').val(formatDateDisplay(new Date()));
+
+            if (patientId) {
+                loadPatientDetails(patientId);
+            }
+            else {
+                $('#liTreatment').hide();
+                $('#liFiles').hide()
+            }
+
+            // Initialize datepicker for all date fields immediately
+            $(".datepicker").datepicker({
+                dateFormat: "dd-M-yy",
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "c-100:c+10"
+            });
+        }
+
+        $(document).ready(async () => {
+            await onLoadRender();
+        });
+
+        async function uploadFile() {
+            const description = document.getElementById('fileDescription').value;
+            const fileInput = document.getElementById('fileInput');
+            if (!description) {
+                alert('Please enter a description.');
+                return;
+            }
+            if (fileInput.files.length === 0) {
+                alert('Please select a file to upload.');
+                return;
+            }
+
+            const fileId = null;
+            const createdOn = new Date().toISOString();
+
+            const recordData = {
+                description: description,
+                patientid: patientId
+            };
+
+            const attachments = {};
+
+            const filePromises = Array.from(fileInput.files).map((file) => {
+                return new Promise((fileResolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const base64Content = reader.result.split(',')[1];
+                        var fileName = "dentalAttachment" + "___" + file.name;
+                        if (!attachments[fileName]) {
+                            attachments[fileName] = [];
+                        }
+                        attachments[fileName].push(base64Content);
+                        fileResolve();
+                    };
+                    reader.onerror = () => fileResolve();
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            Promise.all(filePromises).then(async () => {
+                try {
+                    var response = await DBHandler.submitRecordData('dentalattachment', recordData, fileId, true, attachments);
+                    showSuccessMessage('Record submitted successfully!');
+                    loadFiles();
+                } catch (error) {
+                    alert('Error submitting record: ' + error.message);
+                }
+            });
+        }
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function loadFiles() {
+            if (!patientId)
+                return;
+
+            var filter = "patientid='" + patientId + "'";
+            DBHandler.fetchEntityRecords("dentalattachment", "*", "modifiedon", "desc", filter)
+                .then(appointments => {
+                    let tableBody = $("#filelist");
+                    tableBody.empty();
+
+                    if (appointments.length === 0) {
+                        tableBody.append("<tr><td colspan='6' class='text-center'>No Files Found</td></tr>");
+                        return;
+                    }
+
+                    appointmentsMain = appointments;
+                    let serialNumber = appointments.length;
+
+                    appointments.forEach(appt => {
+                        let formattedDate = formatDateDisplay(appt.createdon);
+                        let row = `<tr>
+                                    <td>${serialNumber--}</td>
+                                    <td>${appt.description}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger" onclick="classMap['AttachmentHandler'].downloadAttachments('dentalattachment','${appt.id}')">Download</button>
+                                    </td>
+                                </tr>`;
+                        tableBody.append(row);
+                    });
+                });
+        }
+
+        function viewFile(fileId, fileName) {
+            const pdfViewer = document.getElementById('pdfViewer');
+            const pdfFrame = document.getElementById('pdfFrame');
+            pdfFrame.src = `/api/pdffile/download/${fileId}`;
+            pdfViewer.style.display = 'block';
+        }
+
+        $(document).ready(async () => {
+            await onLoadRender();
+            loadFiles();
+        });
+    </script>
+</body>
+</html>
