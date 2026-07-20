@@ -679,6 +679,155 @@
             background: #f9fbff;
         }
 
+        /* ═══════════════════════════════════════
+           ACCORDION — PATIENT CARDS
+        ═══════════════════════════════════════ */
+        #patientResultAccordion {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .pat-card {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(20,33,61,0.08);
+            background: #fff;
+            border: 1px solid #e4eaf4;
+            transition: box-shadow 0.2s, transform 0.15s;
+        }
+        .pat-card:hover { box-shadow: 0 6px 24px rgba(20,33,61,0.13); }
+        .pat-card.is-open { box-shadow: 0 6px 28px rgba(20,33,61,0.14); }
+
+        /* Top accent stripe */
+        .pat-card-accent {
+            height: 4px;
+            background: #1b6ca8;
+        }
+        .pat-card:nth-child(2) .pat-card-accent { background: linear-gradient(90deg,#145e38,#198754); }
+        .pat-card:nth-child(3) .pat-card-accent { background: linear-gradient(90deg,#9b1221,#dc3545); }
+        .pat-card:nth-child(4) .pat-card-accent { background: linear-gradient(90deg,#b85500,#fd7e14); }
+        .pat-card:nth-child(5) .pat-card-accent { background: linear-gradient(90deg,#4a2c8a,#6f42c1); }
+        .pat-card:nth-child(6) .pat-card-accent { background: linear-gradient(90deg,#0895b0,#0dcaf0); }
+        .pat-card:nth-child(1) .pat-card-accent { background: linear-gradient(90deg,#0f4c81,#1b6ca8); }
+
+        /* Header button */
+        .pat-card-btn {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 14px 18px;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: background 0.15s;
+        }
+        .pat-card-btn:hover { background: #f6f9fe; }
+        .pat-card.is-open .pat-card-btn { background: #f0f5fd; }
+
+        /* Avatar */
+        .acc-avatar {
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0f4c81, #1b6ca8);
+            color: #fff;
+            font-weight: 800; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 3px 8px rgba(27,108,168,0.35);
+            letter-spacing: 0.5px;
+        }
+        .pat-card:nth-child(2) .acc-avatar { background: linear-gradient(135deg,#145e38,#198754); box-shadow:0 3px 8px rgba(25,135,84,0.35); }
+        .pat-card:nth-child(3) .acc-avatar { background: linear-gradient(135deg,#9b1221,#dc3545); box-shadow:0 3px 8px rgba(220,53,69,0.35); }
+        .pat-card:nth-child(4) .acc-avatar { background: linear-gradient(135deg,#b85500,#fd7e14); box-shadow:0 3px 8px rgba(253,126,20,0.35); }
+        .pat-card:nth-child(5) .acc-avatar { background: linear-gradient(135deg,#4a2c8a,#6f42c1); box-shadow:0 3px 8px rgba(111,66,193,0.35); }
+        .pat-card:nth-child(6) .acc-avatar { background: linear-gradient(135deg,#0895b0,#0dcaf0); box-shadow:0 3px 8px rgba(13,202,240,0.35); }
+
+        /* Info block */
+        .acc-serial {
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase;
+            color: #8fa6c2; margin-bottom: 2px;
+        }
+        .acc-name {
+            font-size: 15px; font-weight: 700;
+            color: #10243e; line-height: 1.2;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 340px;
+        }
+        .acc-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+        .acc-tag {
+            background: #f0f4fa;
+            border: 1px solid #dbe4f0;
+            border-radius: 999px;
+            padding: 3px 10px;
+            font-size: 11.5px; color: #3a5472; font-weight: 500;
+            display: inline-flex; align-items: center; gap: 4px;
+        }
+        .acc-tag i { font-size: 10px; color: #1b6ca8; }
+        .pat-card:nth-child(2) .acc-tag i { color: #198754; }
+        .pat-card:nth-child(3) .acc-tag i { color: #dc3545; }
+        .pat-card:nth-child(4) .acc-tag i { color: #fd7e14; }
+        .pat-card:nth-child(5) .acc-tag i { color: #6f42c1; }
+        .pat-card:nth-child(6) .acc-tag i { color: #0dcaf0; }
+
+        /* Right side */
+        .acc-right {
+            margin-left: auto;
+            display: flex; flex-direction: column;
+            align-items: flex-end; gap: 8px; flex-shrink: 0;
+        }
+        .acc-visits-badge {
+            background: linear-gradient(135deg,#0f4c81,#1b6ca8);
+            color: #fff; border-radius: 999px;
+            padding: 5px 13px; font-size: 12px; font-weight: 700;
+            display: inline-flex; align-items: center; gap: 5px;
+            box-shadow: 0 2px 6px rgba(27,108,168,0.3);
+        }
+        .pat-card:nth-child(2) .acc-visits-badge { background: linear-gradient(135deg,#145e38,#198754); box-shadow:0 2px 6px rgba(25,135,84,0.3); }
+        .pat-card:nth-child(3) .acc-visits-badge { background: linear-gradient(135deg,#9b1221,#dc3545); box-shadow:0 2px 6px rgba(220,53,69,0.3); }
+        .pat-card:nth-child(4) .acc-visits-badge { background: linear-gradient(135deg,#b85500,#fd7e14); box-shadow:0 2px 6px rgba(253,126,20,0.3); }
+        .pat-card:nth-child(5) .acc-visits-badge { background: linear-gradient(135deg,#4a2c8a,#6f42c1); box-shadow:0 2px 6px rgba(111,66,193,0.3); }
+        .pat-card:nth-child(6) .acc-visits-badge { background: linear-gradient(135deg,#0895b0,#0dcaf0); box-shadow:0 2px 6px rgba(13,202,240,0.3); }
+        .acc-chevron {
+            width: 30px; height: 30px; border-radius: 50%;
+            border: 1.5px solid #d0daea;
+            background: #f4f7fc;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.25s, background 0.2s, border-color 0.2s;
+            color: #1b6ca8; font-size: 12px;
+        }
+        .pat-card.is-open .acc-chevron {
+            transform: rotate(180deg);
+            background: #1b6ca8; border-color: #1b6ca8; color: #fff;
+        }
+        .pat-card:nth-child(2).is-open .acc-chevron { background:#198754; border-color:#198754; }
+        .pat-card:nth-child(3).is-open .acc-chevron { background:#dc3545; border-color:#dc3545; }
+        .pat-card:nth-child(4).is-open .acc-chevron { background:#fd7e14; border-color:#fd7e14; }
+        .pat-card:nth-child(5).is-open .acc-chevron { background:#6f42c1; border-color:#6f42c1; }
+        .pat-card:nth-child(6).is-open .acc-chevron { background:#0dcaf0; border-color:#0dcaf0; }
+
+        /* Body */
+        .pat-card-body { display: none; border-top: 1px solid #e8edf5; }
+        .pat-card.is-open .pat-card-body { display: block; }
+
+        .patient-banner {
+            background: linear-gradient(90deg, #0f4c81 0%, #1b6ca8 100%);
+            color: #fff; padding: 12px 18px;
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; gap: 10px;
+        }
+        .pat-card:nth-child(2) .patient-banner { background: linear-gradient(90deg,#145e38,#198754); }
+        .pat-card:nth-child(3) .patient-banner { background: linear-gradient(90deg,#9b1221,#dc3545); }
+        .pat-card:nth-child(4) .patient-banner { background: linear-gradient(90deg,#b85500,#fd7e14); }
+        .pat-card:nth-child(5) .patient-banner { background: linear-gradient(90deg,#4a2c8a,#6f42c1); }
+        .pat-card:nth-child(6) .patient-banner { background: linear-gradient(90deg,#0895b0,#0dcaf0); }
+        .patient-banner .pill {
+            background: rgba(255,255,255,0.2);
+            border-radius: 999px; padding: 4px 12px; font-size: 12px;
+        }
+
         @media (max-width: 992px) {
             .detail-grid {
                 grid-template-columns: repeat(2, minmax(160px, 1fr));
@@ -948,7 +1097,7 @@
         }
 
         function renderPatientAccordion(groupedPatients, patientDetailsList) {
-            let html = '<div class="accordion" id="patientResultAccordion">';
+            let html = '<div id="patientResultAccordion">';
 
             for (let i = 0; i < groupedPatients.length; i++) {
                 const patientEyeRecords = groupedPatients[i];
@@ -959,23 +1108,50 @@
                 const headerName = latestEye.patientname || latestFrontdesk.patientname || '-';
                 const headerUhid = latestEye.uhid || latestFrontdesk.patientid || '-';
                 const headerAge = latestFrontdesk.age || '-';
+                const headerPhone = latestFrontdesk.phone || '-';
                 const rawGender = normalizeText(latestFrontdesk.gender);
-                const headerGender = rawGender === 'male' ? 'M' : (rawGender === 'female' ? 'F' : (latestFrontdesk.gender || '-'));
+                const headerGender = rawGender === 'male' ? 'Male' : (rawGender === 'female' ? 'Female' : (latestFrontdesk.gender || '-'));
+                const visitCount = patientEyeRecords.length;
+                const lastVisit = formatDate(patientEyeRecords[0]?.examinationdate);
 
-                const headingId = `patientHeading_${i}`;
                 const collapseId = `patientCollapse_${i}`;
+                const initials = headerName.split(' ').filter(Boolean).map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
 
                 html += `
-                    <div class="accordion-item mb-2 border rounded">
-                        <h2 class="accordion-header" id="${headingId}">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false" aria-controls="${collapseId}">
-                                <span class="fw-bold text-dark">${escapeHtml(headerName)}</span>&nbsp;|&nbsp;UHID: ${escapeHtml(headerUhid)}&nbsp;|&nbsp;Gender: ${escapeHtml(headerGender)}&nbsp;|&nbsp;Age: ${escapeHtml(headerAge)}
-                            </button>
-                        </h2>
-                        <div id="${collapseId}" class="accordion-collapse collapse" aria-labelledby="${headingId}" data-bs-parent="#patientResultAccordion">
-                            <div class="accordion-body p-0" style="background:#fff;">
-                                ${renderPatientCard(patientEyeRecords, frontdeskRecords, true)}
+                    <div class="pat-card" id="patCard_${i}">
+                        <div class="pat-card-accent"></div>
+                        <button class="pat-card-btn" type="button"
+                            onclick="togglePatCard('patCard_${i}', '${collapseId}')"
+                            aria-expanded="false" aria-controls="${collapseId}">
+                            <div class="acc-avatar" style="pointer-events:none;">${escapeHtml(initials)}</div>
+                            <div class="flex-grow-1 overflow-hidden" style="pointer-events:none;">
+                                <div class="acc-serial">Patient ${i + 1} of ${groupedPatients.length}</div>
+                                <div class="acc-name">${escapeHtml(headerName)}</div>
+                                <div class="acc-meta">
+                                    <span class="acc-tag"><i class="fas fa-id-card"></i>${escapeHtml(headerUhid)}</span>
+                                    <span class="acc-tag"><i class="fas fa-${rawGender === 'male' ? 'mars' : rawGender === 'female' ? 'venus' : 'user'}"></i>${escapeHtml(headerGender)}, ${escapeHtml(headerAge)} yrs</span>
+                                    <span class="acc-tag"><i class="fas fa-phone"></i>${escapeHtml(headerPhone)}</span>
+                                    <span class="acc-tag"><i class="fas fa-calendar-check"></i>Last: ${escapeHtml(lastVisit)}</span>
+                                </div>
                             </div>
+                            <div class="acc-right" style="pointer-events:none;">
+                                <span class="acc-visits-badge"><i class="fas fa-eye"></i>${visitCount} Visit${visitCount !== 1 ? 's' : ''}</span>
+                                <div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+                            </div>
+                        </button>
+                        <div class="pat-card-body" id="${collapseId}">
+                            <div class="patient-banner">
+                                <div>
+                                    <div class="fw-bold">${escapeHtml(headerName)}</div>
+                                    <div class="small opacity-75 mt-1">
+                                        UHID: ${escapeHtml(headerUhid)} &nbsp;&bull;&nbsp;
+                                        ${escapeHtml(headerGender)}, ${escapeHtml(headerAge)} yrs &nbsp;&bull;&nbsp;
+                                        <i class="fas fa-phone me-1"></i>${escapeHtml(headerPhone)}
+                                    </div>
+                                </div>
+                                <span class="pill"><i class="fas fa-eye me-1"></i>Eye Visits: ${visitCount}</span>
+                            </div>
+                            ${renderPatientCard(patientEyeRecords, frontdeskRecords, true)}
                         </div>
                     </div>
                 `;
@@ -1056,25 +1232,65 @@
                 }
                 // ==========================================
 
-                if (hasSameName) {
-                    // Force accordion format because matching names were found across different IDs
+                if (groupedPatients.length > 1) {
+                    // Show accordion format whenever multiple patients are found
                     html = renderPatientAccordion(groupedPatients, patientDetailsList);
                 } else {
-                    // Show standard flat cards for unique entries
+                    // Single patient — show flat card
                     groupedPatients.forEach((group, index) => {
                         html += renderPatientCard(group, patientDetailsList[index], false);
                     });
                 }
 
                 setStatus(`Found ${groupedPatients.length} patient(s).`, "ok");
-                resultsEl.innerHTML = html; 
-                
+                resultsEl.innerHTML = html;
+
             } catch (error) {
                 console.error('Search error', error);
                 setStatus('Unable to fetch records. Please try again.', 'error');
                 resultsEl.innerHTML = '<div class="empty-state">Error while loading data.</div>';
             } finally {
                 searchBtn.disabled = false;
+            }
+        }
+
+        function togglePatCard(cardId, collapseId) {
+            const card = document.getElementById(cardId);
+            const body = document.getElementById(collapseId);
+            if (!card || !body) return;
+
+            const isOpen = card.classList.contains('is-open');
+
+            // Close all
+            document.querySelectorAll('#patientResultAccordion .pat-card.is-open').forEach(c => {
+                c.classList.remove('is-open');
+            });
+
+            // Open if was closed
+            if (!isOpen) card.classList.add('is-open');
+        }
+
+        function toggleAccordion(collapseId, btn) {
+            const accordion = document.getElementById('patientResultAccordion');
+            const target = document.getElementById(collapseId);
+            if (!accordion || !target) return;
+
+            const isOpen = target.classList.contains('show');
+
+            // Close all panels
+            accordion.querySelectorAll('.accordion-collapse.show').forEach(el => {
+                el.classList.remove('show');
+            });
+            accordion.querySelectorAll('.accordion-button').forEach(b => {
+                b.classList.add('collapsed');
+                b.setAttribute('aria-expanded', 'false');
+            });
+
+            // Open clicked if it was closed
+            if (!isOpen) {
+                target.classList.add('show');
+                btn.classList.remove('collapsed');
+                btn.setAttribute('aria-expanded', 'true');
             }
         }
 
