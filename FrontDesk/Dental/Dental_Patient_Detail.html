@@ -704,6 +704,44 @@
             modal.show();
         }
 
+        function activatePatientTab(tabButton) {
+            const targetSelector = tabButton.getAttribute('data-bs-target');
+            if (!targetSelector) {
+                return;
+            }
+
+            const targetPane = document.querySelector(targetSelector);
+            if (!targetPane) {
+                return;
+            }
+
+            document.querySelectorAll('#patientTabs .nav-link').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            document.querySelectorAll('#patientTabsContent .tab-pane').forEach(pane => {
+                pane.classList.remove('show', 'active');
+            });
+
+            tabButton.classList.add('active');
+            targetPane.classList.add('show', 'active');
+        }
+
+        function initializePatientTabs() {
+            document.querySelectorAll('#patientTabs .nav-link').forEach(tabButton => {
+                if (tabButton.dataset.tabInitialized === 'true') {
+                    return;
+                }
+
+                tabButton.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    activatePatientTab(tabButton);
+                });
+
+                tabButton.dataset.tabInitialized = 'true';
+            });
+        }
+
         function onLoadRender() {
             patientId = getQueryStringParam("id");
             
@@ -724,6 +762,7 @@
         }
 
         $(document).ready(async () => {
+            initializePatientTabs();
             await onLoadRender();
         });
 
@@ -824,6 +863,7 @@
         }
 
         $(document).ready(async () => {
+            initializePatientTabs();
             await onLoadRender();
             loadFiles();
         });
