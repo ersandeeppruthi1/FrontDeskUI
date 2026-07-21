@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Dental Patient Detail Search</title>
+
+	<script>
+		let classMap = [];
+		var apiURL = "https://dbsit2.vsservices.in/";
+	</script>
+
+	<link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+	<script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+	<script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+	<link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+	<link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+
+	<script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+	<script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+	<script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+</head>
+
+<body>
+	<style>
+		body {
+			background: #f7f9fc;
+		}
+
+		.page-wrap {
+			max-width: 1250px;
+			margin: 20px auto;
+			padding: 0 12px;
+		}
+
+		.search-card {
+			background: #ffffff;
+			border: 1px solid #dfe3eb;
+			border-radius: 12px;
+			padding: 16px;
+			box-shadow: 0 4px 16px rgba(20, 33, 61, 0.06);
+		}
+
+		.result-card {
+			background: #ffffff;
+			border: 1px solid #dfe3eb;
+			border-radius: 12px;
+			box-shadow: 0 4px 16px rgba(20, 33, 61, 0.06);
+			margin-top: 14px;
+			overflow: hidden;
+		}
+
+		.result-header {
+			background: linear-gradient(90deg, #0f4c81 0%, #1b6ca8 100%);
+			color: #fff;
+			padding: 14px 16px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 12px;
+			flex-wrap: wrap;
+		}
+
+		.pill {
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 999px;
+			padding: 4px 10px;
+			font-size: 13px;
+		}
+
+		.section-title {
+			font-size: 15px;
+			font-weight: 700;
+			margin: 8px 0;
+			color: #10243e;
+		}
+
+		.detail-grid {
+			display: grid;
+			grid-template-columns: repeat(4, minmax(170px, 1fr));
+			gap: 10px;
+		}
+
+		.detail-box {
+			border: 1px solid #e2e7f0;
+			border-radius: 8px;
+			background: #fdfefe;
+			padding: 10px;
+		}
+
+		.detail-box .label {
+			color: #54657d;
+			font-size: 12px;
+			margin-bottom: 2px;
+		}
+
+		.detail-box .value {
+			color: #10243e;
+			font-size: 14px;
+			font-weight: 600;
+			word-break: break-word;
+		}
+
+		.table-sm th,
+		.table-sm td {
+			vertical-align: middle;
+		}
+
+		.med-list {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+
+		.med-chip {
+			border: 1px solid #afc7e5;
+			border-radius: 999px;
+			padding: 4px 10px;
+			color: #173d67;
+			background: #edf5ff;
+			font-size: 12px;
+			font-weight: 600;
+		}
+
+		.empty-state {
+			border: 1px dashed #b9c6d8;
+			border-radius: 8px;
+			padding: 14px;
+			color: #50617a;
+			text-align: center;
+			background: #f9fbff;
+		}
+
+		#patientResultAccordion {
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+		}
+
+		.pat-card {
+			border-radius: 12px;
+			overflow: hidden;
+			box-shadow: 0 2px 12px rgba(20,33,61,0.08);
+			background: #fff;
+			border: 1px solid #e4eaf4;
+			transition: box-shadow 0.2s, transform 0.15s;
+		}
+
+		.pat-card:hover { box-shadow: 0 6px 24px rgba(20,33,61,0.13); }
+		.pat-card.is-open { box-shadow: 0 6px 28px rgba(20,33,61,0.14); }
+
+		.pat-card-accent {
+			height: 4px;
+			background: #1b6ca8;
+		}
+
+		.pat-card:nth-child(2) .pat-card-accent { background: linear-gradient(90deg,#145e38,#198754); }
+		.pat-card:nth-child(3) .pat-card-accent { background: linear-gradient(90deg,#9b1221,#dc3545); }
+		.pat-card:nth-child(4) .pat-card-accent { background: linear-gradient(90deg,#b85500,#fd7e14); }
+		.pat-card:nth-child(5) .pat-card-accent { background: linear-gradient(90deg,#4a2c8a,#6f42c1); }
+		.pat-card:nth-child(6) .pat-card-accent { background: linear-gradient(90deg,#0895b0,#0dcaf0); }
+		.pat-card:nth-child(1) .pat-card-accent { background: linear-gradient(90deg,#0f4c81,#1b6ca8); }
+
+		.pat-card-btn {
+			width: 100%;
+			background: none;
+			border: none;
+			padding: 14px 18px;
+			cursor: pointer;
+			text-align: left;
+			display: flex;
+			align-items: center;
+			gap: 14px;
+			transition: background 0.15s;
+		}
+
+		.pat-card-btn:hover { background: #f6f9fe; }
+		.pat-card.is-open .pat-card-btn { background: #f0f5fd; }
+
+		.acc-avatar {
+			width: 46px;
+			height: 46px;
+			border-radius: 50%;
+			background: linear-gradient(135deg, #0f4c81, #1b6ca8);
+			color: #fff;
+			font-weight: 800;
+			font-size: 16px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+			box-shadow: 0 3px 8px rgba(27,108,168,0.35);
+			letter-spacing: 0.5px;
+		}
+
+		.pat-card:nth-child(2) .acc-avatar { background: linear-gradient(135deg,#145e38,#198754); box-shadow:0 3px 8px rgba(25,135,84,0.35); }
+		.pat-card:nth-child(3) .acc-avatar { background: linear-gradient(135deg,#9b1221,#dc3545); box-shadow:0 3px 8px rgba(220,53,69,0.35); }
+		.pat-card:nth-child(4) .acc-avatar { background: linear-gradient(135deg,#b85500,#fd7e14); box-shadow:0 3px 8px rgba(253,126,20,0.35); }
+		.pat-card:nth-child(5) .acc-avatar { background: linear-gradient(135deg,#4a2c8a,#6f42c1); box-shadow:0 3px 8px rgba(111,66,193,0.35); }
+		.pat-card:nth-child(6) .acc-avatar { background: linear-gradient(135deg,#0895b0,#0dcaf0); box-shadow:0 3px 8px rgba(13,202,240,0.35); }
+
+		.acc-serial {
+			font-size: 10px;
+			font-weight: 700;
+			letter-spacing: 1px;
+			text-transform: uppercase;
+			color: #8fa6c2;
+			margin-bottom: 2px;
+		}
+
+		.acc-name {
+			font-size: 15px;
+			font-weight: 700;
+			color: #10243e;
+			line-height: 1.2;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			max-width: 340px;
+		}
+
+		.acc-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+
+		.acc-tag {
+			background: #f0f4fa;
+			border: 1px solid #dbe4f0;
+			border-radius: 999px;
+			padding: 3px 10px;
+			font-size: 11.5px;
+			color: #3a5472;
+			font-weight: 500;
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+		}
+
+		.acc-tag i { font-size: 10px; color: #1b6ca8; }
+		.pat-card:nth-child(2) .acc-tag i { color: #198754; }
+		.pat-card:nth-child(3) .acc-tag i { color: #dc3545; }
+		.pat-card:nth-child(4) .acc-tag i { color: #fd7e14; }
+		.pat-card:nth-child(5) .acc-tag i { color: #6f42c1; }
+		.pat-card:nth-child(6) .acc-tag i { color: #0dcaf0; }
+
+		.acc-right {
+			margin-left: auto;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+			gap: 8px;
+			flex-shrink: 0;
+		}
+
+		.acc-visits-badge {
+			background: linear-gradient(135deg,#0f4c81,#1b6ca8);
+			color: #fff;
+			border-radius: 999px;
+			padding: 5px 13px;
+			font-size: 12px;
+			font-weight: 700;
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+			box-shadow: 0 2px 6px rgba(27,108,168,0.3);
+		}
+
+		.pat-card:nth-child(2) .acc-visits-badge { background: linear-gradient(135deg,#145e38,#198754); box-shadow:0 2px 6px rgba(25,135,84,0.3); }
+		.pat-card:nth-child(3) .acc-visits-badge { background: linear-gradient(135deg,#9b1221,#dc3545); box-shadow:0 2px 6px rgba(220,53,69,0.3); }
+		.pat-card:nth-child(4) .acc-visits-badge { background: linear-gradient(135deg,#b85500,#fd7e14); box-shadow:0 2px 6px rgba(253,126,20,0.3); }
+		.pat-card:nth-child(5) .acc-visits-badge { background: linear-gradient(135deg,#4a2c8a,#6f42c1); box-shadow:0 2px 6px rgba(111,66,193,0.3); }
+		.pat-card:nth-child(6) .acc-visits-badge { background: linear-gradient(135deg,#0895b0,#0dcaf0); box-shadow:0 2px 6px rgba(13,202,240,0.3); }
+
+		.acc-chevron {
+			width: 30px;
+			height: 30px;
+			border-radius: 50%;
+			border: 1.5px solid #d0daea;
+			background: #f4f7fc;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			transition: transform 0.25s, background 0.2s, border-color 0.2s;
+			color: #1b6ca8;
+			font-size: 12px;
+		}
+
+		.pat-card.is-open .acc-chevron {
+			transform: rotate(180deg);
+			background: #1b6ca8;
+			border-color: #1b6ca8;
+			color: #fff;
+		}
+
+		.pat-card:nth-child(2).is-open .acc-chevron { background:#198754; border-color:#198754; }
+		.pat-card:nth-child(3).is-open .acc-chevron { background:#dc3545; border-color:#dc3545; }
+		.pat-card:nth-child(4).is-open .acc-chevron { background:#fd7e14; border-color:#fd7e14; }
+		.pat-card:nth-child(5).is-open .acc-chevron { background:#6f42c1; border-color:#6f42c1; }
+		.pat-card:nth-child(6).is-open .acc-chevron { background:#0dcaf0; border-color:#0dcaf0; }
+
+		.pat-card-body { display: none; border-top: 1px solid #e8edf5; }
+		.pat-card.is-open .pat-card-body { display: block; }
+
+		.patient-banner {
+			background: linear-gradient(90deg, #0f4c81 0%, #1b6ca8 100%);
+			color: #fff;
+			padding: 12px 18px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			flex-wrap: wrap;
+			gap: 10px;
+		}
+
+		.pat-card:nth-child(2) .patient-banner { background: linear-gradient(90deg,#145e38,#198754); }
+		.pat-card:nth-child(3) .patient-banner { background: linear-gradient(90deg,#9b1221,#dc3545); }
+		.pat-card:nth-child(4) .patient-banner { background: linear-gradient(90deg,#b85500,#fd7e14); }
+		.pat-card:nth-child(5) .patient-banner { background: linear-gradient(90deg,#4a2c8a,#6f42c1); }
+		.pat-card:nth-child(6) .patient-banner { background: linear-gradient(90deg,#0895b0,#0dcaf0); }
+
+		.patient-banner .pill {
+			background: rgba(255,255,255,0.2);
+			border-radius: 999px;
+			padding: 4px 12px;
+			font-size: 12px;
+		}
+
+		@media (max-width: 992px) {
+			.detail-grid {
+				grid-template-columns: repeat(2, minmax(160px, 1fr));
+			}
+		}
+
+		@media (max-width: 576px) {
+			.detail-grid {
+				grid-template-columns: 1fr;
+			}
+
+			.result-header {
+				align-items: flex-start;
+			}
+		}
+	</style>
+
+	<div class="page-wrap">
+		<div class="search-card">
+			<div class="row g-3 align-items-end">
+				<div class="col-md-8 col-lg-9">
+					<label for="patientNameSearch" class="form-label fw-bold">Search Patient Name / UHID / Phone Number</label>
+					<input type="text" class="form-control" id="patientNameSearch" placeholder="Type patient name, UHID, or phone number and press Enter">
+				</div>
+				<div class="col-md-4 col-lg-3 d-grid">
+					<button type="button" class="btn btn-primary" onclick="searchPatientDetails()" id="searchBtn">
+						<i class="fas fa-search me-1"></i> Search
+					</button>
+				</div>
+			</div>
+			<div class="mt-2" id="searchStatus"></div>
+		</div>
+
+		<div id="searchResults" class="mt-3"></div>
+	</div>
+
+	<script>
+		function escapeHtml(value) {
+			return String(value || '')
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#39;');
+		}
+
+		function normalizeText(value) {
+			return String(value || '').toLowerCase().trim().replace(/\s+/g, ' ');
+		}
+
+		function formatDate(value) {
+			if (!value) return '-';
+			const date = new Date(value);
+			if (isNaN(date)) return escapeHtml(value);
+			const day = ('0' + date.getDate()).slice(-2);
+			const month = ('0' + (date.getMonth() + 1)).slice(-2);
+			const year = date.getFullYear();
+			return `${day}/${month}/${year}`;
+		}
+
+		function setStatus(text, type) {
+			const el = document.getElementById('searchStatus');
+			const className = type === 'error' ? 'text-danger' : (type === 'ok' ? 'text-success' : 'text-muted');
+			el.className = className;
+			el.textContent = text || '';
+		}
+
+		function splitValues(value) {
+			return String(value || '')
+				.split(/[,;\n|]+/)
+				.map(item => item.trim())
+				.filter(Boolean);
+		}
+
+		function extractSummaryChips(detail, appointments) {
+			const chips = new Set();
+
+			splitValues(detail.diseases).forEach(item => chips.add(item));
+			splitValues(detail.habits).forEach(item => chips.add(item));
+
+			if (detail.currentproblem) chips.add(`Problem: ${detail.currentproblem}`);
+			if (detail.medicationsyes) chips.add(`Medication: ${detail.medicationsyes}`);
+			if (detail.allergic) chips.add(`Allergy: ${detail.allergic}`);
+			if (detail.diseasesother) chips.add(`Other disease: ${detail.diseasesother}`);
+			if (detail.habitsother) chips.add(`Other habit: ${detail.habitsother}`);
+			if (detail.checkupreasonother) chips.add(`Checkup reason: ${detail.checkupreasonother}`);
+
+			appointments.forEach(record => {
+				if (record.appointmenttype) chips.add(`Visit type: ${record.appointmenttype}`);
+			});
+
+			return Array.from(chips);
+		}
+
+		function groupByPatient(records) {
+			const map = new Map();
+			records.forEach(record => {
+				const key = record.id || record.uhid || record.name;
+				if (!map.has(key)) map.set(key, []);
+				map.get(key).push(record);
+			});
+			return Array.from(map.values()).map(group =>
+				group.sort((a, b) => new Date(b.date || b.createdon) - new Date(a.date || a.createdon))
+			);
+		}
+
+		async function fetchDentalPatientsBySearch(searchTerm) {
+			const allPatients = await DBHandler.fetchEntityRecords(
+				'dentaldetails',
+				'*',
+				'createdon',
+				'desc',
+				'',
+				true,
+				0,
+				''
+			);
+
+			const normalizedSearch = normalizeText(searchTerm);
+			return (allPatients || []).filter(record => {
+				const name = normalizeText(record.name);
+				const uhid = normalizeText(record.uhid);
+				const phone = normalizeText(record.phonenumber);
+				return name.includes(normalizedSearch)
+					|| uhid.includes(normalizedSearch)
+					|| phone.includes(normalizedSearch);
+			});
+		}
+
+		async function fetchAppointmentsByPatientIds(patientIds) {
+			if (!patientIds.length) return [];
+			const allAppointments = await DBHandler.fetchEntityRecords(
+				'dentalappointment',
+				'*',
+				'modifiedon',
+				'desc',
+				'',
+				true,
+				0,
+				''
+			);
+
+			return (allAppointments || []).filter(record => patientIds.includes(record.patientid));
+		}
+
+		async function fetchFrontdeskHistory(uhid) {
+			if (!uhid) return [];
+			return await DBHandler.fetchEntityRecords(
+				'frontdeskpatientrecord',
+				'id,patientid,patientname,age,gender,phone,address,date,doctorname,amount,paymentmethod,totaltest,createdon',
+				'createdon',
+				'desc',
+				`patientid='${String(uhid).replace(/'/g, "''")}'`,
+				true,
+				0,
+				''
+			);
+		}
+
+		function renderPatientCard(patientDetails, appointments, frontdeskRecords, isInsideAccordion = false) {
+			const detail = patientDetails[0] || {};
+			const latestAppointment = appointments[0] || {};
+			const latestFrontdesk = (frontdeskRecords || [])[0] || {};
+			const visitCount = appointments.length;
+			const summaryChips = extractSummaryChips(detail, appointments);
+			const firstVisit = appointments[appointments.length - 1] || {};
+			const rawGender = normalizeText(latestFrontdesk.gender);
+			const headerGender = rawGender === 'male' ? 'M' : (rawGender === 'female' ? 'F' : (latestFrontdesk.gender || '-'));
+			const headerName = detail.name || latestFrontdesk.patientname || '-';
+			const headerUhid = detail.uhid || latestFrontdesk.patientid || '-';
+			const headerAge = detail.age || latestFrontdesk.age || '-';
+
+			const detailData = {
+				'Phone Number': detail.phonenumber || latestFrontdesk.phone || '-',
+				'Occupation': detail.occupation || '-',
+				'Current Teeth Problem': detail.currentproblem || '-',
+				'Latest Treatment': formatDate(latestAppointment.treatmentdate),
+				'First Dental Visit': formatDate(firstVisit.treatmentdate),
+				'Dental Implant Aware': detail.implantsurgery || '-',
+				'Check-up Reason': detail.checkupreason || '-',
+				'Address': detail.address || latestFrontdesk.address || '-'
+			};
+
+			const chipsHtml = summaryChips.length
+				? summaryChips.map(item => `<span class="med-chip">${escapeHtml(item)}</span>`).join('')
+				: '<div class="empty-state">No medical summary recorded for this patient.</div>';
+
+			const frontdeskRows = (frontdeskRecords || []).map((record, index) => `
+				<tr>
+					<td>${index + 1}</td>
+					<td>${formatDate(record.date)}</td>
+					<td>${escapeHtml(record.doctorname || '-')}</td>
+					<td>${escapeHtml(record.totaltest || '-')}</td>
+				</tr>
+			`).join('');
+
+			const treatmentRows = (appointments || []).map((record, index) => `
+				<tr>
+					<td>${index + 1}</td>
+					<td>${formatDate(record.treatmentdate)}</td>
+					<td>${escapeHtml(record.appointmenttype || '-')}</td>
+					<td>${escapeHtml(record.treatment || '-')}</td>
+					<td>${escapeHtml(record.practitioner || '-')}</td>
+					<td>${formatDate(record.nextappointment)}</td>
+				</tr>
+			`).join('');
+
+			const detailBoxes = Object.keys(detailData).map(label => `
+				<div class="detail-box">
+					<div class="label">${escapeHtml(label)}</div>
+					<div class="value">${escapeHtml(detailData[label])}</div>
+				</div>
+			`).join('');
+
+			const cardStyleClass = isInsideAccordion ? '' : 'result-card';
+
+			return `
+				<div class="${cardStyleClass}">
+					${isInsideAccordion ? '' : `
+					<div class="result-header">
+						<div>
+							<div class="fw-bold">${escapeHtml(headerName)}</div>
+							<div class="small">UHID: ${escapeHtml(headerUhid)} | Gender: ${escapeHtml(headerGender)} | Age: ${escapeHtml(headerAge)}</div>
+						</div>
+						<span class="pill">Dental visits: ${visitCount} time(s)</span>
+					</div>
+					`}
+
+					<div class="p-3">
+						<div class="section-title">Patient Details</div>
+						<div class="detail-grid">${detailBoxes}</div>
+
+						<div class="section-title mt-3">Medical & Habit Summary</div>
+						<div class="med-list">${chipsHtml}</div>
+
+						<div class="section-title mt-3">Dental Treatment History</div>
+						<div class="table-responsive">
+							<table class="table table-bordered table-sm align-middle">
+								<thead class="table-light">
+									<tr>
+										<th>#</th>
+										<th>Date</th>
+										<th>Type</th>
+										<th>Treatment</th>
+										<th>Practitioner</th>
+										<th>Next Appointment</th>
+									</tr>
+								</thead>
+								<tbody>
+									${treatmentRows || '<tr><td colspan="6" class="text-center text-muted">No dental treatment history found.</td></tr>'}
+								</tbody>
+							</table>
+						</div>
+
+						<div class="section-title mt-3">Other Visit Details</div>
+						<div class="table-responsive">
+							<table class="table table-bordered table-sm align-middle">
+								<thead class="table-light">
+									<tr>
+										<th>#</th>
+										<th>Date</th>
+										<th>Doctor/Department</th>
+										<th>Test</th>
+									</tr>
+								</thead>
+								<tbody>
+									${frontdeskRows || '<tr><td colspan="4" class="text-center text-muted">No additional visit history found.</td></tr>'}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			`;
+		}
+
+		function renderPatientAccordion(groupedPatients, appointmentGroups, patientDetailsList) {
+			let html = '<div id="patientResultAccordion">';
+
+			for (let index = 0; index < groupedPatients.length; index++) {
+				const patientDetails = groupedPatients[index];
+				const appointments = appointmentGroups[index] || [];
+				const frontdeskRecords = patientDetailsList[index] || [];
+				const detail = patientDetails[0] || {};
+				const latestFrontdesk = frontdeskRecords[0] || {};
+
+				const headerName = detail.name || latestFrontdesk.patientname || '-';
+				const headerUhid = detail.uhid || latestFrontdesk.patientid || '-';
+				const headerAge = detail.age || latestFrontdesk.age || '-';
+				const headerPhone = detail.phonenumber || latestFrontdesk.phone || '-';
+				const rawGender = normalizeText(latestFrontdesk.gender);
+				const headerGender = rawGender === 'male' ? 'Male' : (rawGender === 'female' ? 'Female' : (latestFrontdesk.gender || '-'));
+				const visitCount = appointments.length;
+				const lastVisit = formatDate(appointments[0]?.treatmentdate);
+
+				const collapseId = `patientCollapse_${index}`;
+				const initials = headerName.split(' ').filter(Boolean).map(word => word[0]).join('').toUpperCase().slice(0, 2) || '?';
+
+				html += `
+					<div class="pat-card" id="patCard_${index}">
+						<div class="pat-card-accent"></div>
+						<button class="pat-card-btn" type="button"
+							onclick="togglePatCard('patCard_${index}', '${collapseId}')"
+							aria-expanded="false" aria-controls="${collapseId}">
+							<div class="acc-avatar" style="pointer-events:none;">${escapeHtml(initials)}</div>
+							<div class="flex-grow-1 overflow-hidden" style="pointer-events:none;">
+								<div class="acc-serial">Patient ${index + 1} of ${groupedPatients.length}</div>
+								<div class="acc-name">${escapeHtml(headerName)}</div>
+								<div class="acc-meta">
+									<span class="acc-tag"><i class="fas fa-id-card"></i>${escapeHtml(headerUhid)}</span>
+									<span class="acc-tag"><i class="fas fa-${rawGender === 'male' ? 'mars' : rawGender === 'female' ? 'venus' : 'user'}"></i>${escapeHtml(headerGender)}, ${escapeHtml(headerAge)} yrs</span>
+									<span class="acc-tag"><i class="fas fa-phone"></i>${escapeHtml(headerPhone)}</span>
+									<span class="acc-tag"><i class="fas fa-calendar-check"></i>Last: ${escapeHtml(lastVisit)}</span>
+								</div>
+							</div>
+							<div class="acc-right" style="pointer-events:none;">
+								<span class="acc-visits-badge"><i class="fas fa-tooth"></i>${visitCount} Visit${visitCount !== 1 ? 's' : ''}</span>
+								<div class="acc-chevron"><i class="fas fa-chevron-down"></i></div>
+							</div>
+						</button>
+						<div class="pat-card-body" id="${collapseId}">
+							<div class="patient-banner">
+								<div>
+									<div class="fw-bold">${escapeHtml(headerName)}</div>
+									<div class="small opacity-75 mt-1">
+										UHID: ${escapeHtml(headerUhid)} &nbsp;&bull;&nbsp;
+										${escapeHtml(headerGender)}, ${escapeHtml(headerAge)} yrs &nbsp;&bull;&nbsp;
+										<i class="fas fa-phone me-1"></i>${escapeHtml(headerPhone)}
+									</div>
+								</div>
+								<span class="pill"><i class="fas fa-tooth me-1"></i>Dental Visits: ${visitCount}</span>
+							</div>
+							${renderPatientCard(patientDetails, appointments, frontdeskRecords, true)}
+						</div>
+					</div>
+				`;
+			}
+
+			html += '</div>';
+			return html;
+		}
+
+		async function searchPatientDetails() {
+			const input = document.getElementById('patientNameSearch');
+			const searchTerm = input.value.trim();
+			const resultsEl = document.getElementById('searchResults');
+			const searchBtn = document.getElementById('searchBtn');
+
+			if (!searchTerm) {
+				setStatus('Please enter patient name, UHID, or phone number.', 'error');
+				resultsEl.innerHTML = '';
+				input.focus();
+				return;
+			}
+
+			searchBtn.disabled = true;
+			setStatus('Searching patient records...', '');
+			resultsEl.innerHTML = '';
+
+			try {
+				const patientMatches = await fetchDentalPatientsBySearch(searchTerm);
+
+				if (!patientMatches.length) {
+					setStatus('No patient found for the entered name, UHID, or phone number.', 'error');
+					resultsEl.innerHTML = '<div class="empty-state">No matching dental patient data found.</div>';
+					return;
+				}
+
+				const groupedPatients = groupByPatient(patientMatches);
+				const patientIds = groupedPatients.map(group => group[0]?.id).filter(Boolean);
+				const allAppointments = await fetchAppointmentsByPatientIds(patientIds);
+				const appointmentGroups = groupedPatients.map(group => {
+					const patientId = group[0]?.id;
+					return allAppointments
+						.filter(record => record.patientid === patientId)
+						.sort((a, b) => new Date(b.treatmentdate || b.modifiedon) - new Date(a.treatmentdate || a.modifiedon));
+				});
+
+				const patientDetailsList = await Promise.all(
+					groupedPatients.map(group => fetchFrontdeskHistory(group[0]?.uhid))
+				);
+
+				let html = '';
+				if (groupedPatients.length > 1) {
+					html = renderPatientAccordion(groupedPatients, appointmentGroups, patientDetailsList);
+				} else {
+					html = renderPatientCard(groupedPatients[0], appointmentGroups[0], patientDetailsList[0], false);
+				}
+
+				setStatus(`Found ${groupedPatients.length} patient(s).`, 'ok');
+				resultsEl.innerHTML = html;
+			} catch (error) {
+				console.error('Search error', error);
+				setStatus('Unable to fetch records. Please try again.', 'error');
+				resultsEl.innerHTML = '<div class="empty-state">Error while loading data.</div>';
+			} finally {
+				searchBtn.disabled = false;
+			}
+		}
+
+		function togglePatCard(cardId, collapseId) {
+			const card = document.getElementById(cardId);
+			const body = document.getElementById(collapseId);
+			if (!card || !body) return;
+
+			const isOpen = card.classList.contains('is-open');
+			document.querySelectorAll('#patientResultAccordion .pat-card.is-open').forEach(item => {
+				item.classList.remove('is-open');
+			});
+
+			if (!isOpen) card.classList.add('is-open');
+		}
+
+		document.addEventListener('DOMContentLoaded', function () {
+			const input = document.getElementById('patientNameSearch');
+			input.addEventListener('keydown', function (event) {
+				if (event.key === 'Enter') {
+					event.preventDefault();
+					searchPatientDetails();
+				}
+			});
+		});
+	</script>
+</body>
+
+</html>

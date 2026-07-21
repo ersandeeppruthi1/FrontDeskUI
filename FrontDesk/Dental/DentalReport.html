@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dental Report</title>
-
     <script>
         let classMap = [];
         var apiURL = "https://dbsit2.vsservices.in/";
@@ -21,7 +20,7 @@
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
     <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220259"></script>
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
     <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
@@ -32,6 +31,17 @@
 
     <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
+
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
 
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
@@ -52,20 +62,14 @@
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
-
-    <script src="https://apisit.vsservices.in/JS/ej2.min.vk02bdl5ad.js"></script>
-
-    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://free-crm.csharpasp.net/lib/syncfusion/css/bootstrap5.dvnzgvxkcq.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.css">
-    <link href="https://apisit.vsservices.in/css/app.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
 
 </head>
 
 <body>
     <div class="container2">
-        <div class="toolbar dental-toolbar">
+        <div class="toolbar" style="margin-bottom:10px;">
             <div class="row g-3 align-items-end">
                 <div class="col-sm-6 col-md-3">
                     <label for="startDate">From date</label>
@@ -114,7 +118,7 @@
                             <div class="col-md-6">
                                 <label>Patient Detail<span class="text-danger">*</span></label>
                                 <input id="patientDetail" class="form-control" datatype="text" disabled />
-                                <input id="patientguid" datatype="text" class="d-none" />
+                                <input id="patientguid" datatype="text" style="display:none;" />
                             </div>
                         </div>
                         <div class="row">
@@ -214,8 +218,12 @@
                 rowSelected: toggleEditButton,
                 rowDeselected: toggleEditButton,
                 //enablePersistence: true,
-                toolbar: ['ColumnChooser',
+                allowExcelExport: true,
+                allowPdfExport: true,
+
+                toolbar: [
                     'Search',
+                    'ColumnChooser',
                     {
                         prefixIcon: 'e-icons e-excelexport',
                         tooltipText: 'Export Excel',
@@ -228,61 +236,48 @@
                     },
                     {
                         prefixIcon: 'e-icons e-refresh',
-                        tooltipText: 'Refresh Grid',
+                        tooltipText: 'Refresh',
                         id: 'refreshGrid'
                     },
-                    {
-                        text: 'New Appointment',
-                        tooltipText: 'New Appointment',
-                        prefixIcon: 'e-icons e-plus',
-                        id: 'newAppointment'
-                    },
-                    { text: 'Edit Appointment', prefixIcon: 'e-icons e-edit', id: 'editAppointment', disabled: true },
-                    {
-                        text: 'Delete Appointment',
-                        tooltipText: 'Delete Appointment',
-                        prefixIcon: 'e-icons e-delete',
-                        id: 'deleteAppointment'
-                    }],
-                //height: 480,
+                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit', disabled: true },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' }
+                ],
                 columns: columns,
-                allowExcelExport: true,
-                allowPdfExport: true,
                 toolbarClick: function (args) {
                     if (args.item.id === 'excelExport') {
                         grid.excelExport({
-                            fileName: `Appointments_${formatDate(new Date())}.xlsx`,
-                            // Export current view records (respects filtering/sorting/paging)
-                            exportType: 'AllPages', // or 'AllPages'
+                            fileName: `DentalReport_${formatDate(new Date())}.xlsx`,
+                            exportType: 'AllPages'
                         });
-                    }
-                    if (args.item.id === 'deleteAppointment') {
-                        deleteAppointment();
                     }
 
                     if (args.item.id === 'pdfExport') {
                         grid.pdfExport({
-                            fileName: `Appointments_${formatDate(new Date())}.pdf`,
+                            fileName: `DentalReport_${formatDate(new Date())}.pdf`,
                             exportType: 'CurrentPage',
                             pageOrientation: 'Landscape',
-                            pageSize: 'LETTER'
+                            pageSize: 'A4'
                         });
                     }
 
-                    // ✅ REFRESH BUTTON CLICK
                     if (args.item.id === 'refreshGrid') {
                         loadAppointments2();
                     }
 
-                    if (args.item.id === 'newAppointment') {
+                    if (args.item.id === 'new') {
                         const appointmentModal = document.getElementById('appointmentModal')
                         appointmentForm.reset();
-                        openAppointmentModal(); // your function
+                        openAppointmentModal();
                         document.querySelector('#appointmentModal .modal-title').innerText = "Add Appointment";
                     }
 
-                    if (args.item.id === 'editAppointment') {
+                    if (args.item.id === 'edit') {
                         editAppointment();
+                    }
+
+                    if (args.item.id === 'delete') {
+                        deleteAppointment();
                     }
                 }
             });
@@ -320,9 +315,9 @@
         function toggleEditButton() {
             const selected = grid.getSelectedRecords();
             const editBtn = grid.toolbarModule.toolbar.items
-                .find(item => item.id === "editAppointment");
+                .find(item => item.id === "edit");
             if (!editBtn) return;
-            editBtn.disabled = selected.length !== 1;  // ✅ only one row
+            editBtn.disabled = selected.length !== 1;
         }
 
         async function deleteAppointment() {
@@ -519,64 +514,6 @@
     </script>
 
     <style>
-        body {
-            background-color: #f5f7fa;
-        }
-
-        .container2 {
-            padding: 16px;
-        }
-
-        .toolbar {
-            background: #ffffff;
-            border: 1px solid #e3e8ef;
-            border-radius: 12px;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-            padding: 16px;
-        }
-
-        .dental-toolbar {
-            margin-bottom: 10px;
-        }
-
-        .toolbar label,
-        .modal-body label {
-            color: #334155;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .modal-content {
-            border: 0;
-            border-radius: 16px;
-            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid #e2e8f0;
-            padding: 16px 20px;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .modal-footer {
-            border-top: 1px solid #e2e8f0;
-            padding: 16px 20px;
-        }
-
-        .form-control,
-        .e-input,
-        .e-input-group,
-        .e-control.e-datepicker {
-            border-radius: 10px;
-        }
-
-        #patientAppointmentGrid {
-            margin-top: 16px;
-        }
-
         #patientAppointmentGrid_toolbarItems {
             height: 10px !important;
         }
