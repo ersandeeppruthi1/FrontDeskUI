@@ -41,37 +41,124 @@
 				return '';
 			}
 
+			function parseJwtPayload(token) {
+				try {
+					if (!token || token.split('.').length < 2) return {};
+					const base64Url = token.split('.')[1];
+					const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+					const decoded = atob(base64);
+					return JSON.parse(decoded);
+				} catch (e) {
+					return {};
+				}
+			}
+
 			function resolveToken() {
 				const url = new URL(window.location.href);
 				const qpData = url.searchParams.get('dataToken') || '';
 				const qpAuth = url.searchParams.get('authToken') || '';
+				const qpToken = url.searchParams.get('token') || '';
+				const qpAccessToken = url.searchParams.get('accessToken') || '';
 
 				const localData = localStorage.getItem('dataToken') || '';
 				const localAuth = localStorage.getItem('authToken') || '';
 				const localAuthToken = localStorage.getItem('AuthToken') || '';
+				const localToken = localStorage.getItem('token') || '';
+				const localAccessToken = localStorage.getItem('accessToken') || '';
 
 				const sessionData = sessionStorage.getItem('dataToken') || '';
 				const sessionAuth = sessionStorage.getItem('authToken') || '';
+				const sessionToken = sessionStorage.getItem('token') || '';
+				const sessionAccessToken = sessionStorage.getItem('accessToken') || '';
 
 				const cookieData = getCookie('dataToken') || getCookie('DataToken') || '';
 				const cookieAuth = getCookie('authToken') || getCookie('AuthToken') || '';
+				const cookieToken = getCookie('token') || getCookie('Token') || '';
+				const cookieAccessToken = getCookie('accessToken') || getCookie('AccessToken') || '';
+
+				const globalDataToken = window.dataToken || '';
+				const globalAuthToken = window.authToken || window.AuthToken || '';
 
 				return firstNonEmpty([
 					qpData,
 					qpAuth,
+					qpToken,
+					qpAccessToken,
 					localData,
 					localAuth,
 					localAuthToken,
+					localToken,
+					localAccessToken,
 					sessionData,
 					sessionAuth,
+					sessionToken,
+					sessionAccessToken,
 					cookieData,
-					cookieAuth
+					cookieAuth,
+					cookieToken,
+					cookieAccessToken,
+					globalDataToken,
+					globalAuthToken
 				]);
+			}
+
+			function normalizeUserId(value) {
+				const clean = String(value || '').trim();
+				if (!clean) return '';
+				return clean.length > 36 ? clean.slice(0, 36) : clean;
+			}
+
+			function resolveUserId() {
+				const url = new URL(window.location.href);
+				const qpUserId = firstNonEmpty([
+					url.searchParams.get('userid') || '',
+					url.searchParams.get('userId') || '',
+					url.searchParams.get('uid') || ''
+				]);
+
+				const localUserId = firstNonEmpty([
+					localStorage.getItem('userid') || '',
+					localStorage.getItem('userId') || '',
+					localStorage.getItem('uid') || ''
+				]);
+
+				const sessionUserId = firstNonEmpty([
+					sessionStorage.getItem('userid') || '',
+					sessionStorage.getItem('userId') || '',
+					sessionStorage.getItem('uid') || ''
+				]);
+
+				const cookieUserId = firstNonEmpty([
+					getCookie('userid') || '',
+					getCookie('userId') || '',
+					getCookie('UserId') || ''
+				]);
+
+				const explicitUserId = normalizeUserId(firstNonEmpty([
+					qpUserId,
+					localUserId,
+					sessionUserId,
+					cookieUserId
+				]));
+
+				if (explicitUserId) return explicitUserId;
+
+				const payload = parseJwtPayload(resolveToken());
+				const jwtUserId = normalizeUserId(firstNonEmpty([
+					payload.userId,
+					payload.userid,
+					payload.uid,
+					payload.nameid,
+					payload.sub,
+					payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+				]));
+
+				return jwtUserId || '0';
 			}
 
 			window.AuthManager = {
 				getDataToken: resolveToken,
-				getAuthToken: resolveToken,
+				getAuthToken: resolveUserId,
 				setDataToken: function (token) {
 					if (!token) return;
 					localStorage.setItem('dataToken', token);
@@ -452,10 +539,21 @@
 
 	function addPackagingItem() {
 		const packagingSlip = document.getElementById('packagingSlip').value;
+		const customerId = $('#customerSelect').val();
+		const customerName = $('#customerSelect option:selected').text();
+
+		if (!customerId) {
+			alert('Please select customer before adding packaging slip items.');
+			return;
+		}
+
 		if (!packagingSlip) {
 			alert('Please select a packaging slip.');
 			return;
 		}
+
+		invoiceData.customerId = customerId;
+		invoiceData.customerName = customerName;
 
 		if (!window.DBHandler || typeof DBHandler.fetchEntityRecord !== 'function') return;
 
@@ -480,7 +578,7 @@
 						if (!selectedItem) return;
 						const price = parseFloat(selectedItem.price) || 0;
 						if (!groupedItems[itemName]) {
-							groupedItems[itemName] = { itemId1: selectedItem.id, itemName, price, quantity: 0, totalPrice: 0 };
+							groupedItems[itemName] = { itemId: selectedItem.id, itemName, price, quantity: 0, totalPrice: 0 };
 						}
 						groupedItems[itemName].quantity += quantity;
 						groupedItems[itemName].totalPrice += price * quantity;
@@ -569,7 +667,7 @@
 		invoiceData.cashReceived = value;
 		td.text(value.toFixed(2));
 		updateTotals();
-		if (window.DBHandler && typeof DBHandler.submitRecordData === 'function' && invoiceData.invoiceId) {
+		if (invoiceData.invoiceId) {
 			try {
 				await DBHandler.submitRecordData('billinvoice', { cashreceived: value }, invoiceData.invoiceId, false);
 			} catch (err) {
@@ -662,6 +760,18 @@
 
 	function submitDataToServer(itemIndex) {
 		if (!window.DBHandler || typeof DBHandler.submitRecordData !== 'function') return;
+		if (!invoiceData.customerId) {
+			alert('Please select customer before saving.');
+			return;
+		}
+		if (!invoiceData.items || !invoiceData.items.length) {
+			alert('Please add at least one item before saving.');
+			return;
+		}
+
+		if (!invoiceData.customerName) {
+			invoiceData.customerName = $('#customerSelect option:selected').text() || '';
+		}
 
 		const formData = {
 			customerid: invoiceData.customerId,
@@ -686,22 +796,40 @@
 		}
 		if (addButton) addButton.disabled = true;
 
+		if (window.AuthManager && typeof AuthManager.getAuthToken === 'function' && !AuthManager.getAuthToken()) {
+			if (loader.parentNode) loader.remove();
+			if (addButton) addButton.disabled = false;
+			alert('Session token not found. Please open this page from the app menu after login.');
+			return;
+		}
+
 		DBHandler.submitRecordData('billinvoice', formData, invoiceData.invoiceId, false)
 			.then(response => {
 				if (response && !invoiceData.invoiceId) {
 					invoiceData.invoiceId = response;
-					return StaticDBHandler.fetchEntityRecord('billinvoice', 'invoicenumber,createdon', `id='${invoiceData.invoiceId}'`)
-						.then(p => {
-							if (p && p.length) {
-								invoiceData.createdon = p[0].createdon;
-								invoiceData.invoiceNumber = p[0].invoicenumber;
-								$('#invoiceNumber').text(invoiceData.invoiceNumber);
-							}
-						});
+					// Keep UI in sync even when secondary fetch fails.
+					$('#invoiceNumber').text(String(response));
+					if (window.DBHandler && typeof DBHandler.fetchEntityRecord === 'function') {
+						DBHandler.fetchEntityRecord('billinvoice', 'invoicenumber,createdon', `id='${invoiceData.invoiceId}'`, false)
+							.then(p => {
+								if (p && p.length) {
+									invoiceData.createdon = p[0].createdon;
+									invoiceData.invoiceNumber = p[0].invoicenumber;
+									$('#invoiceNumber').text(invoiceData.invoiceNumber);
+								}
+							})
+							.catch(fetchErr => {
+								console.warn('Invoice saved but invoice metadata fetch failed:', fetchErr);
+							});
+					}
 				}
 			})
 			.catch(error => {
+				const serverMessage = (error && (error.responseJSON?.message || error.responseText || error.statusText)) || '';
 				console.error('Error submitting data:', error);
+				if (serverMessage) {
+					console.error('Server message:', serverMessage);
+				}
 				alert('Failed to submit the data. Please try again.');
 			})
 			.finally(() => {
