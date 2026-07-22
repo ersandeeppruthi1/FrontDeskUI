@@ -99,6 +99,27 @@
 
                 <div class="modal-body">
                     <form id="appointmentForm">
+                        <div id="newColumnsRow" class="row mb-3 d-none">
+                            <div class="col-md-3">
+                                <button id="column1" type="button" class="btn btn-outline-primary w-100" onclick="showMedicalInfoOnlyUI()">Medical Information</button>
+                            </div>
+                            <div class="col-md-3">
+                                <button id="column2" type="button" class="btn btn-outline-primary w-100" onclick="showToothDeficiencyOnlyUI()">Tooth Deficiency Details</button>
+                            </div>
+                            <div class="col-md-3">
+                                <button id="column3" type="button" class="btn btn-outline-primary w-100" onclick="showTreatmentOnlyUI()">Treatment</button>
+                            </div>
+                            <div class="col-md-3">
+                                <button id="column4" type="button" class="btn btn-outline-primary w-100" onclick="showFilesOnlyUI()">Files</button>
+                            </div>
+                        </div>
+                        <div id="medicalInfoContainer" class="row mb-3 d-none">
+                            <div class="col-md-12">
+                                <div class="medical-info-frame-wrap">
+                                    <iframe id="medicalInfoFrame" class="medical-info-frame" title="Medical Information UI"></iframe>
+                                </div>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <label>Patient Id<span class="text-danger">*</span></label>
@@ -175,6 +196,7 @@
 
         let grid;
         let appointmentsMain = [];
+    let activePreviewSection = null;
         var columns = [
             { type: 'checkbox', width: 50 },   // ✅ MUST be first
             { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
@@ -268,11 +290,16 @@
                     if (args.item.id === 'new') {
                         const appointmentModal = document.getElementById('appointmentModal')
                         appointmentForm.reset();
+                        editingId = null;
+                        toggleNewColumnsRow(true);
+                        hideMedicalInfoOnlyUI();
                         openAppointmentModal();
                         document.querySelector('#appointmentModal .modal-title').innerText = "Add Appointment";
                     }
 
                     if (args.item.id === 'edit') {
+                        toggleNewColumnsRow(false);
+                        hideMedicalInfoOnlyUI();
                         editAppointment();
                     }
 
@@ -411,10 +438,172 @@
             return isNaN(d) ? null : d;
         }
 
+        function toggleNewColumnsRow(show) {
+            const row = document.getElementById('newColumnsRow');
+            if (!row) {
+                return;
+            }
+
+            if (show) {
+                row.classList.remove('d-none');
+            } else {
+                row.classList.add('d-none');
+            }
+        }
+
+        function hideMedicalInfoOnlyUI() {
+            const container = document.getElementById('medicalInfoContainer');
+            const frame = document.getElementById('medicalInfoFrame');
+
+            if (container) {
+                container.classList.add('d-none');
+            }
+
+            if (frame) {
+                frame.src = '';
+            }
+
+            activePreviewSection = null;
+            document.querySelectorAll('#newColumnsRow .btn').forEach(btn => btn.classList.remove('active'));
+        }
+
+        function showMedicalInfoOnlyUI() {
+            showSectionOnlyUI('medical');
+        }
+
+        function showToothDeficiencyOnlyUI() {
+            showSectionOnlyUI('tooth');
+        }
+
+        function showTreatmentOnlyUI() {
+            showSectionOnlyUI('treatment');
+        }
+
+        function showFilesOnlyUI() {
+            showSectionOnlyUI('files');
+        }
+
+        function showSectionOnlyUI(sectionKey) {
+            const container = document.getElementById('medicalInfoContainer');
+            const frame = document.getElementById('medicalInfoFrame');
+            if (!container || !frame) {
+                return;
+            }
+
+            if (activePreviewSection === sectionKey && !container.classList.contains('d-none')) {
+                hideMedicalInfoOnlyUI();
+                return;
+            }
+
+            const sectionMap = {
+                medical: { tabId: 'medical-tab', paneId: 'medical' },
+                tooth: { tabId: 'tooth-tab', paneId: 'tooth' },
+                treatment: { tabId: 'treatment-tab', paneId: 'treatment' },
+                files: { tabId: 'files-tab', paneId: 'files' }
+            };
+
+            const sectionConfig = sectionMap[sectionKey];
+            if (!sectionConfig) {
+                return;
+            }
+
+            activePreviewSection = sectionKey;
+            document.querySelectorAll('#newColumnsRow .btn').forEach(btn => btn.classList.remove('active'));
+            const activeButtonMap = {
+                medical: 'column1',
+                tooth: 'column2',
+                treatment: 'column3',
+                files: 'column4'
+            };
+            const activeButton = document.getElementById(activeButtonMap[sectionKey]);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+
+            const patientGuid = document.getElementById('patientguid').value;
+            const baseUrl = 'Dental_Patient_Detail.html';
+            const frameUrl = patientGuid ? `${baseUrl}?id=${encodeURIComponent(patientGuid)}` : baseUrl;
+
+            frame.onload = function () {
+                try {
+                    const doc = frame.contentDocument || frame.contentWindow.document;
+                    if (!doc) {
+                        return;
+                    }
+
+                    const pageTitle = doc.querySelector('h2');
+                    if (pageTitle) {
+                        pageTitle.style.display = 'none';
+                    }
+
+                    const patientContainer = doc.querySelector('.patientContainer');
+                    if (patientContainer) {
+                        patientContainer.style.padding = '10px';
+                        patientContainer.style.boxShadow = 'none';
+                    }
+
+                    const saveButton = Array.from(doc.querySelectorAll('button')).find(btn => btn.textContent && btn.textContent.trim() === 'Save Patient Details');
+                    if (saveButton) {
+                        saveButton.style.display = 'none';
+                    }
+
+                    doc.querySelectorAll('#patientTabs .nav-item').forEach(item => {
+                        item.style.display = 'none';
+                    });
+
+                    const targetTab = doc.getElementById(sectionConfig.tabId);
+                    const targetPane = doc.getElementById(sectionConfig.paneId);
+
+                    doc.querySelectorAll('#patientTabsContent .tab-pane').forEach(pane => {
+                        pane.classList.remove('show', 'active');
+                        pane.style.display = 'none';
+                    });
+
+                    if (targetTab && targetPane) {
+                        doc.querySelectorAll('#patientTabs .nav-link').forEach(tab => tab.classList.remove('active'));
+                        targetTab.classList.add('active');
+                        targetPane.style.display = '';
+                        targetPane.classList.add('show', 'active');
+                    }
+
+                    // Fallback: ensure Add New Treatment/File buttons always open their modals in iframe.
+                    const bootstrapLib = frame.contentWindow && frame.contentWindow.bootstrap;
+                    if (bootstrapLib && bootstrapLib.Modal) {
+                        const treatmentBtn = doc.querySelector('#treatment button[data-bs-target="#appointmentModal"]');
+                        const treatmentModalEl = doc.getElementById('appointmentModal');
+                        if (treatmentBtn && treatmentModalEl) {
+                            treatmentBtn.onclick = function (event) {
+                                event.preventDefault();
+                                const modal = bootstrapLib.Modal.getOrCreateInstance(treatmentModalEl);
+                                modal.show();
+                            };
+                        }
+
+                        const fileBtn = doc.querySelector('#files button[data-bs-target="#fileUploadModal"]');
+                        const fileModalEl = doc.getElementById('fileUploadModal');
+                        if (fileBtn && fileModalEl) {
+                            fileBtn.onclick = function (event) {
+                                event.preventDefault();
+                                const modal = bootstrapLib.Modal.getOrCreateInstance(fileModalEl);
+                                modal.show();
+                            };
+                        }
+                    }
+                } catch (e) {
+                    console.error('Failed to configure section preview', e);
+                }
+            };
+
+            frame.src = frameUrl;
+            container.classList.remove('d-none');
+        }
+
         $(document).ready(async () => {
             applyDatePicker();
             initGrid(columns, 'patientAppointmentGrid');
             loadAppointments2();
+            toggleNewColumnsRow(false);
+            hideMedicalInfoOnlyUI();
         });
 
 
@@ -516,6 +705,19 @@
     <style>
         #patientAppointmentGrid_toolbarItems {
             height: 10px !important;
+        }
+
+        .medical-info-frame-wrap {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .medical-info-frame {
+            width: 100%;
+            height: 620px;
+            border: 0;
         }
     </style>
 
