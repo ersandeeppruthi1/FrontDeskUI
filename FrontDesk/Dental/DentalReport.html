@@ -25,7 +25,6 @@
     <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
-    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
 
@@ -92,7 +91,7 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title">Add Appointment</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal">
+                    <button type="button" class="close" data-bs-dismiss="modal" onclick="closeAppointmentModal()">
                         <span>&times;</span>
                     </button>
                 </div>
@@ -185,7 +184,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="addAppointment()">Save Appointment</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeAppointmentModal()">Close</button>
                 </div>
 
             </div>
@@ -367,6 +366,16 @@
                 { backdrop: 'static', keyboard: false }
             );
             modal.show();
+        }
+
+        function closeAppointmentModal() {
+            const modalElement = document.getElementById('appointmentModal');
+            if (!modalElement || !window.bootstrap || !window.bootstrap.Modal) {
+                return;
+            }
+
+            const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+            modal.hide();
         }
 
         function actionTemplate() {

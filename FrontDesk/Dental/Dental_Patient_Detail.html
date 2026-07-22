@@ -704,14 +704,31 @@
             modal.show();
         }
 
+        function getBootstrapModalInstance(modalElement) {
+            if (!modalElement || !window.bootstrap || !window.bootstrap.Modal) {
+                return null;
+            }
+
+            if (typeof window.bootstrap.Modal.getInstance === 'function') {
+                const existingInstance = window.bootstrap.Modal.getInstance(modalElement);
+                if (existingInstance) {
+                    return existingInstance;
+                }
+            }
+
+            return new window.bootstrap.Modal(modalElement);
+        }
+
         function openTreatmentModal() {
             const modalElement = document.getElementById('appointmentModal');
             if (!modalElement) {
                 return;
             }
 
-            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-            modal.show();
+            const modal = getBootstrapModalInstance(modalElement);
+            if (modal) {
+                modal.show();
+            }
         }
 
         function openFileUploadModal() {
@@ -720,8 +737,10 @@
                 return;
             }
 
-            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-            modal.show();
+            const modal = getBootstrapModalInstance(modalElement);
+            if (modal) {
+                modal.show();
+            }
         }
 
         function activatePatientTab(tabButton) {
@@ -793,7 +812,8 @@
                 alert('Please enter a description.');
                 return;
             }
-            if (fileInput.files.length === 0) {
+            const selectedFiles = Array.from(fileInput.files || []);
+            if (selectedFiles.length === 0) {
                 alert('Please select a file to upload.');
                 return;
             }
@@ -808,7 +828,7 @@
 
             const attachments = {};
 
-            const filePromises = Array.from(fileInput.files).map((file) => {
+            const filePromises = selectedFiles.map((file) => {
                 return new Promise((fileResolve) => {
                     const reader = new FileReader();
                     reader.onload = () => {
@@ -850,18 +870,19 @@
             var filter = "patientid='" + patientId + "'";
             DBHandler.fetchEntityRecords("dentalattachment", "*", "modifiedon", "desc", filter)
                 .then(appointments => {
+                    const fileRows = Array.isArray(appointments) ? appointments : [];
                     let tableBody = $("#filelist");
                     tableBody.empty();
 
-                    if (appointments.length === 0) {
+                    if (fileRows.length === 0) {
                         tableBody.append("<tr><td colspan='6' class='text-center'>No Files Found</td></tr>");
                         return;
                     }
 
-                    appointmentsMain = appointments;
-                    let serialNumber = appointments.length;
+                    appointmentsMain = fileRows;
+                    let serialNumber = fileRows.length;
 
-                    appointments.forEach(appt => {
+                    fileRows.forEach(appt => {
                         let formattedDate = formatDateDisplay(appt.createdon);
                         let row = `<tr>
                                     <td>${serialNumber--}</td>
