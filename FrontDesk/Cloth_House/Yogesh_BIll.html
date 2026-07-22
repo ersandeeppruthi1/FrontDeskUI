@@ -249,6 +249,12 @@
         items: []
     };
 
+    function safeInitSelect2(selector) {
+        if (window.jQuery && typeof $(selector).select2 === 'function') {
+            $(selector).select2();
+        }
+    }
+
     async function loadItemsIntoDropdown() {
         try {
             itemArray = await StaticDBHandler.fetchEntityRecord("billingitem", "id,name,price", "", false);
@@ -260,7 +266,7 @@
                 $('#itemSelect').append(new Option(item.name, item.id));
             });
 
-            $('#itemSelect').select2();
+            safeInitSelect2('#itemSelect');
 
             // Add event listener to update price when an item is selected
             $('#itemSelect').on('change', function () {
@@ -312,7 +318,7 @@
             "desc",
             filterQuery // Apply the filter query
         ).then(() => {
-            $('#packagingSlip').select2(); // Enhance the dropdown with Select2
+            safeInitSelect2('#packagingSlip'); // Enhance the dropdown with Select2
         }).catch(error => {
             console.error("Error loading packaging slips:", error);
         });
@@ -329,7 +335,7 @@
             "asc",
             ""
         ).then(() => {
-            $('#customerSelect').select2();
+            safeInitSelect2('#customerSelect');
             // Automatically select "Cash" by default
             const cashOption = $("#customerSelect option").filter(function () {
                 return $(this).text().trim().toLowerCase() === "cash / paytm";
@@ -1153,7 +1159,7 @@ async function saveFooterValue(field, newValue, td) {
             filterQuery // Apply the filter query
         )
             .then(() => {
-                $('#packagingSlip').select2(); // Initialize Select2 for better dropdown experience
+                safeInitSelect2('#packagingSlip'); // Initialize Select2 for better dropdown experience
             })
             .catch(error => {
                 console.error("Error loading packaging slips:", error);
