@@ -853,7 +853,10 @@
 			const [customersResult, itemsResult, invoicesResult] = await Promise.allSettled([
 				fetchRecordsWithFallback('billingcustomer', ['id,customername', 'id,name', 'id,customername,name']),
 				DBHandler.fetchEntityRecord('billingitem', 'id,name,price,isforpackaging', ''),
-				DBHandler.fetchEntityRecord('billinvoice', 'id,createdon,name,invoicenumber,billjson,customerid,customername,totalprice,invoicedate,invoicenumberwithcustomername,cashreceived', '')
+				fetchRecordsWithFallback('billinvoice', [
+					'id,createdon,name,invoicenumber,billjson,customerid,customername,totalprice,invoicedate,invoicenumberwithcustomername,cashreceived',
+					'id,createdon,name,invoicenumber,billjson,customerid,totalprice,invoicedate,invoicenumberwithcustomername,cashreceived'
+				])
 			]);
 
 			const customers = customersResult.status === 'fulfilled' ? (customersResult.value || []) : [];
@@ -883,6 +886,8 @@
 				price: toNumber(x.price)
 			})).filter(x => String(x.id || '').trim() !== '').sort((a, b) => String(a.name).localeCompare(String(b.name)));
 
+			const customerById = new Map(state.customers.map(c => [String(c.id), c.customername || c.name || '']));
+
 			state.invoices = invoices.map(x => ({
 				id: x.id,
 				createdon: x.createdon,
@@ -890,7 +895,7 @@
 				invoicenumber: toInt(x.invoicenumber, 0),
 				billjson: x.billjson || '[]',
 				customerid: x.customerid || '',
-				customername: x.customername || '',
+				customername: x.customername || customerById.get(String(x.customerid || '')) || '',
 				totalprice: toNumber(x.totalprice),
 				invoicedate: x.invoicedate || '',
 				invoicenumberwithcustomername: x.invoicenumberwithcustomername || '',
@@ -931,7 +936,6 @@
 				invoicenumber: toInt(refs.invoiceNumber.value, 0),
 				billjson: buildBillJson(),
 				customerid: refs.customerSelect.value,
-				customername: refs.customerName.value,
 				totalprice: total,
 				invoicedate: refs.invoiceDate.value,
 				invoicenumberwithcustomername: refs.invoiceLabel.value,
