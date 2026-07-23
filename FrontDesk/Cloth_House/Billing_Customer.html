@@ -94,7 +94,23 @@
 					getCookie('UserId') || ''
 				]);
 
-				if (explicitUserId) return String(explicitUserId).slice(0, 36);
+				function toSafeNumericUserId(value) {
+					const raw = String(value || '').trim();
+					if (!raw) return '0';
+					if (/^\d+$/.test(raw)) {
+						const parsed = parseInt(raw, 10);
+						return Number.isFinite(parsed) && parsed >= 0 ? String(parsed) : '0';
+					}
+
+					const onlyDigits = raw.replace(/\D/g, '');
+					if (!onlyDigits) return '0';
+
+					const normalizedDigits = onlyDigits.length > 9 ? onlyDigits.slice(-9) : onlyDigits;
+					const parsed = parseInt(normalizedDigits, 10);
+					return Number.isFinite(parsed) && parsed >= 0 ? String(parsed) : '0';
+				}
+
+				if (explicitUserId) return toSafeNumericUserId(explicitUserId);
 
 				const payload = parseJwtPayload(resolveToken());
 				const id = firstNonEmpty([
@@ -106,7 +122,7 @@
 					payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
 				]);
 
-				return String(id || '0').slice(0, 36);
+				return toSafeNumericUserId(id || '0');
 			}
 
 			window.AuthManager = {
@@ -556,6 +572,34 @@
 			return /^[0-9]{0,10}$/.test(value || '');
 		}
 
+		function getErrorMessage(error) {
+			if (!error) return 'Unknown error from server.';
+
+			const candidates = [
+				error.message,
+				error.error,
+				error.errorMessage,
+				error.responseText,
+				error.statusText,
+				error.responseJSON && error.responseJSON.message,
+				error.responseJSON && error.responseJSON.error,
+				error.response && error.response.message,
+				error.response && error.response.error,
+				error.data && error.data.message,
+				error.data && error.data.error
+			];
+
+			for (let i = 0; i < candidates.length; i++) {
+				if (candidates[i]) return String(candidates[i]);
+			}
+
+			try {
+				return JSON.stringify(error);
+			} catch (e) {
+				return 'Unknown error from server.';
+			}
+		}
+
 		function enforcePhoneInput(event) {
 			const cleaned = String(event.target.value || '').replace(/[^0-9]/g, '').slice(0, 10);
 			event.target.value = cleaned;
@@ -603,7 +647,7 @@
 				alert('Save function is not available in this runtime.');
 			} catch (error) {
 				console.error('Error saving customer:', error);
-				alert('Failed to save customer.');
+				alert(`Failed to save customer. ${getErrorMessage(error)}`);
 			} finally {
 				refs.saveBtn.disabled = false;
 				refs.saveBtn.textContent = 'Save Customer';

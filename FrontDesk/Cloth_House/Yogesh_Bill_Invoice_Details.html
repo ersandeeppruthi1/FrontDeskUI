@@ -339,7 +339,7 @@
 					<div class="toolbar-row">
 						<div class="section-title mb-0">Detail List</div>
 						<div class="search-wrap">
-							<input type="text" id="searchInput" class="form-control" placeholder="Search by invoice, item, customer or name" />
+							<input type="text" id="searchInput" class="form-control" placeholder="Search by invoice number or name" />
 							<i class="fa fa-search"></i>
 						</div>
 					</div>
@@ -513,15 +513,15 @@
 			const term = refs.searchInput.value.trim().toLowerCase();
 			state.filteredDetails = state.details.filter(row => {
 				if (!term) return true;
+
+				const invoice = state.invoices.find(x => String(x.id) === String(row.billinvoiceid));
+				const invoiceNumber = invoice ? String(invoice.invoicenumber || '') : '';
+				const invoiceLabel = invoice ? String(invoice.invoicenumberwithcustomername || '') : '';
+
 				const text = [
 					row.name,
-					row.billinvoiceid,
-					row.customerid,
-					row.itemname,
-					row.itemid,
-					row.price,
-					row.quantity,
-					row.totalprice
+					invoiceNumber,
+					invoiceLabel
 				].join(' ').toLowerCase();
 				return text.includes(term);
 			});
