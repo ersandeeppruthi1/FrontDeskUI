@@ -494,7 +494,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add New File</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeModalById('fileUploadModal')"></button>
                 </div>
                 <div class="modal-body">
                     <form id="appointmentForm">
@@ -510,7 +510,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="uploadFile()">Add File</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeModalById('fileUploadModal')">Close</button>
                 </div>
             </div>
         </div>
@@ -522,7 +522,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add Appointment</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeModalById('appointmentModal')"></button>
                 </div>
                 <div class="modal-body">
                     <form id="appointmentForm">
@@ -550,7 +550,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" onclick="addAppointment()">Save Appointment</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeModalById('appointmentModal')">Close</button>
                 </div>
             </div>
         </div>
@@ -709,6 +709,10 @@
                 return null;
             }
 
+            if (typeof window.bootstrap.Modal.getOrCreateInstance === 'function') {
+                return window.bootstrap.Modal.getOrCreateInstance(modalElement);
+            }
+
             if (typeof window.bootstrap.Modal.getInstance === 'function') {
                 const existingInstance = window.bootstrap.Modal.getInstance(modalElement);
                 if (existingInstance) {
@@ -717,6 +721,39 @@
             }
 
             return new window.bootstrap.Modal(modalElement);
+        }
+
+        function closeModalById(modalId) {
+            const modalElement = document.getElementById(modalId);
+            if (!modalElement) {
+                return;
+            }
+
+            const modal = getBootstrapModalInstance(modalElement);
+            if (modal && typeof modal.hide === 'function') {
+                modal.hide();
+            }
+        }
+
+        function wireModalDismissButtons() {
+            document.querySelectorAll('.modal [data-bs-dismiss="modal"]').forEach(button => {
+                if (button.dataset.dismissWired === '1') {
+                    return;
+                }
+
+                button.dataset.dismissWired = '1';
+                button.addEventListener('click', function () {
+                    const modalElement = button.closest('.modal');
+                    if (!modalElement) {
+                        return;
+                    }
+
+                    const modal = getBootstrapModalInstance(modalElement);
+                    if (modal && typeof modal.hide === 'function') {
+                        modal.hide();
+                    }
+                });
+            });
         }
 
         function openTreatmentModal() {
@@ -780,6 +817,10 @@
                 tabButton.dataset.tabInitialized = 'true';
             });
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            wireModalDismissButtons();
+        });
 
         function onLoadRender() {
             patientId = getQueryStringParam("id");

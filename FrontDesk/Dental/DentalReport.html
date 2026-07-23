@@ -91,9 +91,7 @@
 
                 <div class="modal-header">
                     <h5 class="modal-title">Add Appointment</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" onclick="closeAppointmentModal()">
-                        <span>&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal" onclick="closeAppointmentModal()"></button>
                 </div>
 
                 <div class="modal-body">
@@ -297,7 +295,7 @@
                     }
 
                     if (args.item.id === 'edit') {
-                        toggleNewColumnsRow(false);
+                        toggleNewColumnsRow(true);
                         hideMedicalInfoOnlyUI();
                         editAppointment();
                     }
@@ -335,6 +333,9 @@
             // ✅ Update modal title
             document.querySelector('#appointmentModal .modal-title').innerText = "Edit Appointment";
 
+            // Keep the same 4 quick options available in Edit mode as in New mode.
+            toggleNewColumnsRow(true);
+
             openAppointmentModal();
         }
 
@@ -360,11 +361,14 @@
         }
 
         function openAppointmentModal() {
-            const appointmentForm = document.getElementById('appointmentForm')
-            const modal = new bootstrap.Modal(
-                appointmentModal,
-                { backdrop: 'static', keyboard: false }
-            );
+            const modalElement = document.getElementById('appointmentModal');
+            if (!modalElement || !window.bootstrap || !window.bootstrap.Modal) {
+                return;
+            }
+
+            const modal = typeof bootstrap.Modal.getOrCreateInstance === 'function'
+                ? bootstrap.Modal.getOrCreateInstance(modalElement, { backdrop: 'static', keyboard: false })
+                : new bootstrap.Modal(modalElement, { backdrop: 'static', keyboard: false });
             modal.show();
         }
 
@@ -374,8 +378,63 @@
                 return;
             }
 
-            const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-            modal.hide();
+            let modal = null;
+
+            if (typeof bootstrap.Modal.getInstance === 'function') {
+                modal = bootstrap.Modal.getInstance(modalElement);
+            }
+
+            if (!modal && typeof bootstrap.Modal.getOrCreateInstance === 'function') {
+                modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            }
+
+            if (!modal) {
+                modal = new bootstrap.Modal(modalElement);
+            }
+
+            if (typeof modal.hide === 'function') {
+                modal.hide();
+            }
+        }
+
+        function getModalInstance(modalElement) {
+            if (!modalElement || !window.bootstrap || !window.bootstrap.Modal) {
+                return null;
+            }
+
+            if (typeof bootstrap.Modal.getOrCreateInstance === 'function') {
+                return bootstrap.Modal.getOrCreateInstance(modalElement);
+            }
+
+            if (typeof bootstrap.Modal.getInstance === 'function') {
+                const existing = bootstrap.Modal.getInstance(modalElement);
+                if (existing) {
+                    return existing;
+                }
+            }
+
+            return new bootstrap.Modal(modalElement);
+        }
+
+        function wireModalDismissButtons() {
+            document.querySelectorAll('.modal [data-bs-dismiss="modal"]').forEach(button => {
+                if (button.dataset.dismissWired === '1') {
+                    return;
+                }
+
+                button.dataset.dismissWired = '1';
+                button.addEventListener('click', function () {
+                    const modalElement = button.closest('.modal');
+                    if (!modalElement) {
+                        return;
+                    }
+
+                    const modal = getModalInstance(modalElement);
+                    if (modal && typeof modal.hide === 'function') {
+                        modal.hide();
+                    }
+                });
+            });
         }
 
         function actionTemplate() {
@@ -577,14 +636,54 @@
                     // Fallback: ensure Add New Treatment/File buttons always open their modals in iframe.
                     const bootstrapLib = frame.contentWindow && frame.contentWindow.bootstrap;
                     if (bootstrapLib && bootstrapLib.Modal) {
+                        const getIframeModalInstance = function (modalElement) {
+                            if (!modalElement) {
+                                return null;
+                            }
+
+                            if (typeof bootstrapLib.Modal.getOrCreateInstance === 'function') {
+                                return bootstrapLib.Modal.getOrCreateInstance(modalElement);
+                            }
+
+                            if (typeof bootstrapLib.Modal.getInstance === 'function') {
+                                const existing = bootstrapLib.Modal.getInstance(modalElement);
+                                if (existing) {
+                                    return existing;
+                                }
+                            }
+
+                            return new bootstrapLib.Modal(modalElement);
+                        };
+
+                        const wireModalCloseButtons = function (modalElement) {
+                            if (!modalElement) {
+                                return;
+                            }
+
+                            modalElement.querySelectorAll('[data-bs-dismiss="modal"], .btn-close').forEach(btn => {
+                                if (btn.dataset.closeWired === '1') {
+                                    return;
+                                }
+
+                                btn.dataset.closeWired = '1';
+                                btn.addEventListener('click', function () {
+                                    const modal = getIframeModalInstance(modalElement);
+                                    if (modal && typeof modal.hide === 'function') {
+                                        modal.hide();
+                                    }
+                                });
+                            });
+                        };
+
                         const treatmentBtn = doc.querySelector('#treatment button[data-bs-target="#appointmentModal"]');
                         const treatmentModalEl = doc.getElementById('appointmentModal');
                         if (treatmentBtn && treatmentModalEl) {
                             treatmentBtn.onclick = function (event) {
                                 event.preventDefault();
-                                const modal = bootstrapLib.Modal.getOrCreateInstance(treatmentModalEl);
+                                const modal = getIframeModalInstance(treatmentModalEl);
                                 modal.show();
                             };
+                            wireModalCloseButtons(treatmentModalEl);
                         }
 
                         const fileBtn = doc.querySelector('#files button[data-bs-target="#fileUploadModal"]');
@@ -592,9 +691,10 @@
                         if (fileBtn && fileModalEl) {
                             fileBtn.onclick = function (event) {
                                 event.preventDefault();
-                                const modal = bootstrapLib.Modal.getOrCreateInstance(fileModalEl);
+                                const modal = getIframeModalInstance(fileModalEl);
                                 modal.show();
                             };
+                            wireModalCloseButtons(fileModalEl);
                         }
                     }
                 } catch (e) {
@@ -612,6 +712,7 @@
             loadAppointments2();
             toggleNewColumnsRow(false);
             hideMedicalInfoOnlyUI();
+            wireModalDismissButtons();
         });
 
 

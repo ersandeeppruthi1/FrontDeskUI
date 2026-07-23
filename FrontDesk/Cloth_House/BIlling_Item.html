@@ -80,7 +80,24 @@
 			function normalizeUserId(value) {
 				const clean = String(value || '').trim();
 				if (!clean) return '';
-				return clean.length > 36 ? clean.slice(0, 36) : clean;
+				return clean.length > 64 ? clean.slice(0, 64) : clean;
+			}
+
+			function toSafeNumericUserId(value) {
+				const raw = String(value || '').trim();
+				if (!raw) return '0';
+
+				if (/^\d+$/.test(raw)) {
+					const parsed = parseInt(raw, 10);
+					return Number.isFinite(parsed) && parsed >= 0 ? String(parsed) : '0';
+				}
+
+				const onlyDigits = raw.replace(/\D/g, '');
+				if (!onlyDigits) return '0';
+
+				const normalizedDigits = onlyDigits.length > 9 ? onlyDigits.slice(-9) : onlyDigits;
+				const parsed = parseInt(normalizedDigits, 10);
+				return Number.isFinite(parsed) && parsed >= 0 ? String(parsed) : '0';
 			}
 
 			function resolveUserId() {
@@ -100,17 +117,17 @@
 					getCookie('UserId') || ''
 				]));
 
-				if (explicitUserId) return explicitUserId;
+				if (explicitUserId) return toSafeNumericUserId(explicitUserId);
 
 				const payload = parseJwtPayload(resolveToken());
-				return normalizeUserId(firstNonEmpty([
+				return toSafeNumericUserId(normalizeUserId(firstNonEmpty([
 					payload.userId,
 					payload.userid,
 					payload.uid,
 					payload.nameid,
 					payload.sub,
 					payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
-				])) || '0';
+				])) || '0');
 			}
 
 			window.AuthManager = {
@@ -579,6 +596,52 @@
 			return String(value) === '1' ? 1 : 0;
 		}
 
+		function normalizeNameKey(value) {
+			return String(value || '').trim().replace(/\s+/g, ' ').toLowerCase();
+		}
+
+		function findItemByName(name, excludeId = '') {
+			const key = normalizeNameKey(name);
+			if (!key) return null;
+			return state.items.find(item => {
+				if (excludeId && String(item.id) === String(excludeId)) return false;
+				return normalizeNameKey(item.name) === key;
+			}) || null;
+		}
+
+		function getErrorMessage(error) {
+			if (!error) return 'Unknown error from server.';
+
+			const direct = [
+				error.message,
+				error.error,
+				error.errorMessage,
+				error.responseText,
+				error.statusText,
+				error.responseJSON && error.responseJSON.message,
+				error.responseJSON && error.responseJSON.error,
+				error.response && error.response.message,
+				error.response && error.response.error,
+				error.data && error.data.message,
+				error.data && error.data.error
+			];
+
+			for (let i = 0; i < direct.length; i++) {
+				if (direct[i]) return String(direct[i]);
+			}
+
+			try {
+				return JSON.stringify(error);
+			} catch (e) {
+				return 'Unknown error from server.';
+			}
+		}
+
+		function isDuplicateConflict(message) {
+			const text = String(message || '').toLowerCase();
+			return text.includes('same key') || text.includes('duplicate') || text.includes('already exists');
+		}
+
 		function applyFilter() {
 			const term = searchInput.value.trim().toLowerCase();
 			state.filteredItems = state.items.filter(item => {
@@ -713,19 +776,54 @@
 				return;
 			}
 
+			const trimmedName = itemNameInput.value.trim();
+			const parsedPrice = parseFloat(itemPriceInput.value || 0);
+			if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+				alert('Please enter a valid price.');
+				return;
+			}
+
 			const payload = {
-				name: itemNameInput.value.trim(),
-				price: parseFloat(itemPriceInput.value || 0),
+				name: trimmedName,
+				price: parsedPrice,
 				isforpackaging: parseInt(isForPackagingSelect.value, 10) || 0
 			};
-			const wasEditing = Boolean(state.editingId);
+
+			let targetId = state.editingId;
+			const duplicateMatch = findItemByName(payload.name, targetId);
+			if (!targetId && duplicateMatch) {
+				targetId = duplicateMatch.id;
+				state.editingId = duplicateMatch.id;
+				cancelEditButton.classList.remove('d-none');
+				saveButton.querySelector('.btn-label').textContent = 'Update Item';
+			}
+
+			const wasEditing = Boolean(targetId);
 
 			saveButton.disabled = true;
 			saveButton.querySelector('.btn-label').textContent = wasEditing ? 'Updating...' : 'Saving...';
 
 			try {
-				const responseId = await DBHandler.submitRecordData('billingitem', payload, state.editingId, false);
-				const savedId = state.editingId || responseId;
+				let responseId;
+				let savedId;
+
+				try {
+					responseId = await DBHandler.submitRecordData('billingitem', payload, targetId, false);
+					savedId = targetId || responseId;
+				} catch (firstError) {
+					const firstMessage = getErrorMessage(firstError);
+					const retryCandidate = findItemByName(payload.name, targetId);
+
+					if (!targetId && retryCandidate && isDuplicateConflict(firstMessage)) {
+						targetId = retryCandidate.id;
+						state.editingId = retryCandidate.id;
+						responseId = await DBHandler.submitRecordData('billingitem', payload, targetId, false);
+						savedId = targetId || responseId;
+					} else {
+						throw firstError;
+					}
+				}
+
 				const existingIndex = state.items.findIndex(item => String(item.id) === String(savedId));
 				const updatedRecord = {
 					id: savedId,
@@ -749,7 +847,8 @@
 				}
 			} catch (error) {
 				console.error('Error saving billing item:', error);
-				alert('Failed to save billing item. Please try again.');
+				const details = getErrorMessage(error);
+				alert(`Failed to save billing item. ${details}`);
 			} finally {
 				saveButton.disabled = false;
 				saveButton.querySelector('.btn-label').textContent = state.editingId ? 'Update Item' : 'Save Item';
