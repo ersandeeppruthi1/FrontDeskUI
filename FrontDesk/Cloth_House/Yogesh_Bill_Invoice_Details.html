@@ -332,6 +332,15 @@
             editBtn.disabled = selected.length !== 1;
         }
 
+        function navigateToEstimatePage(recordId) {
+            const baseUrl = 'Yogesh_Estimate_Bill.html';
+            if (recordId) {
+                window.location.href = `${baseUrl}?id=${encodeURIComponent(recordId)}`;
+                return;
+            }
+            window.location.href = baseUrl;
+        }
+
         async function loadMasters() {
             const [invoices, items] = await Promise.all([
                 DBHandler.fetchEntityRecord('billinvoice', 'id,invoicenumber,customerid,invoicenumberwithcustomername', '', false),
@@ -343,13 +352,7 @@
         }
 
         function openDetailModal() {
-            const modalEl = document.getElementById('detailModal');
-            document.getElementById('detailForm').reset();
-            editingId = null;
-            document.getElementById('quantity').value = '1';
-            recalculateTotal();
-            document.querySelector('#detailModal .modal-title').innerText = 'Add Invoice Detail';
-            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            navigateToEstimatePage();
         }
 
         function editDetail() {
@@ -360,18 +363,7 @@
             }
 
             const row = selected[0];
-            editingId = row.id;
-            document.getElementById('name').value = row.name || '';
-            document.getElementById('billinvoiceid').value = row.billinvoiceid || '';
-            syncInvoiceMeta();
-            document.getElementById('itemid').value = row.itemid || '';
-            syncItemMeta();
-            document.getElementById('price').value = toNumber(row.price);
-            document.getElementById('quantity').value = toNumber(row.quantity);
-            recalculateTotal();
-
-            document.querySelector('#detailModal .modal-title').innerText = 'Edit Invoice Detail';
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('detailModal')).show();
+            navigateToEstimatePage(row.billinvoiceid || row.id);
         }
 
         async function deleteDetail() {
