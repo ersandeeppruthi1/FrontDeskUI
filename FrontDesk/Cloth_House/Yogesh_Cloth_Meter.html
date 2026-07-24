@@ -202,9 +202,32 @@
 			}
 
 			defineItemDropdown() {
-				this.itemDropdown.select2({
+				this.initializeItemDropdownSelect2();
+			}
+
+			initializeItemDropdownSelect2() {
+				const control = this.itemDropdown;
+				if (!control || !control.length) return;
+				const hasSelect2 = typeof $.fn !== 'undefined' && typeof $.fn.select2 === 'function';
+				if (!hasSelect2) return;
+
+				if (control.data('select2')) {
+					control.select2('destroy');
+				}
+
+				control.select2({
 					dropdownAutoWidth: true,
-					width: 'resolve',
+					width: '100%',
+					placeholder: '-- Select Item --',
+					allowClear: true
+				});
+
+				const arrow = control.next('.select2-container').find('.select2-selection__arrow');
+				arrow.off('mousedown.forceopen').on('mousedown.forceopen', function (event) {
+					event.preventDefault();
+					if (typeof $.fn !== 'undefined' && typeof $.fn.select2 === 'function') {
+						control.select2('open');
+					}
 				});
 			}
 
@@ -414,7 +437,9 @@
 							console.warn('billingItemData is empty or not loaded.');
 						}
 
-						$(select).select2({ dropdownAutoWidth: true, width: 'resolve' });
+						if (typeof $.fn !== 'undefined' && typeof $.fn.select2 === 'function') {
+							$(select).select2({ dropdownAutoWidth: true, width: 'resolve' });
+						}
 
 						$(select).on('select2:select', (ev) => {
 							const newItemName = ev.params.data.text;
@@ -537,10 +562,11 @@
 
 			handleAddItem() {
 				this.addButton.addEventListener('click', () => {
+					const selectedItemId = this.itemDropdown.val();
 					const itemName = this.itemDropdown.find(':selected').text();
 
 
-					if (!itemName) {
+					if (!selectedItemId) {
 						const dropdownContainer = this.itemDropdown.siblings('.select2-container');
 
 						dropdownContainer.css('border', '2px solid red');
@@ -781,7 +807,7 @@
 							control.append(new Option(valueData, keyData));
 						});
 						this.billingItemData = records;
-						control.select2({ dropdownAutoWidth: true, width: 'resolve' });
+						this.initializeItemDropdownSelect2();
 					})
 					.catch(error => {
 						console.error('Error loading dropdown:', error);
