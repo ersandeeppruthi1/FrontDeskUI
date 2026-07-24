@@ -242,15 +242,17 @@
             editBtn.disabled = selected.length !== 1;
         }
 
-        function openPackagingModal() {
-            const modalEl = document.getElementById('packagingModal');
-            document.getElementById('packagingForm').reset();
-            editingId = null;
-            document.querySelector('#packagingModal .modal-title').innerText = 'Add Packaging';
-            if (typeof setDatePickerValue === 'function') {
-                setDatePickerValue('createdon', new Date());
+        function navigateToPackagingEditor(recordId) {
+            const baseUrl = 'Yogesh_Cloth_Meter.html';
+            if (recordId) {
+                window.location.href = `${baseUrl}?id=${encodeURIComponent(recordId)}`;
+                return;
             }
-            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+            window.location.href = baseUrl;
+        }
+
+        function openPackagingModal() {
+            navigateToPackagingEditor();
         }
 
         function editPackaging() {
@@ -261,23 +263,7 @@
             }
 
             const row = selected[0];
-            editingId = row.id;
-            document.getElementById('packagingnumber').value = row.packagingnumber || '';
-            document.getElementById('packagingcreatedby').value = row.packagingcreatedby || '';
-            document.getElementById('status').value = row.status || 'Active';
-
-            if (typeof setDatePickerValue === 'function') {
-                setDatePickerValue('createdon', row.createdon ? new Date(row.createdon) : new Date());
-            } else {
-                const createdEl = document.getElementById('createdon');
-                if (createdEl && row.createdon) {
-                    const d = new Date(row.createdon);
-                    createdEl.value = isNaN(d) ? '' : d.toISOString().slice(0, 10);
-                }
-            }
-
-            document.querySelector('#packagingModal .modal-title').innerText = 'Edit Packaging';
-            bootstrap.Modal.getOrCreateInstance(document.getElementById('packagingModal')).show();
+            navigateToPackagingEditor(row.id);
         }
 
         async function deletePackaging() {
