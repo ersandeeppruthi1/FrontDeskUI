@@ -1,792 +1,399 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Packaging List</title>
 
-	<script>
-		let classMap = [];
-		var apiURL = "https://dbsit2.vsservices.in/";
-	</script>
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packaging List</title>
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
 
-	<link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
 
-	<script>
-		(function () {
-			if (window.AuthManager) return;
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-			function getCookie(name) {
-				const key = `${name}=`;
-				const decoded = decodeURIComponent(document.cookie || '');
-				const chunks = decoded.split(';');
-				for (let i = 0; i < chunks.length; i++) {
-					const item = chunks[i].trim();
-					if (item.indexOf(key) === 0) {
-						return item.substring(key.length);
-					}
-				}
-				return '';
-			}
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-			function firstNonEmpty(values) {
-				for (let i = 0; i < values.length; i++) {
-					if (values[i]) return values[i];
-				}
-				return '';
-			}
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
 
-			function parseJwtPayload(token) {
-				try {
-					if (!token || token.split('.').length < 2) return {};
-					const base64Url = token.split('.')[1];
-					const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-					return JSON.parse(atob(base64));
-				} catch (e) {
-					return {};
-				}
-			}
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
-			function resolveToken() {
-				const url = new URL(window.location.href);
-				return firstNonEmpty([
-					url.searchParams.get('dataToken') || '',
-					url.searchParams.get('authToken') || '',
-					url.searchParams.get('token') || '',
-					url.searchParams.get('accessToken') || '',
-					localStorage.getItem('dataToken') || '',
-					localStorage.getItem('authToken') || '',
-					localStorage.getItem('AuthToken') || '',
-					localStorage.getItem('token') || '',
-					localStorage.getItem('accessToken') || '',
-					sessionStorage.getItem('dataToken') || '',
-					sessionStorage.getItem('authToken') || '',
-					sessionStorage.getItem('token') || '',
-					sessionStorage.getItem('accessToken') || '',
-					getCookie('dataToken') || getCookie('DataToken') || '',
-					getCookie('authToken') || getCookie('AuthToken') || '',
-					getCookie('token') || getCookie('Token') || '',
-					getCookie('accessToken') || getCookie('AccessToken') || '',
-					window.dataToken || '',
-					window.authToken || window.AuthToken || ''
-				]);
-			}
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
 
-			function resolveUserId() {
-				const url = new URL(window.location.href);
-				const explicitUserId = firstNonEmpty([
-					url.searchParams.get('userid') || '',
-					url.searchParams.get('userId') || '',
-					url.searchParams.get('uid') || '',
-					localStorage.getItem('userid') || '',
-					localStorage.getItem('userId') || '',
-					localStorage.getItem('uid') || '',
-					sessionStorage.getItem('userid') || '',
-					sessionStorage.getItem('userId') || '',
-					sessionStorage.getItem('uid') || '',
-					getCookie('userid') || '',
-					getCookie('userId') || '',
-					getCookie('UserId') || ''
-				]);
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-				if (explicitUserId) return String(explicitUserId).slice(0, 36);
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
 
-				const payload = parseJwtPayload(resolveToken());
-				const id = firstNonEmpty([
-					payload.userId,
-					payload.userid,
-					payload.uid,
-					payload.nameid,
-					payload.sub,
-					payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
-				]);
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
 
-				return String(id || '0').slice(0, 36);
-			}
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
-			window.AuthManager = {
-				getDataToken: resolveToken,
-				getAuthToken: resolveUserId
-			};
-		})();
-	</script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
-	<script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-	<style>
-		:root {
-			--bg: #F5F7FA;
-			--primary: #4F6EF7;
-			--text-main: #1c2f55;
-			--text-muted: #7083a4;
-			--border: #dfe8f5;
-			--card-shadow: 0 12px 30px rgba(22, 40, 88, 0.08);
-			--radius: 10px;
-		}
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
 
-		body {
-			margin: 0;
-			background: var(--bg);
-			color: var(--text-main);
-			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-		}
-
-		.page-shell {
-			min-height: 100vh;
-			padding: 32px 16px;
-		}
-
-		.page-card {
-			max-width: 1200px;
-			margin: 0 auto;
-			background: #fff;
-			border: 1px solid var(--border);
-			border-radius: var(--radius);
-			box-shadow: var(--card-shadow);
-			overflow: hidden;
-		}
-
-		.page-content {
-			padding: 28px;
-		}
-
-		.page-title {
-			margin: 0;
-			text-align: center;
-			color: var(--primary);
-			font-size: clamp(1.8rem, 3vw, 2.4rem);
-			font-weight: 800;
-			letter-spacing: -0.02em;
-		}
-
-		.header-gap {
-			margin-bottom: 30px;
-		}
-
-		.card-block {
-			background: #fff;
-			border: 1px solid var(--border);
-			border-radius: var(--radius);
-			box-shadow: 0 8px 22px rgba(16, 37, 84, 0.05);
-			padding: 20px;
-		}
-
-		.form-label {
-			font-weight: 600;
-			color: var(--text-main);
-		}
-
-		.form-control,
-		.form-select {
-			min-height: 46px;
-			border-radius: var(--radius);
-			border-color: #d5e0f2;
-			box-shadow: none;
-		}
-
-		.form-control:focus,
-		.form-select:focus {
-			border-color: rgba(79, 110, 247, 0.55);
-			box-shadow: 0 0 0 0.17rem rgba(79, 110, 247, 0.15);
-		}
-
-		.input-group-text {
-			border-radius: var(--radius);
-			border-color: #d5e0f2;
-			background: #f8fbff;
-			color: var(--text-muted);
-		}
-
-		.search-group .form-control {
-			border-right: 0;
-		}
-
-		.search-group .input-group-text {
-			border-left: 0;
-			background: #fff;
-		}
-
-		.table-wrap {
-			position: relative;
-		}
-
-		.table-responsive {
-			border: 1px solid #e3ebf7;
-			border-radius: var(--radius);
-			overflow: auto;
-		}
-
-		.table {
-			margin-bottom: 0;
-			min-width: 840px;
-		}
-
-		.table thead th {
-			background: #f4f7ff;
-			color: #29457d;
-			font-weight: 700;
-			white-space: nowrap;
-		}
-
-		.table th,
-		.table td {
-			vertical-align: middle;
-			padding: 13px 14px;
-			border-color: #e5ecf8;
-		}
-
-		.table tbody tr {
-			transition: background-color 0.15s ease;
-		}
-
-		.table tbody tr:hover {
-			background: #f8fbff;
-		}
-
-		.sortable {
-			cursor: pointer;
-			-webkit-user-select: none;
-			user-select: none;
-		}
-
-		.sort-indicator {
-			margin-left: 6px;
-			color: #9aa8c2;
-			font-size: 0.8rem;
-		}
-
-		.status-badge {
-			display: inline-block;
-			padding: 6px 10px;
-			border-radius: 999px;
-			font-size: 0.85rem;
-			font-weight: 700;
-		}
-
-		.status-active {
-			color: #1d8e4e;
-			background: #e9f9ef;
-			border: 1px solid #bae9c8;
-		}
-
-		.status-inactive {
-			color: #9b4d23;
-			background: #fff4ea;
-			border: 1px solid #ffdcbc;
-		}
-
-		.action-btn {
-			width: 34px;
-			height: 34px;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			border-radius: 50%;
-			border: 1px solid #dce5f3;
-			background: #fff;
-			color: #7083a4;
-			transition: all 0.18s ease;
-		}
-
-		.action-btn:hover {
-			color: var(--primary);
-			border-color: rgba(79, 110, 247, 0.42);
-			box-shadow: 0 8px 16px rgba(79, 110, 247, 0.14);
-		}
-
-		.pagination-wrap {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			gap: 12px;
-			flex-wrap: wrap;
-			margin-top: 14px;
-		}
-
-		.pagination-info {
-			color: var(--text-muted);
-			font-size: 0.95rem;
-		}
-
-		.loading-overlay {
-			position: absolute;
-			inset: 0;
-			display: none;
-			align-items: center;
-			justify-content: center;
-			background: rgba(255, 255, 255, 0.78);
-			border-radius: var(--radius);
-			z-index: 3;
-		}
-
-		.loading-overlay.active {
-			display: flex;
-		}
-
-		.loading-pill {
-			display: inline-flex;
-			align-items: center;
-			gap: 10px;
-			padding: 12px 16px;
-			border: 1px solid var(--border);
-			border-radius: 999px;
-			background: #fff;
-			box-shadow: 0 10px 24px rgba(22, 40, 88, 0.09);
-			color: var(--text-main);
-			font-weight: 600;
-		}
-
-		.empty-state {
-			text-align: center;
-			padding: 36px 12px;
-			color: var(--text-muted);
-		}
-
-		@media (max-width: 767.98px) {
-			.page-content {
-				padding: 18px;
-			}
-
-			.card-block {
-				padding: 16px;
-			}
-
-			.pagination-wrap {
-				align-items: stretch;
-			}
-		}
-	</style>
 </head>
+
 <body>
-	<div class="page-shell">
-		<div class="page-card">
-			<div class="page-content">
-				<h1 class="page-title">Packaging List</h1>
-				<div class="header-gap"></div>
+    <div class="container2">
+        <div class="toolbar toolbar-spacing">
+            <div class="row g-3 align-items-end">
+                <div class="col-sm-6 col-md-3">
+                    <label for="startDate">From date</label>
+                    <input id="startDate" class="form-control" datatype="date" defaultValue="currentDate"
+                        onchange="loadPackagingRecords()">
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label for="endDate">To date</label>
+                    <input id="endDate" class="form-control" datatype="date" defaultValue="currentDate"
+                        onchange="loadPackagingRecords()">
+                </div>
+            </div>
+        </div>
+        <div id="packagingGrid"></div>
+    </div>
 
-				<div class="card-block mb-3">
-					<form id="filterForm" class="needs-validation" novalidate>
-						<div class="row g-3">
-							<div class="col-md-6">
-								<label for="startDate" class="form-label">Start Date</label>
-								<div class="input-group">
-									<input type="date" id="startDate" class="form-control" />
-									<!-- <span class="input-group-text"><i class="fa fa-calendar-alt"></i></span> -->
-								</div>
-								<div class="invalid-feedback">Start date should be on or before end date.</div>
-							</div>
-							<div class="col-md-6">
-								<label for="endDate" class="form-label">End Date</label>
-								<div class="input-group">
-									<input type="date" id="endDate" class="form-control" />
-									<!-- <span class="input-group-text"><i class="fa fa-calendar-alt"></i></span> -->
-								</div>
-								<div class="invalid-feedback">End date should be on or after start date.</div>
-							</div>
-						</div>
-					</form>
-				</div>
+    <div class="modal fade" id="packagingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
 
-				<div class="card-block table-wrap">
-					<div id="loadingOverlay" class="loading-overlay active">
-						<div class="loading-pill">
-							<div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
-							<span>Loading packaging records...</span>
-						</div>
-					</div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Packaging</h5>
+                    <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+                </div>
 
-					<div class="mb-3">
-						<div class="input-group search-group">
-							<input type="text" id="searchInput" class="form-control" placeholder="Search..." />
-							<span class="input-group-text"><i class="fa fa-search"></i></span>
-						</div>
-					</div>
+                <div class="modal-body">
+                    <form id="packagingForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="packagingnumber">Packaging Number<span class="text-danger">*</span></label>
+                                <input id="packagingnumber" class="form-control" maxlength="100" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="packagingcreatedby">Created By</label>
+                                <input id="packagingcreatedby" class="form-control" maxlength="255" />
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="createdon">Created Date</label>
+                                <input id="createdon" class="form-control" datatype="date" defaultValue="currentDate" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="status">Status</label>
+                                <select id="status" class="form-control">
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
 
-					<div class="table-responsive">
-						<table class="table align-middle">
-							<thead>
-								<tr>
-									<th class="sortable" data-sort="packagingnumber">Packaging Number <span class="sort-indicator">↕</span></th>
-									<th class="sortable" data-sort="packagingcreatedby">Created By <span class="sort-indicator">↕</span></th>
-									<th class="sortable" data-sort="createddate">Created Date <span class="sort-indicator">↕</span></th>
-									<th class="sortable" data-sort="status">Status <span class="sort-indicator">↕</span></th>
-									<th class="text-center">Actions</th>
-								</tr>
-							</thead>
-							<tbody id="tableBody"></tbody>
-						</table>
-					</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="savePackaging(event)">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
 
-					<div class="pagination-wrap">
-						<div id="paginationInfo" class="pagination-info"></div>
-						<nav>
-							<ul id="pagination" class="pagination pagination-sm mb-0"></ul>
-						</nav>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+            </div>
+        </div>
+    </div>
 
-	<script>
-		const state = {
-			allRecords: [],
-			filteredRecords: [],
-			pagedRecords: [],
-			searchText: '',
-			startDate: '',
-			endDate: '',
-			sortKey: 'createddate',
-			sortDirection: 'desc',
-			currentPage: 1,
-			pageSize: 8,
-			loading: false
-		};
+    <script>
 
-		const refs = {
-			filterForm: document.getElementById('filterForm'),
-			startDate: document.getElementById('startDate'),
-			endDate: document.getElementById('endDate'),
-			searchInput: document.getElementById('searchInput'),
-			tableBody: document.getElementById('tableBody'),
-			pagination: document.getElementById('pagination'),
-			paginationInfo: document.getElementById('paginationInfo'),
-			loadingOverlay: document.getElementById('loadingOverlay')
-		};
+        let grid;
+        let editingId = null;
 
-		function setLoading(isLoading, message = 'Loading packaging records...') {
-			state.loading = isLoading;
-			refs.loadingOverlay.classList.toggle('active', isLoading);
-			const msgNode = refs.loadingOverlay.querySelector('span');
-			if (msgNode) msgNode.textContent = message;
-		}
+        const columns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+            { field: 'packagingnumber', headerText: 'Packaging Number', width: 180 },
+            { field: 'packagingcreatedby', headerText: 'Created By', width: 180 },
+            { field: 'status', headerText: 'Status', width: 120 },
+            { field: 'createdon', headerText: 'Created Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 130 },
+            { field: 'id', headerText: 'Id', visible: false, allowPdfExport: false }
+        ];
 
-		function safeText(value) {
-			return String(value ?? '')
-				.replaceAll('&', '&amp;')
-				.replaceAll('<', '&lt;')
-				.replaceAll('>', '&gt;')
-				.replaceAll('"', '&quot;')
-				.replaceAll("'", '&#39;');
-		}
+        function getSafeDatePickerValue(id) {
+            if (typeof getDatePickerValue === 'function') {
+                return getDatePickerValue(id);
+            }
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        }
 
-		function toDateValue(value) {
-			if (!value) return '';
-			const d = new Date(value);
-			if (Number.isNaN(d.getTime())) return '';
-			const y = d.getFullYear();
-			const m = String(d.getMonth() + 1).padStart(2, '0');
-			const day = String(d.getDate()).padStart(2, '0');
-			return `${y}-${m}-${day}`;
-		}
+        function formatDate(value) {
+            const d = value instanceof Date ? value : new Date(value);
+            if (isNaN(d)) return '';
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = d.getFullYear();
+            return `${dd}-${mm}-${yyyy}`;
+        }
 
-		function formatDate(value) {
-			const d = value ? new Date(value) : null;
-			if (!d || Number.isNaN(d.getTime())) return '-';
-			return d.toLocaleDateString('en-GB');
-		}
+        function normalizeDate(val) {
+            if (!val) return null;
+            const d = val instanceof Date ? val : new Date(val);
+            return isNaN(d) ? null : d;
+        }
 
-		function normalizeStatus(record) {
-			const raw = String(record.status || '').trim().toLowerCase();
-			if (raw) {
-				if (raw === 'active' || raw === '1' || raw === 'true') return 'Active';
-				if (raw === 'inactive' || raw === '0' || raw === 'false') return 'Inactive';
-				return raw.charAt(0).toUpperCase() + raw.slice(1);
-			}
-			return String(record.isactive) === '0' ? 'Inactive' : 'Active';
-		}
+        function initGrid(cols, gridId) {
+            ej.grids.Grid.Inject(
+                ej.grids.Filter,
+                ej.grids.Group,
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
 
-		function mapRecord(item) {
-			return {
-				id: item.id || '',
-				packagingnumber: item.packagingnumber || '-',
-				packagingcreatedby: item.packagingcreatedby || '-',
-				createddate: item.createdon || item.slipdate || '',
-				status: normalizeStatus(item)
-			};
-		}
+            grid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                pageSettings: { pageSize: 10 },
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                showColumnChooser: true,
+                selectionSettings: { type: 'Multiple' },
+                rowSelected: toggleEditButton,
+                rowDeselected: toggleEditButton,
+                allowExcelExport: true,
+                allowPdfExport: true,
+                toolbar: [
+                    'Search',
+                    'ColumnChooser',
+                    { prefixIcon: 'e-icons e-excelexport', tooltipText: 'Export Excel', id: 'excelExport' },
+                    { prefixIcon: 'e-icons e-pdfexport', tooltipText: 'Export PDF', id: 'pdfExport' },
+                    { prefixIcon: 'e-icons e-refresh', tooltipText: 'Refresh', id: 'refreshGrid' },
+                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit', disabled: true },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' }
+                ],
+                columns: cols,
+                toolbarClick: function (args) {
+                    if (args.item.id === 'excelExport') {
+                        grid.excelExport({ fileName: `PackagingList_${formatDate(new Date())}.xlsx`, exportType: 'AllPages' });
+                    }
 
-		async function fetchPackagingRecords() {
-			if (window.DBHandler && typeof DBHandler.fetchEntityRecord === 'function') {
-				const records = await DBHandler.fetchEntityRecord(
-					'packagingitemdetail',
-					'id,packagingnumber,packagingcreatedby,createdon,slipdate,status,isactive',
-					'',
-					false
-				);
-				return (records || []).map(mapRecord);
-			}
+                    if (args.item.id === 'pdfExport') {
+                        grid.pdfExport({ fileName: `PackagingList_${formatDate(new Date())}.pdf`, exportType: 'CurrentPage', pageOrientation: 'Landscape', pageSize: 'A4' });
+                    }
 
-			// API-ready fallback shape for local development/runtime without DBHandler.
-			return [];
-		}
+                    if (args.item.id === 'refreshGrid') {
+                        loadPackagingRecords();
+                    }
 
-		function validateDateRange() {
-			const start = refs.startDate.value;
-			const end = refs.endDate.value;
+                    if (args.item.id === 'new') {
+                        openPackagingModal();
+                    }
 
-			const valid = !start || !end || start <= end;
-			refs.startDate.classList.toggle('is-invalid', !valid);
-			refs.endDate.classList.toggle('is-invalid', !valid);
-			return valid;
-		}
+                    if (args.item.id === 'edit') {
+                        editPackaging();
+                    }
 
-		function applyFilters() {
-			const term = state.searchText.trim().toLowerCase();
-			const start = state.startDate;
-			const end = state.endDate;
+                    if (args.item.id === 'delete') {
+                        deletePackaging();
+                    }
+                }
+            });
 
-			state.filteredRecords = state.allRecords.filter(record => {
-				const recordDate = toDateValue(record.createddate);
-				const inRange = (!start || (recordDate && recordDate >= start)) && (!end || (recordDate && recordDate <= end));
+            grid.appendTo('#' + gridId);
+        }
 
-				if (!inRange) return false;
-				if (!term) return true;
+        function toggleEditButton() {
+            const selected = grid.getSelectedRecords();
+            const editBtn = grid.toolbarModule.toolbar.items.find(function (item) { return item.id === 'edit'; });
+            if (!editBtn) return;
+            editBtn.disabled = selected.length !== 1;
+        }
 
-				const haystack = [
-					record.packagingnumber,
-					record.packagingcreatedby,
-					formatDate(record.createddate),
-					record.status
-				].join(' ').toLowerCase();
+        function openPackagingModal() {
+            const modalEl = document.getElementById('packagingModal');
+            document.getElementById('packagingForm').reset();
+            editingId = null;
+            document.querySelector('#packagingModal .modal-title').innerText = 'Add Packaging';
+            if (typeof setDatePickerValue === 'function') {
+                setDatePickerValue('createdon', new Date());
+            }
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
 
-				return haystack.includes(term);
-			});
+        function editPackaging() {
+            const selected = grid.getSelectedRecords();
+            if (selected.length !== 1) {
+                alert('Please select one record to edit');
+                return;
+            }
 
-			applySort();
-		}
+            const row = selected[0];
+            editingId = row.id;
+            document.getElementById('packagingnumber').value = row.packagingnumber || '';
+            document.getElementById('packagingcreatedby').value = row.packagingcreatedby || '';
+            document.getElementById('status').value = row.status || 'Active';
 
-		function compareValues(a, b, key) {
-			if (key === 'createddate') {
-				const timeA = a.createddate ? new Date(a.createddate).getTime() : 0;
-				const timeB = b.createddate ? new Date(b.createddate).getTime() : 0;
-				return timeA - timeB;
-			}
+            if (typeof setDatePickerValue === 'function') {
+                setDatePickerValue('createdon', row.createdon ? new Date(row.createdon) : new Date());
+            } else {
+                const createdEl = document.getElementById('createdon');
+                if (createdEl && row.createdon) {
+                    const d = new Date(row.createdon);
+                    createdEl.value = isNaN(d) ? '' : d.toISOString().slice(0, 10);
+                }
+            }
 
-			const x = String(a[key] ?? '').toLowerCase();
-			const y = String(b[key] ?? '').toLowerCase();
-			if (x < y) return -1;
-			if (x > y) return 1;
-			return 0;
-		}
+            document.querySelector('#packagingModal .modal-title').innerText = 'Edit Packaging';
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('packagingModal')).show();
+        }
 
-		function applySort() {
-			state.filteredRecords.sort((a, b) => {
-				const base = compareValues(a, b, state.sortKey);
-				return state.sortDirection === 'asc' ? base : -base;
-			});
+        async function deletePackaging() {
+            const selected = grid.getSelectedRecords();
+            if (!selected.length) {
+                alert('Please select record(s) to delete');
+                return;
+            }
 
-			state.currentPage = 1;
-			paginate();
-			updateSortIndicators();
-		}
+            if (!confirm(`Delete ${selected.length} packaging record(s)?`)) {
+                return;
+            }
 
-		function paginate() {
-			const total = state.filteredRecords.length;
-			const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
-			state.currentPage = Math.min(state.currentPage, totalPages);
+            const ids = selected.map(function (r) { return r.id; });
+            await deleteRecordData('packagingitemdetail', ids, true, true);
+            await loadPackagingRecords();
+        }
 
-			const startIndex = (state.currentPage - 1) * state.pageSize;
-			const endIndex = startIndex + state.pageSize;
-			state.pagedRecords = state.filteredRecords.slice(startIndex, endIndex);
+        async function loadPackagingRecords() {
+            const startDate = getSafeDatePickerValue('startDate');
+            const endDate = getSafeDatePickerValue('endDate');
 
-			renderTable();
-			renderPagination(total, totalPages, startIndex, endIndex);
-		}
+            if (!startDate || !endDate) return;
 
-		function renderTable() {
-			if (!state.pagedRecords.length) {
-				refs.tableBody.innerHTML = `
-					<tr>
-						<td colspan="5" class="empty-state">
-							<div class="fw-semibold mb-1">No packaging records found</div>
-							<div class="small">Try changing filters or search text.</div>
-						</td>
-					</tr>
-				`;
-				return;
-			}
+            const start = startDate + ' 00:00:00';
+            const end = endDate + ' 23:59:59';
+            const filter = `packagingitemdetail.createdon >= '${start}' AND packagingitemdetail.createdon <= '${end}'`;
 
-			refs.tableBody.innerHTML = state.pagedRecords.map(record => {
-				const active = String(record.status || '').toLowerCase() === 'active';
-				return `
-					<tr>
-						<td>${safeText(record.packagingnumber)}</td>
-						<td>${safeText(record.packagingcreatedby)}</td>
-						<td>${safeText(formatDate(record.createddate))}</td>
-						<td>
-							<span class="status-badge ${active ? 'status-active' : 'status-inactive'}">${safeText(record.status)}</span>
-						</td>
-						<td class="text-center">
-							<div class="d-inline-flex gap-2">
-								<button type="button" class="action-btn" data-action="view" data-id="${safeText(record.id)}" title="View">
-									<i class="fa fa-eye"></i>
-								</button>
-								<button type="button" class="action-btn" data-action="edit" data-id="${safeText(record.id)}" title="Edit">
-									<i class="fa fa-pen"></i>
-								</button>
-								<button type="button" class="action-btn" data-action="delete" data-id="${safeText(record.id)}" title="Delete">
-									<i class="fa fa-trash"></i>
-								</button>
-							</div>
-						</td>
-					</tr>
-				`;
-			}).join('');
-		}
+            try {
+                const records = await DBHandler.fetchEntityRecords(
+                    'packagingitemdetail',
+                    'packagingitemdetail.id,packagingitemdetail.packagingnumber,packagingitemdetail.packagingcreatedby,packagingitemdetail.createdon,packagingitemdetail.status,packagingitemdetail.isactive',
+                    'packagingitemdetail.createdon',
+                    'desc',
+                    filter,
+                    false
+                );
 
-		function renderPagination(total, totalPages, startIndex, endIndex) {
-			const shownStart = total === 0 ? 0 : startIndex + 1;
-			const shownEnd = Math.min(endIndex, total);
-			refs.paginationInfo.textContent = `Showing ${shownStart}-${shownEnd} of ${total}`;
+                let sr = 1;
+                const rows = (records || []).map(function (x) {
+                    const status = x.status || (String(x.isactive) === '0' ? 'Inactive' : 'Active');
+                    return {
+                        id: x.id,
+                        srno: sr++,
+                        packagingnumber: x.packagingnumber || '',
+                        packagingcreatedby: x.packagingcreatedby || '',
+                        status: status,
+                        createdon: normalizeDate(x.createdon)
+                    };
+                });
 
-			const prevDisabled = state.currentPage === 1 ? 'disabled' : '';
-			const nextDisabled = state.currentPage === totalPages ? 'disabled' : '';
+                grid.dataSource = rows;
+                grid.refresh();
+            } catch (error) {
+                console.error('Failed to load packaging records:', error);
+            }
+        }
 
-			let pageButtons = `
-				<li class="page-item ${prevDisabled}">
-					<button class="page-link" data-page="prev">Previous</button>
-				</li>
-			`;
+        async function savePackaging(event) {
+            if (event && event.target) {
+                event.target.disabled = true;
+                event.target.innerText = 'Saving...';
+            }
 
-			for (let i = 1; i <= totalPages; i++) {
-				const active = i === state.currentPage ? 'active' : '';
-				pageButtons += `
-					<li class="page-item ${active}">
-						<button class="page-link" data-page="${i}">${i}</button>
-					</li>
-				`;
-			}
+            try {
+                const packagingnumber = (document.getElementById('packagingnumber').value || '').trim();
+                const packagingcreatedby = (document.getElementById('packagingcreatedby').value || '').trim();
+                const status = document.getElementById('status').value || 'Active';
+                const createdon = getSafeDatePickerValue('createdon');
 
-			pageButtons += `
-				<li class="page-item ${nextDisabled}">
-					<button class="page-link" data-page="next">Next</button>
-				</li>
-			`;
+                if (!packagingnumber) {
+                    alert('Packaging Number is required');
+                    return;
+                }
 
-			refs.pagination.innerHTML = pageButtons;
-		}
+                await DBHandler.submitRecordData('packagingitemdetail', {
+                    packagingnumber: packagingnumber,
+                    packagingcreatedby: packagingcreatedby,
+                    status: status,
+                    isactive: String(status).toLowerCase() === 'inactive' ? 0 : 1,
+                    createdon: createdon || null
+                }, editingId, false);
 
-		function updateSortIndicators() {
-			const headers = document.querySelectorAll('th.sortable');
-			headers.forEach(header => {
-				const key = header.getAttribute('data-sort');
-				const indicator = header.querySelector('.sort-indicator');
-				if (!indicator) return;
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('packagingModal')).hide();
+                editingId = null;
+                await loadPackagingRecords();
+            } catch (error) {
+                console.error('Failed to save packaging record:', error);
+                alert('Failed to save packaging record');
+            } finally {
+                if (event && event.target) {
+                    event.target.disabled = false;
+                    event.target.innerText = 'Save';
+                }
+            }
+        }
 
-				if (key !== state.sortKey) {
-					indicator.textContent = '↕';
-					return;
-				}
+        $(document).ready(async function () {
+            if (typeof applyDatePicker === 'function') {
+                applyDatePicker();
+            }
+            initGrid(columns, 'packagingGrid');
+            await loadPackagingRecords();
+        });
+    </script>
 
-				indicator.textContent = state.sortDirection === 'asc' ? '↑' : '↓';
-			});
-		}
+    <style>
+        .toolbar-spacing {
+            margin-bottom: 10px;
+        }
 
-		function handleAction(action, id) {
-			if (action === 'view') {
-				window.location.href = `Yogesh_Cloth.html?id=${encodeURIComponent(id)}`;
-				return;
-			}
+        #packagingGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
 
-			if (action === 'edit') {
-				window.location.href = `Yogesh_Cloth.html?id=${encodeURIComponent(id)}`;
-				return;
-			}
-
-			if (action === 'delete') {
-				if (!confirm('Delete this packaging record?')) return;
-				if (typeof deleteRecordData === 'function') {
-					deleteRecordData('packagingitemdetail', [id], true, true)
-						.then(() => init())
-						.catch(err => {
-							console.error('Delete failed:', err);
-							alert('Failed to delete record.');
-						});
-				} else {
-					alert('Delete function is not available in this runtime.');
-				}
-			}
-		}
-
-		async function init() {
-			setLoading(true);
-			try {
-				state.allRecords = await fetchPackagingRecords();
-				applyFilters();
-			} catch (error) {
-				console.error('Error fetching packaging records:', error);
-				state.allRecords = [];
-				applyFilters();
-			} finally {
-				setLoading(false);
-			}
-		}
-
-		document.querySelectorAll('th.sortable').forEach(header => {
-			header.addEventListener('click', function () {
-				const key = this.getAttribute('data-sort');
-				if (state.sortKey === key) {
-					state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
-				} else {
-					state.sortKey = key;
-					state.sortDirection = 'asc';
-				}
-				paginate();
-				updateSortIndicators();
-			});
-		});
-
-		refs.startDate.addEventListener('change', function () {
-			state.startDate = refs.startDate.value;
-			if (!validateDateRange()) return;
-			applyFilters();
-		});
-
-		refs.endDate.addEventListener('change', function () {
-			state.endDate = refs.endDate.value;
-			if (!validateDateRange()) return;
-			applyFilters();
-		});
-
-		refs.searchInput.addEventListener('input', function () {
-			state.searchText = refs.searchInput.value;
-			applyFilters();
-		});
-
-		refs.pagination.addEventListener('click', function (event) {
-			const btn = event.target.closest('button[data-page]');
-			if (!btn) return;
-
-			const token = btn.getAttribute('data-page');
-			const totalPages = Math.max(1, Math.ceil(state.filteredRecords.length / state.pageSize));
-
-			if (token === 'prev') {
-				if (state.currentPage > 1) state.currentPage -= 1;
-			} else if (token === 'next') {
-				if (state.currentPage < totalPages) state.currentPage += 1;
-			} else {
-				state.currentPage = parseInt(token, 10) || 1;
-			}
-
-			paginate();
-		});
-
-		refs.tableBody.addEventListener('click', function (event) {
-			const button = event.target.closest('button[data-action]');
-			if (!button) return;
-			handleAction(button.getAttribute('data-action'), button.getAttribute('data-id'));
-		});
-
-		document.addEventListener('DOMContentLoaded', function () {
-			updateSortIndicators();
-			init();
-		});
-	</script>
 </body>
+
 </html>

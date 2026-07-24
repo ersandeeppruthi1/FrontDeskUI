@@ -1,951 +1,318 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Billing Item Management</title>
 
-	<script>
-		let classMap = [];
-		var apiURL = "https://dbsit2.vsservices.in/";
-	</script>
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Item Management</title>
 
-	<link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
-	<script>
-		(function () {
-			if (window.AuthManager) return;
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
 
-			function getCookie(name) {
-				const key = `${name}=`;
-				const decoded = decodeURIComponent(document.cookie || '');
-				const chunks = decoded.split(';');
-				for (let i = 0; i < chunks.length; i++) {
-					const item = chunks[i].trim();
-					if (item.indexOf(key) === 0) {
-						return item.substring(key.length);
-					}
-				}
-				return '';
-			}
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-			function firstNonEmpty(values) {
-				for (let i = 0; i < values.length; i++) {
-					if (values[i]) return values[i];
-				}
-				return '';
-			}
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-			function parseJwtPayload(token) {
-				try {
-					if (!token || token.split('.').length < 2) return {};
-					const base64Url = token.split('.')[1];
-					const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-					const decoded = atob(base64);
-					return JSON.parse(decoded);
-				} catch (e) {
-					return {};
-				}
-			}
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
 
-			function resolveToken() {
-				const url = new URL(window.location.href);
-				return firstNonEmpty([
-					url.searchParams.get('dataToken') || '',
-					url.searchParams.get('authToken') || '',
-					url.searchParams.get('token') || '',
-					url.searchParams.get('accessToken') || '',
-					localStorage.getItem('dataToken') || '',
-					localStorage.getItem('authToken') || '',
-					localStorage.getItem('AuthToken') || '',
-					localStorage.getItem('token') || '',
-					localStorage.getItem('accessToken') || '',
-					sessionStorage.getItem('dataToken') || '',
-					sessionStorage.getItem('authToken') || '',
-					sessionStorage.getItem('token') || '',
-					sessionStorage.getItem('accessToken') || '',
-					getCookie('dataToken') || getCookie('DataToken') || '',
-					getCookie('authToken') || getCookie('AuthToken') || '',
-					getCookie('token') || getCookie('Token') || '',
-					getCookie('accessToken') || getCookie('AccessToken') || '',
-					window.dataToken || '',
-					window.authToken || window.AuthToken || ''
-				]);
-			}
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
-			function normalizeUserId(value) {
-				const clean = String(value || '').trim();
-				if (!clean) return '';
-				return clean.length > 64 ? clean.slice(0, 64) : clean;
-			}
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
 
-			function toSafeNumericUserId(value) {
-				const raw = String(value || '').trim();
-				if (!raw) return '0';
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-				if (/^\d+$/.test(raw)) {
-					const parsed = parseInt(raw, 10);
-					return Number.isFinite(parsed) && parsed >= 0 ? String(parsed) : '0';
-				}
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
 
-				const onlyDigits = raw.replace(/\D/g, '');
-				if (!onlyDigits) return '0';
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
-				const normalizedDigits = onlyDigits.length > 9 ? onlyDigits.slice(-9) : onlyDigits;
-				const parsed = parseInt(normalizedDigits, 10);
-				return Number.isFinite(parsed) && parsed >= 0 ? String(parsed) : '0';
-			}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
-			function resolveUserId() {
-				const url = new URL(window.location.href);
-				const explicitUserId = normalizeUserId(firstNonEmpty([
-					url.searchParams.get('userid') || '',
-					url.searchParams.get('userId') || '',
-					url.searchParams.get('uid') || '',
-					localStorage.getItem('userid') || '',
-					localStorage.getItem('userId') || '',
-					localStorage.getItem('uid') || '',
-					sessionStorage.getItem('userid') || '',
-					sessionStorage.getItem('userId') || '',
-					sessionStorage.getItem('uid') || '',
-					getCookie('userid') || '',
-					getCookie('userId') || '',
-					getCookie('UserId') || ''
-				]));
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-				if (explicitUserId) return toSafeNumericUserId(explicitUserId);
-
-				const payload = parseJwtPayload(resolveToken());
-				return toSafeNumericUserId(normalizeUserId(firstNonEmpty([
-					payload.userId,
-					payload.userid,
-					payload.uid,
-					payload.nameid,
-					payload.sub,
-					payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
-				])) || '0');
-			}
-
-			window.AuthManager = {
-				getDataToken: resolveToken,
-				getAuthToken: resolveUserId,
-				setDataToken: function (token) {
-					if (token) localStorage.setItem('dataToken', token);
-				},
-				setAuthToken: function (token) {
-					if (token) localStorage.setItem('authToken', token);
-				}
-			};
-		})();
-	</script>
-	<script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
-
-	<style>
-		:root {
-			--page-bg: #f5f8fc;
-			--primary: #4F6EF7;
-			--primary-soft: #edf2ff;
-			--text-main: #17315c;
-			--text-muted: #6b7a99;
-			--card-shadow: 0 14px 36px rgba(79, 110, 247, 0.10);
-			--border: #dfe7f5;
-			--radius: 10px;
-		}
-
-		body {
-			margin: 0;
-			background: linear-gradient(180deg, #f8fbff 0%, var(--page-bg) 100%);
-			color: var(--text-main);
-			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-		}
-
-		.page-shell {
-			min-height: 100vh;
-			padding: 32px 16px;
-		}
-
-		.management-card {
-			max-width: 1180px;
-			margin: 0 auto;
-			background: #fff;
-			border: 1px solid rgba(79, 110, 247, 0.10);
-			border-radius: var(--radius);
-			box-shadow: var(--card-shadow);
-			overflow: hidden;
-		}
-
-		.card-inner {
-			padding: 28px;
-		}
-
-		.page-title {
-			margin: 0 0 28px;
-			text-align: center;
-			color: var(--primary);
-			font-size: clamp(1.8rem, 3vw, 2.5rem);
-			font-weight: 800;
-			letter-spacing: -0.03em;
-		}
-
-		.section-card {
-			background: #fff;
-			border: 1px solid var(--border);
-			border-radius: var(--radius);
-			box-shadow: 0 8px 22px rgba(16, 37, 84, 0.05);
-			padding: 22px;
-		}
-
-		.section-heading {
-			margin-bottom: 18px;
-			font-size: 1rem;
-			font-weight: 700;
-			color: var(--text-main);
-		}
-
-		.form-control,
-		.form-select {
-			min-height: 48px;
-			border-radius: var(--radius);
-			border-color: #d7e2f4;
-			box-shadow: none;
-		}
-
-		.form-control:focus,
-		.form-select:focus {
-			border-color: rgba(79, 110, 247, 0.55);
-			box-shadow: 0 0 0 0.18rem rgba(79, 110, 247, 0.15);
-		}
-
-		.item-name-dropdown {
-			max-width: 180px;
-		}
-
-		.combobox-wrap {
-			position: relative;
-		}
-
-		.combobox-input {
-			padding-right: 0;
-		}
-
-		.combobox-toggle {
-			min-width: 48px;
-			border-top-left-radius: 0;
-			border-bottom-left-radius: 0;
-			border-left: 0;
-			background: #f8fbff;
-			color: var(--text-muted);
-		}
-
-		.combobox-toggle:hover,
-		.combobox-toggle:focus {
-			background: #eef4ff;
-			color: var(--primary);
-		}
-
-		.combobox-menu {
-			position: absolute;
-			top: calc(100% + 8px);
-			left: 0;
-			right: 0;
-			z-index: 20;
-			display: none;
-			max-height: 260px;
-			overflow-y: auto;
-			padding: 8px;
-			background: #fff;
-			border: 1px solid var(--border);
-			border-radius: var(--radius);
-			box-shadow: 0 14px 30px rgba(16, 37, 84, 0.10);
-		}
-
-		.combobox-menu.show {
-			display: block;
-		}
-
-		.combobox-option {
-			display: block;
-			width: 100%;
-			padding: 10px 12px;
-			border: 0;
-			border-radius: 8px;
-			background: transparent;
-			color: var(--text-main);
-			text-align: left;
-			font-weight: 500;
-		}
-
-		.combobox-option:hover,
-		.combobox-option:focus,
-		.combobox-option.active {
-			background: var(--primary-soft);
-			color: var(--primary);
-		}
-
-		.combobox-empty {
-			padding: 10px 12px;
-			color: var(--text-muted);
-			font-size: 0.95rem;
-		}
-
-		.input-label {
-			font-weight: 600;
-			color: var(--text-main);
-			margin-bottom: 8px;
-		}
-
-		.toolbar-row {
-			display: flex;
-			justify-content: space-between;
-			gap: 16px;
-			align-items: center;
-			flex-wrap: wrap;
-			margin-bottom: 18px;
-		}
-
-		.search-wrap {
-			margin-left: auto;
-			min-width: min(100%, 320px);
-		}
-
-		.search-input-group {
-			position: relative;
-		}
-
-		.search-input-group .form-control {
-			padding-right: 42px;
-		}
-
-		.search-input-group .search-icon {
-			position: absolute;
-			top: 50%;
-			right: 14px;
-			transform: translateY(-50%);
-			color: var(--text-muted);
-			pointer-events: none;
-		}
-
-		.btn-primary {
-			background: var(--primary);
-			border-color: var(--primary);
-			border-radius: var(--radius);
-			min-height: 48px;
-			font-weight: 600;
-			box-shadow: 0 10px 22px rgba(79, 110, 247, 0.18);
-		}
-
-		.btn-primary:hover,
-		.btn-primary:focus {
-			background: #4563e2;
-			border-color: #4563e2;
-		}
-
-		.btn-outline-secondary {
-			border-radius: var(--radius);
-			min-height: 48px;
-		}
-
-		.table-wrap {
-			position: relative;
-		}
-
-		.table {
-			margin-bottom: 0;
-		}
-
-		.table thead th {
-			background: #f4f7ff;
-			color: #29457d;
-			font-weight: 700;
-			border-bottom-width: 1px;
-			white-space: nowrap;
-		}
-
-		.table td,
-		.table th {
-			vertical-align: middle;
-			padding: 14px 16px;
-			border-color: #e5ecf8;
-		}
-
-		.badge-packaging {
-			background: var(--primary-soft);
-			color: var(--primary);
-			border: 1px solid rgba(79, 110, 247, 0.12);
-			border-radius: 999px;
-			padding: 8px 12px;
-			font-weight: 700;
-		}
-
-		.badge-standard {
-			background: #f3f6fa;
-			color: #5c6e91;
-			border: 1px solid #dde6f3;
-			border-radius: 999px;
-			padding: 8px 12px;
-			font-weight: 700;
-		}
-
-		.action-btn {
-			width: 36px;
-			height: 36px;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			border-radius: 50%;
-			border: 1px solid #dde6f3;
-			background: #fff;
-			color: var(--text-muted);
-			transition: 0.2s ease;
-		}
-
-		.action-btn:hover {
-			color: var(--primary);
-			border-color: rgba(79, 110, 247, 0.35);
-			box-shadow: 0 8px 18px rgba(79, 110, 247, 0.12);
-		}
-
-		.empty-state {
-			text-align: center;
-			padding: 32px 12px;
-			color: var(--text-muted);
-		}
-
-		.loading-overlay {
-			position: absolute;
-			inset: 0;
-			display: none;
-			align-items: center;
-			justify-content: center;
-			background: rgba(255, 255, 255, 0.82);
-			border-radius: var(--radius);
-			z-index: 2;
-		}
-
-		.loading-overlay.active {
-			display: flex;
-		}
-
-		.spinner-card {
-			display: inline-flex;
-			align-items: center;
-			gap: 12px;
-			padding: 14px 18px;
-			border: 1px solid var(--border);
-			border-radius: 999px;
-			background: #fff;
-			box-shadow: 0 10px 24px rgba(16, 37, 84, 0.08);
-			color: var(--text-main);
-			font-weight: 600;
-		}
-
-		@media (max-width: 767.98px) {
-			.card-inner {
-				padding: 18px;
-			}
-
-			.section-card {
-				padding: 16px;
-			}
-
-			.toolbar-row {
-				align-items: stretch;
-			}
-
-			.search-wrap {
-				margin-left: 0;
-				width: 100%;
-			}
-
-			.table td,
-			.table th {
-				padding: 12px;
-			}
-		}
-	</style>
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
 </head>
+
 <body>
-	<div class="page-shell">
-		<div class="management-card">
-			<div class="card-inner">
-				<h1 class="page-title">Billing Item Management</h1>
+    <div class="container2">
+        <div id="itemsGrid"></div>
+    </div>
 
-				<div class="section-card mb-4">
-					<div class="section-heading">Item Details</div>
-					<form id="billingItemForm" class="needs-validation" novalidate>
-						<div class="row g-4">
-							<div class="col-lg-6">
-								<label for="itemName" class="form-label input-label">Item Name</label>
-								<div class="combobox-wrap">
-									<div class="input-group">
-										<input type="text" id="itemName" class="form-control combobox-input" placeholder="Enter Name" required autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="itemNameComboboxMenu" />
-										<button type="button" id="itemNameDropdownToggle" class="btn combobox-toggle" aria-label="Show item list">
-											<i class="fa fa-chevron-down"></i>
-										</button>
-									</div>
-									<div id="itemNameComboboxMenu" class="combobox-menu" role="listbox"></div>
-								</div>
-								<div class="invalid-feedback">Item name is required.</div>
-							</div>
-							<div class="col-lg-6">
-								<label for="itemPrice" class="form-label input-label">Price</label>
-								<input type="number" id="itemPrice" class="form-control" placeholder="Enter Price" min="0" step="0.01" required />
-								<div class="invalid-feedback">Price is required.</div>
-							</div>
-							<div class="col-lg-6">
-								<label for="isForPackaging" class="form-label input-label">Is For Packaging</label>
-								<select id="isForPackaging" class="form-select">
-									<option value="0" selected>No</option>
-									<option value="1">Yes</option>
-								</select>
-							</div>
-							<div class="col-lg-6 d-flex align-items-end gap-2">
-								<button type="submit" id="saveButton" class="btn btn-primary flex-grow-1">
-									<span class="btn-label">Save Item</span>
-								</button>
-								<button type="button" id="cancelEditButton" class="btn btn-outline-secondary d-none">Cancel</button>
-							</div>
-						</div>
-					</form>
-				</div>
+    <div class="modal fade" id="itemModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
 
-				<div class="section-card table-wrap">
-					<div id="loadingOverlay" class="loading-overlay active">
-						<div class="spinner-card">
-							<div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
-							<span>Loading billing items...</span>
-						</div>
-					</div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Billing Item</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" title="Close"></button>
+                </div>
 
-					<div class="toolbar-row">
-						<div class="section-heading mb-0">Items List</div>
-						<div class="search-wrap">
-							<div class="search-input-group">
-								<input type="text" id="searchInput" class="form-control" placeholder="Search by item name or price" />
-								<i class="fa fa-search search-icon"></i>
-							</div>
-						</div>
-					</div>
+                <div class="modal-body">
+                    <form id="itemForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="name">Item Name</label>
+                                <input type="text" id="name" class="form-control" placeholder="Enter item name" title="Item Name" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="price">Price</label>
+                                <input type="number" id="price" class="form-control" min="0" step="0.01" placeholder="Enter price" title="Price" required />
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label for="isforpackaging">Is For Packaging</label>
+                                <select id="isforpackaging" class="form-control" title="Is For Packaging">
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
 
-					<div class="table-responsive">
-						<table class="table align-middle">
-							<thead>
-								<tr>
-									<th>Item Name</th>
-									<th>Price</th>
-									<th>Packaging</th>
-									<th class="text-center">Actions</th>
-								</tr>
-							</thead>
-							<tbody id="itemsTableBody"></tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" onclick="saveItem()">Save</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
 
-	<script>
-		const state = {
-			items: [],
-			filteredItems: [],
-			editingId: null,
-			loading: false
-		};
+            </div>
+        </div>
+    </div>
 
-		const form = document.getElementById('billingItemForm');
-		const itemNameInput = document.getElementById('itemName');
-		const itemNameDropdownToggle = document.getElementById('itemNameDropdownToggle');
-		const itemNameComboboxMenu = document.getElementById('itemNameComboboxMenu');
-		const itemPriceInput = document.getElementById('itemPrice');
-		const isForPackagingSelect = document.getElementById('isForPackaging');
-		const searchInput = document.getElementById('searchInput');
-		const tableBody = document.getElementById('itemsTableBody');
-		const loadingOverlay = document.getElementById('loadingOverlay');
-		const saveButton = document.getElementById('saveButton');
-		const cancelEditButton = document.getElementById('cancelEditButton');
+    <script>
 
-		function setLoading(isLoading, message = 'Loading billing items...') {
-			state.loading = isLoading;
-			loadingOverlay.classList.toggle('active', isLoading);
-			const messageNode = loadingOverlay.querySelector('span');
-			if (messageNode) {
-				messageNode.textContent = message;
-			}
-		}
+        let itemGrid;
+        let editingItemId = null;
 
-		function escapeHtml(value) {
-			return String(value ?? '')
-				.replaceAll('&', '&amp;')
-				.replaceAll('<', '&lt;')
-				.replaceAll('>', '&gt;')
-				.replaceAll('"', '&quot;')
-				.replaceAll("'", '&#39;');
-		}
+        function normalizeNameKey(value) {
+            return String(value || '').trim().replace(/\s+/g, ' ').toLowerCase();
+        }
 
-		function formatPrice(value) {
-			const number = parseFloat(value || 0);
-			return Number.isFinite(number) ? number.toFixed(2) : '0.00';
-		}
+        function getErrorMessage(error) {
+            if (!error) return 'Unknown error from server.';
 
-		function normalisePackaging(value) {
-			return String(value) === '1' ? 1 : 0;
-		}
+            const direct = [
+                error.message,
+                error.error,
+                error.errorMessage,
+                error.responseText,
+                error.statusText,
+                error.responseJSON && error.responseJSON.message,
+                error.responseJSON && error.responseJSON.error,
+                error.response && error.response.message,
+                error.response && error.response.error,
+                error.data && error.data.message,
+                error.data && error.data.error
+            ];
 
-		function normalizeNameKey(value) {
-			return String(value || '').trim().replace(/\s+/g, ' ').toLowerCase();
-		}
+            for (let i = 0; i < direct.length; i++) {
+                if (direct[i]) return String(direct[i]);
+            }
 
-		function findItemByName(name, excludeId = '') {
-			const key = normalizeNameKey(name);
-			if (!key) return null;
-			return state.items.find(item => {
-				if (excludeId && String(item.id) === String(excludeId)) return false;
-				return normalizeNameKey(item.name) === key;
-			}) || null;
-		}
+            try {
+                return JSON.stringify(error);
+            } catch (e) {
+                return 'Unknown error from server.';
+            }
+        }
 
-		function getErrorMessage(error) {
-			if (!error) return 'Unknown error from server.';
+        function isDuplicateConflict(message) {
+            const text = String(message || '').toLowerCase();
+            return text.includes('same key') || text.includes('duplicate') || text.includes('already exists');
+        }
 
-			const direct = [
-				error.message,
-				error.error,
-				error.errorMessage,
-				error.responseText,
-				error.statusText,
-				error.responseJSON && error.responseJSON.message,
-				error.responseJSON && error.responseJSON.error,
-				error.response && error.response.message,
-				error.response && error.response.error,
-				error.data && error.data.message,
-				error.data && error.data.error
-			];
+        function findItemByName(items, name, excludeId) {
+            const key = normalizeNameKey(name);
+            if (!key) return null;
+            for (let i = 0; i < items.length; i++) {
+                const row = items[i];
+                if (excludeId && String(row.id) === String(excludeId)) continue;
+                if (normalizeNameKey(row.name) === key) return row;
+            }
+            return null;
+        }
 
-			for (let i = 0; i < direct.length; i++) {
-				if (direct[i]) return String(direct[i]);
-			}
+        function initItemGrid() {
 
-			try {
-				return JSON.stringify(error);
-			} catch (e) {
-				return 'Unknown error from server.';
-			}
-		}
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
 
-		function isDuplicateConflict(message) {
-			const text = String(message || '').toLowerCase();
-			return text.includes('same key') || text.includes('duplicate') || text.includes('already exists');
-		}
+            itemGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                toolbar: [
+                    'Search',
+                    { text: 'New Item', prefixIcon: 'e-icons e-plus', id: 'newItem' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editItem' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteItem' },
+                    'ExcelExport',
+                    'PdfExport'
+                ],
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'name', headerText: 'Item Name', width: 240 },
+                    { field: 'price', headerText: 'Price', width: 140, format: 'N2', textAlign: 'Right' },
+                    {
+                        field: 'isforpackaging',
+                        headerText: 'Is For Packaging',
+                        width: 170,
+                        template: "${isforpackaging == 1 ? 'Yes' : 'No'}"
+                    },
+                    { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 180 }
+                ],
+                toolbarClick: async function (args) {
 
-		function applyFilter() {
-			const term = searchInput.value.trim().toLowerCase();
-			state.filteredItems = state.items.filter(item => {
-				if (!term) return true;
-				const name = String(item.name || '').toLowerCase();
-				const price = formatPrice(item.price).toLowerCase();
-				const packaging = normalisePackaging(item.isforpackaging) === 1 ? 'yes' : 'no';
-				return name.includes(term) || price.includes(term) || packaging.includes(term);
-			});
-			renderTable();
-		}
+                    if (args.item.id === 'newItem') {
+                        editingItemId = null;
+                        document.getElementById('itemForm').reset();
+                        document.getElementById('isforpackaging').value = '0';
+                        document.querySelector('#itemModal .modal-title').innerText = 'Add Billing Item';
+                        new bootstrap.Modal(itemModal).show();
+                    }
 
-		function setComboboxExpanded(isExpanded) {
-			itemNameComboboxMenu.classList.toggle('show', isExpanded);
-			itemNameInput.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
-		}
+                    if (args.item.id === 'editItem') {
+                        const selected = itemGrid.getSelectedRecords();
+                        if (selected.length !== 1) return alert('Select one record');
+                        editingItemId = selected[0].id;
 
-		function renderComboboxOptions(filterText = '') {
-			const term = String(filterText || '').trim().toLowerCase();
-			const items = state.items.filter(item => !term || String(item.name || '').toLowerCase().includes(term));
+                        document.getElementById('name').value = selected[0].name || '';
+                        document.getElementById('price').value = selected[0].price || 0;
+                        document.getElementById('isforpackaging').value = String(selected[0].isforpackaging == 1 ? 1 : 0);
 
-			if (!items.length) {
-				itemNameComboboxMenu.innerHTML = '<div class="combobox-empty">No matching items found</div>';
-				return;
-			}
+                        document.querySelector('#itemModal .modal-title').innerText = 'Edit Billing Item';
+                        new bootstrap.Modal(itemModal).show();
+                    }
 
-			itemNameComboboxMenu.innerHTML = items.map(item => `
-				<button type="button" class="combobox-option" role="option" data-id="${escapeHtml(item.id)}">
-					${escapeHtml(item.name)}
-				</button>
-			`).join('');
-		}
+                    if (args.item.id === 'deleteItem') {
+                        const selected = itemGrid.getSelectedRecords();
+                        if (!selected.length) return alert('Select record(s)');
 
-		function openCombobox(showAll = false) {
-			renderComboboxOptions(showAll ? '' : itemNameInput.value);
-			setComboboxExpanded(true);
-		}
+                        if (!confirm('Delete selected item record(s)?')) return;
+                        const ids = selected.map(function (r) { return r.id; });
+                        await deleteRecordData('billingitem', ids, true, true);
+                        loadItems();
+                    }
+                }
+            });
 
-		function closeCombobox() {
-			setComboboxExpanded(false);
-		}
+            itemGrid.appendTo('#itemsGrid');
+        }
 
-		function renderTable() {
-			if (!state.filteredItems.length) {
-				tableBody.innerHTML = `
-					<tr>
-						<td colspan="4" class="empty-state">
-							<div class="fw-semibold mb-1">No billing items found</div>
-							<div class="small">Save a new item or change the search text.</div>
-						</td>
-					</tr>
-				`;
-				return;
-			}
+        async function loadItems() {
 
-			tableBody.innerHTML = state.filteredItems.map(item => {
-				const isPackaging = normalisePackaging(item.isforpackaging) === 1;
-				return `
-					<tr>
-						<td>
-							<div class="fw-semibold">${escapeHtml(item.name)}</div>
-						</td>
-						<td>${formatPrice(item.price)}</td>
-						<td>
-							<span class="${isPackaging ? 'badge-packaging' : 'badge-standard'}">${isPackaging ? 'Yes' : 'No'}</span>
-						</td>
-						<td class="text-center">
-							<div class="d-inline-flex gap-2">
-								<button type="button" class="action-btn" data-action="edit" data-id="${escapeHtml(item.id)}" title="Edit item">
-									<i class="fa fa-pen"></i>
-								</button>
-								<button type="button" class="action-btn" data-action="delete" data-id="${escapeHtml(item.id)}" title="Delete item">
-									<i class="fa fa-trash"></i>
-								</button>
-							</div>
-						</td>
-					</tr>
-				`;
-			}).join('');
-		}
+            const data = await DBHandler.fetchEntityRecords(
+                'billingitem',
+                '*',
+                'createdon',
+                'desc'
+            );
 
-		async function loadItems() {
-			if (!window.DBHandler || typeof DBHandler.fetchEntityRecord !== 'function') {
-				setLoading(false);
-				tableBody.innerHTML = `
-					<tr><td colspan="4" class="empty-state">DBHandler is not available in this context.</td></tr>
-				`;
-				return;
-			}
+            itemGrid.dataSource = data || [];
+        }
 
-			setLoading(true, 'Loading billing items...');
-			try {
-				const records = await DBHandler.fetchEntityRecord('billingitem', 'id,name,price,isforpackaging', '', false);
-				state.items = (records || []).sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
-				renderComboboxOptions();
-				applyFilter();
-			} catch (error) {
-				console.error('Error loading billing items:', error);
-				tableBody.innerHTML = `
-					<tr><td colspan="4" class="empty-state">Failed to load billing items.</td></tr>
-				`;
-			} finally {
-				setLoading(false);
-			}
-		}
+        async function saveItem() {
 
-		function resetForm() {
-			form.reset();
-			form.classList.remove('was-validated');
-			isForPackagingSelect.value = '0';
-			state.editingId = null;
-			closeCombobox();
-			saveButton.querySelector('.btn-label').textContent = 'Save Item';
-			cancelEditButton.classList.add('d-none');
-		}
+            const name = document.getElementById('name').value.trim();
+            const priceValue = document.getElementById('price').value;
+            const isforpackaging = document.getElementById('isforpackaging').value;
+            const price = parseFloat(priceValue || 0);
 
-		function fillFormForEdit(item) {
-			state.editingId = item.id;
-			itemNameInput.value = item.name || '';
-			itemPriceInput.value = formatPrice(item.price);
-			isForPackagingSelect.value = String(normalisePackaging(item.isforpackaging));
-			closeCombobox();
-			saveButton.querySelector('.btn-label').textContent = 'Update Item';
-			cancelEditButton.classList.remove('d-none');
-			itemNameInput.focus();
-		}
+            if (!name) return alert('Item name is required');
+            if (!Number.isFinite(price) || price < 0) return alert('Please enter a valid price');
 
-		async function saveItem(event) {
-			event.preventDefault();
-			form.classList.add('was-validated');
-			if (!form.checkValidity()) {
-				return;
-			}
+            const payload = {
+                name,
+                price,
+                isforpackaging: parseInt(isforpackaging, 10) || 0
+            };
 
-			const trimmedName = itemNameInput.value.trim();
-			const parsedPrice = parseFloat(itemPriceInput.value || 0);
-			if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
-				alert('Please enter a valid price.');
-				return;
-			}
+            try {
+                const currentRows = (itemGrid && itemGrid.dataSource) ? itemGrid.dataSource : [];
+                let targetId = editingItemId;
+                const duplicate = findItemByName(currentRows, name, targetId);
 
-			const payload = {
-				name: trimmedName,
-				price: parsedPrice,
-				isforpackaging: parseInt(isForPackagingSelect.value, 10) || 0
-			};
+                if (!targetId && duplicate) {
+                    targetId = duplicate.id;
+                    editingItemId = duplicate.id;
+                }
 
-			let targetId = state.editingId;
-			const duplicateMatch = findItemByName(payload.name, targetId);
-			if (!targetId && duplicateMatch) {
-				targetId = duplicateMatch.id;
-				state.editingId = duplicateMatch.id;
-				cancelEditButton.classList.remove('d-none');
-				saveButton.querySelector('.btn-label').textContent = 'Update Item';
-			}
+                try {
+                    await DBHandler.submitRecordData('billingitem', payload, targetId, false);
+                } catch (firstError) {
+                    const duplicateFromError = findItemByName(currentRows, name, targetId);
+                    const message = getErrorMessage(firstError);
+                    if (!targetId && duplicateFromError && isDuplicateConflict(message)) {
+                        targetId = duplicateFromError.id;
+                        editingItemId = duplicateFromError.id;
+                        await DBHandler.submitRecordData('billingitem', payload, targetId, false);
+                    } else {
+                        throw firstError;
+                    }
+                }
 
-			const wasEditing = Boolean(targetId);
+                bootstrap.Modal.getInstance(itemModal).hide();
+                editingItemId = null;
+                loadItems();
+            } catch (error) {
+                console.error('Error saving billing item:', error);
+                alert('Failed to save billing item. ' + getErrorMessage(error));
+            }
+        }
 
-			saveButton.disabled = true;
-			saveButton.querySelector('.btn-label').textContent = wasEditing ? 'Updating...' : 'Saving...';
+        $(document).ready(() => {
+            initItemGrid();
+            loadItems();
+        });
+    </script>
 
-			try {
-				let responseId;
-				let savedId;
+    <style>
+        #itemsGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
 
-				try {
-					responseId = await DBHandler.submitRecordData('billingitem', payload, targetId, false);
-					savedId = targetId || responseId;
-				} catch (firstError) {
-					const firstMessage = getErrorMessage(firstError);
-					const retryCandidate = findItemByName(payload.name, targetId);
-
-					if (!targetId && retryCandidate && isDuplicateConflict(firstMessage)) {
-						targetId = retryCandidate.id;
-						state.editingId = retryCandidate.id;
-						responseId = await DBHandler.submitRecordData('billingitem', payload, targetId, false);
-						savedId = targetId || responseId;
-					} else {
-						throw firstError;
-					}
-				}
-
-				const existingIndex = state.items.findIndex(item => String(item.id) === String(savedId));
-				const updatedRecord = {
-					id: savedId,
-					name: payload.name,
-					price: payload.price,
-					isforpackaging: payload.isforpackaging
-				};
-
-				if (existingIndex >= 0) {
-					state.items[existingIndex] = updatedRecord;
-				} else {
-					state.items.push(updatedRecord);
-				}
-
-				state.items.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
-				renderComboboxOptions();
-				applyFilter();
-				resetForm();
-				if (typeof showSuccessMessage === 'function') {
-					showSuccessMessage(wasEditing ? 'Billing item updated successfully.' : 'Billing item saved successfully.');
-				}
-			} catch (error) {
-				console.error('Error saving billing item:', error);
-				const details = getErrorMessage(error);
-				alert(`Failed to save billing item. ${details}`);
-			} finally {
-				saveButton.disabled = false;
-				saveButton.querySelector('.btn-label').textContent = state.editingId ? 'Update Item' : 'Save Item';
-			}
-		}
-
-		async function deleteItem(id) {
-			const item = state.items.find(entry => String(entry.id) === String(id));
-			if (!item) return;
-
-			if (!confirm(`Delete billing item "${item.name}"?`)) {
-				return;
-			}
-
-			try {
-				if (typeof deleteRecordData === 'function') {
-					await deleteRecordData('billingitem', [id], true, true);
-				} else {
-					console.warn('deleteRecordData is not available; removing item from the UI only.');
-				}
-				state.items = state.items.filter(entry => String(entry.id) !== String(id));
-				renderComboboxOptions();
-				applyFilter();
-				if (state.editingId && String(state.editingId) === String(id)) {
-					resetForm();
-				}
-			} catch (error) {
-				console.error('Error deleting billing item:', error);
-				alert('Failed to delete billing item. Please try again.');
-			}
-		}
-
-		tableBody.addEventListener('click', function (event) {
-			const button = event.target.closest('button[data-action]');
-			if (!button) return;
-
-			const action = button.getAttribute('data-action');
-			const id = button.getAttribute('data-id');
-			const item = state.items.find(entry => String(entry.id) === String(id));
-
-			if (action === 'edit' && item) {
-				fillFormForEdit(item);
-				return;
-			}
-
-			if (action === 'delete') {
-				deleteItem(id);
-			}
-		});
-
-		form.addEventListener('submit', saveItem);
-		cancelEditButton.addEventListener('click', resetForm);
-		searchInput.addEventListener('input', applyFilter);
-		itemNameInput.addEventListener('focus', function () {
-			openCombobox(true);
-		});
-		itemNameInput.addEventListener('input', function () {
-			if (state.editingId) {
-				const currentItem = state.items.find(entry => String(entry.id) === String(state.editingId));
-				if (!currentItem || String(currentItem.name || '') !== itemNameInput.value) {
-					state.editingId = null;
-					cancelEditButton.classList.add('d-none');
-					saveButton.querySelector('.btn-label').textContent = 'Save Item';
-				}
-			}
-			openCombobox(false);
-		});
-		itemNameDropdownToggle.addEventListener('click', function () {
-			if (itemNameComboboxMenu.classList.contains('show')) {
-				closeCombobox();
-			} else {
-				itemNameInput.focus();
-				openCombobox(true);
-			}
-		});
-		itemNameComboboxMenu.addEventListener('click', function (event) {
-			const option = event.target.closest('.combobox-option');
-			if (!option) return;
-
-			const id = option.getAttribute('data-id');
-			const item = state.items.find(entry => String(entry.id) === String(id));
-			if (!item) return;
-
-			itemNameInput.value = item.name || '';
-			fillFormForEdit(item);
-		});
-		document.addEventListener('click', function (event) {
-			const insideCombobox = event.target.closest('.combobox-wrap');
-			if (!insideCombobox) {
-				closeCombobox();
-			}
-		});
-
-		document.addEventListener('DOMContentLoaded', function () {
-			resetForm();
-			loadItems();
-		});
-	</script>
 </body>
+
 </html>

@@ -1,913 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Billing Customer Management</title>
 
-	<script>
-		let classMap = [];
-		var apiURL = "https://dbsit2.vsservices.in/";
-	</script>
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Customer Management</title>
 
-	<link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+    </script>
 
-	<script>
-		(function () {
-			if (window.AuthManager) return;
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-			function getCookie(name) {
-				const key = `${name}=`;
-				const decoded = decodeURIComponent(document.cookie || '');
-				const chunks = decoded.split(';');
-				for (let i = 0; i < chunks.length; i++) {
-					const item = chunks[i].trim();
-					if (item.indexOf(key) === 0) {
-						return item.substring(key.length);
-					}
-				}
-				return '';
-			}
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-			function firstNonEmpty(values) {
-				for (let i = 0; i < values.length; i++) {
-					if (values[i]) return values[i];
-				}
-				return '';
-			}
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
 
-			function parseJwtPayload(token) {
-				try {
-					if (!token || token.split('.').length < 2) return {};
-					const base64Url = token.split('.')[1];
-					const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-					return JSON.parse(atob(base64));
-				} catch (e) {
-					return {};
-				}
-			}
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
-			function resolveToken() {
-				const url = new URL(window.location.href);
-				return firstNonEmpty([
-					url.searchParams.get('dataToken') || '',
-					url.searchParams.get('authToken') || '',
-					url.searchParams.get('token') || '',
-					url.searchParams.get('accessToken') || '',
-					localStorage.getItem('dataToken') || '',
-					localStorage.getItem('authToken') || '',
-					localStorage.getItem('AuthToken') || '',
-					localStorage.getItem('token') || '',
-					localStorage.getItem('accessToken') || '',
-					sessionStorage.getItem('dataToken') || '',
-					sessionStorage.getItem('authToken') || '',
-					sessionStorage.getItem('token') || '',
-					sessionStorage.getItem('accessToken') || '',
-					getCookie('dataToken') || getCookie('DataToken') || '',
-					getCookie('authToken') || getCookie('AuthToken') || '',
-					getCookie('token') || getCookie('Token') || '',
-					getCookie('accessToken') || getCookie('AccessToken') || '',
-					window.dataToken || '',
-					window.authToken || window.AuthToken || ''
-				]);
-			}
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
 
-			function resolveUserId() {
-				const url = new URL(window.location.href);
-				const explicitUserId = firstNonEmpty([
-					url.searchParams.get('userid') || '',
-					url.searchParams.get('userId') || '',
-					url.searchParams.get('uid') || '',
-					localStorage.getItem('userid') || '',
-					localStorage.getItem('userId') || '',
-					localStorage.getItem('uid') || '',
-					sessionStorage.getItem('userid') || '',
-					sessionStorage.getItem('userId') || '',
-					sessionStorage.getItem('uid') || '',
-					getCookie('userid') || '',
-					getCookie('userId') || '',
-					getCookie('UserId') || ''
-				]);
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-				function toSafeNumericUserId(value) {
-					const raw = String(value || '').trim();
-					if (!raw) return '0';
-					if (/^\d+$/.test(raw)) {
-						const parsed = parseInt(raw, 10);
-						return Number.isFinite(parsed) && parsed >= 0 ? String(parsed) : '0';
-					}
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
 
-					const onlyDigits = raw.replace(/\D/g, '');
-					if (!onlyDigits) return '0';
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
-					const normalizedDigits = onlyDigits.length > 9 ? onlyDigits.slice(-9) : onlyDigits;
-					const parsed = parseInt(normalizedDigits, 10);
-					return Number.isFinite(parsed) && parsed >= 0 ? String(parsed) : '0';
-				}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
-				if (explicitUserId) return toSafeNumericUserId(explicitUserId);
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-				const payload = parseJwtPayload(resolveToken());
-				const id = firstNonEmpty([
-					payload.userId,
-					payload.userid,
-					payload.uid,
-					payload.nameid,
-					payload.sub,
-					payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
-				]);
-
-				return toSafeNumericUserId(id || '0');
-			}
-
-			window.AuthManager = {
-				getDataToken: resolveToken,
-				getAuthToken: resolveUserId
-			};
-		})();
-	</script>
-
-	<script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
-
-	<style>
-		:root {
-			--bg: #F5F7FA;
-			--primary: #4F6EF7;
-			--primary-soft: #edf2ff;
-			--text-main: #1f325d;
-			--text-muted: #7083a4;
-			--border: #dde6f4;
-			--card-shadow: 0 12px 30px rgba(20, 40, 84, 0.08);
-			--radius: 10px;
-		}
-
-		body {
-			margin: 0;
-			background: var(--bg);
-			color: var(--text-main);
-			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-		}
-
-		.page-shell {
-			min-height: 100vh;
-			padding: 28px 16px;
-		}
-
-		.page-card {
-			max-width: 1220px;
-			margin: 0 auto;
-			background: #fff;
-			border: 1px solid var(--border);
-			border-radius: var(--radius);
-			box-shadow: var(--card-shadow);
-			overflow: hidden;
-		}
-
-		.page-content {
-			padding: 28px;
-		}
-
-		.page-title {
-			margin: 0 0 28px;
-			text-align: center;
-			color: var(--primary);
-			font-size: clamp(1.8rem, 3vw, 2.35rem);
-			font-weight: 800;
-			letter-spacing: -0.02em;
-		}
-
-		.card-block {
-			background: #fff;
-			border: 1px solid var(--border);
-			border-radius: var(--radius);
-			box-shadow: 0 8px 20px rgba(16, 37, 84, 0.05);
-			padding: 20px;
-		}
-
-		.form-label {
-			font-weight: 600;
-		}
-
-		.form-control,
-		.form-select {
-			min-height: 46px;
-			border-radius: var(--radius);
-			border-color: #d5e0f2;
-			box-shadow: none;
-		}
-
-		textarea.form-control {
-			min-height: 106px;
-			resize: vertical;
-		}
-
-		.form-control:focus,
-		.form-select:focus {
-			border-color: rgba(79, 110, 247, 0.55);
-			box-shadow: 0 0 0 0.17rem rgba(79, 110, 247, 0.15);
-		}
-
-		.actions-row {
-			display: flex;
-			justify-content: flex-end;
-			gap: 10px;
-			margin-top: 18px;
-			flex-wrap: wrap;
-		}
-
-		.btn-primary {
-			background: var(--primary);
-			border-color: var(--primary);
-		}
-
-		.btn-primary:hover,
-		.btn-primary:focus {
-			background: #405ee6;
-			border-color: #405ee6;
-		}
-
-		.search-group .form-control {
-			border-right: 0;
-		}
-
-		.search-group .input-group-text {
-			border-left: 0;
-			background: #fff;
-			border-color: #d5e0f2;
-			color: var(--text-muted);
-		}
-
-		.table-wrap {
-			position: relative;
-		}
-
-		.table-responsive {
-			border: 1px solid #e2eaf8;
-			border-radius: var(--radius);
-			overflow: auto;
-		}
-
-		.table {
-			margin-bottom: 0;
-			min-width: 900px;
-		}
-
-		.table thead th {
-			background: #f4f7ff;
-			color: #29457d;
-			font-weight: 700;
-			white-space: nowrap;
-		}
-
-		.table th,
-		.table td {
-			padding: 13px 14px;
-			vertical-align: middle;
-			border-color: #e5ecf8;
-		}
-
-		.table tbody tr {
-			transition: background-color 0.15s ease;
-		}
-
-		.table tbody tr:hover {
-			background: #f8fbff;
-		}
-
-		.sortable {
-			cursor: pointer;
-			-webkit-user-select: none;
-			user-select: none;
-		}
-
-		.sort-indicator {
-			margin-left: 6px;
-			color: #9aa8c2;
-			font-size: 0.8rem;
-		}
-
-		.action-btn {
-			width: 34px;
-			height: 34px;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			border-radius: 50%;
-			border: 1px solid #dce5f3;
-			background: #fff;
-			color: #7083a4;
-			transition: all 0.18s ease;
-		}
-
-		.action-btn:hover {
-			color: var(--primary);
-			border-color: rgba(79, 110, 247, 0.42);
-			box-shadow: 0 8px 16px rgba(79, 110, 247, 0.13);
-		}
-
-		.pagination-wrap {
-			margin-top: 14px;
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			gap: 12px;
-			flex-wrap: wrap;
-		}
-
-		.pagination-info {
-			color: var(--text-muted);
-			font-size: 0.95rem;
-		}
-
-		.loading-overlay {
-			position: absolute;
-			inset: 0;
-			display: none;
-			align-items: center;
-			justify-content: center;
-			background: rgba(255, 255, 255, 0.78);
-			border-radius: var(--radius);
-			z-index: 3;
-		}
-
-		.loading-overlay.active {
-			display: flex;
-		}
-
-		.loading-pill {
-			display: inline-flex;
-			align-items: center;
-			gap: 10px;
-			padding: 12px 16px;
-			border: 1px solid var(--border);
-			border-radius: 999px;
-			background: #fff;
-			box-shadow: 0 10px 24px rgba(22, 40, 88, 0.09);
-			color: var(--text-main);
-			font-weight: 600;
-		}
-
-		.empty-state {
-			text-align: center;
-			padding: 36px 12px;
-			color: var(--text-muted);
-		}
-
-		.muted-note {
-			color: var(--text-muted);
-			font-size: 0.9rem;
-		}
-
-		@media (max-width: 767.98px) {
-			.page-content {
-				padding: 18px;
-			}
-
-			.card-block {
-				padding: 16px;
-			}
-
-			.actions-row {
-				justify-content: stretch;
-			}
-
-			.actions-row .btn {
-				flex: 1 1 auto;
-			}
-		}
-	</style>
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
 </head>
+
 <body>
-	<div class="page-shell">
-		<div class="page-card">
-			<div class="page-content">
-				<h1 class="page-title">Billing Customer Management</h1>
-
-				<div class="card-block mb-3">
-					<form id="customerForm" class="needs-validation" novalidate>
-						<input type="hidden" id="customerId" />
-						<div class="row g-3">
-							<div class="col-lg-6">
-								<label for="customerName" class="form-label">Customer Name <span class="text-danger">*</span></label>
-								<input
-									type="text"
-									id="customerName"
-									class="form-control"
-									placeholder="Enter Name"
-									maxlength="255"
-									required
-								/>
-								<div class="invalid-feedback">Customer Name is required.</div>
-
-								<label for="customerAddress" class="form-label mt-3">Address</label>
-								<textarea
-									id="customerAddress"
-									class="form-control"
-									placeholder="Enter Address"
-									maxlength="1000"
-								></textarea>
-							</div>
-
-							<div class="col-lg-6">
-								<label for="phoneNumber" class="form-label">Phone Number</label>
-								<input
-									type="text"
-									id="phoneNumber"
-									class="form-control"
-									placeholder="Enter Number"
-									inputmode="numeric"
-									maxlength="10"
-									pattern="^[0-9]{0,10}$"
-								/>
-								<div class="invalid-feedback">Phone Number must be numeric and up to 10 digits.</div>
-								<div class="muted-note mt-2">Only numeric values are allowed. Maximum 10 digits.</div>
-							</div>
-						</div>
-
-						<div class="actions-row">
-							<button type="button" id="resetBtn" class="btn btn-outline-secondary px-4">Reset</button>
-							<button type="submit" id="saveBtn" class="btn btn-primary px-4">Save Customer</button>
-						</div>
-					</form>
-				</div>
-
-				<div class="card-block table-wrap">
-					<div id="loadingOverlay" class="loading-overlay active">
-						<div class="loading-pill">
-							<div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
-							<span>Loading customer records...</span>
-						</div>
-					</div>
-
-					<div class="mb-3">
-						<div class="input-group search-group">
-							<input type="text" id="searchInput" class="form-control" placeholder="Search..." />
-							<span class="input-group-text"><i class="fa fa-search"></i></span>
-						</div>
-					</div>
-
-					<div class="table-responsive">
-						<table class="table align-middle">
-							<thead>
-								<tr>
-									<th class="sortable" data-sort="customername">Customer Name <span class="sort-indicator">↕</span></th>
-									<th class="sortable" data-sort="phonenumber">Phone Number <span class="sort-indicator">↕</span></th>
-									<th class="sortable" data-sort="address">Address <span class="sort-indicator">↕</span></th>
-									<th class="sortable" data-sort="createdon">Created Date <span class="sort-indicator">↕</span></th>
-									<th class="text-center">Actions</th>
-								</tr>
-							</thead>
-							<tbody id="tableBody"></tbody>
-						</table>
-					</div>
-
-					<div class="pagination-wrap">
-						<div id="paginationInfo" class="pagination-info"></div>
-						<nav>
-							<ul id="pagination" class="pagination pagination-sm mb-0"></ul>
-						</nav>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<script>
-		const ENTITY_NAME = 'billingcustomer';
-		const ENTITY_COLUMNS = 'id,customername,address,phonenumber,createdon';
-
-		const state = {
-			records: [],
-			filtered: [],
-			paged: [],
-			searchText: '',
-			sortKey: 'createdon',
-			sortDirection: 'desc',
-			currentPage: 1,
-			pageSize: 8
-		};
-
-		const refs = {
-			customerForm: document.getElementById('customerForm'),
-			customerId: document.getElementById('customerId'),
-			customerName: document.getElementById('customerName'),
-			customerAddress: document.getElementById('customerAddress'),
-			phoneNumber: document.getElementById('phoneNumber'),
-			resetBtn: document.getElementById('resetBtn'),
-			saveBtn: document.getElementById('saveBtn'),
-			searchInput: document.getElementById('searchInput'),
-			tableBody: document.getElementById('tableBody'),
-			pagination: document.getElementById('pagination'),
-			paginationInfo: document.getElementById('paginationInfo'),
-			loadingOverlay: document.getElementById('loadingOverlay')
-		};
-
-		function setLoading(flag, message = 'Loading customer records...') {
-			refs.loadingOverlay.classList.toggle('active', flag);
-			const text = refs.loadingOverlay.querySelector('span');
-			if (text) text.textContent = message;
-		}
-
-		function sanitize(value) {
-			return String(value ?? '')
-				.replaceAll('&', '&amp;')
-				.replaceAll('<', '&lt;')
-				.replaceAll('>', '&gt;')
-				.replaceAll('"', '&quot;')
-				.replaceAll("'", '&#39;');
-		}
-
-		function normalizeDateValue(value) {
-			if (!value) return '';
-			const d = new Date(value);
-			if (Number.isNaN(d.getTime())) return '';
-			const y = d.getFullYear();
-			const m = String(d.getMonth() + 1).padStart(2, '0');
-			const day = String(d.getDate()).padStart(2, '0');
-			return `${y}-${m}-${day}`;
-		}
-
-		function formatDate(value) {
-			if (!value) return '-';
-			const d = new Date(value);
-			if (Number.isNaN(d.getTime())) return '-';
-			return d.toLocaleDateString('en-GB');
-		}
-
-		function mapRecord(item) {
-			return {
-				id: item.id || '',
-				customername: item.customername || '',
-				address: item.address || '',
-				phonenumber: item.phonenumber || '',
-				createdon: item.createdon || ''
-			};
-		}
-
-		async function loadCustomers() {
-			setLoading(true);
-			try {
-				if (window.DBHandler && typeof DBHandler.fetchEntityRecord === 'function') {
-					const result = await DBHandler.fetchEntityRecord(ENTITY_NAME, ENTITY_COLUMNS, '', false);
-					state.records = (result || []).map(mapRecord);
-				} else {
-					state.records = [];
-				}
-				applyFilters();
-			} catch (error) {
-				console.error('Error fetching customers:', error);
-				state.records = [];
-				applyFilters();
-			} finally {
-				setLoading(false);
-			}
-		}
-
-		function validatePhone(value) {
-			return /^[0-9]{0,10}$/.test(value || '');
-		}
-
-		function getErrorMessage(error) {
-			if (!error) return 'Unknown error from server.';
-
-			const candidates = [
-				error.message,
-				error.error,
-				error.errorMessage,
-				error.responseText,
-				error.statusText,
-				error.responseJSON && error.responseJSON.message,
-				error.responseJSON && error.responseJSON.error,
-				error.response && error.response.message,
-				error.response && error.response.error,
-				error.data && error.data.message,
-				error.data && error.data.error
-			];
-
-			for (let i = 0; i < candidates.length; i++) {
-				if (candidates[i]) return String(candidates[i]);
-			}
-
-			try {
-				return JSON.stringify(error);
-			} catch (e) {
-				return 'Unknown error from server.';
-			}
-		}
-
-		function enforcePhoneInput(event) {
-			const cleaned = String(event.target.value || '').replace(/[^0-9]/g, '').slice(0, 10);
-			event.target.value = cleaned;
-			if (cleaned && !validatePhone(cleaned)) {
-				refs.phoneNumber.classList.add('is-invalid');
-			} else {
-				refs.phoneNumber.classList.remove('is-invalid');
-			}
-		}
-
-		function validateForm() {
-			const htmlValid = refs.customerForm.checkValidity();
-			const phone = refs.phoneNumber.value.trim();
-			const phoneValid = validatePhone(phone);
-
-			refs.phoneNumber.classList.toggle('is-invalid', !phoneValid);
-			refs.customerForm.classList.add('was-validated');
-
-			return htmlValid && phoneValid;
-		}
-
-		async function saveCustomer(event) {
-			event.preventDefault();
-			if (!validateForm()) return;
-
-			const formData = {
-				customername: refs.customerName.value.trim(),
-				address: refs.customerAddress.value.trim(),
-				phonenumber: refs.phoneNumber.value.trim()
-			};
-
-			const recordId = refs.customerId.value.trim() || '';
-
-			try {
-				refs.saveBtn.disabled = true;
-				refs.saveBtn.textContent = 'Saving...';
-
-				if (window.DBHandler && typeof DBHandler.submitRecordData === 'function') {
-					await DBHandler.submitRecordData(ENTITY_NAME, formData, recordId, false);
-					resetForm();
-					await loadCustomers();
-					return;
-				}
-
-				alert('Save function is not available in this runtime.');
-			} catch (error) {
-				console.error('Error saving customer:', error);
-				alert(`Failed to save customer. ${getErrorMessage(error)}`);
-			} finally {
-				refs.saveBtn.disabled = false;
-				refs.saveBtn.textContent = 'Save Customer';
-			}
-		}
-
-		function resetForm() {
-			refs.customerId.value = '';
-			refs.customerName.value = '';
-			refs.customerAddress.value = '';
-			refs.phoneNumber.value = '';
-			refs.customerForm.classList.remove('was-validated');
-			refs.phoneNumber.classList.remove('is-invalid');
-			refs.saveBtn.textContent = 'Save Customer';
-		}
-
-		function applyFilters() {
-			const term = state.searchText.trim().toLowerCase();
-			state.filtered = state.records.filter(record => {
-				if (!term) return true;
-				const text = [
-					record.customername,
-					record.phonenumber,
-					record.address,
-					formatDate(record.createdon)
-				].join(' ').toLowerCase();
-				return text.includes(term);
-			});
-
-			applySort();
-		}
-
-		function compareRecords(a, b, key) {
-			if (key === 'createdon') {
-				const da = normalizeDateValue(a.createdon);
-				const db = normalizeDateValue(b.createdon);
-				return da.localeCompare(db);
-			}
-
-			const x = String(a[key] ?? '').toLowerCase();
-			const y = String(b[key] ?? '').toLowerCase();
-			if (x < y) return -1;
-			if (x > y) return 1;
-			return 0;
-		}
-
-		function applySort() {
-			state.filtered.sort((a, b) => {
-				const value = compareRecords(a, b, state.sortKey);
-				return state.sortDirection === 'asc' ? value : -value;
-			});
-
-			state.currentPage = 1;
-			paginate();
-			renderSortState();
-		}
-
-		function paginate() {
-			const total = state.filtered.length;
-			const totalPages = Math.max(1, Math.ceil(total / state.pageSize));
-			state.currentPage = Math.min(state.currentPage, totalPages);
-
-			const startIndex = (state.currentPage - 1) * state.pageSize;
-			const endIndex = startIndex + state.pageSize;
-			state.paged = state.filtered.slice(startIndex, endIndex);
-
-			renderTable();
-			renderPagination(total, totalPages, startIndex, endIndex);
-		}
-
-		function renderTable() {
-			if (!state.paged.length) {
-				refs.tableBody.innerHTML = `
-					<tr>
-						<td colspan="5" class="empty-state">
-							<div class="fw-semibold mb-1">No customers found</div>
-							<div class="small">Try a different search term or add a new customer.</div>
-						</td>
-					</tr>
-				`;
-				return;
-			}
-
-			refs.tableBody.innerHTML = state.paged.map(record => `
-				<tr>
-					<td>${sanitize(record.customername || '-')}</td>
-					<td>${sanitize(record.phonenumber || '-')}</td>
-					<td>${sanitize(record.address || '-')}</td>
-					<td>${sanitize(formatDate(record.createdon))}</td>
-					<td class="text-center">
-						<div class="d-inline-flex gap-2">
-							<button type="button" class="action-btn" data-action="view" data-id="${sanitize(record.id)}" title="View">
-								<i class="fa fa-eye"></i>
-							</button>
-							<button type="button" class="action-btn" data-action="edit" data-id="${sanitize(record.id)}" title="Edit">
-								<i class="fa fa-pen"></i>
-							</button>
-							<button type="button" class="action-btn" data-action="delete" data-id="${sanitize(record.id)}" title="Delete">
-								<i class="fa fa-trash"></i>
-							</button>
-						</div>
-					</td>
-				</tr>
-			`).join('');
-		}
-
-		function renderPagination(total, totalPages, startIndex, endIndex) {
-			const shownStart = total === 0 ? 0 : startIndex + 1;
-			const shownEnd = Math.min(endIndex, total);
-			refs.paginationInfo.textContent = `Showing ${shownStart}-${shownEnd} of ${total}`;
-
-			let html = `
-				<li class="page-item ${state.currentPage === 1 ? 'disabled' : ''}">
-					<button class="page-link" data-page="prev">Previous</button>
-				</li>
-			`;
-
-			for (let i = 1; i <= totalPages; i++) {
-				html += `
-					<li class="page-item ${i === state.currentPage ? 'active' : ''}">
-						<button class="page-link" data-page="${i}">${i}</button>
-					</li>
-				`;
-			}
-
-			html += `
-				<li class="page-item ${state.currentPage === totalPages ? 'disabled' : ''}">
-					<button class="page-link" data-page="next">Next</button>
-				</li>
-			`;
-
-			refs.pagination.innerHTML = html;
-		}
-
-		function renderSortState() {
-			document.querySelectorAll('th.sortable').forEach(th => {
-				const key = th.getAttribute('data-sort');
-				const indicator = th.querySelector('.sort-indicator');
-				if (!indicator) return;
-				if (key !== state.sortKey) {
-					indicator.textContent = '↕';
-				} else {
-					indicator.textContent = state.sortDirection === 'asc' ? '↑' : '↓';
-				}
-			});
-		}
-
-		function onSortClick(event) {
-			const th = event.target.closest('th.sortable');
-			if (!th) return;
-			const key = th.getAttribute('data-sort');
-
-			if (state.sortKey === key) {
-				state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
-			} else {
-				state.sortKey = key;
-				state.sortDirection = 'asc';
-			}
-
-			paginate();
-			renderSortState();
-		}
-
-		function onPaginationClick(event) {
-			const button = event.target.closest('button[data-page]');
-			if (!button) return;
-
-			const token = button.getAttribute('data-page');
-			const totalPages = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
-
-			if (token === 'prev' && state.currentPage > 1) {
-				state.currentPage -= 1;
-			} else if (token === 'next' && state.currentPage < totalPages) {
-				state.currentPage += 1;
-			} else if (token !== 'prev' && token !== 'next') {
-				state.currentPage = parseInt(token, 10) || 1;
-			}
-
-			paginate();
-		}
-
-		function populateForEdit(recordId) {
-			const record = state.records.find(x => String(x.id) === String(recordId));
-			if (!record) return;
-
-			refs.customerId.value = record.id || '';
-			refs.customerName.value = record.customername || '';
-			refs.customerAddress.value = record.address || '';
-			refs.phoneNumber.value = record.phonenumber || '';
-			refs.customerForm.classList.remove('was-validated');
-			refs.phoneNumber.classList.remove('is-invalid');
-			refs.saveBtn.textContent = 'Update Customer';
-			refs.customerName.focus();
-		}
-
-		function viewRecord(recordId) {
-			const record = state.records.find(x => String(x.id) === String(recordId));
-			if (!record) return;
-			const message = [
-				`Customer Name: ${record.customername || '-'}`,
-				`Phone Number: ${record.phonenumber || '-'}`,
-				`Address: ${record.address || '-'}`,
-				`Created Date: ${formatDate(record.createdon)}`
-			].join('\n');
-			alert(message);
-		}
-
-		async function deleteRecord(recordId) {
-			if (!confirm('Delete this customer?')) return;
-
-			try {
-				if (typeof deleteRecordData === 'function') {
-					await deleteRecordData(ENTITY_NAME, [recordId], true, true);
-					await loadCustomers();
-					return;
-				}
-
-				alert('Delete function is not available in this runtime.');
-			} catch (error) {
-				console.error('Error deleting customer:', error);
-				alert('Failed to delete customer.');
-			}
-		}
-
-		function onTableAction(event) {
-			const button = event.target.closest('button[data-action]');
-			if (!button) return;
-
-			const action = button.getAttribute('data-action');
-			const id = button.getAttribute('data-id');
-
-			if (action === 'view') {
-				viewRecord(id);
-			} else if (action === 'edit') {
-				populateForEdit(id);
-			} else if (action === 'delete') {
-				deleteRecord(id);
-			}
-		}
-
-		function wireEvents() {
-			refs.phoneNumber.addEventListener('input', enforcePhoneInput);
-			refs.customerForm.addEventListener('submit', saveCustomer);
-			refs.resetBtn.addEventListener('click', resetForm);
-
-			refs.searchInput.addEventListener('input', function () {
-				state.searchText = refs.searchInput.value;
-				applyFilters();
-			});
-
-			document.querySelector('thead').addEventListener('click', onSortClick);
-			refs.pagination.addEventListener('click', onPaginationClick);
-			refs.tableBody.addEventListener('click', onTableAction);
-		}
-
-		document.addEventListener('DOMContentLoaded', function () {
-			wireEvents();
-			renderSortState();
-			loadCustomers();
-		});
-	</script>
+    <div class="container2">
+        <div id="customersGrid"></div>
+    </div>
+
+    <div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Customer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="customerForm" novalidate>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="customername" class="form-label">Customer Name</label>
+                                <input type="text" id="customername" class="form-control" maxlength="255" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phonenumber" class="form-label">Phone Number</label>
+                                <input type="text" id="phonenumber" class="form-control" maxlength="10" inputmode="numeric" />
+                            </div>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label for="address" class="form-label">Address</label>
+                                <textarea id="address" class="form-control" rows="4" maxlength="1000"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="button" onclick="saveCustomer()">Save</button>
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let customerGrid;
+        let editingCustomerId = null;
+
+        function getCustomerModal() {
+            const modalEl = document.getElementById('customerModal');
+            return bootstrap.Modal.getOrCreateInstance(modalEl);
+        }
+
+        function resetCustomerForm() {
+            document.getElementById('customerForm').reset();
+            document.getElementById('customername').classList.remove('is-invalid');
+            document.getElementById('phonenumber').classList.remove('is-invalid');
+        }
+
+        function bindPhoneInput() {
+            const input = document.getElementById('phonenumber');
+            input.addEventListener('input', function () {
+                this.value = String(this.value || '').replace(/[^0-9]/g, '').slice(0, 10);
+            });
+        }
+
+        function initCustomerGrid() {
+            ej.grids.Grid.Inject(
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Filter,
+                ej.grids.Toolbar,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
+
+            customerGrid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                pageSettings: { pageSize: 12 },
+                toolbar: [
+                    'Search',
+                    { text: 'New Customer', prefixIcon: 'e-icons e-plus', id: 'newCustomer' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'editCustomer' },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'deleteCustomer' },
+                    'ExcelExport',
+                    'PdfExport'
+                ],
+                columns: [
+                    { type: 'checkbox', width: 50 },
+                    { field: 'customername', headerText: 'Customer Name', width: 220 },
+                    { field: 'phonenumber', headerText: 'Phone Number', width: 160 },
+                    { field: 'address', headerText: 'Address', width: 280 },
+                    { field: 'createdon', headerText: 'Created On', type: 'date', format: 'dd/MMM/yyyy hh:mm', width: 180 }
+                ],
+                toolbarClick: async function (args) {
+                    if (args.item.id === 'newCustomer') {
+                        editingCustomerId = null;
+                        resetCustomerForm();
+                        document.querySelector('#customerModal .modal-title').innerText = 'Add Customer';
+                        getCustomerModal().show();
+                    }
+
+                    if (args.item.id === 'editCustomer') {
+                        const selected = customerGrid.getSelectedRecords();
+                        if (selected.length !== 1) {
+                            alert('Select one record');
+                            return;
+                        }
+
+                        editingCustomerId = selected[0].id;
+                        document.getElementById('customername').value = selected[0].customername || '';
+                        document.getElementById('phonenumber').value = selected[0].phonenumber || '';
+                        document.getElementById('address').value = selected[0].address || '';
+                        document.querySelector('#customerModal .modal-title').innerText = 'Edit Customer';
+                        getCustomerModal().show();
+                    }
+
+                    if (args.item.id === 'deleteCustomer') {
+                        const selected = customerGrid.getSelectedRecords();
+                        if (!selected.length) {
+                            alert('Select record(s)');
+                            return;
+                        }
+
+                        if (!confirm('Delete selected customer record(s)?')) return;
+
+                        const ids = selected.map(function (r) { return r.id; });
+                        await deleteRecordData('billingcustomer', ids, true, true);
+                        await loadCustomers();
+                    }
+
+                    if (args.item.id === 'customersGrid_excelexport') {
+                        customerGrid.excelExport();
+                    }
+
+                    if (args.item.id === 'customersGrid_pdfexport') {
+                        customerGrid.pdfExport();
+                    }
+                }
+            });
+
+            customerGrid.appendTo('#customersGrid');
+        }
+
+        async function loadCustomers() {
+            try {
+                const data = await DBHandler.fetchEntityRecords(
+                    'billingcustomer',
+                    '*',
+                    'createdon',
+                    'desc'
+                );
+
+                customerGrid.dataSource = data || [];
+            } catch (error) {
+                console.error('Error loading billing customers:', error);
+                customerGrid.dataSource = [];
+                alert('Failed to load billing customers.');
+            }
+        }
+
+        function validateCustomerForm() {
+            const nameEl = document.getElementById('customername');
+            const phoneEl = document.getElementById('phonenumber');
+
+            const name = String(nameEl.value || '').trim();
+            const phone = String(phoneEl.value || '').trim();
+
+            const nameValid = !!name;
+            const phoneValid = !phone || /^[0-9]{1,10}$/.test(phone);
+
+            nameEl.classList.toggle('is-invalid', !nameValid);
+            phoneEl.classList.toggle('is-invalid', !phoneValid);
+
+            if (!nameValid) {
+                alert('Customer Name is required');
+                return false;
+            }
+
+            if (!phoneValid) {
+                alert('Phone Number must be numeric and up to 10 digits');
+                return false;
+            }
+
+            return true;
+        }
+
+        async function saveCustomer() {
+            if (!validateCustomerForm()) return;
+
+            const payload = {
+                customername: document.getElementById('customername').value.trim(),
+                phonenumber: document.getElementById('phonenumber').value.trim(),
+                address: document.getElementById('address').value.trim()
+            };
+
+            try {
+                await DBHandler.submitRecordData('billingcustomer', payload, editingCustomerId, false);
+                getCustomerModal().hide();
+                await loadCustomers();
+            } catch (error) {
+                console.error('Error saving billing customer:', error);
+                alert('Failed to save billing customer.');
+            }
+        }
+
+        $(document).ready(function () {
+            bindPhoneInput();
+            initCustomerGrid();
+            loadCustomers();
+        });
+    </script>
+
+    <style>
+        #customersGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
+
 </body>
+
 </html>
