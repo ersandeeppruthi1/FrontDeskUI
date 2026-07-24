@@ -1,722 +1,526 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Bill Invoice Detail Management</title>
 
-	<script>
-		let classMap = [];
-		var apiURL = "https://dbsit2.vsservices.in/";
-	</script>
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Invoice Detail Management</title>
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
 
-	<link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
 
-	<script>
-		(function () {
-			if (window.AuthManager) return;
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-			function getCookie(name) {
-				const key = `${name}=`;
-				const decoded = decodeURIComponent(document.cookie || '');
-				const chunks = decoded.split(';');
-				for (let i = 0; i < chunks.length; i++) {
-					const item = chunks[i].trim();
-					if (item.indexOf(key) === 0) return item.substring(key.length);
-				}
-				return '';
-			}
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-			function firstNonEmpty(values) {
-				for (let i = 0; i < values.length; i++) {
-					if (values[i]) return values[i];
-				}
-				return '';
-			}
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
 
-			function parseJwtPayload(token) {
-				try {
-					if (!token || token.split('.').length < 2) return {};
-					const base64Url = token.split('.')[1];
-					const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-					return JSON.parse(atob(base64));
-				} catch (e) {
-					return {};
-				}
-			}
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
-			function resolveToken() {
-				const url = new URL(window.location.href);
-				return firstNonEmpty([
-					url.searchParams.get('dataToken') || '',
-					url.searchParams.get('authToken') || '',
-					url.searchParams.get('token') || '',
-					url.searchParams.get('accessToken') || '',
-					localStorage.getItem('dataToken') || '',
-					localStorage.getItem('authToken') || '',
-					localStorage.getItem('AuthToken') || '',
-					localStorage.getItem('token') || '',
-					localStorage.getItem('accessToken') || '',
-					sessionStorage.getItem('dataToken') || '',
-					sessionStorage.getItem('authToken') || '',
-					sessionStorage.getItem('token') || '',
-					sessionStorage.getItem('accessToken') || '',
-					getCookie('dataToken') || getCookie('DataToken') || '',
-					getCookie('authToken') || getCookie('AuthToken') || '',
-					getCookie('token') || getCookie('Token') || '',
-					getCookie('accessToken') || getCookie('AccessToken') || '',
-					window.dataToken || '',
-					window.authToken || window.AuthToken || ''
-				]);
-			}
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
 
-			function resolveUserId() {
-				const url = new URL(window.location.href);
-				const explicitUserId = firstNonEmpty([
-					url.searchParams.get('userid') || '',
-					url.searchParams.get('userId') || '',
-					url.searchParams.get('uid') || '',
-					localStorage.getItem('userid') || '',
-					localStorage.getItem('userId') || '',
-					localStorage.getItem('uid') || '',
-					sessionStorage.getItem('userid') || '',
-					sessionStorage.getItem('userId') || '',
-					sessionStorage.getItem('uid') || '',
-					getCookie('userid') || '',
-					getCookie('userId') || '',
-					getCookie('UserId') || ''
-				]);
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-				if (explicitUserId) return String(explicitUserId).slice(0, 36);
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
 
-				const payload = parseJwtPayload(resolveToken());
-				const id = firstNonEmpty([
-					payload.userId,
-					payload.userid,
-					payload.uid,
-					payload.nameid,
-					payload.sub,
-					payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
-				]);
-				return String(id || '0').slice(0, 36);
-			}
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
 
-			window.AuthManager = {
-				getDataToken: resolveToken,
-				getAuthToken: resolveUserId
-			};
-		})();
-	</script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
-	<script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
-	<style>
-		:root {
-			--bg: #f5f7fa;
-			--primary: #4f6ef7;
-			--text-main: #1f325d;
-			--text-muted: #7083a4;
-			--border: #dde6f4;
-			--radius: 10px;
-			--card-shadow: 0 12px 30px rgba(20, 40, 84, 0.08);
-		}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-		body {
-			margin: 0;
-			background: var(--bg);
-			color: var(--text-main);
-			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-		}
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
 
-		.page-shell { min-height: 100vh; padding: 28px 16px; }
-		.page-card {
-			max-width: 1220px;
-			margin: 0 auto;
-			border: 1px solid var(--border);
-			border-radius: var(--radius);
-			background: #fff;
-			box-shadow: var(--card-shadow);
-			overflow: hidden;
-		}
-
-		.page-content { padding: 26px; }
-		.page-title {
-			margin: 0 0 24px;
-			text-align: center;
-			color: var(--primary);
-			font-size: clamp(1.8rem, 3vw, 2.3rem);
-			font-weight: 800;
-		}
-
-		.card-block {
-			border: 1px solid var(--border);
-			border-radius: var(--radius);
-			background: #fff;
-			box-shadow: 0 8px 20px rgba(16, 37, 84, 0.05);
-			padding: 20px;
-		}
-
-		.section-title { margin-bottom: 16px; font-weight: 700; }
-		.form-label { font-weight: 600; }
-
-		.form-control,
-		.form-select {
-			min-height: 46px;
-			border-radius: var(--radius);
-			border-color: #d5e0f2;
-			box-shadow: none;
-		}
-
-		.form-control:focus,
-		.form-select:focus {
-			border-color: rgba(79, 110, 247, 0.55);
-			box-shadow: 0 0 0 0.17rem rgba(79, 110, 247, 0.15);
-		}
-
-		.table-wrap { position: relative; }
-		.table-responsive {
-			border: 1px solid #e2eaf8;
-			border-radius: var(--radius);
-			overflow: auto;
-		}
-
-		.table { margin-bottom: 0; min-width: 960px; }
-		.table thead th {
-			background: #f4f7ff;
-			color: #29457d;
-			font-weight: 700;
-			white-space: nowrap;
-		}
-		.table th,
-		.table td { padding: 12px 14px; border-color: #e5ecf8; vertical-align: middle; }
-
-		.toolbar-row {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			gap: 12px;
-			flex-wrap: wrap;
-			margin-bottom: 14px;
-		}
-
-		.search-wrap { margin-left: auto; width: min(100%, 340px); position: relative; }
-		.search-wrap .form-control { padding-right: 40px; }
-		.search-wrap .fa-search {
-			position: absolute;
-			right: 14px;
-			top: 50%;
-			transform: translateY(-50%);
-			color: var(--text-muted);
-			pointer-events: none;
-		}
-
-		.btn-primary { background: var(--primary); border-color: var(--primary); }
-		.btn-primary:hover,
-		.btn-primary:focus { background: #405ee6; border-color: #405ee6; }
-
-		.action-btn {
-			width: 34px;
-			height: 34px;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			border-radius: 50%;
-			border: 1px solid #dce5f3;
-			background: #fff;
-			color: #7083a4;
-		}
-
-		.action-btn:hover { color: var(--primary); border-color: rgba(79, 110, 247, 0.42); }
-
-		.loading-overlay {
-			position: absolute;
-			inset: 0;
-			display: none;
-			align-items: center;
-			justify-content: center;
-			background: rgba(255, 255, 255, 0.82);
-			border-radius: var(--radius);
-			z-index: 2;
-		}
-
-		.loading-overlay.active { display: flex; }
-
-		.spinner-card {
-			display: inline-flex;
-			align-items: center;
-			gap: 10px;
-			padding: 12px 16px;
-			border: 1px solid var(--border);
-			border-radius: 999px;
-			background: #fff;
-			box-shadow: 0 10px 24px rgba(16, 37, 84, 0.08);
-			font-weight: 600;
-		}
-
-		.empty-state { text-align: center; padding: 28px 12px; color: var(--text-muted); }
-
-		@media (max-width: 767.98px) {
-			.page-content { padding: 18px; }
-			.card-block { padding: 16px; }
-		}
-	</style>
 </head>
+
 <body>
-	<div class="page-shell">
-		<div class="page-card">
-			<div class="page-content">
-				<h1 class="page-title">Bill Invoice Detail Management</h1>
+    <div class="container2">
+        <div class="toolbar toolbar-spacing">
+            <div class="row g-3 align-items-end">
+                <div class="col-sm-6 col-md-3">
+                    <label for="startDate">From date</label>
+                    <input id="startDate" class="form-control" datatype="date" defaultValue="currentDate"
+                        onchange="loadDetails()">
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <label for="endDate">To date</label>
+                    <input id="endDate" class="form-control" datatype="date" defaultValue="currentDate"
+                        onchange="loadDetails()">
+                </div>
+            </div>
+        </div>
+        <div id="invoiceDetailGrid"></div>
+    </div>
 
-				<div class="card-block mb-3">
-					<div class="section-title">Detail Form</div>
-					<form id="detailForm" class="needs-validation" novalidate>
-						<input type="hidden" id="detailId" />
-						<div class="row g-3">
-							<div class="col-md-4">
-								<label for="detailName" class="form-label">Name</label>
-								<input type="text" id="detailName" class="form-control" placeholder="Enter detail name" maxlength="255" required />
-								<div class="invalid-feedback">Name is required.</div>
-							</div>
-							<div class="col-md-4">
-								<label for="billInvoiceSelect" class="form-label">Bill Invoice</label>
-								<select id="billInvoiceSelect" class="form-select" required></select>
-								<div class="invalid-feedback">Bill invoice is required.</div>
-							</div>
-							<div class="col-md-4">
-								<label for="customerId" class="form-label">Customer Id</label>
-								<input type="text" id="customerId" class="form-control" readonly required />
-								<div class="invalid-feedback">Customer Id is required.</div>
-							</div>
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
 
-							<div class="col-md-4">
-								<label for="itemSelect" class="form-label">Item</label>
-								<select id="itemSelect" class="form-select" required></select>
-								<div class="invalid-feedback">Item is required.</div>
-							</div>
-							<div class="col-md-4">
-								<label for="itemName" class="form-label">Item Name</label>
-								<input type="text" id="itemName" class="form-control" readonly required />
-								<div class="invalid-feedback">Item Name is required.</div>
-							</div>
-							<div class="col-md-4">
-								<label for="price" class="form-label">Price</label>
-								<input type="number" id="price" class="form-control" min="0" step="0.01" required />
-								<div class="invalid-feedback">Price is required.</div>
-							</div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Invoice Detail</h5>
+                    <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+                </div>
 
-							<div class="col-md-4">
-								<label for="quantity" class="form-label">Quantity</label>
-								<input type="number" id="quantity" class="form-control" min="0.01" step="0.01" value="1" required />
-								<div class="invalid-feedback">Quantity is required.</div>
-							</div>
-							<div class="col-md-4">
-								<label for="totalPrice" class="form-label">Total Price</label>
-								<input type="number" id="totalPrice" class="form-control" readonly required />
-								<div class="invalid-feedback">Total price is required.</div>
-							</div>
-						</div>
+                <div class="modal-body">
+                    <form id="detailForm">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="name">Name<span class="text-danger">*</span></label>
+                                <input id="name" class="form-control" maxlength="255" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="billinvoiceid">Bill Invoice<span class="text-danger">*</span></label>
+                                <select id="billinvoiceid" class="form-control" onchange="syncInvoiceMeta()" required>
+                                    <option value="">Select Invoice</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="customerid">Customer Id</label>
+                                <input id="customerid" class="form-control" readonly />
+                            </div>
+                        </div>
 
-						<div class="d-flex justify-content-end flex-wrap gap-2 mt-3">
-							<button type="button" id="resetBtn" class="btn btn-outline-secondary">Reset</button>
-							<button type="submit" id="saveBtn" class="btn btn-primary"><span class="btn-label">Save Detail</span></button>
-						</div>
-					</form>
-				</div>
+                        <div class="row mt-3">
+                            <div class="col-md-4">
+                                <label for="itemid">Item<span class="text-danger">*</span></label>
+                                <select id="itemid" class="form-control" onchange="syncItemMeta()" required>
+                                    <option value="">Select Item</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="itemname">Item Name</label>
+                                <input id="itemname" class="form-control" readonly />
+                            </div>
+                            <div class="col-md-2">
+                                <label for="price">Price<span class="text-danger">*</span></label>
+                                <input id="price" type="number" min="0" step="0.01" class="form-control" onchange="recalculateTotal()" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label for="quantity">Quantity<span class="text-danger">*</span></label>
+                                <input id="quantity" type="number" min="0.01" step="0.01" class="form-control" value="1" onchange="recalculateTotal()" required />
+                            </div>
+                        </div>
 
-				<div class="card-block table-wrap">
-					<div id="loadingOverlay" class="loading-overlay active">
-						<div class="spinner-card">
-							<div class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></div>
-							<span>Loading bill invoice details...</span>
-						</div>
-					</div>
+                        <div class="row mt-3">
+                            <div class="col-md-3">
+                                <label for="totalprice">Total Price</label>
+                                <input id="totalprice" type="number" class="form-control" readonly />
+                            </div>
+                        </div>
+                    </form>
+                </div>
 
-					<div class="toolbar-row">
-						<div class="section-title mb-0">Detail List</div>
-						<div class="search-wrap">
-							<input type="text" id="searchInput" class="form-control" placeholder="Search by invoice number or name" />
-							<i class="fa fa-search"></i>
-						</div>
-					</div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="saveDetail(event)">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
 
-					<div class="table-responsive">
-						<table class="table align-middle">
-							<thead>
-								<tr>
-									<th>Name</th>
-									<th>Invoice</th>
-									<th>Customer Id</th>
-									<th>Item</th>
-									<th>Price</th>
-									<th>Quantity</th>
-									<th>Total Price</th>
-									<th class="text-center">Actions</th>
-								</tr>
-							</thead>
-							<tbody id="detailTableBody"></tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+            </div>
+        </div>
+    </div>
 
-	<script>
-		const state = {
-			invoices: [],
-			items: [],
-			details: [],
-			filteredDetails: [],
-			editingId: null
-		};
+    <script>
 
-		const refs = {
-			detailForm: document.getElementById('detailForm'),
-			detailId: document.getElementById('detailId'),
-			detailName: document.getElementById('detailName'),
-			billInvoiceSelect: document.getElementById('billInvoiceSelect'),
-			customerId: document.getElementById('customerId'),
-			itemSelect: document.getElementById('itemSelect'),
-			itemName: document.getElementById('itemName'),
-			price: document.getElementById('price'),
-			quantity: document.getElementById('quantity'),
-			totalPrice: document.getElementById('totalPrice'),
-			saveBtn: document.getElementById('saveBtn'),
-			resetBtn: document.getElementById('resetBtn'),
-			searchInput: document.getElementById('searchInput'),
-			detailTableBody: document.getElementById('detailTableBody'),
-			loadingOverlay: document.getElementById('loadingOverlay')
-		};
+        let grid;
+        let editingId = null;
+        let invoiceMap = {};
+        let itemMap = {};
 
-		function setLoading(flag, message = 'Loading bill invoice details...') {
-			refs.loadingOverlay.classList.toggle('active', flag);
-			const node = refs.loadingOverlay.querySelector('span');
-			if (node) node.textContent = message;
-		}
+        const columns = [
+            { type: 'checkbox', width: 50 },
+            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
+            { field: 'name', headerText: 'Name', width: 160 },
+            { field: 'invoicelabel', headerText: 'Invoice', width: 220 },
+            { field: 'customerid', headerText: 'Customer Id', width: 140 },
+            { field: 'itemname', headerText: 'Item', width: 180 },
+            { field: 'price', headerText: 'Price', width: 120, textAlign: 'Right', format: 'N2' },
+            { field: 'quantity', headerText: 'Qty', width: 90, textAlign: 'Right', format: 'N2' },
+            { field: 'totalprice', headerText: 'Total', width: 120, textAlign: 'Right', format: 'N2' },
+            { field: 'createdon', headerText: 'Created Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 130 },
+            { field: 'id', visible: false, allowPdfExport: false },
+            { field: 'billinvoiceid', visible: false, allowPdfExport: false },
+            { field: 'itemid', visible: false, allowPdfExport: false }
+        ];
 
-		function escapeHtml(value) {
-			return String(value ?? '')
-				.replaceAll('&', '&amp;')
-				.replaceAll('<', '&lt;')
-				.replaceAll('>', '&gt;')
-				.replaceAll('"', '&quot;')
-				.replaceAll("'", '&#39;');
-		}
+        function toNumber(value) {
+            const n = parseFloat(value);
+            return Number.isFinite(n) ? n : 0;
+        }
 
-		function toNumber(value) {
-			const n = parseFloat(value);
-			return Number.isFinite(n) ? n : 0;
-		}
+        function normalizeDate(val) {
+            if (!val) return null;
+            const d = val instanceof Date ? val : new Date(val);
+            return isNaN(d) ? null : d;
+        }
 
-		function formatMoney(value) {
-			return toNumber(value).toFixed(2);
-		}
+        function formatDate(value) {
+            const d = value instanceof Date ? value : new Date(value);
+            if (isNaN(d)) return '';
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = d.getFullYear();
+            return `${dd}-${mm}-${yyyy}`;
+        }
 
-		function calculateTotal() {
-			const total = toNumber(refs.price.value) * toNumber(refs.quantity.value);
-			refs.totalPrice.value = formatMoney(total);
-		}
+        function getSafeDatePickerValue(id) {
+            if (typeof getDatePickerValue === 'function') {
+                return getDatePickerValue(id);
+            }
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        }
 
-		async function fetchRecordsWithFallback(entity, columnsList) {
-			let lastError = null;
-			for (let i = 0; i < columnsList.length; i++) {
-				try {
-					return await DBHandler.fetchEntityRecord(entity, columnsList[i], '', false) || [];
-				} catch (error) {
-					lastError = error;
-				}
-			}
+        function recalculateTotal() {
+            const p = toNumber(document.getElementById('price').value);
+            const q = toNumber(document.getElementById('quantity').value);
+            document.getElementById('totalprice').value = (p * q).toFixed(2);
+        }
 
-			if (lastError) throw lastError;
-			return [];
-		}
+        function renderInvoiceOptions(records) {
+            const select = document.getElementById('billinvoiceid');
+            invoiceMap = {};
+            let html = '<option value="">Select Invoice</option>';
 
-		function renderInvoiceOptions() {
-			const options = ['<option value="">Select Bill Invoice</option>']
-				.concat(state.invoices.map(inv => {
-					const label = inv.invoicenumberwithcustomername || inv.invoicenumber || inv.id;
-					return `<option value="${escapeHtml(inv.id)}">${escapeHtml(label)}</option>`;
-				}));
-			refs.billInvoiceSelect.innerHTML = options.join('');
-		}
+            (records || []).forEach(function (x) {
+                const id = String(x.id || '');
+                if (!id) return;
+                const label = x.invoicenumberwithcustomername || x.invoicenumber || id;
+                invoiceMap[id] = {
+                    customerid: x.customerid || '',
+                    label: label
+                };
+                html += `<option value="${id}">${label}</option>`;
+            });
 
-		function renderItemOptions() {
-			const options = ['<option value="">Select Item</option>']
-				.concat(state.items.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.name || '')}</option>`));
-			refs.itemSelect.innerHTML = options.join('');
-		}
+            select.innerHTML = html;
+        }
 
-		function onInvoiceChange() {
-			const invoice = state.invoices.find(x => String(x.id) === String(refs.billInvoiceSelect.value));
-			refs.customerId.value = invoice ? String(invoice.customerid || '') : '';
-			if (!refs.detailName.value.trim() && invoice) {
-				refs.detailName.value = `Invoice ${invoice.invoicenumber || invoice.id} Detail`;
-			}
-		}
+        function renderItemOptions(records) {
+            const select = document.getElementById('itemid');
+            itemMap = {};
+            let html = '<option value="">Select Item</option>';
 
-		function onItemChange() {
-			const item = state.items.find(x => String(x.id) === String(refs.itemSelect.value));
-			refs.itemName.value = item ? String(item.name || '') : '';
-			refs.price.value = item ? formatMoney(item.price) : '';
-			calculateTotal();
-		}
+            (records || []).forEach(function (x) {
+                const id = String(x.id || '');
+                if (!id) return;
+                const name = x.name || '';
+                const price = toNumber(x.price);
+                itemMap[id] = { name: name, price: price };
+                html += `<option value="${id}">${name}</option>`;
+            });
 
-		function renderDetailsTable() {
-			if (!state.filteredDetails.length) {
-				refs.detailTableBody.innerHTML = `
-					<tr>
-						<td colspan="8" class="empty-state">
-							<div class="fw-semibold mb-1">No bill invoice details found</div>
-							<div class="small">Save a new detail or change your search text.</div>
-						</td>
-					</tr>
-				`;
-				return;
-			}
+            select.innerHTML = html;
+        }
 
-			refs.detailTableBody.innerHTML = state.filteredDetails.map(row => {
-				const invoice = state.invoices.find(x => String(x.id) === String(row.billinvoiceid));
-				const invoiceLabel = invoice
-					? (invoice.invoicenumberwithcustomername || invoice.invoicenumber || invoice.id)
-					: row.billinvoiceid;
+        function syncInvoiceMeta() {
+            const id = String(document.getElementById('billinvoiceid').value || '');
+            const invoice = invoiceMap[id];
+            document.getElementById('customerid').value = invoice ? String(invoice.customerid || '') : '';
+        }
 
-				return `
-					<tr>
-						<td>${escapeHtml(row.name || '-')}</td>
-						<td>${escapeHtml(invoiceLabel || '-')}</td>
-						<td>${escapeHtml(row.customerid || '-')}</td>
-						<td>${escapeHtml(row.itemname || '-')}</td>
-						<td>${formatMoney(row.price)}</td>
-						<td>${formatMoney(row.quantity)}</td>
-						<td>${formatMoney(row.totalprice)}</td>
-						<td class="text-center">
-							<div class="d-inline-flex gap-2">
-								<button type="button" class="action-btn" data-action="edit" data-id="${escapeHtml(row.id)}" title="Edit">
-									<i class="fa fa-pen"></i>
-								</button>
-								<button type="button" class="action-btn" data-action="delete" data-id="${escapeHtml(row.id)}" title="Delete">
-									<i class="fa fa-trash"></i>
-								</button>
-							</div>
-						</td>
-					</tr>
-				`;
-			}).join('');
-		}
+        function syncItemMeta() {
+            const id = String(document.getElementById('itemid').value || '');
+            const item = itemMap[id];
+            document.getElementById('itemname').value = item ? String(item.name || '') : '';
+            document.getElementById('price').value = item ? String(item.price || 0) : '';
+            recalculateTotal();
+        }
 
-		function applyFilter() {
-			const term = refs.searchInput.value.trim().toLowerCase();
-			state.filteredDetails = state.details.filter(row => {
-				if (!term) return true;
+        function initGrid(cols, gridId) {
+            ej.grids.Grid.Inject(
+                ej.grids.Filter,
+                ej.grids.Group,
+                ej.grids.Page,
+                ej.grids.Sort,
+                ej.grids.Toolbar,
+                ej.grids.ColumnChooser,
+                ej.grids.ExcelExport,
+                ej.grids.PdfExport
+            );
 
-				const invoice = state.invoices.find(x => String(x.id) === String(row.billinvoiceid));
-				const invoiceNumber = invoice ? String(invoice.invoicenumber || '') : '';
-				const invoiceLabel = invoice ? String(invoice.invoicenumberwithcustomername || '') : '';
+            grid = new ej.grids.Grid({
+                dataSource: [],
+                allowPaging: true,
+                pageSettings: { pageSize: 10 },
+                allowSorting: true,
+                allowFiltering: true,
+                filterSettings: { type: 'Excel' },
+                showColumnChooser: true,
+                selectionSettings: { type: 'Multiple' },
+                rowSelected: toggleEditButton,
+                rowDeselected: toggleEditButton,
+                allowExcelExport: true,
+                allowPdfExport: true,
+                toolbar: [
+                    'Search',
+                    'ColumnChooser',
+                    { prefixIcon: 'e-icons e-excelexport', tooltipText: 'Export Excel', id: 'excelExport' },
+                    { prefixIcon: 'e-icons e-pdfexport', tooltipText: 'Export PDF', id: 'pdfExport' },
+                    { prefixIcon: 'e-icons e-refresh', tooltipText: 'Refresh', id: 'refreshGrid' },
+                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
+                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit', disabled: true },
+                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' }
+                ],
+                columns: cols,
+                toolbarClick: function (args) {
+                    if (args.item.id === 'excelExport') {
+                        grid.excelExport({ fileName: `BillInvoiceDetail_${formatDate(new Date())}.xlsx`, exportType: 'AllPages' });
+                    }
 
-				const text = [
-					row.name,
-					invoiceNumber,
-					invoiceLabel
-				].join(' ').toLowerCase();
-				return text.includes(term);
-			});
+                    if (args.item.id === 'pdfExport') {
+                        grid.pdfExport({ fileName: `BillInvoiceDetail_${formatDate(new Date())}.pdf`, exportType: 'CurrentPage', pageOrientation: 'Landscape', pageSize: 'A4' });
+                    }
 
-			renderDetailsTable();
-		}
+                    if (args.item.id === 'refreshGrid') {
+                        loadDetails();
+                    }
 
-		function resetForm() {
-			state.editingId = null;
-			refs.detailForm.reset();
-			refs.detailForm.classList.remove('was-validated');
-			refs.detailId.value = '';
-			refs.itemName.value = '';
-			refs.customerId.value = '';
-			refs.quantity.value = '1';
-			refs.totalPrice.value = '0.00';
-			refs.saveBtn.querySelector('.btn-label').textContent = 'Save Detail';
-		}
+                    if (args.item.id === 'new') {
+                        openDetailModal();
+                    }
 
-		function fillFormForEdit(id) {
-			const row = state.details.find(x => String(x.id) === String(id));
-			if (!row) return;
+                    if (args.item.id === 'edit') {
+                        editDetail();
+                    }
 
-			state.editingId = row.id;
-			refs.detailId.value = row.id;
-			refs.detailName.value = row.name || '';
-			refs.billInvoiceSelect.value = row.billinvoiceid || '';
-			refs.customerId.value = row.customerid || '';
-			refs.itemSelect.value = row.itemid || '';
-			refs.itemName.value = row.itemname || '';
-			refs.price.value = formatMoney(row.price);
-			refs.quantity.value = formatMoney(row.quantity);
-			refs.totalPrice.value = formatMoney(row.totalprice);
-			refs.saveBtn.querySelector('.btn-label').textContent = 'Update Detail';
-			window.scrollTo({ top: 0, behavior: 'smooth' });
-		}
+                    if (args.item.id === 'delete') {
+                        deleteDetail();
+                    }
+                }
+            });
 
-		async function deleteDetail(id) {
-			const row = state.details.find(x => String(x.id) === String(id));
-			if (!row) return;
+            grid.appendTo('#' + gridId);
+        }
 
-			if (!confirm(`Delete detail "${row.name || row.id}"?`)) return;
+        function toggleEditButton() {
+            const selected = grid.getSelectedRecords();
+            const editBtn = grid.toolbarModule.toolbar.items.find(function (item) { return item.id === 'edit'; });
+            if (!editBtn) return;
+            editBtn.disabled = selected.length !== 1;
+        }
 
-			try {
-				if (typeof deleteRecordData === 'function') {
-					await deleteRecordData('billinvoicedetail', [id], true, true);
-				}
+        async function loadMasters() {
+            const [invoices, items] = await Promise.all([
+                DBHandler.fetchEntityRecord('billinvoice', 'id,invoicenumber,customerid,invoicenumberwithcustomername', '', false),
+                DBHandler.fetchEntityRecord('billingitem', 'id,name,price', '', false)
+            ]);
 
-				state.details = state.details.filter(x => String(x.id) !== String(id));
-				applyFilter();
-				if (String(state.editingId) === String(id)) {
-					resetForm();
-				}
-			} catch (error) {
-				console.error('Error deleting detail:', error);
-				alert('Failed to delete detail.');
-			}
-		}
+            renderInvoiceOptions(invoices || []);
+            renderItemOptions(items || []);
+        }
 
-		async function loadMasterData() {
-			if (!window.DBHandler || typeof DBHandler.fetchEntityRecord !== 'function') {
-				alert('DBHandler is not available in this context.');
-				return;
-			}
+        function openDetailModal() {
+            const modalEl = document.getElementById('detailModal');
+            document.getElementById('detailForm').reset();
+            editingId = null;
+            document.getElementById('quantity').value = '1';
+            recalculateTotal();
+            document.querySelector('#detailModal .modal-title').innerText = 'Add Invoice Detail';
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
 
-			const [invoiceResult, itemResult, detailResult] = await Promise.allSettled([
-				fetchRecordsWithFallback('billinvoice', ['id,invoicenumber,customerid,customername,invoicenumberwithcustomername', 'id,invoicenumber,customerid,invoicenumberwithcustomername']),
-				fetchRecordsWithFallback('billingitem', ['id,name,price']),
-				fetchRecordsWithFallback('billinvoicedetail', ['createdon,name,id,billinvoiceid,itemid,itemname,price,quantity,totalprice,customerid'])
-			]);
+        function editDetail() {
+            const selected = grid.getSelectedRecords();
+            if (selected.length !== 1) {
+                alert('Please select one record to edit');
+                return;
+            }
 
-			const invoiceRows = invoiceResult.status === 'fulfilled' ? invoiceResult.value : [];
-			const itemRows = itemResult.status === 'fulfilled' ? itemResult.value : [];
-			const detailRows = detailResult.status === 'fulfilled' ? detailResult.value : [];
+            const row = selected[0];
+            editingId = row.id;
+            document.getElementById('name').value = row.name || '';
+            document.getElementById('billinvoiceid').value = row.billinvoiceid || '';
+            syncInvoiceMeta();
+            document.getElementById('itemid').value = row.itemid || '';
+            syncItemMeta();
+            document.getElementById('price').value = toNumber(row.price);
+            document.getElementById('quantity').value = toNumber(row.quantity);
+            recalculateTotal();
 
-			if (invoiceResult.status !== 'fulfilled') console.error('Failed to load billinvoice:', invoiceResult.reason);
-			if (itemResult.status !== 'fulfilled') console.error('Failed to load billingitem:', itemResult.reason);
-			if (detailResult.status !== 'fulfilled') console.error('Failed to load billinvoicedetail:', detailResult.reason);
+            document.querySelector('#detailModal .modal-title').innerText = 'Edit Invoice Detail';
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('detailModal')).show();
+        }
 
-			state.invoices = (invoiceRows || []).map(x => ({
-				id: x.id,
-				invoicenumber: x.invoicenumber,
-				customerid: x.customerid || '',
-				customername: x.customername || '',
-				invoicenumberwithcustomername: x.invoicenumberwithcustomername || ''
-			})).filter(x => String(x.id || '').trim() !== '');
+        async function deleteDetail() {
+            const selected = grid.getSelectedRecords();
+            if (!selected.length) {
+                alert('Please select record(s) to delete');
+                return;
+            }
 
-			state.items = (itemRows || []).map(x => ({
-				id: x.id,
-				name: x.name || '',
-				price: toNumber(x.price)
-			})).filter(x => String(x.id || '').trim() !== '');
+            if (!confirm(`Delete ${selected.length} detail record(s)?`)) {
+                return;
+            }
 
-			state.details = (detailRows || []).map(x => ({
-				createdon: x.createdon,
-				name: x.name || '',
-				id: x.id,
-				billinvoiceid: x.billinvoiceid || '',
-				itemid: x.itemid || '',
-				itemname: x.itemname || '',
-				price: toNumber(x.price),
-				quantity: toNumber(x.quantity),
-				totalprice: toNumber(x.totalprice),
-				customerid: x.customerid || ''
-			})).filter(x => String(x.id || '').trim() !== '');
+            const ids = selected.map(function (r) { return r.id; });
+            await deleteRecordData('billinvoicedetail', ids, true, true);
+            await loadDetails();
+        }
 
-			renderInvoiceOptions();
-			renderItemOptions();
-			applyFilter();
-		}
+        async function loadDetails() {
+            const startDate = getSafeDatePickerValue('startDate');
+            const endDate = getSafeDatePickerValue('endDate');
 
-		async function saveDetail(event) {
-			event.preventDefault();
-			refs.detailForm.classList.add('was-validated');
-			if (!refs.detailForm.checkValidity()) return;
+            if (!startDate || !endDate) return;
 
-			calculateTotal();
+            const start = startDate + ' 00:00:00';
+            const end = endDate + ' 23:59:59';
+            const filter = `billinvoicedetail.createdon >= '${start}' AND billinvoicedetail.createdon <= '${end}'`;
 
-			const payload = {
-				name: refs.detailName.value.trim(),
-				billinvoiceid: refs.billInvoiceSelect.value,
-				itemid: refs.itemSelect.value,
-				itemname: refs.itemName.value,
-				price: toNumber(refs.price.value),
-				quantity: toNumber(refs.quantity.value),
-				totalprice: toNumber(refs.totalPrice.value),
-				customerid: refs.customerId.value
-			};
+            try {
+                await loadMasters();
 
-			refs.saveBtn.disabled = true;
-			refs.saveBtn.querySelector('.btn-label').textContent = state.editingId ? 'Updating...' : 'Saving...';
+                const joinCondition = 'LEFT JOIN billinvoice ON billinvoice.id = billinvoicedetail.billinvoiceid LEFT JOIN billingitem ON billingitem.id = billinvoicedetail.itemid';
+                const details = await DBHandler.fetchEntityRecords(
+                    'billinvoicedetail',
+                    'billinvoicedetail.id,billinvoicedetail.name,billinvoicedetail.billinvoiceid,billinvoicedetail.customerid,billinvoicedetail.itemid,billinvoicedetail.itemname,billinvoicedetail.price,billinvoicedetail.quantity,billinvoicedetail.totalprice,billinvoicedetail.createdon,billinvoice.invoicenumberwithcustomername,billinvoice.invoicenumber,billingitem.name as itemlookupname',
+                    'billinvoicedetail.createdon',
+                    'desc',
+                    filter,
+                    true,
+                    0,
+                    joinCondition
+                );
 
-			try {
-				const responseId = await DBHandler.submitRecordData('billinvoicedetail', payload, state.editingId, false);
-				const savedId = state.editingId || responseId;
-				const existingIndex = state.details.findIndex(x => String(x.id) === String(savedId));
-				const row = {
-					createdon: new Date().toISOString(),
-					id: savedId,
-					...payload
-				};
+                let sr = 1;
+                const rows = (details || []).map(function (x) {
+                    const inv = invoiceMap[String(x.billinvoiceid || '')];
+                    return {
+                        id: x.id,
+                        srno: sr++,
+                        name: x.name || '',
+                        billinvoiceid: x.billinvoiceid || '',
+                        customerid: x.customerid || (inv ? inv.customerid : ''),
+                        itemid: x.itemid || '',
+                        itemname: x.itemname || x.itemlookupname || (itemMap[String(x.itemid || '')] ? itemMap[String(x.itemid || '')].name : ''),
+                        price: toNumber(x.price),
+                        quantity: toNumber(x.quantity),
+                        totalprice: toNumber(x.totalprice),
+                        createdon: normalizeDate(x.createdon),
+                        invoicelabel: x.invoicenumberwithcustomername || (inv ? inv.label : (x.invoicenumber || ''))
+                    };
+                });
 
-				if (existingIndex >= 0) {
-					state.details[existingIndex] = row;
-				} else {
-					state.details.push(row);
-				}
+                grid.dataSource = rows;
+                grid.refresh();
+            } catch (error) {
+                console.error('Failed to load invoice details:', error);
+            }
+        }
 
-				applyFilter();
-				resetForm();
-				if (typeof showSuccessMessage === 'function') {
-					showSuccessMessage('Bill invoice detail saved successfully.');
-				}
-			} catch (error) {
-				console.error('Error saving detail:', error);
-				alert('Failed to save bill invoice detail.');
-			} finally {
-				refs.saveBtn.disabled = false;
-				refs.saveBtn.querySelector('.btn-label').textContent = state.editingId ? 'Update Detail' : 'Save Detail';
-			}
-		}
+        async function saveDetail(event) {
+            if (event && event.target) {
+                event.target.disabled = true;
+                event.target.innerText = 'Saving...';
+            }
 
-		function wireEvents() {
-			refs.billInvoiceSelect.addEventListener('change', onInvoiceChange);
-			refs.itemSelect.addEventListener('change', onItemChange);
-			refs.price.addEventListener('input', calculateTotal);
-			refs.quantity.addEventListener('input', calculateTotal);
-			refs.resetBtn.addEventListener('click', resetForm);
-			refs.searchInput.addEventListener('input', applyFilter);
-			refs.detailForm.addEventListener('submit', saveDetail);
+            try {
+                const name = (document.getElementById('name').value || '').trim();
+                const billinvoiceid = document.getElementById('billinvoiceid').value;
+                const customerid = document.getElementById('customerid').value;
+                const itemid = document.getElementById('itemid').value;
+                const itemname = (document.getElementById('itemname').value || '').trim();
+                const price = toNumber(document.getElementById('price').value);
+                const quantity = toNumber(document.getElementById('quantity').value);
+                const totalprice = toNumber(document.getElementById('totalprice').value);
 
-			refs.detailTableBody.addEventListener('click', function (event) {
-				const btn = event.target.closest('button[data-action]');
-				if (!btn) return;
+                if (!name) {
+                    alert('Name is required');
+                    return;
+                }
 
-				const action = btn.getAttribute('data-action');
-				const id = btn.getAttribute('data-id');
-				if (action === 'edit') fillFormForEdit(id);
-				if (action === 'delete') deleteDetail(id);
-			});
-		}
+                if (!billinvoiceid) {
+                    alert('Bill invoice is required');
+                    return;
+                }
 
-		document.addEventListener('DOMContentLoaded', async function () {
-			setLoading(true);
-			wireEvents();
-			try {
-				await loadMasterData();
-				resetForm();
-			} catch (error) {
-				console.error('Initialization error:', error);
-				alert('Failed to load bill invoice detail page data.');
-			} finally {
-				setLoading(false);
-			}
-		});
-	</script>
+                if (!itemid) {
+                    alert('Item is required');
+                    return;
+                }
+
+                if (quantity <= 0) {
+                    alert('Quantity must be greater than zero');
+                    return;
+                }
+
+                await DBHandler.submitRecordData('billinvoicedetail', {
+                    name: name,
+                    billinvoiceid: billinvoiceid,
+                    customerid: customerid,
+                    itemid: itemid,
+                    itemname: itemname,
+                    price: price,
+                    quantity: quantity,
+                    totalprice: totalprice
+                }, editingId, false);
+
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('detailModal')).hide();
+                editingId = null;
+                await loadDetails();
+            } catch (error) {
+                console.error('Failed to save invoice detail:', error);
+                alert('Failed to save invoice detail');
+            } finally {
+                if (event && event.target) {
+                    event.target.disabled = false;
+                    event.target.innerText = 'Save';
+                }
+            }
+        }
+
+        $(document).ready(async function () {
+            if (typeof applyDatePicker === 'function') {
+                applyDatePicker();
+            }
+            initGrid(columns, 'invoiceDetailGrid');
+            await loadDetails();
+        });
+    </script>
+
+    <style>
+        .toolbar-spacing {
+            margin-bottom: 10px;
+        }
+
+        #invoiceDetailGrid_toolbarItems {
+            height: 10px !important;
+        }
+    </style>
+
 </body>
+
 </html>
