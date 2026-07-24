@@ -1,1409 +1,1485 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head runat="server">
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Estimate Bill</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<script>
-		let classMap = [];
-		var apiURL = "https://dbsit2.vsservices.in/";
-	</script>
+    <script>
+        let classMap = [];
+        var apiURL = "https://dbsit2.vsservices.in/";
+        //var apiURL = "";
+    </script>
 
-	<link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
-	<script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
-	<script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
+    <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-	<script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
-	<link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.bundle.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/app.css?id=081220258" rel="stylesheet" />
 
-	<script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
-	<script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
-	<script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/utility.js?id=081220258"></script>
+    <script src="https://apisit.vsservices.in/JS/entityPage.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
 
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/popper.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/bootstrap.min.js"></script>
+    <link href="https://apisit.vsservices.in/css/Default/simple-line-icons.min.css" rel="stylesheet" />
 
-	<style>
-		.estimate-container {
-			padding-left: 0;
-			padding-right: 0;
-		}
+    <script src="https://apisit.vsservices.in/css/Default/dayjs.js"></script>
 
-		.estimate-form {
-			padding-left: 20px;
-			padding-right: 20px;
-		}
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
 
-		.estimate-title {
-			margin-top: 0 !important;
-		}
+    <script src="https://apisit.vsservices.in/css/Default/pdfmake.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
 
-		.inline-select {
-			width: auto;
-		}
+    <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
+    <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
-		.plus-btn {
-			margin-left: 3px;
-		}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
-		.estimate-modal {
-			padding-top: 35px;
-		}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-		.estimate-table-section {
-			padding-left: 2px;
-			padding-right: 2px;
-		}
-
-		.estimate-header-row {
-			border: 1px solid black;
-		}
-
-		.estimate-header-cell {
-			padding: 8px;
-			text-align: center;
-		}
-
-		.align-right {
-			text-align: right;
-		}
-
-		.align-center {
-			text-align: center;
-		}
-
-		.align-left {
-			text-align: left;
-		}
-
-		.footer-input {
-			text-align: right;
-		}
-
-		.invoice-input {
-			width: 200px;
-		}
-	</style>
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-buttons/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-popups/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-richtexteditor/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-navigations/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-dropdowns/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-lists/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-inputs/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-calendars/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-notifications/styles/bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
+    <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
+    <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
 </head>
-
 <body>
-	<div class="container estimate-container">
-		<div class="form estimate-form">
-			<h2 class="mb-4 estimate-title">Estimate</h2>
-
-
-			<div class="mb-3">
-				<label for="customerSelect" class="form-label"><b>Customer Name:</b></label>
-				<div class="d-flex align-items-center">
-					<select id="customerSelect" class="form-select me-2 inline-select"></select>
-					<button class="btn btn-primary plus-btn" id="btnNewCustomer" onclick="openNewCustomer()">+</button>
-				</div>
-			</div>
-
-			<div class="btn-group" role="group" id="toggleGroup">
-				<button type="button" class="btn btn-outline-primary toggle-btn" data-target="itemSection">Item</button>
-				<button type="button" class="btn btn-outline-primary toggle-btn"
-					data-target="packagingSlipSection">Packaging Slip</button>
-			</div>
-
-			<div id="itemSection" class="toggle-section">
-				<div class="mb-3">
-					<label for="itemSelect" class="form-label"><b>Item:</b></label>
-					<div class="d-flex align-items-center">
-						<select id="itemSelect" class="form-select me-2 inline-select"></select>
-						<button class="btn btn-primary plus-btn" id="btnNewItem" onclick="openNewItem()">+</button>
-					</div>
-				</div>
-
-				<div class="mb-3">
-					<label for="itemQuantity" class="form-label"><b>Quantity:</b></label>
-					<input type="number" id="itemQuantity" class="form-control" />
-				</div>
-
-				<div class="mb-3">
-					<label for="itemPrice" class="form-label"><b>Price:</b></label>
-					<input type="number" id="itemPrice" class="form-control" />
-				</div>
-			</div>
-
-			<div id="packagingSlipSection" class="toggle-section d-none">
-				<div class="mb-3">
-					<label for="packagingSlipLoad" class="form-label"><b>Packaging Slip Load:</b></label>
-					<select id="packagingSlipLoad" class="form-select" onchange="handlePackagingSlipLoadChange(event)">
-						<option value="lastTwoDays">Last two days</option>
-						<option value="lastSevenDays">Last seven days</option>
-						<option value="all">All</option>
-					</select>
-				</div>
-
-				<div class="mb-3">
-					<label for="packagingSlip" class="form-label"><b>Packaging Slip:</b></label>
-					<select id="packagingSlip" class="form-select">
-						<option value="">Select a packaging slip</option>
-					</select>
-				</div>
-			</div>
-
-
-			<button class="btn btn-primary" id="addToSummary" onclick="addToSummaryClick()">Add</button>
-			<div class="modal fade estimate-modal" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel"
-				aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="addCustomerModalLabel">Add Customer</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<div class="modal-body">
-							<form id="addCustomerForm">
-								<div class="mb-3">
-									<label for="customerName" class="form-label">Customer Name</label>
-									<input type="text" id="customerName" class="form-control" required>
-								</div>
-								<div class="mb-3">
-									<label for="customerPhone" class="form-label">Phone Number</label>
-									<input type="text" id="customerPhone" class="form-control" required>
-								</div>
-								<div class="mb-3">
-									<label for="customerAddress" class="form-label">Address</label>
-									<textarea id="customerAddress" class="form-control" rows="3" required></textarea>
-								</div>
-							</form>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-							<button type="button" class="btn btn-primary" id="saveCustomer"
-								onclick="saveCustomer()">Save</button>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class="modal fade estimate-modal" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title" id="addItemModalLabel">Add Item</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<div class="modal-body">
-							<form id="addItemForm">
-								<div class="mb-3">
-									<label for="itemName" class="form-label">Item Name</label>
-									<input type="text" id="itemName" class="form-control" required>
-								</div>
-								<div class="mb-3">
-									<label for="price" class="form-label">Price</label>
-									<input type="number" id="price" class="form-control" required>
-								</div>
-							</form>
-						</div>
-						<div class="modal-footer">
-							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-							<button type="button" class="btn btn-primary" id="saveItem" onclick="saveItem()">Save</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="tablesection estimate-table-section">
-			<table class="vstable">
-				<thead>
-					<tr class="estimate-header-row">
-						<th class="estimate-header-cell" colspan="5">
-							Estimate Number: <span id="invoiceNumber" onclick="enableInvoiceEdit()">...</span>
-						</th>
-					</tr>
-					<tr>
-						<th>Item Name</th>
-						<th>Price</th>
-						<th>Quantity</th>
-						<th>Total Price</th>
-						<th>Action</th>
-
-					</tr>
-				</thead>
-				<tbody id="summaryTableBody"></tbody>
-				<tfoot id="summaryFooter">
-					<tr>
-						<td colspan="2" class="align-right">Total</td>
-						<td id="totalQuantity" class="align-center">0</td>
-						<td id="totalPrice" class="align-right">0.00</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td colspan="3" class="align-right">Cash/Paytm Received</td>
-						<td id="cashReceivedCell" class="footer-editable align-right" data-field="cashReceived">
-							0.00
-						</td>
-						<td></td>
-					</tr>
-
-					<tr>
-						<td colspan="3" class="align-right">Balance</td>
-						<td id="balanceCell" class="align-right">0.00</td>
-						<td></td>
-					</tr>
-				</tfoot>
-			</table>
-			<div class="d-flex justify-content-between align-items-center mt-3">
-				<button class="btn btn-secondary" id="exportToPDF" onclick="exportTableToPDF()">Export</button>
-				<div class="mx-auto">
-					<button class="btn btn-success" id="generateNewBill">New</button>
-				</div>
-				<button class="btn btn-primary" id="printInvoice" onclick="printInvoice()">Print</button>
-			</div>
-
-		</div>
-	</div>
-
-	<script>
-
-		let itemArray = [];
-		let invoiceData = {
-			invoiceId: null,
-			customerId: null,
-			customerName: null,
-			items: []
-		};
-
-		async function loadItemsIntoDropdown() {
-			try {
-				itemArray = await StaticDBHandler.fetchEntityRecord("billingitem", "id,name,price", "", false);
-
-				itemArray.sort((a, b) => a.name.localeCompare(b.name));
-
-				$('#itemSelect').empty().append('<option value="">Select an item</option>');
-				itemArray.forEach(item => {
-					$('#itemSelect').append(new Option(item.name, item.id));
-				});
-
-				$('#itemSelect').select2();
-
-				$('#itemSelect').on('change', function () {
-					const selectedItemId = $(this).val();
-
-					if (selectedItemId) {
-						const selectedItem = itemArray.find(item => item.id === selectedItemId);
-						if (selectedItem) {
-							$('#itemPrice').val(parseFloat(selectedItem.price).toFixed(2));
-						}
-					} else {
-						$('#itemPrice').val('');
-					}
-				});
-
-			} catch (error) {
-				console.error("Error loading items:", error);
-			}
-		}
-
-		function loadPackagingSlipIntoDropdown(filterCondition = "") {
-			let filterQuery = "";
-
-			const today = new Date();
-			if (filterCondition === "lastTwoDays") {
-				const twoDaysAgo = new Date(today);
-				twoDaysAgo.setDate(today.getDate() - 2);
-				filterQuery = `slidate >= '${twoDaysAgo.toISOString().split('T')[0]}'`;
-			} else if (filterCondition === "lastSevenDays") {
-				const sevenDaysAgo = new Date(today);
-				sevenDaysAgo.setDate(today.getDate() - 7);
-				filterQuery = `slidate >= '${sevenDaysAgo.toISOString().split('T')[0]}'`;
-			} else if (filterCondition === "all") {
-				filterQuery = "";
-			}
-
-			loadFreshDropdown(
-				"packagingSlip",
-				"id",
-				"packagingnumber,packagingcreatedby",
-				"packagingitemdetail",
-				"id,packagingnumber,packagingcreatedby",
-				"packagingnumber",
-				"desc",
-				filterQuery
-			).then(() => {
-				$('#packagingSlip').select2();
-			}).catch(error => {
-				console.error("Error loading packaging slips:", error);
-			});
-		}
-
-		function loadCustomersIntoDropdown() {
-			DropDownHelper.loadDropdown(
-				"customerSelect",
-				"id",
-				"name",
-				"billingcustomer",
-				"id,name",
-				"name",
-				"asc",
-				""
-			).then(() => {
-				$('#customerSelect').select2();
-				const cashOption = $("#customerSelect option").filter(function () {
-					return $(this).text().trim().toLowerCase() === "cash / paytm";
-				});
-
-				if (cashOption.length > 0) {
-					cashOption.prop("selected", true);
-					$('#customerSelect').trigger('change');
-				}
-			});
-		}
-
-		function addItem() {
-			const itemName = $('#itemSelect option:selected').text();
-			const itemId = $('#itemSelect').val();
-			const price = parseFloat($('#itemPrice').val()) || 0;
-			const quantity = parseFloat($('#itemQuantity').val()) || 0;
-			const totalPrice = price * quantity;
-			const customerId = $('#customerSelect').val();
-			const customerName = $('#customerSelect option:selected').text();
-
-			if (!customerId || !itemId || !price || !quantity) {
-				alert('Please fill all fields correctly before adding.');
-				return;
-			}
-
-			invoiceData.customerId = customerId;
-			invoiceData.customerName = customerName;
-
-			var item222 = {
-				itemId,
-				itemName,
-				price,
-				quantity,
-				totalPrice
-			};
-			invoiceData.items.push(item222);
-
-			renderTable();
-			updateTotals();
-
-			$('#itemSelect').val('').trigger('change');
-			$('#itemQuantity').val('');
-			$('#itemPrice').val('');
-			updateTotals();
-			const newItemIndex = invoiceData.items.length - 1;
-			submitDataToServer(newItemIndex);
-		}
-
-		function addToSummaryClick() {
-			try {
-				const activeButton = document.querySelector('#toggleGroup .btn-primary');
-				const activeTab = activeButton ? activeButton.textContent.trim() : null;
-
-				console.log("Active Tab:", activeTab);
-
-				if (activeTab === "Item") {
-					addItem();
-				} else if (activeTab === "Packaging Slip") {
-					addPackagingItem();
-				} else {
-					console.error("Invalid tab selection");
-					alert("Please select a valid tab to add an item.");
-				}
-			} catch (error) {
-				console.error("Error handling addToSummary click event:", error);
-				alert("An error occurred while processing your request. Please try again.");
-			}
-		}
-
-		function addPackagingItem() {
-			console.log("Adding packaging item...");
-			const packagingSlip = document.getElementById('packagingSlip').value;
-			if (!packagingSlip) {
-				alert("Please select a packaging slip.");
-				return;
-			}
-
-			DBHandler.fetchEntityRecord(
-				"packagingitemdetail",
-				"itemjson,packagingnumber",
-				`id='${packagingSlip}'`, true
-			)
-				.then(response => {
-					if (response && response.length > 0) {
-						const record = response[0];
-
-						let itemsFromPackagingSlip = {};
-						if (record.itemjson) {
-							try {
-								itemsFromPackagingSlip = JSON.parse(record.itemjson);
-
-								if (typeof itemsFromPackagingSlip !== "object") {
-									console.error("Parsed itemjson is not an object:", itemsFromPackagingSlip);
-									itemsFromPackagingSlip = {};
-								}
-							} catch (error) {
-								console.error("Failed to parse itemjson:", error, record.itemjson);
-								itemsFromPackagingSlip = {};
-							}
-						}
-
-						const groupedItems = {};
-
-						Object.keys(itemsFromPackagingSlip).forEach(itemName => {
-							const itemArray22 = itemsFromPackagingSlip[itemName];
-							itemArray22.forEach(item => {
-								const itemId = item.itemId || itemName;
-								const quantity = parseFloat(item.meter * item.count, 10) || 0;
-								const selectedItem = itemArray.find(item => item.name === itemId);
-								if (!selectedItem) return;
-								const price = parseFloat(selectedItem.price);
-								const itemId1 = selectedItem.id;
-								if (!groupedItems[itemId]) {
-									groupedItems[itemId] = {
-										itemId1,
-										itemName,
-										price,
-										quantity: 0,
-										totalPrice: 0
-									};
-								}
-
-								groupedItems[itemId].quantity += quantity;
-								groupedItems[itemId].totalPrice += price * quantity;
-							});
-						});
-
-						Object.values(groupedItems).forEach(groupedItem => {
-							invoiceData.items.push(groupedItem);
-						});
-
-						renderTable();
-						updateTotals();
-						console.log(`Packaging slip "${packagingSlip}" added successfully.`);
-						$('#itemSelect').val('').trigger('change');
-						$('#itemQuantity').val('');
-						$('#itemPrice').val('');
-						submitDataToServer();
-						$('#packagingSlip').val(null).trigger('change');
-						document.querySelector('.toggle-btn[data-target="itemSection"]').click();
-
-					} else {
-						console.warn("No data found for the provided record ID.");
-					}
-
-				})
-				.catch(error => {
-					console.error("Error fetching packaging details:", error);
-				});
-		}
-
-		function renderTable() {
-			$('#summaryTableBody').empty();
-			invoiceData.items.forEach((item, index) => {
-				const row = `
-				<tr>
-					<td class="align-left">${item.itemName}</td>
-					<td class="align-right editable-cell" data-index="${index}" data-field="price">
-						${item.price.toFixed(2)}
-					</td>
-					<td class="align-center editable-cell" data-index="${index}" data-field="quantity">
-						${item.quantity.toFixed(2)}
-					</td>
-					<td class="align-right">${convertNumberToComma(item.totalPrice)}</td>
-					<td>
-						<button class="btn btn-danger btn-sm delete-row" data-index="${index}">
-							<i class="fa fa-trash"></i>
-						</button>
-					</td>
-				</tr>`;
-				$('#summaryTableBody').append(row);
-			});
-
-			attachFooterEditEvents();
-			attachDeleteHandlers();
-			toggleTableSectionVisibility();
-		}
-
-		function attachFooterEditEvents() {
-			$(".footer-editable").off("dblclick").on("dblclick", function () {
-				let td = $(this);
-				let field = td.data("field");
-				let currentValue = td.text().trim();
-
-				if (td.find("input").length > 0) return;
-
-				let input = $(`<input type="text" class="form-control form-control-sm footer-input" value="${currentValue}">`);
-
-				td.empty().append(input);
-				input.focus();
-
-				input.on("blur", function () {
-					saveFooterValue(field, input.val(), td);
-				});
-
-				input.on("keypress", function (e) {
-					if (e.which === 13) {
-						saveFooterValue(field, input.val(), td);
-					}
-				});
-			});
-		}
-
-		async function saveFooterValue(field, newValue, td) {
-			try {
-				let value = parseFloat(newValue);
-				if (isNaN(value)) value = 0;
-
-				const updatedData = {
-					cashreceived: value,
-				};
-
-				invoiceData.cashReceived = value;
-
-				td.text(value.toFixed(2));
-				updateTotals();
-				await DBHandler.submitRecordData(
-					'billinvoice',
-					updatedData,
-					invoiceData.invoiceId,
-					false
-				);
-
-
-				showSuccessMessage('Footer values updated successfully!');
-			}
-			catch (err) {
-				console.error("Error updating footer:", err);
-				alert("Failed to update footer values.");
-			}
-			finally {
-				hideLoader();
-			}
-		}
-
-
-
-		function attachDoubleClickHandlers() {
-			$('#summaryTableBody').on('dblclick', '.editable-cell', function () {
-				const cell = $(this);
-				const index = cell.data('index');
-				const field = cell.data('field');
-
-				const currentValue = invoiceData.items[index][field];
-
-				const input = $('<input>', {
-					type: 'number',
-					class: 'form-control form-control-sm',
-					value: currentValue.toFixed(2),
-					step: '0.01',
-				});
-
-				cell.html(input);
-				input.focus();
-
-				input[0].select();
-
-				input.on('blur keyup', function (event) {
-					if (event.type === 'blur' || event.key === 'Enter') {
-						const newValue = parseFloat(input.val()) || 0;
-
-						invoiceData.items[index][field] = newValue;
-						invoiceData.items[index].totalPrice =
-							invoiceData.items[index].price * invoiceData.items[index].quantity;
-
-						cell.html(newValue.toFixed(2));
-						renderTable();
-						updateTotals();
-						submitDataToServer(index);
-					}
-				});
-			});
-		}
-
-		function convertNumberToComma(number) {
-			const num = parseFloat(number);
-
-			if (isNaN(num)) {
-				console.error("Invalid number provided:", number);
-				return "0.00";
-			}
-
-			const parts = num.toFixed(2).split(".");
-			let integerPart = parts[0];
-			const decimalPart = parts[1];
-
-			const lastThreeDigits = integerPart.slice(-3);
-			const otherDigits = integerPart.slice(0, -3);
-
-			const formattedInteger = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + (otherDigits ? "," : "") + lastThreeDigits;
-
-			return `${formattedInteger}.${decimalPart}`;
-		}
-
-
-
-
-
-		function attachDeleteHandlers() {
-			$('.delete-row').on('click', function () {
-				const index = $(this).data('index');
-				invoiceData.items.splice(index, 1);
-				renderTable();
-				updateTotals();
-				submitDataToServer();
-			});
-		}
-
-
-		function exportTableToPDF() {
-			const { jsPDF } = window.jspdf;
-			const doc = new jsPDF();
-
-			doc.setFontSize(18);
-			const pageWidth = doc.internal.pageSize.getWidth();
-			const title = "Estimate";
-			const titleX = (pageWidth - doc.getTextWidth(title)) / 2;
-			doc.text(title, titleX, 15);
-
-			const invoiceNumber = $('#invoiceNumber').text().trim() || 'Draft';
-			doc.setFontSize(12);
-			doc.text(`Estimate Number: ${invoiceNumber}`, 15, 25);
-
-			const tableData = [];
-			invoiceData.items.forEach(item => {
-				tableData.push([
-					item.itemName,
-					convertNumberToComma(item.price),
-					convertNumberToComma(item.quantity),
-					convertNumberToComma(item.totalPrice),
-				]);
-			});
-
-			const totalQty = $('#totalQuantity').text().trim();
-			const totalPrice = convertNumberToComma(getTotalPrice());
-
-			tableData.push([
-				"Total",
-				"",
-				totalQty,
-				totalPrice
-			]);
-
-			const cashReceived = Number(invoiceData.cashReceived || 0);
-			const balance = Number((getTotalPrice() - cashReceived) || 0);
-
-			if (cashReceived > 0) {
-				tableData.push([
-					"Cash/Paytm Received",
-					"",
-					"",
-					convertNumberToComma(cashReceived)
-				]);
-
-				tableData.push([
-					"Pending Balance",
-					"",
-					"",
-					convertNumberToComma(balance)
-				]);
-			}
-
-			const headers = [["Item Name", "Price", "Quantity", "Total Price"]];
-
-			doc.autoTable({
-				head: headers,
-				body: tableData,
-				startY: 35,
-				tableLineWidth: 0.1,
-				tableLineColor: [0, 0, 0],
-
-				styles: {
-					fontSize: 10,
-					lineWidth: 0.1,
-					valign: "middle"
-				},
-				headStyles: {
-					fillColor: null,
-					textColor: [0, 0, 0],
-					fontSize: 12,
-					fontStyle: "bold",
-					halign: "center",
-					lineWidth: 0.2
-				},
-				bodyStyles: {
-					textColor: [50, 50, 50],
-					lineColor: [0, 0, 0]
-				},
-
-				columnStyles: {
-					0: { halign: "left" },
-					1: { halign: "right" },
-					2: { halign: "right" },
-					3: { halign: "right" }
-				},
-
-				alternateRowStyles: { fillColor: null },
-
-				didDrawCell: function (data) {
-					if (data.row.index >= tableData.length - (cashReceived > 0 ? 3 : 1)) {
-						doc.setFont("helvetica", "bold");
-					}
-				}
-			});
-
-			doc.save(`Estimate_${invoiceNumber}.pdf`);
-		}
-
-
-
-		function attachEditHandlers() {
-			$('#summaryTableBody td[contenteditable="true"]').on('blur', function () {
-				const index = $(this).data('index');
-				const field = $(this).data('field');
-				const value = parseFloat($(this).text());
-
-				if (!isNaN(value) && value > 0) {
-					invoiceData.items[index][field] = value;
-					invoiceData.items[index].totalPrice = invoiceData.items[index].price * invoiceData.items[index].quantity;
-
-					renderTable();
-					updateTotals();
-				} else {
-					alert('Please enter a valid number.');
-					renderTable();
-				}
-				submitDataToServer();
-			});
-		}
-
-		function updateItemOnServer(itemIndex) {
-			const item = invoiceData.items[itemIndex];
-
-			const billDetailData = {
-				billinvoiceid: invoiceData.invoiceId,
-				itemname: item.itemName,
-				price: item.price,
-				quantity: item.quantity,
-				totalprice: item.totalPrice,
-				customerid: invoiceData.customerId,
-			};
-
-			const recordId = item.id || null;
-
-			DBHandler.submitRecordData("billinvoicedetail", billDetailData, recordId, false)
-				.then(response => {
-					if (!item.id) {
-						invoiceData.items[itemIndex].id = response;
-					}
-					console.log(`Item '${item.itemName}' updated successfully with ID: ${response}`);
-				})
-				.catch(error => {
-					console.error(`Error updating item '${item.itemName}':`, error);
-					alert('Failed to update the item on the server. Please try again.');
-				});
-		}
-
-		function generateNewBill() {
-			invoiceData = {
-				invoiceId: null,
-				customerId: null,
-				customerName: null,
-				items: []
-			};
-
-			const cashOption = $("#customerSelect option").filter(function () {
-				return $(this).text().trim().toLowerCase() === "cash";
-			});
-
-			if (cashOption.length > 0) {
-				cashOption.prop("selected", true);
-				$('#customerSelect').trigger('change');
-			}
-
-			$('#itemSelect').val('').trigger('change');
-			$('#itemQuantity').val('');
-			$('#itemPrice').val('');
-
-			renderTable();
-
-			updateTotals();
-
-			$('#invoiceNumber').text('...');
-		}
-		document.getElementById('generateNewBill').addEventListener('click', generateNewBill);
-
-		$('#summaryTableBody td[contenteditable="true"]').on('blur', function () {
-			const index = $(this).data('index');
-			const field = $(this).data('field');
-			const value = parseFloat($(this).text());
-
-			if (field === 'price' || field === 'quantity') {
-				if (!isNaN(value) && value > 0) {
-					invoiceData.items[index][field] = value;
-					invoiceData.items[index].totalPrice = invoiceData.items[index].price * invoiceData.items[index].quantity;
-					renderTable();
-					updateTotals();
-				} else {
-					alert('Please enter a valid number.');
-					renderTable();
-				}
-			}
-		});
-
-		function processItemDetail(itemIndex) {
-			const item = invoiceData.items[itemIndex];
-			const billDetailData = {
-				billinvoiceid: invoiceData.invoiceId,
-				itemname: item.itemName,
-				price: item.price,
-				quantity: item.quantity,
-				totalprice: item.totalPrice,
-				customerid: invoiceData.customerId,
-			};
-
-			DBHandler.submitRecordData("billinvoicedetail", billDetailData, item.id, false)
-				.then(response => {
-					invoiceData.items[itemIndex].id = response;
-					console.log(`Item '${item.itemName}' submitted successfully with ID: ${response}`);
-				})
-				.catch(error => {
-					console.error(`Error submitting item '${item.itemName}':`, error);
-				});
-		}
-
-
-		function submitDataToServer(itemIndex) {
-			try {
-				if (!invoiceData.customerId) {
-					const customerId = $('#customerSelect').val();
-					const customerName = $('#customerSelect option:selected').text();
-					if (!customerId) {
-						alert('Please fill all fields correctly before adding.');
-						return;
-					}
-					invoiceData.customerId = customerId;
-					invoiceData.customerName = customerName;
-				}
-
-				const formData = {
-					customerid: invoiceData.customerId,
-					customername: invoiceData.customerName,
-					billjson: JSON.stringify(invoiceData.items),
-					totalprice: parseFloat(getTotalPrice()),
-				};
-				if (invoiceData.invoicedate) {
-					formData["invoicedate"] = invoiceData.invoicedate;
-				}
-				else {
-					const today = new Date();
-					const yyyy = today.getFullYear();
-					const mm = String(today.getMonth() + 1).padStart(2, '0');
-					const dd = String(today.getDate()).padStart(2, '0');
-
-					formData["invoicedate"] = `${yyyy}-${mm}-${dd}`;
-					invoiceData.invoicedate = formData["slipdate"];
-
-				}
-				const addButton = document.getElementById('addToSummary');
-
-				const loader = document.createElement('span');
-				loader.classList.add('spinner-border', 'spinner-border-sm', 'text-light');
-				loader.style.marginLeft = '10px';
-				addButton.appendChild(loader);
-				addButton.disabled = true;
-
-				if (invoiceData.invoiceId && itemIndex) {
-					processItemDetail(itemIndex);
-
-				}
-
-				DBHandler.submitRecordData("billinvoice", formData, invoiceData.invoiceId, false)
-					.then(response => {
-						if (response) {
-							if (!invoiceData.invoiceId) {
-								invoiceData.invoiceId = response;
-								if (itemIndex)
-									processItemDetail(itemIndex);
-								return StaticDBHandler.fetchEntityRecord(
-									"billinvoice",
-									"invoicenumber,createdon",
-									`id='${invoiceData.invoiceId}'`
-								).then((p) => {
-									invoiceData.createdon = p[0].createdon;
-									invoiceData.invoiceNumber = p[0].invoicenumber;
-									$('#invoiceNumber').text(invoiceData.invoiceNumber);
-									$('#invoiceHeading').removeClass('d-none');
-								});
-							}
-						}
-					})
-					.catch(error => {
-						console.error("Error submitting data:", error);
-						alert("Failed to submit the data. Please try again.");
-					})
-					.finally(() => {
-						loader.remove();
-						addButton.disabled = false;
-					});
-			} catch (error) {
-				console.error("Error in submitDataToServer:", error);
-				alert("An unexpected error occurred. Please try again.");
-			}
-		}
-
-		function updateTotals() {
-			let totalQty = 0;
-			let totalPrice = 0;
-
-			invoiceData.items.forEach(item => {
-				totalQty += item.quantity;
-				totalPrice += item.totalPrice;
-			});
-
-			$('#totalQuantity').text(convertNumberToComma(totalQty));
-			$('#totalPrice').text(convertNumberToComma(totalPrice));
-
-			const cashReceived = invoiceData.cashReceived || 0;
-			const balance = totalPrice - cashReceived;
-
-			$('#cashReceivedCell').text(convertNumberToComma(cashReceived));
-			$('#balanceCell').text(convertNumberToComma(balance));
-		}
-
-
-
-		function getTotalPrice() {
-			const totalPriceText = $('#totalPrice').text().replace(/,/g, "");
-			const totalPrice = parseFloat(totalPriceText);
-
-			if (isNaN(totalPrice)) {
-				console.error("Failed to parse total price:", totalPriceText);
-				return 0;
-			}
-
-			return totalPrice;
-		}
-
-
-		function popuplateInEditMode() {
-			invoiceData.invoiceId = getQueryStringParam("id");
-			if (!invoiceData.invoiceId)
-				invoiceData.invoiceId = "";
-			else {
-				populateInvoiceDetail(invoiceData.invoiceId);
-			}
-		}
-
-		function populateInvoiceDetail(invoiceId) {
-			if (!invoiceId) {
-				console.error("Invoice ID is required to populate details.");
-				return;
-			}
-
-			showLoader();
-			DBHandler.fetchEntityRecord(
-				"billinvoice",
-				"customerid,customername,totalprice,billjson,invoicenumber,createdon,invoicenumberwithcustomername,cashreceived",
-				`id='${invoiceId}'`,
-				true
-			).then(response => {
-				if (response && response.length > 0) {
-					const invoice = response[0];
-
-					invoiceData.createdon = response[0].createdon;
-					invoiceData.invoiceNumber = response[0].invoicenumber;
-					invoiceData.cashReceived = response[0].cashreceived || 0;
-					$('#invoiceNumber').text(invoiceData.invoiceNumber);
-					if (invoice.invoicenumberwithcustomername)
-						$('#invoiceNumber').text(invoice.invoicenumberwithcustomername);
-
-					$('#invoiceHeading').removeClass('d-none');
-
-
-					$('#customerSelect').val(invoice.customerid).trigger('change');
-
-					invoiceData.invoiceId = invoiceId;
-					invoiceData.customerId = invoice.customerid;
-					invoiceData.customerName = invoice.customername;
-					invoiceData.items = JSON.parse(invoice.billjson || "[]");
-
-					renderTable();
-					updateTotals();
-
-					console.log(`Invoice details for ID ${invoiceId} populated successfully.`);
-				} else {
-					console.warn("No invoice data found for the provided ID.");
-				}
-			})
-				.catch(error => {
-					console.error("Error fetching invoice details:", error);
-					alert("Failed to fetch the invoice details. Please try again.");
-				})
-				.finally(() => {
-					hideLoader();
-				});
-		}
-
-		function populatetab() {
-			document.querySelectorAll('.toggle-btn').forEach(button => {
-				button.addEventListener('click', () => {
-					document.querySelectorAll('.toggle-section').forEach(section => {
-						section.classList.add('d-none');
-					});
-
-					document.querySelectorAll('.toggle-btn').forEach(btn => {
-						btn.classList.remove('btn-primary');
-						btn.classList.add('btn-outline-primary');
-					});
-
-					const target = button.getAttribute('data-target');
-					document.getElementById(target).classList.remove('d-none');
-
-					button.classList.remove('btn-outline-primary');
-					button.classList.add('btn-primary');
-				});
-			});
-
-			document.querySelector('.toggle-btn[data-target="itemSection"]').click();
-
-		}
-
-		function handlePackagingSlipLoadChange(event) {
-			const selectedOption = event.target.value;
-
-			let filterQuery = "";
-			const today = new Date();
-
-			if (selectedOption === "lastTwoDays") {
-				const twoDaysAgo = new Date(today);
-				twoDaysAgo.setDate(today.getDate() - 2);
-				filterQuery = `slipdate >= '${twoDaysAgo.toISOString().split('T')[0]}'`;
-			} else if (selectedOption === "lastSevenDays") {
-				const sevenDaysAgo = new Date(today);
-				sevenDaysAgo.setDate(today.getDate() - 7);
-				filterQuery = `slipdate >= '${sevenDaysAgo.toISOString().split('T')[0]}'`;
-			} else if (selectedOption === "all") {
-				filterQuery = "";
-			}
-
-			loadFreshDropdown(
-				"packagingSlip",
-				"id",
-				"packagingnumber,packagingcreatedby",
-				"packagingitemdetail",
-				"id,packagingnumber,packagingcreatedby",
-				"packagingnumber",
-				"desc",
-				filterQuery
-			)
-				.then(() => {
-					$('#packagingSlip').select2();
-				})
-				.catch(error => {
-					console.error("Error loading packaging slips:", error);
-				});
-		}
-
-
-		function toggleTableSectionVisibility() {
-			const tableSection = document.querySelector('.tablesection');
-
-			if (invoiceData.items.length > 0) {
-				tableSection.style.display = 'block';
-				tableSection.style.opacity = 0;
-				tableSection.style.transition = 'opacity 0.5s';
-				setTimeout(() => {
-					tableSection.style.opacity = 1;
-				}, 10);
-			} else {
-				tableSection.style.transition = 'opacity 0.5s';
-				tableSection.style.opacity = 0;
-				setTimeout(() => {
-					tableSection.style.display = 'none';
-				}, 500);
-			}
-		}
-
-
-		function printInvoice() {
-			try {
-				const lines = [];
-				const lineWidth = 48;
-				const rawDate = new Date(invoiceData.createdon);
-				const day = rawDate.getDate().toString().padStart(2, '0');
-				const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-				const month = monthNames[rawDate.getMonth()];
-				const year = rawDate.getFullYear();
-				const dateofCreation = `${day}-${month}-${year}`;
-				const invoiceNumber = `Estimate Number: ${invoiceData.invoiceNumber || '...'}`;
-				lines.push(centerText(invoiceNumber, lineWidth));
-				lines.push(centerText(dateofCreation, lineWidth));
-				lines.push('-'.repeat(lineWidth));
-
-				const header = `${'Item Name'.padEnd(20, ' ')}${'Price'.padStart(8, ' ')}${'Qty'.padStart(7, ' ')}${'Total'.padStart(13, ' ')}`;
-				lines.push(header);
-				lines.push('-'.repeat(lineWidth));
-
-				let totalQty = 0;
-				let totalPrice = 0;
-				const boldOn = '\x1b\x45\x01';
-				const boldOff = '\x1b\x45\x00';
-
-				invoiceData.items.forEach(item => {
-					let itemName = item.itemName;
-					const price = convertNumberToComma(item.price).padStart(8, ' ');
-					const quantity = item.quantity.toFixed(2).padStart(7, ' ');
-					const total = convertNumberToComma(item.totalPrice).padStart(13, ' ');
-					if (item.totalPrice != 0) {
-						while (itemName.length > 20) {
-							lines.push(boldOn + itemName.substring(0, 20) + boldOff);
-							itemName = itemName.substring(20);
-						}
-
-						lines.push(`${boldOn}${itemName.padEnd(20, ' ')}${boldOff}${price}${quantity}${total}`);
-
-						totalQty += parseFloat(item.quantity);
-						totalPrice += parseFloat(item.totalPrice);
-					}
-				});
-
-				totalPrice = Math.round(totalPrice);
-
-				lines.push('-'.repeat(lineWidth));
-				lines.push(
-					`${boldOn}${'Total'.padEnd(20, ' ')}${''.padStart(8, ' ')}${totalQty.toFixed(2).padStart(7, ' ')}${convertNumberToComma(totalPrice).padStart(13, ' ')}${boldOff}`
-				);
-				lines.push('-'.repeat(lineWidth));
-
-				const cashReceived = Number(invoiceData.cashReceived || 0);
-				const balance = Number((totalPrice - cashReceived) || 0);
-
-				if (cashReceived > 0) {
-					lines.push(
-						`${boldOn}${'Cash Received'.padEnd(20, ' ')}` +
-						`${''.padStart(15, ' ')}` +
-						`${convertNumberToComma(cashReceived).padStart(13, ' ')}${boldOff}`
-					);
-
-					lines.push(
-						`${boldOn}${'Pending Balance'.padEnd(20, ' ')}` +
-						`${''.padStart(15, ' ')}` +
-						`${convertNumberToComma(balance).padStart(13, ' ')}${boldOff}`
-					);
-
-					lines.push('-'.repeat(lineWidth));
-				}
-
-				lines.push(centerText('Thank you for your purchase!', lineWidth));
-				lines.push('-'.repeat(lineWidth));
-
-				printerMinPrint(lines);
-			} catch (error) {
-				console.error('Error printing invoice:', error);
-				alert(`Error printing: ${error.message}`);
-			}
-		}
-
-
-		function openNewItem() {
-			const modal = new bootstrap.Modal(document.getElementById('addItemModal'));
-			modal.show();
-
-			document.getElementById('itemName').value = '';
-			document.getElementById('price').value = '';
-		}
-
-		function openNewCustomer() {
-			const modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
-			modal.show();
-
-			document.getElementById('customerName').value = '';
-			document.getElementById('customerPhone').value = '';
-			document.getElementById('customerAddress').value = '';
-		}
-
-		function saveItem() {
-			const name = document.getElementById('itemName').value.trim();
-			const price = document.getElementById('price').value.trim();
-
-			if (!name || !price) {
-				alert('Please fill in all the fields.');
-				return;
-			}
-
-			const saveButton = document.getElementById('saveItem');
-			saveButton.disabled = true;
-			saveButton.innerHTML = 'Saving...';
-
-			const itemData = {
-				name,
-				price,
-			};
-
-			DBHandler.submitRecordData('billingitem', itemData)
-				.then((response) => {
-					if (response) {
-						alert('Item added successfully!');
-
-						const customerSelect = document.getElementById('itemSelect');
-						const newOption = new Option(name, response, true, true);
-						customerSelect.add(newOption);
-
-						$(customerSelect).trigger('change');
-						refreshAuthToken();
-						const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
-						modal.hide();
-					} else {
-						alert('Failed to add the Item. Please try again.');
-					}
-				})
-				.catch((error) => {
-					console.error('Error adding item:', error);
-					alert('An error occurred while adding the item. Please try again.');
-				})
-				.finally(() => {
-					saveButton.disabled = false;
-					saveButton.innerHTML = 'Save';
-				});
-		}
-
-		function saveCustomer() {
-			const name = document.getElementById('customerName').value.trim();
-			const phone = document.getElementById('customerPhone').value.trim();
-			const address = document.getElementById('customerAddress').value.trim();
-
-			if (!name || !phone || !address) {
-				alert('Please fill in all the fields.');
-				return;
-			}
-
-			const saveButton = document.getElementById('saveCustomer');
-			saveButton.disabled = true;
-			saveButton.innerHTML = 'Saving...';
-			var phoneNumber = phone;
-			const customerData = {
-				name,
-				phoneNumber,
-				address,
-			};
-
-			DBHandler.submitRecordData('billingcustomer', customerData)
-				.then((response) => {
-					if (response) {
-						alert('Customer added successfully!');
-
-						const customerSelect = document.getElementById('customerSelect');
-						const newOption = new Option(name, response, true, true);
-						customerSelect.add(newOption);
-
-						$(customerSelect).trigger('change');
-						refreshAuthToken();
-						const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerModal'));
-						modal.hide();
-					} else {
-						alert('Failed to add the customer. Please try again.');
-					}
-				})
-				.catch((error) => {
-					console.error('Error adding customer:', error);
-					alert('An error occurred while adding the customer. Please try again.');
-				})
-				.finally(() => {
-					saveButton.disabled = false;
-					saveButton.innerHTML = 'Save';
-				});
-		}
-
-
-		async function saveInvoiceNumber(newValue) {
-			if (!newValue.trim()) {
-				alert('Invoice number cannot be empty.');
-				return;
-			}
-
-			try {
-				showLoader();
-
-				const updatedData = {
-					invoicenumberwithcustomername: `${newValue}`
-				};
-
-
-				await DBHandler.submitRecordData('billinvoice', updatedData, invoiceData.invoiceId, false);
-
-				invoiceData.invoiceNumber = newValue;
-
-				const span = document.createElement('span');
-				span.id = 'invoiceNumber';
-				span.className = 'editable-text';
-				span.textContent = newValue;
-				span.onclick = enableInvoiceEdit;
-
-				const input = document.querySelector('#invoiceNumberInput');
-				if (input) {
-					input.replaceWith(span);
-				}
-
-				showSuccessMessage('Invoice number updated successfully!');
-			} catch (error) {
-				console.error('Error updating invoice number:', error);
-				alert('Failed to update invoice number.');
-			} finally {
-				hideLoader();
-			}
-		}
-
-		function enableInvoiceEdit() {
-			const span = document.getElementById('invoiceNumber');
-			const currentValue = span.textContent.trim();
-
-			const input = document.createElement('input');
-			input.type = 'text';
-			input.id = 'invoiceNumberInput';
-			input.value = currentValue;
-			input.className = 'form-control invoice-input';
-
-			span.replaceWith(input);
-			input.focus();
-
-			input.addEventListener('blur', () => saveInvoiceNumber(input.value));
-			input.addEventListener('keydown', (e) => {
-				if (e.key === 'Enter') {
-					saveInvoiceNumber(input.value);
-				}
-			});
-		}
-
-
-
-		function onDomLoaded() {
-			toggleTableSectionVisibility();
-			loadCustomersIntoDropdown();
-			loadItemsIntoDropdown();
-			loadPackagingSlipIntoDropdown();
-			populatetab();
-			popuplateInEditMode();
-			attachDoubleClickHandlers();
-		}
-
-
-		$(document).ready(function () {
-			onDomLoaded();
-		});
-
-
-	</script>
-</body>
-
-</html>
-
-
-
+    <div class="container" style="padding-left:0px;padding-right:0px;">
+    <div class="form" style="padding-left:20px;padding-right:20px;">
+        <h2 class="mb-4" style="margin-top:0px !important;">Estimate</h2>
+
+
+        <!-- Customer Section -->
+        <div class="mb-3">
+            <label for="customerSelect" class="form-label"><b>Customer Name:</b></label>
+            <div class="d-flex align-items-center">
+                <select id="customerSelect" class="form-select me-2" style="width: auto;"></select>
+                <button class="btn btn-primary" id="btnNewCustomer" style="margin-left:3px;"
+                    onclick="openNewCustomer()">+</button>
+            </div>
+        </div>
+
+        <div class="btn-group" role="group" id="toggleGroup">
+            <button type="button" class="btn btn-outline-primary toggle-btn" data-target="itemSection">Item</button>
+            <button type="button" class="btn btn-outline-primary toggle-btn"
+                data-target="packagingSlipSection">Packaging Slip</button>
+        </div>
+
+        <div id="itemSection" class="toggle-section">
+            <div class="mb-3">
+                <label for="itemSelect" class="form-label"><b>Item:</b></label>
+                <div class="d-flex align-items-center">
+                    <select id="itemSelect" class="form-select me-2" style="width: auto;"></select>
+                    <button class="btn btn-primary" id="btnNewItem" style="margin-left:3px;"
+                        onclick="openNewItem()">+</button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="itemQuantity" class="form-label"><b>Quantity:</b></label>
+                <input type="number" id="itemQuantity" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label for="itemPrice" class="form-label"><b>Price:</b></label>
+                <input type="number" id="itemPrice" class="form-control" />
+            </div>
+        </div>
+
+        <div id="packagingSlipSection" class="toggle-section d-none">
+            <div class="mb-3">
+                <label for="packagingSlipLoad" class="form-label"><b>Packaging Slip Load:</b></label>
+                <select id="packagingSlipLoad" class="form-select" onchange="handlePackagingSlipLoadChange(event)">
+                    <option value="lastTwoDays">Last two days</option>
+                    <option value="lastSevenDays">Last seven days</option>
+                    <option value="all">All</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="packagingSlip" class="form-label"><b>Packaging Slip:</b></label>
+                <select id="packagingSlip" class="form-select">
+                    <option value="">Select a packaging slip</option>
+                </select>
+            </div>
+        </div>
+
+
+        <!-- "Add" button -->
+        <button class="btn btn-primary" id="addToSummary" onclick="addToSummaryClick()">Add</button>
+        <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel"
+            aria-hidden="true" style="padding-top:35px;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addCustomerModalLabel">Add Customer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addCustomerForm">
+                            <div class="mb-3">
+                                <label for="customerName" class="form-label">Customer Name</label>
+                                <input type="text" id="customerName" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="customerPhone" class="form-label">Phone Number</label>
+                                <input type="text" id="customerPhone" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="customerAddress" class="form-label">Address</label>
+                                <textarea id="customerAddress" class="form-control" rows="3" required></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveCustomer"
+                            onclick="saveCustomer()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true"
+            style="padding-top:35px;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addItemModalLabel">Add Item</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addItemForm">
+                            <div class="mb-3">
+                                <label for="itemName" class="form-label">Item Name</label>
+                                <input type="text" id="itemName" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Price</label>
+                                <input type="number" id="price" class="form-control" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveItem" onclick="saveItem()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tablesection" style="padding-left:2px;padding-right:2px;">
+        <table class="vstable">
+            <thead>
+                <tr style="border:1px solid black;">
+                    <th style="padding: 8px; text-align:center;" colspan="5">
+                        Estimate Number: <span id="invoiceNumber" onclick="enableInvoiceEdit()">...</span>
+                    </th>
+                </tr>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+
+                </tr>
+            </thead>
+            <tbody id="summaryTableBody"></tbody>
+<tfoot id="summaryFooter">
+    <tr>
+        <td colspan="2" style="text-align:right;">Total</td>
+        <td id="totalQuantity" style="text-align:center;">0</td>
+        <td id="totalPrice" style="text-align:right;">0.00</td>
+    </tr>
+
+    <!-- NEW ROW 1: Cash Received -->
+    <tr>
+        <td colspan="3" style="text-align:right;">Cash/Paytm Received</td>
+        <td id="cashReceivedCell" class="footer-editable" data-field="cashReceived" style="text-align:right;">
+            0.00
+        </td>
+    </tr>
+
+    <!-- NEW ROW 2: Balance -->
+    <tr>
+        <td colspan="3" style="text-align:right;">Balance</td>
+        <td id="balanceCell" style="text-align:right;">0.00</td>
+    </tr>
+</tfoot>
+        </table>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <button class="btn btn-secondary" id="exportToPDF" onclick="exportTableToPDF()">Export</button>
+            <div class="mx-auto">
+                <button class="btn btn-success" id="generateNewBill">New</button>
+            </div>
+            <button class="btn btn-primary" id="printInvoice" onclick="printInvoice()">Print</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+    let itemArray = [];
+    let invoiceData = {
+        invoiceId: null, // Maintain invoice ID across calls
+        customerId: null,
+        customerName: null,
+        items: []
+    };
+
+    async function loadItemsIntoDropdown() {
+        try {
+            itemArray = await StaticDBHandler.fetchEntityRecord("billingitem", "id,name,price", "", false);
+			
+			itemArray.sort((a, b) => a.name.localeCompare(b.name));
+
+            $('#itemSelect').empty().append('<option value="">Select an item</option>');
+            itemArray.forEach(item => {
+                $('#itemSelect').append(new Option(item.name, item.id));
+            });
+
+            $('#itemSelect').select2();
+
+            // Add event listener to update price when an item is selected
+            $('#itemSelect').on('change', function () {
+                const selectedItemId = $(this).val();
+
+                if (selectedItemId) {
+                    // Find the selected item in itemArray
+                    const selectedItem = itemArray.find(item => item.id === selectedItemId);
+                    if (selectedItem) {
+                        // Update the price field with the selected item's price
+                        $('#itemPrice').val(parseFloat(selectedItem.price).toFixed(2));
+                    }
+                } else {
+                    // Clear the price field if no item is selected
+                    $('#itemPrice').val('');
+                }
+            });
+
+        } catch (error) {
+            console.error("Error loading items:", error);
+        }
+    }
+
+    function loadPackagingSlipIntoDropdown(filterCondition = "") {
+        let filterQuery = "";
+
+        // Determine the filter condition
+        const today = new Date();
+        if (filterCondition === "lastTwoDays") {
+            const twoDaysAgo = new Date(today);
+            twoDaysAgo.setDate(today.getDate() - 2);
+            filterQuery = `slidate >= '${twoDaysAgo.toISOString().split('T')[0]}'`;
+        } else if (filterCondition === "lastSevenDays") {
+            const sevenDaysAgo = new Date(today);
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            filterQuery = `slidate >= '${sevenDaysAgo.toISOString().split('T')[0]}'`;
+        } else if (filterCondition === "all") {
+            filterQuery = ""; // No filter for "All"
+        }
+
+        // Load the dropdown with filtered data
+        loadFreshDropdown(
+            "packagingSlip",
+            "id",
+            "packagingnumber,packagingcreatedby",
+            "packagingitemdetail",
+            "id,packagingnumber,packagingcreatedby",
+            "packagingnumber",
+            "desc",
+            filterQuery // Apply the filter query
+        ).then(() => {
+            $('#packagingSlip').select2(); // Enhance the dropdown with Select2
+        }).catch(error => {
+            console.error("Error loading packaging slips:", error);
+        });
+    }
+
+    function loadCustomersIntoDropdown() {
+        DropDownHelper.loadDropdown(
+            "customerSelect",
+            "id",
+            "name",
+            "billingcustomer",
+            "id,name",
+            "name",
+            "asc",
+            ""
+        ).then(() => {
+            $('#customerSelect').select2();
+            // Automatically select "Cash" by default
+            const cashOption = $("#customerSelect option").filter(function () {
+                return $(this).text().trim().toLowerCase() === "cash / paytm";
+            });
+
+            if (cashOption.length > 0) {
+                cashOption.prop("selected", true);
+                $('#customerSelect').trigger('change'); // Update Select2 UI
+            }
+        });
+    }
+
+    function addItem() {
+        const itemName = $('#itemSelect option:selected').text();
+        const itemId = $('#itemSelect').val();
+        const price = parseFloat($('#itemPrice').val()) || 0;
+        const quantity = parseFloat($('#itemQuantity').val()) || 0;
+        const totalPrice = price * quantity;
+        const customerId = $('#customerSelect').val();
+        const customerName = $('#customerSelect option:selected').text();
+
+        if (!customerId || !itemId || !price || !quantity) {
+            alert('Please fill all fields correctly before adding.');
+            return;
+        }
+
+        invoiceData.customerId = customerId;
+        invoiceData.customerName = customerName;
+
+        // Add or update item in invoiceData.items
+        var item222 = {
+            itemId,
+            itemName,
+            price,
+            quantity,
+            totalPrice
+        };
+        invoiceData.items.push(item222);
+
+        renderTable();
+        updateTotals();
+
+        // Clear item inputs
+        $('#itemSelect').val('').trigger('change');
+        $('#itemQuantity').val('');
+        $('#itemPrice').val('');
+        updateTotals();
+        // Pass the index of the newly added item
+        const newItemIndex = invoiceData.items.length - 1; // Get the index of the last added item
+        submitDataToServer(newItemIndex);
+    }
+
+    function addToSummaryClick() {
+        try {
+            // Get the active tab from the button group
+            const activeButton = document.querySelector('#toggleGroup .btn-primary'); // Find the active button
+            const activeTab = activeButton ? activeButton.textContent.trim() : null;
+
+            console.log("Active Tab:", activeTab);
+
+            // Perform actions based on the active tab
+            if (activeTab === "Item") {
+                addItem();
+            } else if (activeTab === "Packaging Slip") {
+                addPackagingItem();
+            } else {
+                console.error("Invalid tab selection");
+                alert("Please select a valid tab to add an item.");
+            }
+        } catch (error) {
+            console.error("Error handling addToSummary click event:", error);
+            alert("An error occurred while processing your request. Please try again.");
+        }
+    }
+
+    function addPackagingItem() {
+        console.log("Adding packaging item...");
+        const packagingSlip = document.getElementById('packagingSlip').value;
+        if (!packagingSlip) {
+            alert("Please select a packaging slip.");
+            return;
+        }
+
+        // Fetch details of the selected packaging slip
+        DBHandler.fetchEntityRecord(
+            "packagingitemdetail",
+            "itemjson,packagingnumber",
+            `id='${packagingSlip}'`, true
+        )
+            .then(response => {
+                if (response && response.length > 0) {
+                    const record = response[0]; // Assuming the first record is the required one
+
+                    // Parse and validate itemjson
+                    let itemsFromPackagingSlip = {};
+                    if (record.itemjson) {
+                        try {
+                            itemsFromPackagingSlip = JSON.parse(record.itemjson);
+
+                            // Ensure the parsed data is an object
+                            if (typeof itemsFromPackagingSlip !== "object") {
+                                console.error("Parsed itemjson is not an object:", itemsFromPackagingSlip);
+                                itemsFromPackagingSlip = {};
+                            }
+                        } catch (error) {
+                            console.error("Failed to parse itemjson:", error, record.itemjson);
+                            itemsFromPackagingSlip = {};
+                        }
+                    }
+
+                    // Validate, group, and add items
+                    const groupedItems = {};
+
+                    // Iterate over each key in the object
+                    Object.keys(itemsFromPackagingSlip).forEach(itemName => {
+                        const itemArray22 = itemsFromPackagingSlip[itemName]; // Array of item details
+                        itemArray22.forEach(item => {
+                            const itemId = item.itemId || itemName; // Use itemName as itemId if not provided
+                            const quantity = parseFloat(item.meter * item.count, 10) || 0;
+                            const selectedItem = itemArray.find(item => item.name === itemId);
+                            const price = parseFloat(selectedItem.price);
+                            const itemId1 = selectedItem.id;
+                            // Initialize or update grouped item
+                            if (!groupedItems[itemId]) {
+                                groupedItems[itemId] = {
+                                    itemId1,
+                                    itemName,
+                                    price,
+                                    quantity: 0,
+                                    totalPrice: 0
+                                };
+                            }
+
+                            groupedItems[itemId].quantity += quantity;
+                            groupedItems[itemId].totalPrice += price * quantity;
+                        });
+                    });
+
+                    // Add grouped items to invoiceData.items
+                    Object.values(groupedItems).forEach(groupedItem => {
+                        invoiceData.items.push(groupedItem);
+                    });
+
+                    // Update the UI
+                    renderTable();
+                    updateTotals();
+                    console.log(`Packaging slip "${packagingSlip}" added successfully.`);
+                    // Clear item inputs
+                    $('#itemSelect').val('').trigger('change');
+                    $('#itemQuantity').val('');
+                    $('#itemPrice').val('');
+                    submitDataToServer();
+                    $('#packagingSlip').val(null).trigger('change');
+                    // Set default active section
+                    document.querySelector('.toggle-btn[data-target="itemSection"]').click();
+
+                } else {
+                    console.warn("No data found for the provided record ID.");
+                }
+
+            })
+            .catch(error => {
+                console.error("Error fetching packaging details:", error);
+            });
+    }
+
+    function renderTable() {
+        $('#summaryTableBody').empty();
+        invoiceData.items.forEach((item, index) => {
+            const row = `
+                                             <tr>
+                                                 <td style="text-align:left">${item.itemName}</td>
+                                                 <td style="text-align:right" class="editable-cell" data-index="${index}" data-field="price">
+                                                     ${item.price.toFixed(2)}
+                                                 </td>
+                                                 <td style="text-align:center" class="editable-cell" data-index="${index}" data-field="quantity">
+                                                     ${item.quantity.toFixed(2)}
+                                                 </td>
+                                                 <td style="text-align:right">${convertNumberToComma(item.totalPrice)}</td>
+                                                 <td>
+                                                     <button class="btn btn-danger btn-sm delete-row" data-index="${index}">
+                                                         <i class="fa fa-trash"></i>
+                                                     </button>
+                                                 </td>
+                                             </tr>`;
+            $('#summaryTableBody').append(row);
+        });
+
+        attachFooterEditEvents();
+        attachDeleteHandlers();
+        toggleTableSectionVisibility();
+    }
+
+function attachFooterEditEvents() {
+    $(".footer-editable").off("dblclick").on("dblclick", function () {
+        let td = $(this);
+        let field = td.data("field");
+        let currentValue = td.text().trim();
+
+        // If already editing, do nothing
+        if (td.find("input").length > 0) return;
+
+        let input = $(`<input type="text" class="form-control form-control-sm" 
+                              style="text-align:right;" value="${currentValue}">`);
+
+        td.empty().append(input);
+        input.focus();
+
+        // Save on blur
+        input.on("blur", function () {
+            saveFooterValue(field, input.val(), td);
+        });
+
+        // Save on Enter
+        input.on("keypress", function (e) {
+            if (e.which === 13) {
+                saveFooterValue(field, input.val(), td);
+            }
+        });
+    });
+}
+
+async function saveFooterValue(field, newValue, td) {
+    try {
+        let value = parseFloat(newValue);
+        if (isNaN(value)) value = 0;
+        
+        const updatedData = {
+            cashreceived: value,
+        };
+
+        invoiceData.cashReceived  =value;
+
+        td.text(value.toFixed(2));
+        updateTotals();
+        await DBHandler.submitRecordData(
+            'billinvoice',
+            updatedData,
+            invoiceData.invoiceId,
+            false
+        );
+
+
+        showSuccessMessage('Footer values updated successfully!');
+    }
+    catch (err) {
+        console.error("Error updating footer:", err);
+        alert("Failed to update footer values.");
+    }
+    finally {
+        hideLoader();
+    }
+}
+
+
+
+    function attachDoubleClickHandlers() {
+        $('#summaryTableBody').on('dblclick', '.editable-cell', function () {
+            const cell = $(this);
+            const index = cell.data('index'); // Retrieve the item index from data attribute
+            const field = cell.data('field'); // Retrieve the field (e.g., price, quantity)
+
+            // Get the current value directly from the invoiceData.items array
+            const currentValue = invoiceData.items[index][field];
+
+            // Create an input element for editing
+            const input = $('<input>', {
+                type: 'number',
+                style: 'width: 100%;',
+                class: 'form-control form-control-sm',
+                value: currentValue.toFixed(2), // Use the value from the array
+                step: '0.01',
+            });
+
+            // Replace cell content with input
+            cell.html(input);
+            input.focus();
+
+            // Automatically select the input text
+            input[0].select();
+
+            // Save on blur or enter key
+            input.on('blur keyup', function (event) {
+                if (event.type === 'blur' || event.key === 'Enter') {
+                    const newValue = parseFloat(input.val()) || 0;
+
+                    // Update the invoiceData.items array and calculate the total price
+                    invoiceData.items[index][field] = newValue;
+                    invoiceData.items[index].totalPrice =
+                        invoiceData.items[index].price * invoiceData.items[index].quantity;
+
+                    // Replace input with updated value
+                    cell.html(newValue.toFixed(2));
+                    renderTable(); // Re-render the table to reflect changes
+                    updateTotals();
+                    submitDataToServer(index); // Submit updated data to the server
+                }
+            });
+        });
+    }
+
+    function convertNumberToComma(number) {
+        // Convert input to a valid number
+        const num = parseFloat(number);
+
+        // Check if the input is a valid number
+        if (isNaN(num)) {
+            console.error("Invalid number provided:", number);
+            return "0.00"; // Return a default value
+        }
+
+        // Split the number into integer and decimal parts
+        const parts = num.toFixed(2).split("."); // Split into integer and decimal parts
+        let integerPart = parts[0];
+        const decimalPart = parts[1];
+
+        // Apply Indian comma formatting to the integer part
+        const lastThreeDigits = integerPart.slice(-3); // Get the last three digits
+        const otherDigits = integerPart.slice(0, -3); // Get the rest of the digits
+
+        // Format the digits with commas
+        const formattedInteger = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + (otherDigits ? "," : "") + lastThreeDigits;
+
+        // Combine the formatted integer and decimal parts
+        return `${formattedInteger}.${decimalPart}`;
+    }
+
+
+
+
+
+    function attachDeleteHandlers() {
+        $('.delete-row').on('click', function () {
+            const index = $(this).data('index'); // Get the row index from the button
+            invoiceData.items.splice(index, 1); // Remove the item from the array
+            renderTable(); // Re-render the table
+            updateTotals(); // Update totals after deletion
+            submitDataToServer();
+        });
+    }
+
+
+    function exportTableToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(18);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const title = "Estimate";
+    const titleX = (pageWidth - doc.getTextWidth(title)) / 2;
+    doc.text(title, titleX, 15);
+
+    // Invoice Number
+    const invoiceNumber = $('#invoiceNumber').text().trim() || 'Draft';
+    doc.setFontSize(12);
+    doc.text(`Estimate Number: ${invoiceNumber}`, 15, 25);
+
+    // Build table data
+    const tableData = [];
+    invoiceData.items.forEach(item => {
+        tableData.push([
+            item.itemName,
+            convertNumberToComma(item.price),
+            convertNumberToComma(item.quantity),
+            convertNumberToComma(item.totalPrice),
+        ]);
+    });
+
+    // Add Total Row
+    const totalQty = $('#totalQuantity').text().trim();
+    const totalPrice = convertNumberToComma(getTotalPrice());
+
+    tableData.push([
+        "Total",
+        "",
+        totalQty,
+        totalPrice
+    ]);
+
+    // Add Cash Received & Balance only if >0
+    const cashReceived = Number(invoiceData.cashReceived || 0);
+    const balance = Number((getTotalPrice() - cashReceived) || 0);
+
+    if (cashReceived > 0) {
+        tableData.push([
+            "Cash/Paytm Received",
+            "",
+            "",
+            convertNumberToComma(cashReceived)
+        ]);
+
+        tableData.push([
+            "Pending Balance",
+            "",
+            "",
+            convertNumberToComma(balance)
+        ]);
+    }
+
+    // Table Headers
+    const headers = [["Item Name", "Price", "Quantity", "Total Price"]];
+
+    // Generate PDF Table
+    doc.autoTable({
+        head: headers,
+        body: tableData,
+        startY: 35,
+        tableLineWidth: 0.1,
+        tableLineColor: [0, 0, 0],
+
+        styles: {
+            fontSize: 10,
+            lineWidth: 0.1,
+            valign: "middle"
+        },
+        headStyles: {
+            fillColor: null,
+            textColor: [0, 0, 0],
+            fontSize: 12,
+            fontStyle: "bold",
+            halign: "center",
+            lineWidth: 0.2
+        },
+        bodyStyles: {
+            textColor: [50, 50, 50],
+            lineColor: [0, 0, 0]
+        },
+
+        columnStyles: {
+            0: { halign: "left" },
+            1: { halign: "right" },
+            2: { halign: "right" },
+            3: { halign: "right" }
+        },
+
+        alternateRowStyles: { fillColor: null },
+
+        didDrawCell: function (data) {
+            const lastRowIndex = tableData.length - 1;
+            if (data.row.index >= tableData.length - (cashReceived > 0 ? 3 : 1)) {
+                doc.setFont("helvetica", "bold");
+            }
+        }
+    });
+
+    doc.save(`Estimate_${invoiceNumber}.pdf`);
+}
+
+
+
+    function attachEditHandlers() {
+        $('#summaryTableBody td[contenteditable="true"]').on('blur', function () {
+            const index = $(this).data('index');
+            const field = $(this).data('field');
+            const value = parseFloat($(this).text());
+
+            if (!isNaN(value) && value > 0) {
+                invoiceData.items[index][field] = value;
+                invoiceData.items[index].totalPrice = invoiceData.items[index].price * invoiceData.items[index].quantity;
+
+                renderTable(); // Re-render table to update total price
+                updateTotals();
+            } else {
+                alert('Please enter a valid number.');
+                renderTable(); // Revert changes
+            }
+            submitDataToServer();
+        });
+    }
+
+    function updateItemOnServer(itemIndex) {
+        const item = invoiceData.items[itemIndex];
+
+        // Prepare data for the server
+        const billDetailData = {
+            billinvoiceid: invoiceData.invoiceId,
+            itemname: item.itemName,
+            price: item.price,
+            quantity: item.quantity,
+            totalprice: item.totalPrice,
+            customerid: invoiceData.customerId,
+        };
+
+        // Check if the item has an ID (exists on the server)
+        const recordId = item.id || null;
+
+        // Submit the updated data to the server
+        DBHandler.submitRecordData("billinvoicedetail", billDetailData, recordId, false)
+            .then(response => {
+                if (!item.id) {
+                    // If the item was newly created, update its ID in local data
+                    invoiceData.items[itemIndex].id = response;
+                }
+                console.log(`Item '${item.itemName}' updated successfully with ID: ${response}`);
+            })
+            .catch(error => {
+                console.error(`Error updating item '${item.itemName}':`, error);
+                alert('Failed to update the item on the server. Please try again.');
+            });
+    }
+
+    function generateNewBill() {
+        // Reset the invoice data
+        invoiceData = {
+            invoiceId: null,
+            customerId: null,
+            customerName: null,
+            items: []
+        };
+
+        // Clear all input fields
+        const cashOption = $("#customerSelect option").filter(function () {
+            return $(this).text().trim().toLowerCase() === "cash";
+        });
+
+        if (cashOption.length > 0) {
+            cashOption.prop("selected", true);
+            $('#customerSelect').trigger('change'); // Update Select2 UI
+        }
+
+        $('#itemSelect').val('').trigger('change');
+        $('#itemQuantity').val('');
+        $('#itemPrice').val('');
+
+        // Clear the table
+        renderTable();
+
+        // Reset totals
+        updateTotals();
+
+        $('#invoiceNumber').text('...');
+    }
+    document.getElementById('generateNewBill').addEventListener('click', generateNewBill);
+
+    $('#summaryTableBody td[contenteditable="true"]').on('blur', function () {
+        const index = $(this).data('index');
+        const field = $(this).data('field');
+        const value = parseFloat($(this).text());
+
+        if (field === 'price' || field === 'quantity') {
+            if (!isNaN(value) && value > 0) {
+                invoiceData.items[index][field] = value;
+                invoiceData.items[index].totalPrice = invoiceData.items[index].price * invoiceData.items[index].quantity;
+                renderTable(); // Re-render table to update total price
+                updateTotals();
+            } else {
+                alert('Please enter a valid number.');
+                renderTable(); // Revert changes
+            }
+        }
+    });
+
+    function processItemDetail(itemIndex) {
+        const item = invoiceData.items[itemIndex]; // Retrieve item by index
+        const billDetailData = {
+            billinvoiceid: invoiceData.invoiceId,
+            itemname: item.itemName,
+            price: item.price,
+            quantity: item.quantity,
+            totalprice: item.totalPrice,
+            customerid: invoiceData.customerId,
+        };
+
+        // Submit item details to the database
+        DBHandler.submitRecordData("billinvoicedetail", billDetailData, item.id, false)
+            .then(response => {
+                // Update the item with the returned ID
+                invoiceData.items[itemIndex].id = response;
+                console.log(`Item '${item.itemName}' submitted successfully with ID: ${response}`);
+            })
+            .catch(error => {
+                console.error(`Error submitting item '${item.itemName}':`, error);
+            });
+    }
+
+
+    function submitDataToServer(itemIndex) {
+        try {
+            if (!invoiceData.customerId) {
+                const customerId = $('#customerSelect').val();
+                const customerName = $('#customerSelect option:selected').text();
+                if (!customerId) {
+                    alert('Please fill all fields correctly before adding.');
+                    return;
+                }
+                invoiceData.customerId = customerId;
+                invoiceData.customerName = customerName;
+            }
+
+            const formData = {
+                customerid: invoiceData.customerId,
+                customername: invoiceData.customerName,
+                billjson: JSON.stringify(invoiceData.items),
+                totalprice: parseFloat(getTotalPrice()),
+            };
+            if (invoiceData.invoicedate) {
+                formData["invoicedate"] = invoiceData.invoicedate;
+            }
+            else {
+                // Get today's date in YYYY-MM-DD format
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+                const dd = String(today.getDate()).padStart(2, '0');
+
+                formData["invoicedate"] = `${yyyy}-${mm}-${dd}`;
+                invoiceData.invoicedate = formData["slipdate"];
+
+            }
+            const addButton = document.getElementById('addToSummary');
+
+            // Add spinner to the "Add" button and disable it
+            const loader = document.createElement('span');
+            loader.classList.add('spinner-border', 'spinner-border-sm', 'text-light');
+            loader.style.marginLeft = '10px';
+            addButton.appendChild(loader);
+            addButton.disabled = true;
+
+            if (invoiceData.invoiceId && itemIndex) {
+                // If invoiceId exists, no need to submit main invoice data
+                processItemDetail(itemIndex);
+
+            }
+
+            // Submit main invoice data and get the invoiceId
+            DBHandler.submitRecordData("billinvoice", formData, invoiceData.invoiceId, false)
+                .then(response => {
+                    if (response) {
+                        if (!invoiceData.invoiceId) {
+                            invoiceData.invoiceId = response;
+                            if (itemIndex)
+                                processItemDetail(itemIndex); // Submit item details after main invoice
+                            // Fetch and display the invoice number
+                            return StaticDBHandler.fetchEntityRecord(
+                                "billinvoice",
+                                "invoicenumber,createdon",
+                                `id='${invoiceData.invoiceId}'`
+                            ).then((p) => {
+                                invoiceData.createdon = p[0].createdon;
+                                invoiceData.invoiceNumber = p[0].invoicenumber;
+                                $('#invoiceNumber').text(invoiceData.invoiceNumber);
+                                $('#invoiceHeading').removeClass('d-none');
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error submitting data:", error);
+                    alert("Failed to submit the data. Please try again.");
+                })
+                .finally(() => {
+                    // Remove spinner and re-enable the button
+                    loader.remove();
+                    addButton.disabled = false;
+                });
+        } catch (error) {
+            console.error("Error in submitDataToServer:", error);
+            alert("An unexpected error occurred. Please try again.");
+        }
+    }
+
+    function updateTotals() {
+    let totalQty = 0;
+    let totalPrice = 0;
+
+    invoiceData.items.forEach(item => {
+        totalQty += item.quantity;
+        totalPrice += item.totalPrice;
+    });
+
+    // Update totals
+    $('#totalQuantity').text(convertNumberToComma(totalQty));
+    $('#totalPrice').text(convertNumberToComma(totalPrice));
+
+    // Update footer values
+    const cashReceived = invoiceData.cashReceived || 0;
+    const balance = totalPrice - cashReceived;
+
+    // Update UI
+    $('#cashReceivedCell').text(convertNumberToComma(cashReceived));
+    $('#balanceCell').text(convertNumberToComma(balance));
+}
+
+
+
+    function getTotalPrice() {
+        const totalPriceText = $('#totalPrice').text().replace(/,/g, ""); // Remove all commas
+        const totalPrice = parseFloat(totalPriceText); // Convert to a number
+
+        if (isNaN(totalPrice)) {
+            console.error("Failed to parse total price:", totalPriceText);
+            return 0; // Return 0 if parsing fails
+        }
+
+        return totalPrice;
+    }
+
+
+    function popuplateInEditMode() {
+        invoiceData.invoiceId = getQueryStringParam("id");
+        if (!invoiceData.invoiceId)
+            invoiceData.invoiceId = "";
+        else {
+            populateInvoiceDetail(invoiceData.invoiceId);
+        }
+    }
+
+    function populateInvoiceDetail(invoiceId) {
+        if (!invoiceId) {
+            console.error("Invoice ID is required to populate details.");
+            return;
+        }
+
+        showLoader();
+        // Fetch the main invoice data
+        DBHandler.fetchEntityRecord(
+            "billinvoice",
+            "customerid,customername,totalprice,billjson,invoicenumber,createdon,invoicenumberwithcustomername,cashreceived",
+            `id='${invoiceId}'`,
+            true
+        ).then(response => {
+            if (response && response.length > 0) {
+                const invoice = response[0];
+
+                invoiceData.createdon = response[0].createdon;
+                invoiceData.invoiceNumber = response[0].invoicenumber;
+                invoiceData.cashReceived = response[0].cashreceived || 0;
+                $('#invoiceNumber').text(invoiceData.invoiceNumber);
+                if(invoice.invoicenumberwithcustomername)
+                    $('#invoiceNumber').text(invoice.invoicenumberwithcustomername);
+
+                $('#invoiceHeading').removeClass('d-none');
+
+
+                // Populate customer information
+                $('#customerSelect').val(invoice.customerid).trigger('change');
+
+                // Update invoice data object
+                invoiceData.invoiceId = invoiceId;
+                invoiceData.customerId = invoice.customerid;
+                invoiceData.customerName = invoice.customername;
+                invoiceData.items = JSON.parse(invoice.billjson || "[]");
+
+                // Render the table with items
+                renderTable();
+                updateTotals();
+
+                console.log(`Invoice details for ID ${invoiceId} populated successfully.`);
+            } else {
+                console.warn("No invoice data found for the provided ID.");
+            }
+        })
+            .catch(error => {
+                console.error("Error fetching invoice details:", error);
+                alert("Failed to fetch the invoice details. Please try again.");
+            })
+            .finally(() => {
+                hideLoader();
+            });
+    }
+
+    function populatetab() {
+        // Attach click event listeners to toggle buttons
+        document.querySelectorAll('.toggle-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Hide all sections
+                document.querySelectorAll('.toggle-section').forEach(section => {
+                    section.classList.add('d-none');
+                });
+
+                // Remove active state from all buttons
+                document.querySelectorAll('.toggle-btn').forEach(btn => {
+                    btn.classList.remove('btn-primary');
+                    btn.classList.add('btn-outline-primary');
+                });
+
+                // Show the targeted section
+                const target = button.getAttribute('data-target');
+                document.getElementById(target).classList.remove('d-none');
+
+                // Set active state for the clicked button
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-primary');
+            });
+        });
+
+        // Set default active section
+        document.querySelector('.toggle-btn[data-target="itemSection"]').click();
+
+    }
+
+    function handlePackagingSlipLoadChange(event) {
+        const selectedOption = event.target.value;
+
+        let filterQuery = "";
+        const today = new Date();
+
+        // Determine filter query based on selected option
+        if (selectedOption === "lastTwoDays") {
+            const twoDaysAgo = new Date(today);
+            twoDaysAgo.setDate(today.getDate() - 2);
+            filterQuery = `slipdate >= '${twoDaysAgo.toISOString().split('T')[0]}'`;
+        } else if (selectedOption === "lastSevenDays") {
+            const sevenDaysAgo = new Date(today);
+            sevenDaysAgo.setDate(today.getDate() - 7);
+            filterQuery = `slipdate >= '${sevenDaysAgo.toISOString().split('T')[0]}'`;
+        } else if (selectedOption === "all") {
+            filterQuery = ""; // No filter for "All"
+        }
+
+        // Call the function to load packaging slips
+        loadFreshDropdown(
+            "packagingSlip",
+            "id",
+            "packagingnumber,packagingcreatedby",
+            "packagingitemdetail",
+            "id,packagingnumber,packagingcreatedby",
+            "packagingnumber",
+            "desc",
+            filterQuery // Apply the filter query
+        )
+            .then(() => {
+                $('#packagingSlip').select2(); // Initialize Select2 for better dropdown experience
+            })
+            .catch(error => {
+                console.error("Error loading packaging slips:", error);
+            });
+    }
+
+
+    function toggleTableSectionVisibility() {
+        const tableSection = document.querySelector('.tablesection');
+
+        if (invoiceData.items.length > 0) {
+            tableSection.style.display = 'block';
+            tableSection.style.opacity = 0; // Start with invisible
+            tableSection.style.transition = 'opacity 0.5s'; // Animation duration
+            setTimeout(() => {
+                tableSection.style.opacity = 1; // Fade in
+            }, 10); // Slight delay to trigger the transition
+        } else {
+            tableSection.style.transition = 'opacity 0.5s'; // Animation duration
+            tableSection.style.opacity = 0; // Fade out
+            setTimeout(() => {
+                tableSection.style.display = 'none'; // Hide after fade-out completes
+            }, 500); // Delay matches the transition duration
+        }
+    }
+
+
+    function printInvoice() {
+        try {
+            const lines = [];
+            const lineWidth = 48; // Character width for a 3-inch receipt
+debugger;
+            const rawDate = new Date(invoiceData.createdon);
+            const day = rawDate.getDate().toString().padStart(2, '0');
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames[rawDate.getMonth()];
+            const year = rawDate.getFullYear();
+            const dateofCreation = `${day}-${month}-${year}`;
+            // Add Invoice Number
+            const invoiceNumber = `Estimate Number: ${invoiceData.invoiceNumber || '...'}`;
+            lines.push(centerText(invoiceNumber, lineWidth));
+            lines.push(centerText(dateofCreation, lineWidth));
+            lines.push('-'.repeat(lineWidth)); // Divider line
+
+            // Add Table Header with proper spacing
+            const header = `${'Item Name'.padEnd(20, ' ')}${'Price'.padStart(8, ' ')}${'Qty'.padStart(7, ' ')}${'Total'.padStart(13, ' ')}`;
+            lines.push(header);
+            lines.push('-'.repeat(lineWidth));
+
+            let totalQty = 0;
+            let totalPrice = 0;
+            const boldOn = '\x1b\x45\x01';  // Turn bold mode on
+            const boldOff = '\x1b\x45\x00'; // Turn bold mode off
+
+            // Add Invoice Items
+            invoiceData.items.forEach(item => {
+                let itemName = item.itemName;
+                const price = convertNumberToComma(item.price).padStart(8, ' ');
+                const quantity = item.quantity.toFixed(2).padStart(7, ' ');
+                const total = convertNumberToComma(item.totalPrice).padStart(13, ' ');
+                if (item.totalPrice != 0) {
+                    // Split item name into multiple lines if it exceeds 20 characters
+                    while (itemName.length > 20) {
+                        lines.push(boldOn + itemName.substring(0, 20) + boldOff);
+                        itemName = itemName.substring(20); // Trim the processed part
+                    }
+
+                    // Add the last part of the item name with the other columns
+                    lines.push(`${boldOn}${itemName.padEnd(20, ' ')}${boldOff}${price}${quantity}${total}`);
+
+                    totalQty += parseFloat(item.quantity);
+                    totalPrice += parseFloat(item.totalPrice);
+                }
+            });
+
+            totalPrice = Math.round(totalPrice);
+
+            // Add Total Section
+            lines.push('-'.repeat(lineWidth));
+            lines.push(
+                `${boldOn}${'Total'.padEnd(20, ' ')}${''.padStart(8, ' ')}${totalQty.toFixed(2).padStart(7, ' ')}${convertNumberToComma(totalPrice).padStart(13, ' ')}${boldOff}`
+            );
+            lines.push('-'.repeat(lineWidth));
+
+             const cashReceived = Number(invoiceData.cashReceived || 0);
+            const balance = Number((totalPrice-cashReceived) || 0);
+
+        if (cashReceived > 0) {
+            // Cash Received row
+            lines.push(
+                `${boldOn}${'Cash Received'.padEnd(20, ' ')}` +
+                `${''.padStart(15, ' ')}` +
+                `${convertNumberToComma(cashReceived).padStart(13, ' ')}${boldOff}`
+            );
+
+            // Pending Balance row
+            lines.push(
+                `${boldOn}${'Pending Balance'.padEnd(20, ' ')}` +
+                `${''.padStart(15, ' ')}` +
+                `${convertNumberToComma(balance).padStart(13, ' ')}${boldOff}`
+            );
+
+            lines.push('-'.repeat(lineWidth));
+        }
+
+            // Add Footer (Optional)
+            lines.push(centerText('Thank you for your purchase!', lineWidth));
+            lines.push('-'.repeat(lineWidth));
+
+            // Send Lines to Printer
+            printerMinPrint(lines);
+        } catch (error) {
+            console.error('Error printing invoice:', error);
+            alert(`Error printing: ${error.message}`);
+        }
+    }
+
+
+    function openNewItem() {
+        // Open the "Add Customer" modal
+        const modal = new bootstrap.Modal(document.getElementById('addItemModal'));
+        modal.show();
+
+        // Clear the input fields in the modal
+        document.getElementById('itemName').value = '';
+        document.getElementById('price').value = '';
+    }
+
+    function openNewCustomer() {
+        // Open the "Add Customer" modal
+        const modal = new bootstrap.Modal(document.getElementById('addCustomerModal'));
+        modal.show();
+
+        // Clear the input fields in the modal
+        document.getElementById('customerName').value = '';
+        document.getElementById('customerPhone').value = '';
+        document.getElementById('customerAddress').value = '';
+    }
+
+    function saveItem() {
+        const name = document.getElementById('itemName').value.trim();
+        const price = document.getElementById('price').value.trim();
+
+        if (!name || !price) {
+            alert('Please fill in all the fields.');
+            return;
+        }
+
+        // Show a loading spinner or disable the button while saving
+        const saveButton = document.getElementById('saveItem');
+        saveButton.disabled = true;
+        saveButton.innerHTML = 'Saving...';
+
+        const itemData = {
+            name,
+            price,
+        };
+
+        // Submit the customer data to the server
+        DBHandler.submitRecordData('billingitem', itemData)
+            .then((response) => {
+                if (response) {
+                    alert('Item added successfully!');
+
+                    // Add the new customer to the dropdown and select it
+                    const customerSelect = document.getElementById('itemSelect');
+                    const newOption = new Option(name, response, true, true); // Select the new customer
+                    customerSelect.add(newOption);
+
+                    $(customerSelect).trigger('change');
+                    refreshAuthToken();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addItemModal'));
+                    modal.hide();
+                } else {
+                    alert('Failed to add the Item. Please try again.');
+                }
+            })
+            .catch((error) => {
+                console.error('Error adding item:', error);
+                alert('An error occurred while adding the item. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable the button and reset its text
+                saveButton.disabled = false;
+                saveButton.innerHTML = 'Save';
+            });
+    }
+
+    function saveCustomer() {
+        const name = document.getElementById('customerName').value.trim();
+        const phone = document.getElementById('customerPhone').value.trim();
+        const address = document.getElementById('customerAddress').value.trim();
+
+        // Validate input fields
+        if (!name || !phone || !address) {
+            alert('Please fill in all the fields.');
+            return;
+        }
+
+        // Show a loading spinner or disable the button while saving
+        const saveButton = document.getElementById('saveCustomer');
+        saveButton.disabled = true;
+        saveButton.innerHTML = 'Saving...';
+        var phoneNumber = phone;
+        // Data to be submitted
+        const customerData = {
+            name,
+            phoneNumber,
+            address,
+        };
+
+        // Submit the customer data to the server
+        DBHandler.submitRecordData('billingcustomer', customerData)
+            .then((response) => {
+                if (response) {
+                    alert('Customer added successfully!');
+
+                    // Add the new customer to the dropdown and select it
+                    const customerSelect = document.getElementById('customerSelect');
+                    const newOption = new Option(name, response, true, true); // Select the new customer
+                    customerSelect.add(newOption);
+
+                    $(customerSelect).trigger('change');
+                    refreshAuthToken();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addCustomerModal'));
+                    modal.hide();
+                } else {
+                    alert('Failed to add the customer. Please try again.');
+                }
+            })
+            .catch((error) => {
+                console.error('Error adding customer:', error);
+                alert('An error occurred while adding the customer. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable the button and reset its text
+                saveButton.disabled = false;
+                saveButton.innerHTML = 'Save';
+            });
+    }
+
+    
+async function saveInvoiceNumber(newValue) {
+    if (!newValue.trim()) {
+        alert('Invoice number cannot be empty.');
+        return;
+    }
+
+    try {
+        showLoader();
+
+        // Prepare data for DB
+        const updatedData = {
+            invoicenumberwithcustomername : `${newValue}`
+        };
+
+
+        // Update DB
+        await DBHandler.submitRecordData('billinvoice', updatedData, invoiceData.invoiceId, false);
+
+        // Update invoiceData object
+        invoiceData.invoiceNumber = newValue;
+
+        // ✅ Convert back to span after save
+        const span = document.createElement('span');
+        span.id = 'invoiceNumber';
+        span.className = 'editable-text';
+        span.textContent = newValue;
+        span.onclick = enableInvoiceEdit;
+
+        // Replace only the specific input we created
+        const input = document.querySelector('#invoiceNumberInput'); // Use a unique ID
+        if (input) {
+            input.replaceWith(span);
+        }
+
+        showSuccessMessage('Invoice number updated successfully!');
+    } catch (error) {
+        console.error('Error updating invoice number:', error);
+        alert('Failed to update invoice number.');
+    } finally {
+        hideLoader();
+    }
+}
+
+function enableInvoiceEdit() {
+    const span = document.getElementById('invoiceNumber');
+    const currentValue = span.textContent.trim();
+
+    // Create input field with unique ID
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.id = 'invoiceNumberInput'; // ✅ Unique ID
+    input.value = currentValue;
+    input.className = 'form-control';
+    input.style.width = '200px';
+
+    span.replaceWith(input);
+    input.focus();
+
+    input.addEventListener('blur', () => saveInvoiceNumber(input.value));
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            saveInvoiceNumber(input.value);
+        }
+    });
+}
+
+
+
+    function onDomLoaded() {
+        toggleTableSectionVisibility()
+        loadCustomersIntoDropdown();
+        loadItemsIntoDropdown();
+        loadPackagingSlipIntoDropdown();
+        populatetab();
+        popuplateInEditMode();
+        attachDoubleClickHandlers();
+    }
+
+
+    $(document).ready(function () {
+        onDomLoaded();
+    });
+
+
+</script>
+
+</body></html>

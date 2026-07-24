@@ -69,9 +69,6 @@
 			<div><b>Total Than:</b> <span id="total-count-display">0</span></div>
 			<div><b>Total Meter:</b> <span id="total-sum-display">0</span></div>
 		</div>
-
-		<h2 class="mb-4 packaging-title">Packaging Slip</h2>
-
 		<div class="mb-3">
 			<label for="itemDropdown" class="form-label"><b>Item Name </b></label>
 			<select id="itemDropdown" class="form-select">
@@ -79,11 +76,11 @@
 			</select>
 		</div>
 
-		<div class="row mb-2">
-			<div class="col-md-4">
+		<div class="row mb-2 meter-than-row">
+			<div class="col-6 col-md-6 meter-than-col">
 				<label class="form-label"><b>Meter</b></label>
 			</div>
-			<div class="col-md-4">
+			<div class="col-6 col-md-6 meter-than-col">
 				<label class="form-label"><b>Than</b></label>
 			</div>
 		</div>
@@ -110,7 +107,8 @@
 				this.totalSumDisplay = document.getElementById('total-sum-display');
 				this.container = document.getElementById('input-container');
 				this.addButton = document.getElementById('add-item-btn');
-				this.itemDropdown = $('#itemDropdown');
+				this.itemDropdownEl = document.getElementById('itemDropdown');
+				this.itemDropdownControl = null;
 				const buttonsContainer = this.createButtonsContainer();
 				this.exportButton = this.createExportButton(buttonsContainer);
 				this.boldOn = '\x1b\x45\x01';
@@ -206,33 +204,26 @@
 			}
 
 			defineItemDropdown() {
-				this.initializeItemDropdownSelect2();
+				this.initializeItemDropdown();
 			}
 
-			initializeItemDropdownSelect2() {
-				const control = this.itemDropdown;
-				if (!control || !control.length) return;
-				const hasSelect2 = typeof $.fn !== 'undefined' && typeof $.fn.select2 === 'function';
-				if (!hasSelect2) return;
+			initializeItemDropdown() {
+				if (!this.itemDropdownEl) return;
 
-				if (control.data('select2')) {
-					control.select2('destroy');
+				if (this.itemDropdownControl) {
+					this.itemDropdownControl.destroy();
 				}
 
-				control.select2({
-					dropdownAutoWidth: true,
-					width: '100%',
+				this.itemDropdownControl = new ej.dropdowns.DropDownList({
+					dataSource: [],
+					fields: { text: 'name', value: 'name' },
 					placeholder: '-- Select Item --',
-					allowClear: true
+					allowFiltering: true,
+					filterBarPlaceholder: 'Search item...',
+					popupHeight: '250px'
 				});
 
-				const arrow = control.next('.select2-container').find('.select2-selection__arrow');
-				arrow.off('mousedown.forceopen').on('mousedown.forceopen', function (event) {
-					event.preventDefault();
-					if (typeof $.fn !== 'undefined' && typeof $.fn.select2 === 'function') {
-						control.select2('open');
-					}
-				});
+				this.itemDropdownControl.appendTo('#itemDropdown');
 			}
 
 			async printTableViaBluetooth() {
@@ -426,39 +417,38 @@
 						const table = cell.closest('table');
 						const oldItemName = table.getAttribute('data-item-name');
 
-						const select = document.createElement('select');
-						select.classList.add('form-select', 'item-edit-dropdown');
+						const input = document.createElement('input');
+						input.type = 'text';
+						const inputId = `item_edit_${Date.now()}`;
+						input.id = inputId;
 						cell.innerHTML = '';
-						cell.appendChild(select);
+						cell.appendChild(input);
 
 						if (Array.isArray(this.billingItemData) && this.billingItemData.length > 0) {
-							select.append(new Option('-- Select Item --', ''));
-							this.billingItemData.forEach(record => {
-								const option = new Option(record.name, record.name);
-								select.append(option);
+							const inlineDropdown = new ej.dropdowns.DropDownList({
+								dataSource: this.billingItemData,
+								fields: { text: 'name', value: 'name' },
+								placeholder: '-- Select Item --',
+								allowFiltering: true,
+								popupHeight: '250px',
+								value: oldItemName,
+								change: (ev) => {
+									const newItemName = ev.value;
+									if (newItemName && newItemName !== oldItemName) {
+										this.itemData[newItemName] = this.itemData[oldItemName];
+										delete this.itemData[oldItemName];
+										this.renderTable();
+										this.updateSummary();
+									} else {
+										cell.innerHTML = oldItemName;
+									}
+								}
 							});
+							inlineDropdown.appendTo('#' + inputId);
 						} else {
 							console.warn('billingItemData is empty or not loaded.');
+							cell.innerHTML = oldItemName;
 						}
-
-						if (typeof $.fn !== 'undefined' && typeof $.fn.select2 === 'function') {
-							$(select).select2({ dropdownAutoWidth: true, width: 'resolve' });
-						}
-
-						$(select).on('select2:select', (ev) => {
-							const newItemName = ev.params.data.text;
-							if (newItemName && newItemName !== oldItemName) {
-								this.itemData[newItemName] = this.itemData[oldItemName];
-								delete this.itemData[oldItemName];
-
-								cell.innerHTML = newItemName;
-
-								this.renderTable();
-								this.updateSummary();
-							} else {
-								cell.innerHTML = oldItemName;
-							}
-						});
 					}
 
 					if (cell.tagName === 'TD' && cell.closest('tbody')) {
@@ -528,7 +518,7 @@
 
 				for (let i = 0; i < totallendth; i++) {
 					const newRow = document.createElement('div');
-					newRow.classList.add('row', 'mb-2');
+					newRow.classList.add('row', 'mb-2', 'meter-than-row');
 
 					const meterTabIndex = rows.length + i + 1;
 					const countTabIndex = (rows.length + 250 + i) * 2 + 1;
@@ -548,11 +538,11 @@
 					countInput.setAttribute('tabindex', countTabIndex);
 
 					const meterCol = document.createElement('div');
-					meterCol.classList.add('col-md-4');
+					meterCol.classList.add('col-6', 'col-md-6', 'meter-than-col');
 					meterCol.appendChild(meterInput);
 
 					const countCol = document.createElement('div');
-					countCol.classList.add('col-md-4');
+					countCol.classList.add('col-6', 'col-md-6', 'meter-than-col');
 					countCol.appendChild(countInput);
 
 					newRow.appendChild(meterCol);
@@ -566,21 +556,24 @@
 
 			handleAddItem() {
 				this.addButton.addEventListener('click', () => {
-					const selectedItemId = this.itemDropdown.val();
-					const itemName = this.itemDropdown.find(':selected').text();
+					const selectedItemId = this.itemDropdownControl ? this.itemDropdownControl.value : '';
+					const itemName = selectedItemId;
 
 
 					if (!selectedItemId) {
-						const dropdownContainer = this.itemDropdown.siblings('.select2-container');
+						const dropdownContainer = this.itemDropdownControl && this.itemDropdownControl.inputWrapper
+							? this.itemDropdownControl.inputWrapper.container
+							: null;
 
-						dropdownContainer.css('border', '2px solid red');
+						if (dropdownContainer) {
+							dropdownContainer.style.border = '2px solid red';
+							dropdownContainer.title = 'Please select an item';
 
-						dropdownContainer.attr('title', 'Please select an item');
-
-						setTimeout(() => {
-							dropdownContainer.css('border', '');
-							dropdownContainer.removeAttr('title');
-						}, 3000);
+							setTimeout(() => {
+								dropdownContainer.style.border = '';
+								dropdownContainer.removeAttribute('title');
+							}, 3000);
+						}
 
 						return;
 					}
@@ -602,7 +595,9 @@
 					this.container.innerHTML = '';
 					this.generateNextRow();
 
-					this.itemDropdown.val(null).trigger('change');
+					if (this.itemDropdownControl) {
+						this.itemDropdownControl.value = null;
+					}
 					this.renderTable();
 					this.updateSummary();
 				});
@@ -780,7 +775,6 @@
 			}
 
 			loadDropdown() {
-				const controlId = "itemDropdown";
 				const key = "name";
 				const value = "name";
 				const entityName = "billingitem";
@@ -791,27 +785,18 @@
 
 				StaticDBHandler.fetchEntityRecord(entityName, columns, filterClause, false)
 					.then(records => {
-						const control = $('#' + controlId);
-						if (!control.length) {
-							console.error(`Control with ID "${controlId}" not found.`);
+						if (!this.itemDropdownControl) {
+							console.error('Item dropdown control not initialized.');
 							return;
 						}
 
 						records.sort((a, b) => a.name.localeCompare(b.name));
 
-						const valueFields = value.split(',');
-
-						control.empty();
-
-						control.append(new Option('-- Select --', ''));
-
-						records.forEach(record => {
-							const keyData = record[key];
-							const valueData = valueFields.map(field => record[field]).join(' -- ');
-							control.append(new Option(valueData, keyData));
-						});
 						this.billingItemData = records;
-						this.initializeItemDropdownSelect2();
+						this.itemDropdownControl.fields = { text: value, value: key };
+						this.itemDropdownControl.dataSource = records;
+						this.itemDropdownControl.value = null;
+						this.itemDropdownControl.dataBind();
 					})
 					.catch(error => {
 						console.error('Error loading dropdown:', error);
@@ -880,6 +865,34 @@
 			window.clothMeterCalculator = new ClothMeterCalculator();
 		});
 	</script>
+	<style>
+
+		.fixed-summary {
+			position: fixed;
+			top: 8px;
+			left: 50px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			width: 90%;
+			z-index: 1050;
+			background: #fff;
+			padding: 8px 12px;
+			border: 1px solid #dee2e6;
+			border-radius: 8px;
+			box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+		}
+
+		.meter-than-row {
+			display: flex;
+			flex-wrap: nowrap;
+		}
+
+		.meter-than-col {
+			flex: 0 0 50%;
+			max-width: 50%;
+		}
+	</style>
 	<script>
 
 		function getClothMeterCalculator() {
