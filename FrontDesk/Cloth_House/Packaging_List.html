@@ -1,10 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head runat="server">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Packaging List</title>
+
     <script>
         let classMap = [];
         var apiURL = "https://dbsit2.vsservices.in/";
@@ -12,7 +12,6 @@
     </script>
 
     <link href="https://apisit.vsservices.in/css/Default/bootstrap.min.css" rel="stylesheet" />
-
     <script src="https://apisit.vsservices.in/css/Default/jquery.min.js"></script>
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
     <link href="https://apisit.vsservices.in/css/Default/font-awesome-all.min.css" rel="stylesheet" />
@@ -25,6 +24,7 @@
     <script src="https://apisit.vsservices.in/JS/controls.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/listcontrols.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/formHandler.js?id=081220258" type="module"></script>
+    <script src="https://apisit.vsservices.in/JS/pageLoader.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/Master/DBHandler.js?id=081220258" type="module"></script>
     <script src="https://apisit.vsservices.in/JS/VastuBill/VastuBillPDFExporter.js?id=081220258"></script>
 
@@ -41,13 +41,12 @@
     <script src="https://apisit.vsservices.in/css/Default/vfs_fonts.js"></script>
 
     <script src="https://apisit.vsservices.in/css/Default/xlsx.full.min.js"></script>
-
     <script src="https://apisit.vsservices.in/css/Default/moment.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.css"
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-base/styles/bootstrap5.css" rel="stylesheet">
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-grids/styles/bootstrap5.css" rel="stylesheet">
@@ -63,323 +62,894 @@
     <link href="https://cdn.syncfusion.com/ej2/32.1.19/ej2-splitbuttons/styles/bootstrap5.css" rel="stylesheet">
     <script src="https://cdn.syncfusion.com/ej2/32.1.19/dist/ej2.min.js" type="text/javascript"></script>
     <script src="https://cdn.syncfusion.com/ej2/syncfusion-helper.js" type="text/javascript"></script>
-
 </head>
-
 <body>
-    <div class="container2">
-        <div class="toolbar toolbar-spacing">
-            <div class="row g-3 align-items-end">
-                <div class="col-sm-6 col-md-3">
-                    <label for="startDate">From date</label>
-                    <input id="startDate" class="form-control" datatype="date" defaultValue="currentDate"
-                        onchange="loadPackagingRecords()">
-                </div>
-                <div class="col-sm-6 col-md-3">
-                    <label for="endDate">To date</label>
-                    <input id="endDate" class="form-control" datatype="date" defaultValue="currentDate"
-                        onchange="loadPackagingRecords()">
-                </div>
-            </div>
-        </div>
-        <div id="packagingGrid"></div>
-    </div>
+<div class="container mt-4 packaging-page">
+		<div class="fixed-summary">
+			<div><b>Total Than:</b> <span id="total-count-display">0</span></div>
+			<div><b>Total Meter:</b> <span id="total-sum-display">0</span></div>
+		</div>
 
-    <div class="modal fade" id="packagingModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
+		<h2 class="mb-4 packaging-title">Packaging Slip</h2>
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Add Packaging</h5>
-                    <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
-                </div>
+		<div class="mb-3">
+			<label for="itemDropdown" class="form-label"><b>Item Name </b></label>
+			<select id="itemDropdown" class="form-select">
+				<option value="">-- Select Item --</option>
+			</select>
+		</div>
 
-                <div class="modal-body">
-                    <form id="packagingForm">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="packagingnumber">Packaging Number<span class="text-danger">*</span></label>
-                                <input id="packagingnumber" class="form-control" maxlength="100" required />
-                            </div>
-                            <div class="col-md-6">
-                                <label for="packagingcreatedby">Created By</label>
-                                <input id="packagingcreatedby" class="form-control" maxlength="255" />
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <label for="createdon">Created Date</label>
-                                <input id="createdon" class="form-control" datatype="date" defaultValue="currentDate" />
-                            </div>
-                            <div class="col-md-6">
-                                <label for="status">Status</label>
-                                <select id="status" class="form-control">
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
-                                </select>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+		<div class="row mb-2">
+			<div class="col-md-4">
+				<label class="form-label"><b>Meter</b></label>
+			</div>
+			<div class="col-md-4">
+				<label class="form-label"><b>Than</b></label>
+			</div>
+		</div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="savePackaging(event)">Save</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+		<div id="input-container"></div>
 
-            </div>
-        </div>
-    </div>
+		<button id="add-item-btn" tabindex="499" class="btn btn-primary mt-3">Add Item</button>
 
-    <script>
+		<div id="results-container" class="mt-4"></div>
 
-        let grid;
-        let editingId = null;
+	</div>
 
-        const columns = [
-            { type: 'checkbox', width: 50 },
-            { field: 'srno', headerText: 'S.No.', textAlign: 'Right', width: 80 },
-            { field: 'packagingnumber', headerText: 'Packaging Number', width: 180 },
-            { field: 'packagingcreatedby', headerText: 'Created By', width: 180 },
-            { field: 'status', headerText: 'Status', width: 120 },
-            { field: 'createdon', headerText: 'Created Date', type: 'date', format: { type: 'date', format: 'd/M/y' }, width: 130 },
-            { field: 'id', headerText: 'Id', visible: false, allowPdfExport: false }
-        ];
+	<script>
 
-        function getSafeDatePickerValue(id) {
-            if (typeof getDatePickerValue === 'function') {
-                return getDatePickerValue(id);
-            }
-            const el = document.getElementById(id);
-            return el ? el.value : '';
-        }
+		class ClothMeterCalculator {
+			constructor() {
+				this.recordId = "";
+				this.packagingSlipNumber = "";
+				this.packagingnumbernew = "";
+				this.itemData = {};
+				this.billingItemData = {};
+				this.resultsContainer = document.getElementById('results-container');
+				this.totalCountDisplay = document.getElementById('total-count-display');
+				this.totalSumDisplay = document.getElementById('total-sum-display');
+				this.container = document.getElementById('input-container');
+				this.addButton = document.getElementById('add-item-btn');
+				this.itemDropdown = $('#itemDropdown');
+				const buttonsContainer = this.createButtonsContainer();
+				this.exportButton = this.createExportButton(buttonsContainer);
+				this.boldOn = '\x1b\x45\x01';
+				this.boldOff = '\x1b\x45\x00';
+				this.newSlipButton = this.createNewSlipButton(buttonsContainer);
+				this.printButton = this.createPrintButton(buttonsContainer);
+				this.recordId = getQueryStringParam("id");
+				if (!this.recordId)
+					this.recordId = "";
+				else {
+					this.populatePackagingDetail(this.recordId);
+				}
+				this.initializePage();
 
-        function formatDate(value) {
-            const d = value instanceof Date ? value : new Date(value);
-            if (isNaN(d)) return '';
-            const dd = String(d.getDate()).padStart(2, '0');
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const yyyy = d.getFullYear();
-            return `${dd}-${mm}-${yyyy}`;
-        }
+				this.updateSummary(true);
+			}
+			populatePackagingDetail(recordId) {
+				showLoader();
+				DBHandler.fetchEntityRecord(
+					"packagingitemdetail",
+					"itemjson,packagingnumber,createdon,packagingnumbernew",
+					`id='${recordId}'`
+				)
+					.then(response => {
+						if (response && response.length > 0) {
+							const record = response[0];
 
-        function normalizeDate(val) {
-            if (!val) return null;
-            const d = val instanceof Date ? val : new Date(val);
-            return isNaN(d) ? null : d;
-        }
+							if (record.itemjson) {
+								try {
+									this.itemData = JSON.parse(record.itemjson);
+								} catch (error) {
+									console.error("Failed to parse itemjson:", error);
+									this.itemData = {};
+								}
+							}
 
-        function initGrid(cols, gridId) {
-            ej.grids.Grid.Inject(
-                ej.grids.Filter,
-                ej.grids.Group,
-                ej.grids.Page,
-                ej.grids.Sort,
-                ej.grids.Toolbar,
-                ej.grids.ColumnChooser,
-                ej.grids.ExcelExport,
-                ej.grids.PdfExport
-            );
+							if (record.packagingnumber) {
+								this.packagingSlipNumber = record.packagingnumber;
+								this.packagingnumbernew = record.packagingnumbernew;
+								if (record.packagingnumbernew && record.packagingnumbernew.trim() != "")
+									this.packagingSlipNumber = record.packagingnumbernew;
+								this.createdon = record.createdon;
+							}
 
-            grid = new ej.grids.Grid({
-                dataSource: [],
-                allowPaging: true,
-                pageSettings: { pageSize: 10 },
-                allowSorting: true,
-                allowFiltering: true,
-                filterSettings: { type: 'Excel' },
-                showColumnChooser: true,
-                selectionSettings: { type: 'Multiple' },
-                rowSelected: toggleEditButton,
-                rowDeselected: toggleEditButton,
-                allowExcelExport: true,
-                allowPdfExport: true,
-                toolbar: [
-                    'Search',
-                    'ColumnChooser',
-                    { prefixIcon: 'e-icons e-excelexport', tooltipText: 'Export Excel', id: 'excelExport' },
-                    { prefixIcon: 'e-icons e-pdfexport', tooltipText: 'Export PDF', id: 'pdfExport' },
-                    { prefixIcon: 'e-icons e-refresh', tooltipText: 'Refresh', id: 'refreshGrid' },
-                    { text: 'New', prefixIcon: 'e-icons e-plus', id: 'new' },
-                    { text: 'Edit', prefixIcon: 'e-icons e-edit', id: 'edit', disabled: true },
-                    { text: 'Delete', prefixIcon: 'e-icons e-delete', id: 'delete' }
-                ],
-                columns: cols,
-                toolbarClick: function (args) {
-                    if (args.item.id === 'excelExport') {
-                        grid.excelExport({ fileName: `PackagingList_${formatDate(new Date())}.xlsx`, exportType: 'AllPages' });
-                    }
+							this.renderTable();
+							this.updateSummary(true);
+							hideLoader();
+						} else {
+							console.warn("No data found for the provided record ID.");
+						}
+					})
+					.catch(error => {
+						console.error("Error fetching packaging details:", error);
+					});
+			}
 
-                    if (args.item.id === 'pdfExport') {
-                        grid.pdfExport({ fileName: `PackagingList_${formatDate(new Date())}.pdf`, exportType: 'CurrentPage', pageOrientation: 'Landscape', pageSize: 'A4' });
-                    }
+			createButtonsContainer() {
+				const buttonsContainer = document.createElement('div');
+				buttonsContainer.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mt-3');
+				buttonsContainer.style.width = '100%';
+				document.querySelector('.container').appendChild(buttonsContainer);
+				return buttonsContainer;
+			}
 
-                    if (args.item.id === 'refreshGrid') {
-                        loadPackagingRecords();
-                    }
+			createExportButton(buttonsContainer) {
+				const button = document.createElement('button');
+				button.textContent = 'Export';
+				button.classList.add('btn', 'btn-success');
+				button.style.width = 'auto';
+				button.addEventListener('click', () => this.exportToPDF());
+				buttonsContainer.appendChild(button);
+				return button;
+			}
 
-                    if (args.item.id === 'new') {
-                        openPackagingModal();
-                    }
+			createPrintButton(buttonsContainer) {
+				const button = document.createElement('button');
+				button.textContent = 'Print';
+				button.classList.add('btn', 'btn-primary');
+				button.style.width = 'auto';
+				button.addEventListener('click', () => this.printTableViaBluetooth());
+				buttonsContainer.appendChild(button);
+				return button;
+			}
 
-                    if (args.item.id === 'edit') {
-                        editPackaging();
-                    }
+			createNewSlipButton(buttonsContainer) {
+				const button = document.createElement('button');
+				button.textContent = 'New';
+				button.classList.add('btn', 'btn-warning');
+				button.style.width = 'auto';
+				button.addEventListener('click', () => this.clearData());
+				buttonsContainer.appendChild(button);
+				return button;
+			}
 
-                    if (args.item.id === 'delete') {
-                        deletePackaging();
-                    }
-                }
-            });
+			defineItemDropdown() {
+				this.initializeItemDropdownSelect2();
+			}
 
-            grid.appendTo('#' + gridId);
-        }
+			initializeItemDropdownSelect2() {
+				const control = this.itemDropdown;
+				if (!control || !control.length) return;
+				const hasSelect2 = typeof $.fn !== 'undefined' && typeof $.fn.select2 === 'function';
+				if (!hasSelect2) return;
 
-        function toggleEditButton() {
-            const selected = grid.getSelectedRecords();
-            const editBtn = grid.toolbarModule.toolbar.items.find(function (item) { return item.id === 'edit'; });
-            if (!editBtn) return;
-            editBtn.disabled = selected.length !== 1;
-        }
+				if (control.data('select2')) {
+					control.select2('destroy');
+				}
 
-        function navigateToPackagingEditor(recordId) {
-            const baseUrl = 'Yogesh_Cloth_Meter.html';
-            if (recordId) {
-                window.location.href = `${baseUrl}?id=${encodeURIComponent(recordId)}`;
-                return;
-            }
-            window.location.href = baseUrl;
-        }
+				control.select2({
+					dropdownAutoWidth: true,
+					width: '100%',
+					placeholder: '-- Select Item --',
+					allowClear: true
+				});
 
-        function openPackagingModal() {
-            navigateToPackagingEditor();
-        }
+				const arrow = control.next('.select2-container').find('.select2-selection__arrow');
+				arrow.off('mousedown.forceopen').on('mousedown.forceopen', function (event) {
+					event.preventDefault();
+					if (typeof $.fn !== 'undefined' && typeof $.fn.select2 === 'function') {
+						control.select2('open');
+					}
+				});
+			}
 
-        function editPackaging() {
-            const selected = grid.getSelectedRecords();
-            if (selected.length !== 1) {
-                alert('Please select one record to edit');
-                return;
-            }
+			async printTableViaBluetooth() {
+				try {
+					const lines = [];
+					const lineWidth = 48;
 
-            const row = selected[0];
-            navigateToPackagingEditor(row.id);
-        }
+					const rawDate = this.createdon ? new Date(this.createdon) : new Date();
+					const day = rawDate.getDate().toString().padStart(2, '0');
+					const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+					const month = monthNames[rawDate.getMonth()];
+					const year = rawDate.getFullYear();
+					const dateofCreation = `${day}-${month}-${year}`;
 
-        async function deletePackaging() {
-            const selected = grid.getSelectedRecords();
-            if (!selected.length) {
-                alert('Please select record(s) to delete');
-                return;
-            }
+					const slipNumber = `Packaging Slip Number: ${$('#packagingSlipNumber').text() || '...'}`;
 
-            if (!confirm(`Delete ${selected.length} packaging record(s)?`)) {
-                return;
-            }
+					lines.push(centerText(slipNumber));
+					lines.push(centerText(dateofCreation));
 
-            const ids = selected.map(function (r) { return r.id; });
-            await deleteRecordData('packagingitemdetail', ids, true, true);
-            await loadPackagingRecords();
-        }
+					lines.push('-'.repeat(lineWidth));
 
-        async function loadPackagingRecords() {
-            const startDate = getSafeDatePickerValue('startDate');
-            const endDate = getSafeDatePickerValue('endDate');
+					lines.push('Item Name                Than      Meter');
+					lines.push('-'.repeat(lineWidth));
 
-            if (!startDate || !endDate) return;
+					let totalOverallThan = 0;
+					let totalOverallMeter = 0;
 
-            const start = startDate + ' 00:00:00';
-            const end = endDate + ' 23:59:59';
-            const filter = `packagingitemdetail.createdon >= '${start}' AND packagingitemdetail.createdon <= '${end}'`;
+					const summaryData = Object.entries(this.itemData).map(([itemName, rows]) => {
+						const totalThan = rows.reduce((sum, row) => sum + row.count, 0);
+						const totalMeter = rows.reduce((sum, row) => sum + row.meter * row.count, 0);
+						totalOverallThan += totalThan;
+						totalOverallMeter += totalMeter;
+						return { itemName, totalThan, totalMeter };
+					});
 
-            try {
-                const records = await DBHandler.fetchEntityRecords(
-                    'packagingitemdetail',
-                    'packagingitemdetail.id,packagingitemdetail.packagingnumber,packagingitemdetail.packagingcreatedby,packagingitemdetail.createdon,packagingitemdetail.status,packagingitemdetail.isactive',
-                    'packagingitemdetail.createdon',
-                    'desc',
-                    filter,
-                    false
-                );
+					summaryData.forEach(({ itemName, totalThan, totalMeter }) => {
+						if (totalThan != 0) {
+							lines.push(
+								`${this.boldOn}${itemName.padEnd(24)}${totalThan.toString().padStart(6)}${totalMeter.toFixed(2).padStart(10)}${this.boldOff}`
+							);
+						}
+					});
 
-                let sr = 1;
-                const rows = (records || []).map(function (x) {
-                    const status = x.status || (String(x.isactive) === '0' ? 'Inactive' : 'Active');
-                    return {
-                        id: x.id,
-                        srno: sr++,
-                        packagingnumber: x.packagingnumber || '',
-                        packagingcreatedby: x.packagingcreatedby || '',
-                        status: status,
-                        createdon: normalizeDate(x.createdon)
-                    };
-                });
+					lines.push('-'.repeat(lineWidth));
+					lines.push(`${'Total : '.padEnd(24)}${totalOverallThan.toString().padStart(6)}${totalOverallMeter.toFixed(2).padStart(10)}`);
+					lines.push('-'.repeat(lineWidth));
 
-                grid.dataSource = rows;
-                grid.refresh();
-            } catch (error) {
-                console.error('Failed to load packaging records:', error);
-            }
-        }
+					var newItemData = {};
+					Object.keys(this.itemData).forEach(itemName => {
+						const filteredRows = this.itemData[itemName].filter(x => x.meter != 0 && x.count != 0);
+						if (filteredRows.length) {
+							newItemData[itemName] = filteredRows;
+						}
+					});
 
-        async function savePackaging(event) {
-            if (event && event.target) {
-                event.target.disabled = true;
-                event.target.innerText = 'Saving...';
-            }
+					Object.entries(newItemData).forEach(([itemName, rows]) => {
+						lines.push(this.boldOn + centerText(itemName) + this.boldOff);
+						lines.push('-'.repeat(lineWidth));
 
-            try {
-                const packagingnumber = (document.getElementById('packagingnumber').value || '').trim();
-                const packagingcreatedby = (document.getElementById('packagingcreatedby').value || '').trim();
-                const status = document.getElementById('status').value || 'Active';
-                const createdon = getSafeDatePickerValue('createdon');
+						for (let i = 0; i < rows.length; i += 2) {
+							const first = rows[i];
+							const second = rows[i + 1];
 
-                if (!packagingnumber) {
-                    alert('Packaging Number is required');
-                    return;
-                }
+							const firstText = `${first.meter.toFixed(2)} * ${first.count} = ${(first.meter * first.count).toFixed(2)}`.padEnd(lineWidth / 2, ' ');
+							const secondText = second
+								? `${second.meter.toFixed(2)} * ${second.count} = ${(second.meter * second.count).toFixed(2)}`.padEnd(lineWidth / 2, ' ')
+								: ''.padEnd(lineWidth / 2, ' ');
 
-                await DBHandler.submitRecordData('packagingitemdetail', {
-                    packagingnumber: packagingnumber,
-                    packagingcreatedby: packagingcreatedby,
-                    status: status,
-                    isactive: String(status).toLowerCase() === 'inactive' ? 0 : 1,
-                    createdon: createdon || null
-                }, editingId, false);
+							lines.push(firstText + this.boldOn + secondText + this.boldOff);
+						}
 
-                bootstrap.Modal.getOrCreateInstance(document.getElementById('packagingModal')).hide();
-                editingId = null;
-                await loadPackagingRecords();
-            } catch (error) {
-                console.error('Failed to save packaging record:', error);
-                alert('Failed to save packaging record');
-            } finally {
-                if (event && event.target) {
-                    event.target.disabled = false;
-                    event.target.innerText = 'Save';
-                }
-            }
-        }
+						const totalThan = rows.reduce((sum, row) => sum + row.count, 0);
+						const totalMeter = rows.reduce((sum, row) => sum + row.meter * row.count, 0);
+						lines.push('-'.repeat(lineWidth));
+						lines.push(this.boldOn + alignLeftRight(`Total Than: ${totalThan}`, `Total Meter: ${totalMeter.toFixed(2)}`) + this.boldOff);
+						lines.push('-'.repeat(lineWidth));
+					});
 
-        $(document).ready(async function () {
-            if (typeof applyDatePicker === 'function') {
-                applyDatePicker();
-            }
-            initGrid(columns, 'packagingGrid');
-            await loadPackagingRecords();
-        });
-    </script>
+					printerMinPrint(lines);
+				} catch (error) {
+					console.error('Error printing table via Bluetooth:', error);
+					alert(`Error printing: ${error.message}`);
+				}
+			}
 
-    <style>
-        .toolbar-spacing {
-            margin-bottom: 10px;
-        }
+			updateSummary(isStartup) {
+				let totalCount = 0;
+				let totalSum = 0;
 
-        #packagingGrid_toolbarItems {
-            height: 10px !important;
-        }
-    </style>
+				Object.values(this.itemData).forEach((rows) => {
+					rows.forEach(({ meter, count }) => {
+						totalCount += count;
+						totalSum += meter * count;
+					});
+				});
 
-</body>
+				this.totalCountDisplay.textContent = totalCount;
+				this.totalSumDisplay.textContent = totalSum.toFixed(2);
 
-</html>
+				const fixedSummary = document.querySelector('.fixed-summary');
+				if (totalCount === 0 && totalSum === 0) {
+					fixedSummary.style.display = 'none';
+				} else {
+					fixedSummary.style.display = 'flex';
+				}
+
+				const hasData = Object.keys(this.itemData).length > 0;
+				this.exportButton.style.display = hasData ? 'block' : 'none';
+				this.printButton.style.display = hasData ? 'block' : 'none';
+				this.newSlipButton.style.display = hasData ? 'block' : 'none';
+
+				if (!isStartup || isStartup !== true) {
+					setTimeout(() => {
+						this.submitDataToServer();
+					}, 10);
+				}
+			}
+
+			renderTable() {
+				this.resultsContainer.innerHTML = '';
+
+				const summaryData = Object.entries(this.itemData).map(([itemName, rows]) => {
+					const totalThan = rows.reduce((sum, row) => sum + row.count, 0);
+					const totalMeter = rows.reduce((sum, row) => sum + row.meter * row.count, 0);
+					return { itemName, totalThan, totalMeter };
+				});
+
+				const totalOverallThan = summaryData.reduce((sum, item) => sum + item.totalThan, 0);
+				const totalOverallMeter = summaryData.reduce((sum, item) => sum + item.totalMeter, 0);
+
+				let html = `
+		<div class="table-responsive mb-4">
+			<table class="table table-bordered table-sm summary-table">
+				<thead>
+					<tr><th colspan="3" class="text-center">
+						Packaging Slip Number: <span id="packagingSlipNumber" style="cursor:pointer;" onclick="enableSlipNumberEdit('${this.recordId}')">${this.packagingSlipNumber}</span></th></tr>
+					<tr><th>Item Name</th><th>Total Than</th><th>Total Meter</th></tr>
+				</thead>
+				<tbody>
+					${summaryData.map(({ itemName, totalThan, totalMeter }) => `
+						<tr>
+							<td>${itemName}</td>
+							<td>${totalThan}</td>
+							<td>${totalMeter.toFixed(2)}</td>
+						</tr>
+					`).join('')}
+				</tbody>
+				<tfoot>
+					<tr><th>Overall Total</th><th>${totalOverallThan}</th><th>${totalOverallMeter.toFixed(2)}</th></tr>
+				</tfoot>
+			</table>
+		</div>
+	`;
+
+				Object.entries(this.itemData).forEach(([itemName, rows]) => {
+					html += `
+			<div class="table-responsive mb-4">
+				<table class="table table-bordered table-sm" data-item-name="${itemName}">
+					<thead>
+						<tr>
+							<th colspan="5" class="editable-item-name" style="cursor:pointer;text-align:center">${itemName}</th>
+						</tr>
+						<tr><th>Meter</th><th>Than</th><th>Total</th><th>Action</th></tr>
+					</thead>
+					<tbody>
+						${rows.map(({ meter, count }, index) => `
+							<tr>
+								<td>${meter.toFixed(2)}</td>
+								<td>${count}</td>
+								<td>${(meter * count).toFixed(2)}</td>
+								<td><button class="btn btn-danger btn-sm delete-row" data-item="${itemName}" data-index="${index}">X</button></td>
+							</tr>
+						`).join('')}
+					</tbody>
+					<tfoot>
+						<tr><th>Total</th><th>${rows.reduce((sum, r) => sum + r.count, 0)}</th><th>${rows.reduce((sum, r) => sum + r.meter * r.count, 0).toFixed(2)}</th><th></th></tr>
+					</tfoot>
+				</table>
+			</div>
+		`;
+				});
+
+				this.resultsContainer.innerHTML = html;
+			}
+
+			enableInlineEditing() {
+				this.resultsContainer.addEventListener('dblclick', (e) => {
+					const cell = e.target;
+
+					if (cell.tagName === 'TH' && cell.classList.contains('editable-item-name')) {
+						const table = cell.closest('table');
+						const oldItemName = table.getAttribute('data-item-name');
+
+						const select = document.createElement('select');
+						select.classList.add('form-select', 'item-edit-dropdown');
+						cell.innerHTML = '';
+						cell.appendChild(select);
+
+						if (Array.isArray(this.billingItemData) && this.billingItemData.length > 0) {
+							select.append(new Option('-- Select Item --', ''));
+							this.billingItemData.forEach(record => {
+								const option = new Option(record.name, record.name);
+								select.append(option);
+							});
+						} else {
+							console.warn('billingItemData is empty or not loaded.');
+						}
+
+						if (typeof $.fn !== 'undefined' && typeof $.fn.select2 === 'function') {
+							$(select).select2({ dropdownAutoWidth: true, width: 'resolve' });
+						}
+
+						$(select).on('select2:select', (ev) => {
+							const newItemName = ev.params.data.text;
+							if (newItemName && newItemName !== oldItemName) {
+								this.itemData[newItemName] = this.itemData[oldItemName];
+								delete this.itemData[oldItemName];
+
+								cell.innerHTML = newItemName;
+
+								this.renderTable();
+								this.updateSummary();
+							} else {
+								cell.innerHTML = oldItemName;
+							}
+						});
+					}
+
+					if (cell.tagName === 'TD' && cell.closest('tbody')) {
+						const row = cell.closest('tr');
+						const table = cell.closest('table');
+						const itemName = table.getAttribute('data-item-name');
+						const cellIndex = Array.from(row.children).indexOf(cell);
+						const rowIndex = Array.from(table.querySelector('tbody').children).indexOf(row);
+
+						if ([0, 1].includes(cellIndex)) {
+							const currentValue = parseFloat(cell.textContent) || 0;
+							const input = document.createElement('input');
+							input.type = 'number';
+							input.value = currentValue;
+							input.classList.add('form-control');
+							cell.innerHTML = '';
+							cell.appendChild(input);
+							input.focus();
+
+							input.addEventListener('blur', () => {
+								const newValue = parseFloat(input.value) || 0;
+								if (cellIndex === 0) this.itemData[itemName][rowIndex].meter = newValue;
+								if (cellIndex === 1) this.itemData[itemName][rowIndex].count = newValue;
+								this.renderTable();
+								this.updateSummary();
+							});
+
+							input.addEventListener('keydown', (ev) => {
+								if (ev.key === 'Enter') input.blur();
+							});
+						}
+					}
+				});
+
+				this.resultsContainer.addEventListener('click', (e) => {
+					if (e.target.classList.contains('delete-row')) {
+						const itemName = e.target.dataset.item;
+						const index = parseInt(e.target.dataset.index);
+						this.itemData[itemName].splice(index, 1);
+						if (!this.itemData[itemName].length) delete this.itemData[itemName];
+						this.renderTable();
+						this.updateSummary();
+					}
+				});
+			}
+
+			generateNextRow(isLastRow) {
+				const rows = Array.from(this.container.querySelectorAll('.row'));
+				const lastRow = rows[rows.length - 2];
+
+				if (lastRow) {
+					const meterVal = parseFloat(lastRow.querySelector('.meter-input').value) || 0;
+					const countVal = parseFloat(lastRow.querySelector('.count-input').value) || 1;
+					if (meterVal === 0 && isLastRow && isLastRow == true) {
+						this.addButton.click();
+						return;
+					}
+
+					if (meterVal === 0 || countVal === 0) {
+						return;
+					}
+				}
+				var totallendth = 2;
+				const lastRow2 = rows[rows.length - 1];
+				if (lastRow2)
+					totallendth = 1;
+
+				for (let i = 0; i < totallendth; i++) {
+					const newRow = document.createElement('div');
+					newRow.classList.add('row', 'mb-2');
+
+					const meterTabIndex = rows.length + i + 1;
+					const countTabIndex = (rows.length + 250 + i) * 2 + 1;
+
+					const meterInput = document.createElement('input');
+					meterInput.type = 'number';
+					meterInput.classList.add('form-control', 'meter-input');
+					meterInput.placeholder = 'Meter';
+					meterInput.min = '0';
+					meterInput.setAttribute('tabindex', meterTabIndex);
+
+					const countInput = document.createElement('input');
+					countInput.type = 'number';
+					countInput.classList.add('form-control', 'count-input');
+					countInput.placeholder = '1';
+					countInput.value = '';
+					countInput.setAttribute('tabindex', countTabIndex);
+
+					const meterCol = document.createElement('div');
+					meterCol.classList.add('col-md-4');
+					meterCol.appendChild(meterInput);
+
+					const countCol = document.createElement('div');
+					countCol.classList.add('col-md-4');
+					countCol.appendChild(countInput);
+
+					newRow.appendChild(meterCol);
+					newRow.appendChild(countCol);
+
+					this.container.appendChild(newRow);
+					rows.push(newRow);
+				}
+			}
+
+
+			handleAddItem() {
+				this.addButton.addEventListener('click', () => {
+					const selectedItemId = this.itemDropdown.val();
+					const itemName = this.itemDropdown.find(':selected').text();
+
+
+					if (!selectedItemId) {
+						const dropdownContainer = this.itemDropdown.siblings('.select2-container');
+
+						dropdownContainer.css('border', '2px solid red');
+
+						dropdownContainer.attr('title', 'Please select an item');
+
+						setTimeout(() => {
+							dropdownContainer.css('border', '');
+							dropdownContainer.removeAttr('title');
+						}, 3000);
+
+						return;
+					}
+					const rows = this.container.querySelectorAll('.row');
+					const newRows = Array.from(rows)
+						.map((row) => {
+							const meter = parseFloat(row.querySelector('.meter-input').value) || 0;
+							const count = parseFloat(row.querySelector('.count-input').value) || 1;
+							return meter > 0 && count > 0 ? { meter, count } : null;
+						})
+						.filter(Boolean);
+
+					if (!newRows.length) {
+						return;
+					}
+
+					this.itemData[itemName] = (this.itemData[itemName] || []).concat(newRows);
+
+					this.container.innerHTML = '';
+					this.generateNextRow();
+
+					this.itemDropdown.val(null).trigger('change');
+					this.renderTable();
+					this.updateSummary();
+				});
+			}
+
+			exportToPDF() {
+				const { jsPDF } = window.jspdf;
+
+				const doc = new jsPDF({
+					orientation: "portrait",
+					unit: "mm",
+					format: [105, 297]
+				});
+
+				const filename = `Packaging_Slip_${this.packagingSlipNumber || 'Unknown'}_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+				const packagingSlipHeader = `Packaging Slip Number: ${this.packagingSlipNumber || 'Unknown'}`;
+				const pageWidth = doc.internal.pageSize.getWidth();
+				const textWidth = doc.getTextWidth(packagingSlipHeader);
+				const xOffset = (pageWidth - textWidth) / 2;
+				doc.setFontSize(12);
+				doc.text(packagingSlipHeader, xOffset, 15);
+
+				let yOffset = 20;
+
+				const summaryData = Object.entries(this.itemData).map(([itemName, rows]) => {
+					const totalThan = rows.reduce((sum, row) => sum + row.count, 0);
+					const totalMeter = rows.reduce((sum, row) => sum + row.meter * row.count, 0);
+					return [itemName, totalThan, totalMeter.toFixed(2)];
+				});
+
+				const totalOverallThan = summaryData.reduce((sum, row) => sum + row[1], 0);
+				const totalOverallMeter = summaryData.reduce((sum, row) => sum + parseFloat(row[2]), 0);
+
+				doc.autoTable({
+					head: [["Item Name", "Total Than", "Total Meter"]],
+					body: summaryData,
+					foot: [
+						[
+							{ content: "Overall Total", styles: { halign: "left" } },
+							{ content: totalOverallThan.toString(), styles: { halign: "center" } },
+							{ content: totalOverallMeter.toFixed(2), styles: { halign: "right" } },
+						],
+					],
+					startY: yOffset,
+					theme: "grid",
+					tableWidth: "auto",
+					headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: "bold" },
+					bodyStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
+					footStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: "bold" },
+					columnStyles: {
+						1: { halign: "center" },
+						2: { halign: "right" },
+					},
+					styles: {
+						fontSize: 10,
+						cellPadding: 1.5,
+						lineColor: [0, 0, 0],
+						lineWidth: 0.1,
+					},
+				});
+
+				yOffset = doc.lastAutoTable.finalY + 5;
+
+				Object.entries(this.itemData).forEach(([itemName, rows]) => {
+					const tableData = rows.map(({ meter, count }) => [
+						parseFloat(meter).toFixed(2),
+						count,
+						(meter * count).toFixed(2),
+					]);
+					const totalThan = rows.reduce((sum, row) => sum + row.count, 0);
+					const totalMeter = rows.reduce((sum, row) => sum + row.meter * row.count, 0);
+
+					doc.autoTable({
+						head: [
+							[{ content: itemName, colSpan: 3, styles: { halign: "center", fontStyle: "bold" } }],
+							["Meter", "Than", "Total"],
+						],
+						body: tableData,
+						foot: [
+							[
+								{ content: "Total", styles: { halign: "left" } },
+								{ content: totalThan, styles: { halign: "center" } },
+								{ content: totalMeter.toFixed(2), styles: { halign: "right" } },
+							],
+						],
+						startY: yOffset,
+						theme: "grid",
+						tableWidth: "auto",
+						headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: "bold" },
+						bodyStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
+						footStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: "bold" },
+						columnStyles: {
+							1: { halign: "center" },
+							2: { halign: "right" },
+						},
+						styles: {
+							fontSize: 10,
+							cellPadding: 1.5,
+							lineColor: [0, 0, 0],
+							lineWidth: 0.1,
+						},
+					});
+
+					yOffset = doc.lastAutoTable.finalY + 5;
+				});
+
+				doc.save(filename);
+			}
+
+			clearData() {
+				this.recordId = "";
+				this.packagingSlipNumber = "";
+				this.createdon = "";
+				this.itemData = {};
+				this.container.innerHTML = '';
+				this.resultsContainer.innerHTML = '';
+				this.totalCountDisplay.textContent = '0';
+				this.totalSumDisplay.textContent = '0';
+				this.generateNextRow();
+				this.updateSummary(true);
+			}
+
+			initializePage() {
+				this.defineItemDropdown();
+
+				this.container.addEventListener('input', (e) => {
+					if (e.target.classList.contains('meter-input') || e.target.classList.contains('count-input')) {
+						let currentTotalCount = 0;
+						let currentTotalSum = 0;
+
+						const allrows = Array.from(this.container.querySelectorAll('.row'));
+
+						allrows.forEach((row) => {
+							const meter = parseFloat(row.querySelector('.meter-input')?.value) || 0;
+							const count = parseFloat(row.querySelector('.count-input')?.value) || 1;
+
+							if (meter > 0 && count > 0) {
+								currentTotalCount += count;
+								currentTotalSum += meter * count;
+							}
+						});
+
+						this.totalCountDisplay.textContent = currentTotalCount;
+						this.totalSumDisplay.textContent = currentTotalSum;
+
+						const currentRow = e.target.closest('.row');
+
+						const isLastRow = allrows.indexOf(currentRow) === allrows.length - 1;
+
+						this.generateNextRow(isLastRow);
+					}
+				});
+
+				this.container.addEventListener('blur', (e) => {
+					if (e.target.classList.contains('count-input')) {
+						const currentRow = e.target.closest('.row');
+						const allrows = Array.from(this.container.querySelectorAll('.row'));
+						const currentRowIndex = allrows.indexOf(currentRow);
+
+						if (currentRowIndex < allrows.length - 1) {
+							const nextRow = allrows[currentRowIndex + 1];
+							const nextMeterInput = nextRow.querySelector('.meter-input');
+							if (nextMeterInput) {
+								nextMeterInput.focus();
+							}
+						}
+					}
+				}, true);
+
+				this.handleAddItem();
+				this.enableInlineEditing();
+				this.generateNextRow();
+				this.loadDropdown();
+			}
+
+			loadDropdown() {
+				const controlId = "itemDropdown";
+				const key = "name";
+				const value = "name";
+				const entityName = "billingitem";
+				const columns = "id,name";
+				const sortColumn = "createdon";
+				const sortDirection = "desc";
+				const filterClause = "isforpackaging=1";
+
+				StaticDBHandler.fetchEntityRecord(entityName, columns, filterClause, false)
+					.then(records => {
+						const control = $('#' + controlId);
+						if (!control.length) {
+							console.error(`Control with ID "${controlId}" not found.`);
+							return;
+						}
+
+						records.sort((a, b) => a.name.localeCompare(b.name));
+
+						const valueFields = value.split(',');
+
+						control.empty();
+
+						control.append(new Option('-- Select --', ''));
+
+						records.forEach(record => {
+							const keyData = record[key];
+							const valueData = valueFields.map(field => record[field]).join(' -- ');
+							control.append(new Option(valueData, keyData));
+						});
+						this.billingItemData = records;
+						this.initializeItemDropdownSelect2();
+					})
+					.catch(error => {
+						console.error('Error loading dropdown:', error);
+						if (error.status === 401) {
+							window.location.href = (apiURL ? apiURL : '') + "login.html";
+						} else {
+							alert('Failed to load items. Please try again.');
+						}
+					});
+			}
+
+			submitDataToServer() {
+				try {
+					const recordId = this.recordId;
+					const formData = {};
+					formData["itemjson"] = JSON.stringify(this.itemData);
+
+					const today = new Date();
+					const yyyy = today.getFullYear();
+					const mm = String(today.getMonth() + 1).padStart(2, '0');
+					const dd = String(today.getDate()).padStart(2, '0');
+
+					formData["slipdate"] = `${yyyy}-${mm}-${dd}`;
+					formData["packagingcreatedby"] = getCookie("displayName");
+
+					const loader = document.createElement("span");
+					loader.classList.add("spinner-border", "spinner-border-sm", "text-light");
+					loader.style.marginRight = "5px";
+					const totalThanElement = document.querySelector("#total-count-display").parentElement;
+					totalThanElement.prepend(loader);
+
+					DBHandler.submitRecordData("packagingitemdetail", formData, recordId, false)
+						.then((response) => {
+							if (!this.recordId) this.recordId = response;
+
+							if (!this.packagingSlipNumber) {
+								StaticDBHandler.fetchEntityRecord(
+									"packagingitemdetail",
+									"packagingnumber,createdon",
+									`id='${this.recordId}'`
+								)
+									.then((p) => {
+										this.packagingSlipNumber = p[0].packagingnumber;
+										this.createdon = p[0].createdon;
+										this.renderTable();
+									})
+									.catch((error) => {
+										alert("Error fetching packaging slip number:", error);
+									});
+							}
+						})
+						.catch((error) => {
+							console.error("Error submitting data:", error);
+							alert("Failed to submit the data. Please try again.");
+						})
+						.finally(() => {
+							loader.remove();
+						});
+				} catch (error) {
+					console.error("Error in submitDataToServer:", error);
+					alert("An unexpected error occurred. Please try again.");
+				}
+			}
+		}
+		$(document).ready(function () {
+			window.clothMeterCalculator = new ClothMeterCalculator();
+		});
+	</script>
+	<script>
+
+		function getClothMeterCalculator() {
+			return window.clothMeterCalculator;
+		}
+
+		function enableSlipNumberEdit(recordId) {
+			const span = document.getElementById('packagingSlipNumber');
+			const currentValue = span.textContent.trim();
+
+			const input = document.createElement('input');
+			input.type = 'text';
+			input.value = currentValue;
+			input.id = 'packagingSlipInput';
+			input.className = 'form-control';
+			input.style.width = '250px';
+
+			span.replaceWith(input);
+			input.focus();
+
+			input.addEventListener('blur', () => saveSlipNumber(input.value, recordId));
+			input.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter') saveSlipNumber(input.value, recordId);
+			});
+		}
+
+		async function saveSlipNumber(newValue, recordId) {
+			const calculator = getClothMeterCalculator();
+			if (!newValue.trim()) {
+				alert('Slip number cannot be empty.');
+				revertToSpan((calculator && calculator.packagingSlipNumber) || '', recordId);
+				return;
+			}
+
+			try {
+				const updatedData = {
+					packagingnumbernew: newValue
+				};
+
+				if (calculator) {
+					calculator.packagingSlipNumber = newValue;
+				}
+
+				await DBHandler.submitRecordData('packagingitemdetail', updatedData, recordId, false);
+
+				revertToSpan(newValue, recordId);
+
+				showSuccessMessage('Packaging Slip Number updated successfully!');
+			} catch (error) {
+				console.error('Error updating slip number:', error);
+				alert('Failed to update slip number.');
+				revertToSpan((calculator && calculator.packagingSlipNumber) || '', recordId);
+			} finally {
+				hideLoader();
+			}
+		}
+
+		function revertToSpan(value, recordId) {
+			const span = document.createElement('span');
+			span.id = 'packagingSlipNumber';
+			span.className = 'editable-slip-number';
+			span.textContent = value;
+			span.style.cursor = 'pointer';
+			span.onclick = () => enableSlipNumberEdit(recordId);
+
+			const input = document.getElementById('packagingSlipInput');
+			if (input) input.replaceWith(span);
+		}
+
+
+	</script>
+
+</body></html>
