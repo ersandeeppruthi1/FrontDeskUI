@@ -68,7 +68,7 @@
 
 <body>
     <div class="container2">
-        <div class="toolbar" style="margin-bottom:10px;">
+        <div class="toolbar toolbar-spacing">
             <div class="row g-3 align-items-end">
                 <div class="col-sm-6 col-md-3">
                     <label for="startDate">From date</label>
@@ -136,7 +136,7 @@
                             <div class="col-md-6">
                                 <label>Patient Detail<span class="text-danger">*</span></label>
                                 <input id="patientDetail" class="form-control" datatype="text" disabled />
-                                <input id="patientguid" datatype="text" style="display:none;" />
+                                <input id="patientguid" datatype="text" class="hidden-field" />
                             </div>
                         </div>
                         <div class="row">
@@ -285,18 +285,10 @@
                     }
 
                     if (args.item.id === 'new') {
-                        const appointmentModal = document.getElementById('appointmentModal')
-                        appointmentForm.reset();
-                        editingId = null;
-                        toggleNewColumnsRow(true);
-                        hideMedicalInfoOnlyUI();
-                        openAppointmentModal();
-                        document.querySelector('#appointmentModal .modal-title').innerText = "Add Appointment";
+                        navigateToDentalDetails();
                     }
 
                     if (args.item.id === 'edit') {
-                        toggleNewColumnsRow(true);
-                        hideMedicalInfoOnlyUI();
                         editAppointment();
                     }
 
@@ -310,33 +302,22 @@
 
         let editingId = null;
 
-        function editAppointment() {
+        const DENTAL_DETAILS_WEBRESOURCE_ID="8e972e09-88b3-46fd-b0c1-e6e317b43e5b";
+
+function buildDentalDetailsUrl(patientId){
+ let url=`${window.location.origin}/main.html?type=html&webresourceid=${DENTAL_DETAILS_WEBRESOURCE_ID}`;
+ if(patientId){url+=`&id=${encodeURIComponent(patientId)}`;}
+ return url;
+}
+function navigateToDentalDetails(patientId){window.location.href=buildDentalDetailsUrl(patientId);}
+
+function editAppointment() {
             const selectedRecords = grid.getSelectedRecords();
             if (selectedRecords.length !== 1) {
                 return alert("Please select one appointment to edit");
             }
             const record = selectedRecords[0];
-            editingId = record.id;
-
-            document.getElementById('appointmentTreatment').value = record.treatment;
-            document.getElementById('appointmentPractitioner').value = record.practitioner;
-            document.getElementById('appointmentType').value = record.appointmenttype;
-
-            document.getElementById('patientid').value = record.uhid;
-            if (record.uhid && record.uhid != "") {
-                patientSearchClick();
-            } 
-            
-            document.getElementById('appointmentDate').ej2_instances[0].value = record.treatmentdate;
-            document.getElementById('nextAppointment').ej2_instances[0].value = record.nextappointment;
-
-            // ✅ Update modal title
-            document.querySelector('#appointmentModal .modal-title').innerText = "Edit Appointment";
-
-            // Keep the same 4 quick options available in Edit mode as in New mode.
-            toggleNewColumnsRow(true);
-
-            openAppointmentModal();
+            navigateToDentalDetails(record.patientid || '');
         }
 
         function toggleEditButton() {
@@ -488,6 +469,7 @@
                     modifiedon: normalizeDate(a.modifiedon),
                     PatientName: a.PatientName,
                     appointmenttype: a.appointmenttype || '',
+                    patientid: a.patientid || '',
                     uhid: a.uhid || ''
                 }));
 
@@ -588,8 +570,7 @@
             }
 
             const patientGuid = document.getElementById('patientguid').value;
-            const baseUrl = 'Dental_Patient_Detail.html';
-            const frameUrl = patientGuid ? `${baseUrl}?id=${encodeURIComponent(patientGuid)}` : baseUrl;
+            const frameUrl = buildDentalDetailsUrl(patientGuid);
 
             frame.onload = function () {
                 try {
@@ -812,6 +793,14 @@
     </script>
 
     <style>
+        .toolbar-spacing {
+            margin-bottom: 10px;
+        }
+
+        .hidden-field {
+            display: none;
+        }
+
         #patientAppointmentGrid_toolbarItems {
             height: 10px !important;
         }
